@@ -1,0 +1,23 @@
+.loading {
+  @apply relative cursor-wait opacity-50;
+}
+
+.loading.loading-center {
+  @apply bg-muted-foreground;
+}
+
+.loading.loading-center::before {
+  @apply bg-muted-foreground absolute inset-0 z-30;
+  content: "";
+}
+
+.loading.loading-center::after {
+  @apply absolute inset-0 z-30 m-auto h-4 w-4 animate-spin rounded-full border-4 border-dashed;
+  content: "";
+}
+
+.loading.loading-left::before,
+.loading.loading-right::after {
+  @apply h-4 w-4 animate-spin rounded-full border-4 border-dashed;
+  content: "";
+}
