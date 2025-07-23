@@ -7,7 +7,7 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 import type { ComponentProps } from "react";
-import { createContext, Fragment, useContext } from "react";
+import React, { createContext, Fragment, useContext } from "react";
 import PortalWrapper from "../wrappers/PortalWrapper";
 import type { ButtonProps } from "./Button";
 import { Button } from "./Button";
@@ -311,5 +311,6 @@ export {
   useModal,
   type ModalBackdropProps,
   type ModalContentProps,
-  type ModalProps,
+  type ModalProps
 };
+

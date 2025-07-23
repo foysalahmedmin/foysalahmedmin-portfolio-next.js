@@ -7,7 +7,7 @@ import type {
   HTMLAttributes,
   LiHTMLAttributes,
 } from "react";
-import {
+import React, {
   createContext,
   useCallback,
   useContext,
@@ -295,5 +295,6 @@ export {
   type TabsListProps,
   type TabsRootProps,
   type TabsTriggerProps,
-  type TabValue,
+  type TabValue
 };
+

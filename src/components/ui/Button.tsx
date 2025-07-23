@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import type { ComponentProps, ElementType, ReactNode } from "react";
+import React from "react";
 
 type SupportedElements = "button" | "input" | "textarea" | "select" | "div";
 

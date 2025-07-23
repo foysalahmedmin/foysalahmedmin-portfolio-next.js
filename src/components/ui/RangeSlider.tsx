@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { ArrowBigDownDash, ArrowBigUpDash } from "lucide-react";
 import type { ComponentProps } from "react";
-import {
+import React, {
   createContext,
   useCallback,
   useContext,
@@ -265,7 +265,8 @@ export type {
   MinInputProps,
   RangeSliderContextValue,
   RangeSliderInputProps,
-  RangeSliderProps,
+  RangeSliderProps
 };
 
-export { RangeSlider };
+  export { RangeSlider };
+
