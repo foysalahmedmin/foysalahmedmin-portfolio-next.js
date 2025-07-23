@@ -12,7 +12,7 @@ import emblaCarouselAutoplay from "embla-carousel-autoplay";
 import emblaCarouselClassNames from "embla-carousel-class-names";
 import useEmblaCarousel from "embla-carousel-react";
 import type { KeyboardEvent } from "react";
-import {
+import React, {
   createContext,
   useCallback,
   useContext,
@@ -483,5 +483,6 @@ export type {
   CarouselPaginationProps,
   CarouselPaginationTriggerProps,
   CarouselRootProps,
-  CarouselTriggerProps,
+  CarouselTriggerProps
 };
+

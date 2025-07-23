@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import type { ComponentProps } from "react";
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 import type { ButtonProps } from "./Button";
 import { Button } from "./Button";
 
@@ -208,5 +208,6 @@ export {
   dropdownVariants,
   useDropdown,
   type DropdownContentProps,
-  type DropdownProps,
+  type DropdownProps
 };
+

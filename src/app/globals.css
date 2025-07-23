@@ -107,16 +107,16 @@
 
 /* Base Styles */
 @layer base {
-  @import "./assets/styles/base/variables.css";
-  @import "./assets/styles/base/typography.css";
+  @import "../assets/styles/base/variables.css";
+  @import "../assets/styles/base/typography.css";
 }
 
 /* Component Styles */
 @layer components {
-  @import "./assets/styles/components/checkbox.css";
+  @import "../assets/styles/components/checkbox.css";
 }
 
 /* Utility Styles */
 @layer utilities {
-  @import "./assets/styles/utilities/loading.css";
+  @import "../assets/styles/utilities/loading.css";
 }

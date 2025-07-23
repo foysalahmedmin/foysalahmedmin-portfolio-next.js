@@ -317,5 +317,6 @@ export {
   useDrawer,
   type DrawerBackdropProps,
   type DrawerContentProps,
-  type DrawerProps,
+  type DrawerProps
 };
+
