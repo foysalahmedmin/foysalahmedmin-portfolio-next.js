@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+public/
+dist/
+build/
+coverage/
+*.min.js
+*.min.css
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Ignore TypeScript files but allow TSX files
+# *.ts
+!*.tsx
