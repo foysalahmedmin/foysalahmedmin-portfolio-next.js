@@ -1,5 +1,5 @@
 const HomePage = () => {
-  return <main></main>;
+  return <main>I'm Foysal Ahmed (Min)</main>;
 };
 
 export default HomePage;

@@ -1,5 +1,5 @@
 import { FlatCompat } from "@eslint/eslintrc";
-import prettier from "eslint-plugin-prettier";
+import prettierPlugin from "eslint-plugin-prettier";
 import globals from "globals";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -14,9 +14,31 @@ const compat = new FlatCompat({
 export default [
   ...compat.config({
     extends: ["next/core-web-vitals", "next/typescript"],
-    plugins: {
-      prettier,
+    rules: {
+      /* Base Rules */
+      "no-undef": "error",
+      "no-unused-vars": "off",
+      "no-console": "off",
+
+      /* TypeScript Rules */
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/consistent-type-imports": "off",
+
+      /* Next.js Rules */
+      "@next/next/no-img-element": "off",
     },
+  }),
+  {
+    files: ["**/*.tsx", "**/*.jsx"],
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      "prettier/prettier": "off",
+    },
+  },
+  {
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
@@ -31,19 +53,18 @@ export default [
         ecmaFeatures: { jsx: true },
       },
     },
-    rules: {
-      /* Base Rules */
-      "no-undef": "error",
-      "no-unused-vars": "warn",
-      "no-console": "warn",
-
-      /* TypeScript Rules */
-      "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/consistent-type-imports": "warn",
-    },
-  }),
+  },
   {
-    ignores: ["node_modules/", ".next/", "out/", "public/"],
+    ignores: [
+      "node_modules",
+      ".next/",
+      "out/",
+      "public/",
+      "dist",
+      "build",
+      "**/*.config.js",
+      "**/*.config.mjs",
+      "**/*.config.cjs",
+    ],
   },
 ];
