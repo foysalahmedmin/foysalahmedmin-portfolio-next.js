@@ -23,7 +23,8 @@ export default [
       /* TypeScript Rules */
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/consistent-type-imports": "off",
+      "@typescript-eslint/consistent-type-imports": "warn",
+
 
       /* Next.js Rules */
       "@next/next/no-img-element": "off",
