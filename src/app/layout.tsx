@@ -1,3 +1,4 @@
+import AnimationApplier from "@/components/appliers/AnimationApplier";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import React from "react";
@@ -29,6 +30,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+
+        {/* Appliers */}
+        <AnimationApplier />
       </body>
     </html>
   );
