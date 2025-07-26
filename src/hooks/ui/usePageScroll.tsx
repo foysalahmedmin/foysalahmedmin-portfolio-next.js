@@ -13,12 +13,13 @@ const usePageScroll = ({
   onNext,
   onPrev,
   buffer = 0,
-  delay = 300,
+  delay = 500,
   sensitivity = 100,
   enabled = true,
 }: TUsePageScrollOptions) => {
   const refs = useRef<(Element | null)[]>([]);
   const startY = useRef<(number | null)[]>([]);
+  const touchStartY = useRef<(number | null)[]>([]);
   const lastTriggerTime = useRef(0);
 
   const canTrigger = () => {
@@ -31,9 +32,7 @@ const usePageScroll = ({
   const handleWheel = (e: WheelEvent, el: Element) => {
     if (!canTrigger()) return;
 
-    const scrollTop = el.scrollTop;
-    const scrollHeight = el.scrollHeight;
-    const clientHeight = el.clientHeight;
+    const { scrollTop, scrollHeight, clientHeight } = el;
     const delta = e.deltaY;
 
     if (
@@ -55,9 +54,7 @@ const usePageScroll = ({
     if (start == null || !canTrigger()) return;
 
     const delta = start - e.clientY;
-    const scrollTop = el.scrollTop;
-    const scrollHeight = el.scrollHeight;
-    const clientHeight = el.clientHeight;
+    const { scrollTop, scrollHeight, clientHeight } = el;
 
     if (
       delta > sensitivity &&
@@ -71,45 +68,77 @@ const usePageScroll = ({
     startY.current[index] = null;
   };
 
-  useEffect(() => {
-  if (!enabled) return;
-
-  const listeners: {
-    el: Element;
-    wheel: (e: Event) => void;
-    up: (e: Event) => void;
-    down: (e: Event) => void;
-  }[] = [];
-
-  refs.current.forEach((el, index) => {
-    if (!el) return;
-
-    const wheel = (e: Event) => handleWheel(e as WheelEvent, el);
-    const up = (e: Event) => handlePointerUp(e as PointerEvent, el, index);
-    const down = (e: Event) => handlePointerDown(e as PointerEvent, index);
-
-    el.addEventListener("wheel", wheel, { passive: true });
-    el.addEventListener("pointerup", up, { passive: true });
-    el.addEventListener("pointerdown", down, { passive: true });
-
-    listeners.push({ el, wheel, up, down });
-  });
-
-  return () => {
-    listeners.forEach(({ el, wheel, down, up }) => {
-      el.removeEventListener("wheel", wheel);
-      el.removeEventListener("pointerup", up);
-      el.removeEventListener("pointerdown", down);
-    });
+  const handleTouchStart = (e: TouchEvent, index: number) => {
+    touchStartY.current[index] = e.touches[0].clientY;
   };
-}, [onNext, onPrev, delay, sensitivity, buffer, enabled]);
 
+  const handleTouchEnd = (e: TouchEvent, el: Element, index: number) => {
+    const start = touchStartY.current[index];
+    if (start == null || !canTrigger()) return;
+
+    const endY = e.changedTouches[0].clientY;
+    const delta = start - endY;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+
+    if (
+      delta > sensitivity &&
+      scrollTop + clientHeight >= scrollHeight - buffer
+    ) {
+      onNext();
+    } else if (delta < -sensitivity && scrollTop <= buffer) {
+      onPrev();
+    }
+
+    touchStartY.current[index] = null;
+  };
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const listeners: {
+      el: Element;
+      wheel: (e: Event) => void;
+      up: (e: Event) => void;
+      down: (e: Event) => void;
+      touchStart: (e: Event) => void;
+      touchEnd: (e: Event) => void;
+    }[] = [];
+
+    refs.current.forEach((el, index) => {
+      if (!el) return;
+
+      const wheel = (e: Event) => handleWheel(e as WheelEvent, el);
+      const down = (e: Event) => handlePointerDown(e as PointerEvent, index);
+      const up = (e: Event) => handlePointerUp(e as PointerEvent, el, index);
+
+      const touchStart = (e: Event) => handleTouchStart(e as TouchEvent, index);
+      const touchEnd = (e: Event) => handleTouchEnd(e as TouchEvent, el, index);
+
+      el.addEventListener("wheel", wheel, { passive: true });
+      el.addEventListener("pointerdown", down, { passive: true });
+      el.addEventListener("pointerup", up, { passive: true });
+
+      el.addEventListener("touchstart", touchStart, { passive: true });
+      el.addEventListener("touchend", touchEnd, { passive: true });
+
+      listeners.push({ el, wheel, down, up, touchStart, touchEnd });
+    });
+
+    return () => {
+      listeners.forEach(({ el, wheel, down, up, touchStart, touchEnd }) => {
+        el.removeEventListener("wheel", wheel);
+        el.removeEventListener("pointerdown", down);
+        el.removeEventListener("pointerup", up);
+        el.removeEventListener("touchstart", touchStart);
+        el.removeEventListener("touchend", touchEnd);
+      });
+    };
+  }, [onNext, onPrev, delay, sensitivity, buffer, enabled]);
 
   const setRef = (index: number) => (el: Element | null) => {
     refs.current[index] = el;
-    if (startY.current[index] === undefined) {
-      startY.current[index] = null;
-    }
+    startY.current[index] ??= null;
+    touchStartY.current[index] ??= null;
   };
 
   return { setRef };
