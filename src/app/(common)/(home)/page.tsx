@@ -1,5 +1,11 @@
 const HomePage = () => {
-  return <main>I am Foysal Ahmed (Min)</main>;
+  console.log("Home Page");
+  
+  return <main>
+    
+    I am Foysal Ahmed (Min)
+
+  </main>;
 };
 
 export default HomePage;

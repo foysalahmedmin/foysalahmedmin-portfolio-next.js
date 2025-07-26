@@ -1,5 +1,5 @@
 import { FlatCompat } from "@eslint/eslintrc";
-import prettierPlugin from "eslint-plugin-prettier";
+import prettierConfig from "eslint-config-prettier/flat";
 import globals from "globals";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -18,28 +18,19 @@ export default [
       /* Base Rules */
       "no-undef": "error",
       "no-unused-vars": "off",
-      "no-console": "off",
+      "no-console": "warn",
 
       /* TypeScript Rules */
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/consistent-type-imports": "warn",
 
-
       /* Next.js Rules */
       "@next/next/no-img-element": "off",
     },
   }),
   {
-    files: ["**/*.tsx", "**/*.jsx"],
-    plugins: {
-      prettier: prettierPlugin,
-    },
-    rules: {
-      "prettier/prettier": "off",
-    },
-  },
-  {
+    // Language options for ESLint
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
@@ -56,6 +47,7 @@ export default [
     },
   },
   {
+    // Files and directories to ignore during linting
     ignores: [
       "node_modules",
       ".next/",
@@ -68,4 +60,6 @@ export default [
       "**/*.config.cjs",
     ],
   },
+  // Prettier configuration is now applied
+  ...prettierConfig,
 ];
