@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import type { ComponentProps } from "react";
-import React, { createContext, Fragment, useContext, useRef } from "react";
+import React, { createContext, Fragment, useContext } from "react";
 import PortalWrapper from "../wrappers/PortalWrapper";
 import type { ButtonProps } from "./Button";
 import { Button } from "./Button";
 
 const drawerVariants = cva(
-  "fixed inset-0 z-[1000] invisible opacity-0 transition-all duration-300 ease-in-out",
+  "drawer fixed inset-0 z-[1000] invisible opacity-0 transition-all duration-300 ease-in-out",
   {
     variants: {
       variant: {
@@ -28,7 +28,7 @@ const drawerVariants = cva(
 );
 
 const drawerBackdropVariants = cva(
-  "fixed inset-0 z-[100] bg-black/25 transition-opacity duration-300",
+  "drawer-backdrop fixed inset-0 z-[100] bg-black/25 transition-opacity duration-300",
   {
     variants: {
       variant: {
@@ -54,12 +54,12 @@ const drawerBackdropVariants = cva(
 );
 
 const drawerContentVariants = cva(
-  "fixed z-[1000] h-full overflow-y-auto bg-white border border-gray-200 shadow-xl transition-transform duration-300",
+  "drawer-content fixed z-[1000] h-full overflow-y-auto bg-card transition-transform duration-300",
   {
     variants: {
       variant: {
         default: "",
-        none: "border-0 shadow-none",
+        none: "",
       },
       size: {
         default: "w-[85vw] sm:w-64 md:w-80 lg:w-[26rem]",
@@ -127,6 +127,7 @@ const DrawerRoot: React.FC<DrawerProps> = ({
   ...props
 }) => {
   const overlayState = useOverlayState(isOpenProp, setIsOpenProp);
+
   const Comp = asPortal ? PortalWrapper : Fragment;
 
   return (
@@ -182,15 +183,14 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
   ...props
 }) => {
   const { isOpen, onClose } = useDrawer();
-  const componentRef = useRef<HTMLDivElement>(null!);
-  useClickOutside<HTMLDivElement>(componentRef, onClose);
+  const ref = useClickOutside<HTMLDivElement>(onClose);
 
   return (
     <div
       className={cn(drawerContentVariants({ variant, size, side, className }), {
         [cn("translate-x-0", activeClassName)]: isOpen,
       })}
-      ref={componentRef}
+      ref={ref}
       {...props}
     >
       {children}
@@ -299,6 +299,7 @@ const DrawerCloseTrigger: React.FC<ButtonProps> = ({
 
 // Drawer Compound Component
 const Drawer = Object.assign(DrawerRoot, {
+  Root: DrawerRoot,
   Backdrop: DrawerBackdrop,
   Content: DrawerContent,
   Header: DrawerHeader,

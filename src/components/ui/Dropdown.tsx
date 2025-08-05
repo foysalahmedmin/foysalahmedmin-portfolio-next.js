@@ -1,12 +1,13 @@
 "use client";
 
+import { useClickOutside } from "@/hooks/ui/useClickOutside";
 import type { OverlayState } from "@/hooks/ui/useOverlayState";
 import useOverlayState from "@/hooks/ui/useOverlayState";
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import type { ComponentProps } from "react";
-import React, { createContext, useContext } from "react";
+import { createContext, useContext } from "react";
 import type { ButtonProps } from "./Button";
 import { Button } from "./Button";
 
@@ -22,10 +23,10 @@ const dropdownVariants = cva("relative", {
   },
 });
 
-const dropdownContentVariants = cva("absolute z-50 shadow-lg", {
+const dropdownContentVariants = cva("absolute z-30 shadow-lg", {
   variants: {
     variant: {
-      default: "border border-gray-200 bg-white rounded-lg p-1",
+      default: "border border-gray-200 bg-card rounded-lg p-1",
       none: "",
     },
     side: {
@@ -77,7 +78,6 @@ const DropdownRoot: React.FC<DropdownProps> = ({
   isOpen: isOpenProp,
   setIsOpen: setIsOpenProp,
   children,
-  asPortal = false,
   ...props
 }) => {
   const overlayState = useOverlayState(isOpenProp, setIsOpenProp);
@@ -105,10 +105,19 @@ const DropdownContent: React.FC<DropdownContentProps> = ({
   children,
   ...props
 }) => {
-  const { isOpen, variant: contextVariant, side: contextSide } = useDropdown();
+  const {
+    isOpen,
+    variant: contextVariant,
+    side: contextSide,
+    onClose,
+  } = useDropdown();
 
+  const ref = useClickOutside<HTMLDivElement>(() => {
+    if (isOpen) onClose();
+  });
   return (
     <div
+      ref={ref}
       className={cn(
         dropdownContentVariants({
           variant: variant ?? contextVariant,
@@ -140,7 +149,7 @@ const DropdownItem: React.FC<ComponentProps<"button">> = ({
   return (
     <button
       className={cn(
-        "w-full rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+        "w-full rounded-md px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       disabled={disabled}
@@ -169,7 +178,7 @@ const DropdownLabel: React.FC<ComponentProps<"div">> = ({
 }) => (
   <div
     className={cn(
-      "px-3 py-2 text-xs font-medium tracking-wider text-gray-500 uppercase",
+      "text-muted-foreground px-4 py-2 text-xs font-medium tracking-wider uppercase",
       className,
     )}
     {...props}
