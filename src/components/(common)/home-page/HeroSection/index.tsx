@@ -4,20 +4,14 @@ import { ChevronDown, Play } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-type TSectionComponentProps = {
-  className?: string;
-  isActive?: boolean;
-};
-
-const HeroSection: React.FC<TSectionComponentProps> = ({ className, isActive }) => {
+const HeroSection: React.FC = () => {
   const youtubeVideoId = "UKpICjcmWZg";
   const youtubeVideoLink = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&loop=1&playlist=${youtubeVideoId}&controls=0&mute=1`;
 
   return (
     <section
       className={cn(
-        "dark relative flex min-h-screen flex-col justify-end overflow-hidden bg-background text-foreground lg:justify-center",
-        className,
+        "dark bg-background text-foreground relative flex min-h-screen flex-col justify-end overflow-hidden lg:justify-center"
       )}
     >
       {/* Background */}
@@ -27,28 +21,28 @@ const HeroSection: React.FC<TSectionComponentProps> = ({ className, isActive }) 
             backgroundImage: "url('/images/hero-banner.png')",
             backgroundPosition: "70% 90%",
           }}
-          className={cn("absolute inset-0 bg-cover bg-no-repeat", {
-            "zoom-out": isActive,
-          })}
+          className={cn("absolute inset-0 bg-cover bg-no-repeat")}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-muted via-muted/50 to-transparent lg:bg-gradient-to-r" />
+          <div className="from-muted via-muted/50 absolute inset-0 bg-gradient-to-t to-transparent lg:bg-gradient-to-r" />
         </div>
       </div>
 
       {/* Content */}
-      <div className="container relative z-10 py-24 text-left">
-        <div className="mr-auto max-w-2xl animate-fade-in space-y-12">
+      <div className="relative z-10 container py-24 text-left">
+        <div className="animate-fade-in mr-auto max-w-2xl space-y-12">
           {/* Modal Trigger */}
           <Modal>
             <Modal.Trigger
               shape="icon"
               variant="outline"
               className={cn(
-                "inline-flex size-20 items-center justify-center rounded-full border-2 border-current",
-                { "zoom-in": isActive },
+                "inline-flex size-20 items-center justify-center rounded-full border-2 border-current"
               )}
             >
-              <Play className="size-10 transition-transform group-hover:scale-110" strokeWidth={1} />
+              <Play
+                className="size-10 transition-transform group-hover:scale-110"
+                strokeWidth={1}
+              />
             </Modal.Trigger>
 
             <Modal.Backdrop>
@@ -67,16 +61,12 @@ const HeroSection: React.FC<TSectionComponentProps> = ({ className, isActive }) 
           </Modal>
 
           {/* Text */}
-          <div
-            className={cn("space-y-4", { "animate-slide-up": isActive })}
-          >
+          <div className={cn("space-y-4")}>
             <div className="space-y-4">
               <h1 className="text-4xl font-bold uppercase md:text-6xl">
                 Foysal Ahmed
               </h1>
-              <p>
-                Web Developer | Full Stack Engineer | System Engineer
-              </p>
+              <p>Web Developer | Full Stack Engineer | System Engineer</p>
             </div>
             <div
               className="flex justify-start space-x-4"
@@ -94,15 +84,15 @@ const HeroSection: React.FC<TSectionComponentProps> = ({ className, isActive }) 
       </div>
 
       {/* Scroll indicator */}
-    <div className="absolute bottom-12 left-1/2 z-10 hidden -translate-x-1/2 animate-bounce md:block">
+      <div className="absolute bottom-12 left-1/2 z-10 hidden -translate-x-1/2 animate-bounce md:block">
         <Link
-            href="#about"
-            className="flex flex-col items-center text-sm text-foreground transition-colors"
+          href="#about"
+          className="text-foreground flex flex-col items-center text-sm transition-colors"
         >
-            <span className="mb-2">Scroll</span>
-            <ChevronDown className="size-6" />
+          <span className="mb-2">Scroll</span>
+          <ChevronDown className="size-6" />
         </Link>
-    </div>
+      </div>
     </section>
   );
 };
