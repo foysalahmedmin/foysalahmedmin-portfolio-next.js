@@ -7,11 +7,6 @@ import mongoose, { Query, Schema } from "mongoose";
 
 const articleSchema = new Schema<TArticleDocument>(
   {
-    sequence: {
-      type: Number,
-      required: true,
-    },
-
     name: {
       type: String,
       required: true,
@@ -142,28 +137,19 @@ const articleSchema = new Schema<TArticleDocument>(
   }
 );
 
-articleSchema.virtual("like_count", {
-  ref: "Reaction",
+articleSchema.virtual("reviews", {
+  ref: "Review",
   localField: "_id",
-  foreignField: "article",
-  count: true,
-  match: { type: "like", is_deleted: { $ne: true } },
+  foreignField: "project",
+  match: { type: "article", is_deleted: { $ne: true } },
 });
 
-articleSchema.virtual("dislike_count", {
-  ref: "Reaction",
+articleSchema.virtual("review_count", {
+  ref: "Review",
   localField: "_id",
-  foreignField: "article",
+  foreignField: "project",
   count: true,
-  match: { type: "dislike", is_deleted: { $ne: true } },
-});
-
-articleSchema.virtual("comment_count", {
-  ref: "Comment",
-  localField: "_id",
-  foreignField: "article",
-  count: true,
-  match: { is_deleted: { $ne: true } },
+  match: { type: "article", is_deleted: { $ne: true } },
 });
 
 // toJSON override to remove sensitive fields from output

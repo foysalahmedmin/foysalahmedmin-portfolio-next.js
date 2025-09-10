@@ -7,11 +7,6 @@ import mongoose, { Query, Schema } from "mongoose";
 
 const projectSchema = new Schema<TProjectDocument>(
   {
-    sequence: {
-      type: Number,
-      required: true,
-    },
-
     name: {
       type: String,
       required: true,
@@ -136,28 +131,27 @@ projectSchema.virtual("resources", {
   match: { is_deleted: { $ne: true } },
 });
 
-projectSchema.virtual("like_count", {
-  ref: "Reaction",
-  localField: "_id",
-  foreignField: "project",
-  count: true,
-  match: { type: "like", is_deleted: { $ne: true } },
-});
-
-projectSchema.virtual("dislike_count", {
-  ref: "Reaction",
-  localField: "_id",
-  foreignField: "project",
-  count: true,
-  match: { type: "dislike", is_deleted: { $ne: true } },
-});
-
-projectSchema.virtual("comment_count", {
-  ref: "Comment",
+projectSchema.virtual("resource_count", {
+  ref: "Resource",
   localField: "_id",
   foreignField: "project",
   count: true,
   match: { is_deleted: { $ne: true } },
+});
+
+projectSchema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "project",
+  match: { type: "project", is_deleted: { $ne: true } },
+});
+
+projectSchema.virtual("review_count", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "project",
+  count: true,
+  match: { type: "project", is_deleted: { $ne: true } },
 });
 
 // toJSON override to remove sensitive fields from output

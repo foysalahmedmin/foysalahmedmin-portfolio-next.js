@@ -8,7 +8,6 @@ export type TStatus =
   | "cancelled";
 
 export type TProject = {
-  sequence: number;
   name: string;
   slug: string;
   description?: string;

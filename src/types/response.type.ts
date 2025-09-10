@@ -1,24 +1,30 @@
-import type { User } from "./model";
-
-export interface Response {
+export type Response<T = unknown> = {
   success?: boolean;
   message?: string;
   status?: number;
-  data?: unknown;
-  [key: string]: unknown;
-}
-
-export interface AuthResponse extends Response {
-  data?: {
-    token?: string;
-    info?: User;
+  data?: T;
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+    statistics?: Record<string, number>;
+    [key: string]: unknown;
   };
-}
+};
 
-export interface UserResponse extends Response {
-  data?: User;
-}
+export type ErrorSource = {
+  path: string;
+  message: string;
+};
 
-export interface UsersResponse extends Response {
-  data?: User[];
-}
+export type ErrorResponse = {
+  success: false;
+  status: number;
+  message: string;
+  sources?: ErrorSource[];
+  error?: {
+    status: number;
+    name: string;
+  };
+  stack?: string | null;
+};

@@ -1,5 +1,5 @@
 import { ENV } from "../env";
 
 export const URLS = {
-  user: `${ENV.media_url}/uploads/images/user`,
+  user: `${ENV.url}/uploads/images/user`,
 };
