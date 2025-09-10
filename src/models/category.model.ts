@@ -7,7 +7,7 @@ import mongoose, { Query, Schema } from "mongoose";
 
 const categorySchema = new Schema<TCategoryDocument>(
   {
-    category: {
+    category: { // Parent
       type: Schema.Types.ObjectId,
       ref: "Category",
     },

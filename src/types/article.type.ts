@@ -3,7 +3,6 @@ import { Document, Model, Types } from "mongoose";
 export type TStatus = "draft" | "pending" | "published" | "archived";
 
 export type TArticle = {
-  sequence: number;
   name: string;
   slug: string;
   description?: string;
