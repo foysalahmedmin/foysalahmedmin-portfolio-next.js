@@ -1,36 +1,45 @@
 import { ENV } from '@/config';
 import connectDB from '@/lib/db';
-import { TUserDocument } from '@/types/user.type';
-import bcrypt from 'bcrypt';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import { cookies } from 'next/headers';
 
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
     
-    const { email, password } = await req.json();
+    // Get refresh token from cookies
+    const refreshToken = cookies().get('refreshToken')?.value;
     
-    // Validate input
-    if (!email || !password) {
+    if (!refreshToken) {
       return NextResponse.json(
-        { success: false, message: 'Email and password are required' },
-        { status: 400 }
+        { success: false, message: 'Refresh token not found' },
+        { status: 401 }
+      );
+    }
+    
+    // Verify refresh token
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, ENV.jwtRefreshSecret) as { id: string };
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid or expired refresh token' },
+        { status: 401 }
       );
     }
     
     // Get User model
     const UserModel = mongoose.models.User || mongoose.model('User', require('@/models/user.model').default);
     
-    // Find user by email
-    const user = await UserModel.findOne({ email, is_deleted: { $ne: true } }).select('+password');
+    // Find user by id
+    const user = await UserModel.findOne({ _id: decoded.id, is_deleted: { $ne: true } });
     
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Invalid email or password' },
-        { status: 401 }
+        { success: false, message: 'User not found' },
+        { status: 404 }
       );
     }
     
@@ -42,31 +51,22 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid email or password' },
-        { status: 401 }
-      );
-    }
-    
-    // Generate tokens
+    // Generate new access token
     const accessToken = jwt.sign(
       { id: user._id },
       ENV.jwtAccessSecret,
       { expiresIn: ENV.jwtAccessSecretExpiresIn }
     );
     
-    const refreshToken = jwt.sign(
+    // Generate new refresh token
+    const newRefreshToken = jwt.sign(
       { id: user._id },
       ENV.jwtRefreshSecret,
       { expiresIn: ENV.jwtRefreshSecretExpiresIn }
     );
     
-    // Set cookies
-    cookies().set('refreshToken', refreshToken, {
+    // Set new refresh token cookie
+    cookies().set('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: ENV.environment === 'production',
       sameSite: 'strict',
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      message: 'Sign in successful',
+      message: 'Token refreshed successfully',
       data: {
         user,
         accessToken,
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('Sign in error:', error);
+    console.error('Refresh token error:', error);
     return NextResponse.json(
       { success: false, message: error.message || 'Internal server error' },
       { status: 500 }
