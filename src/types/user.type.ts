@@ -1,4 +1,5 @@
 import { Document, Model, Types } from "mongoose";
+import { Response } from "./response.type";
 
 export type TRole =
   | "super-admin"
@@ -33,3 +34,6 @@ export type TUserModel = Model<TUserDocument> & {
   isUserExist(_id: string): Promise<TUserDocument | null>;
   isUserExistByEmail(email: string): Promise<TUserDocument | null>;
 };
+
+export type TUserResponse = Response<TUser>;
+export type TUsersResponse = Response<TUser[]>;
