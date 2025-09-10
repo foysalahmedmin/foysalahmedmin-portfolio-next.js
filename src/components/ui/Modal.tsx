@@ -24,7 +24,7 @@ const modalVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 const modalBackdropVariants = cva(
@@ -44,7 +44,7 @@ const modalBackdropVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 const modalContentVariants = cva(
@@ -75,7 +75,7 @@ const modalContentVariants = cva(
       size: "default",
       side: "center",
     },
-  },
+  }
 );
 
 type ModalContextType = OverlayState &
@@ -237,7 +237,7 @@ const ModalFooter: React.FC<ComponentProps<"div">> = ({
   <div
     className={cn(
       "flex items-center justify-end gap-3 border-t p-6",
-      className,
+      className
     )}
     {...props}
   >
@@ -311,6 +311,5 @@ export {
   useModal,
   type ModalBackdropProps,
   type ModalContentProps,
-  type ModalProps
+  type ModalProps,
 };
-
