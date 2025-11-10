@@ -153,7 +153,8 @@ userSchema.methods.isPasswordChanged = function (jwtTimestamp: number) {
   return jwtTimestamp < passwordChangedTimestamp;
 };
 
-export const User = mongoose.model<TUserDocument, TUserModel>(
-  "User",
-  userSchema
-);
+export const User =
+  (mongoose.models.User as TUserModel) ||
+  mongoose.model<TUserDocument, TUserModel>("User", userSchema);
+
+export default User;

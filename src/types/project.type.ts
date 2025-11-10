@@ -7,6 +7,10 @@ export type TStatus =
   | "completed"
   | "cancelled";
 
+type Ref<T extends string = string> = {
+  _id: Types.ObjectId;
+} & Record<string, any>;
+
 export type TProject = {
   name: string;
   slug: string;
@@ -15,10 +19,10 @@ export type TProject = {
   thumbnail?: string;
   images?: string[];
   tags?: string[];
-  category: Types.ObjectId;
-  author: Types.ObjectId;
-  collaborators?: Types.ObjectId[];
-  client?: Types.ObjectId;
+  category: Types.ObjectId | Ref;
+  author: Types.ObjectId | Ref;
+  collaborators?: (Types.ObjectId | Ref)[];
+  client?: Types.ObjectId | Ref;
   status: TStatus;
   is_featured: boolean;
   is_premium: boolean;
@@ -34,5 +38,5 @@ export interface TProjectDocument extends TProject, Document {
 }
 
 export type TProjectModel = Model<TProjectDocument> & {
-  isNewsExist(_id: string): Promise<TProjectDocument | null>;
+  isProjectExist(_id: string): Promise<TProjectDocument | null>;
 };

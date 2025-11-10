@@ -4,8 +4,8 @@ export type TStatus = "pending" | "approved" | "rejected";
 
 export type TReview = {
   user?: Types.ObjectId;
-  content: Types.ObjectId;
-  type: "project" | "article";
+  target: Types.ObjectId;
+  target_model: "Project" | "Article";
   rating: number;
   review: string;
   status?: TStatus;
@@ -20,5 +20,5 @@ export interface TReviewDocument extends TReview, Document {
 }
 
 export type TReviewModel = Model<TReviewDocument> & {
-  isCommentExist(_id: string): Promise<TReviewDocument | null>;
+  isReviewExist(_id: string): Promise<TReviewDocument | null>;
 };

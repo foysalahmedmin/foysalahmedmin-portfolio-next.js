@@ -9,7 +9,7 @@ export const fetchArticles = createAsyncThunk(
       dispatch(fetchArticlesStart());
       
       const { page = 1, limit = 10, category } = params;
-      let url = `/api/articles?page=${page}&limit=${limit}`;
+      let url = `/api/public/articles?page=${page}&limit=${limit}`;
       
       if (category) {
         url += `&category=${category}`;
@@ -22,8 +22,13 @@ export const fetchArticles = createAsyncThunk(
         throw new Error(data.message || 'Failed to fetch articles');
       }
       
-      dispatch(fetchArticlesSuccess(data.data));
-      return data.data;
+      const payload = {
+        articles: data.data.articles,
+        pagination: data.data.pagination,
+      };
+
+      dispatch(fetchArticlesSuccess(payload));
+      return payload;
     } catch (error: any) {
       dispatch(articleFailure(error.message || 'Failed to fetch articles'));
       throw error;
@@ -38,7 +43,7 @@ export const fetchFeaturedArticles = createAsyncThunk(
     try {
       dispatch(fetchArticlesStart());
       
-      const response = await fetch('/api/articles?featured=true&limit=6');
+      const response = await fetch('/api/public/articles?featured=true&limit=6');
       const data = await response.json();
       
       if (!data.success) {
@@ -61,7 +66,7 @@ export const fetchArticleBySlug = createAsyncThunk(
     try {
       dispatch(fetchArticlesStart());
       
-      const response = await fetch(`/api/articles/${slug}`);
+      const response = await fetch(`/api/public/articles/${slug}`);
       const data = await response.json();
       
       if (!data.success) {
