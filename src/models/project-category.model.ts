@@ -1,19 +1,22 @@
 import {
-  TCategory,
-  TCategoryDocument,
-  TCategoryModel,
-} from "@/types/category.type";
+  TProjectCategory,
+  TProjectCategoryDocument,
+  TProjectCategoryModel,
+} from "@/types/project-category.type";
 import mongoose, { Query, Schema } from "mongoose";
 
-const categorySchema = new Schema<TCategoryDocument>(
+const projectCategorySchema = new Schema<TProjectCategoryDocument>(
   {
-    category: { // Parent
+    parent: {
       type: Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "ProjectCategory",
     },
     icon: {
       type: String,
       default: "blocks",
+    },
+    thumbnail: {
+      type: String,
     },
     name: {
       type: String,
@@ -25,11 +28,12 @@ const categorySchema = new Schema<TCategoryDocument>(
     },
     slug: {
       type: String,
-      required: [true, "Code is required"],
+      required: [true, "Slug is required"],
       unique: true,
       trim: true,
-      minlength: [1, "Code must be at least 1 character"],
-      maxlength: [20, "Code cannot exceed 20 characters"],
+      lowercase: true,
+      minlength: [1, "Slug must be at least 1 character"],
+      maxlength: [50, "Slug cannot exceed 50 characters"],
     },
     description: {
       type: String,
@@ -72,33 +76,22 @@ const categorySchema = new Schema<TCategoryDocument>(
   }
 );
 
-// Virtual field for children
-categorySchema.virtual("children", {
-  ref: "Category",
+projectCategorySchema.virtual("children", {
+  ref: "ProjectCategory",
   localField: "_id",
-  foreignField: "category",
+  foreignField: "parent",
   match: { is_deleted: { $ne: true } },
 });
 
-// toJSON override to remove sensitive fields from output
-categorySchema.methods.toJSON = function () {
+projectCategorySchema.methods.toJSON = function () {
   const category = this.toObject();
   delete category.is_deleted;
   return category;
 };
 
-// Query middleware to exclude deleted categories
-categorySchema.pre(/^find/, function (this: Query<TCategory, TCategory>, next) {
-  this.setQuery({
-    ...this.getQuery(),
-    is_deleted: { $ne: true },
-  });
-  next();
-});
-
-categorySchema.pre(
-  /^update/,
-  function (this: Query<TCategory, TCategory>, next) {
+projectCategorySchema.pre(
+  /^find/,
+  function (this: Query<TProjectCategory, TProjectCategory>, next) {
     this.setQuery({
       ...this.getQuery(),
       is_deleted: { $ne: true },
@@ -107,24 +100,37 @@ categorySchema.pre(
   }
 );
 
-// Aggregation pipeline
-categorySchema.pre("aggregate", function (next) {
+projectCategorySchema.pre(
+  /^update/,
+  function (this: Query<TProjectCategory, TProjectCategory>, next) {
+    this.setQuery({
+      ...this.getQuery(),
+      is_deleted: { $ne: true },
+    });
+    next();
+  }
+);
+
+projectCategorySchema.pre("aggregate", function (next) {
   this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
   next();
 });
 
-// Static methods
-categorySchema.statics.isCategoryExist = async function (_id: string) {
+projectCategorySchema.statics.isCategoryExist = async function (_id: string) {
   return await this.findById(_id);
 };
 
-// Instance methods
-categorySchema.methods.softDelete = async function () {
+projectCategorySchema.methods.softDelete = async function () {
   this.is_deleted = true;
   return await this.save();
 };
 
-export const Category = mongoose.model<TCategoryDocument, TCategoryModel>(
-  "Category",
-  categorySchema
-);
+export const ProjectCategory =
+  (mongoose.models.ProjectCategory as TProjectCategoryModel) ||
+  mongoose.model<TProjectCategoryDocument, TProjectCategoryModel>(
+    "ProjectCategory",
+    projectCategorySchema
+  );
+
+export default ProjectCategory;
+

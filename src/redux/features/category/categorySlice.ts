@@ -1,17 +1,22 @@
-import { TCategory } from "@/types/category.type";
+import { TArticleCategory } from "@/types/article-category.type";
+import { TProjectCategory } from "@/types/project-category.type";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface CategoryState {
-  categories: TCategory[];
-  category: TCategory | null;
-  isLoading: boolean;
+  projectCategories: TProjectCategory[];
+  projectCategory: TProjectCategory | null;
+  articleCategories: TArticleCategory[];
+  articleCategory: TArticleCategory | null;
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: CategoryState = {
-  categories: [],
-  category: null,
-  isLoading: false,
+  projectCategories: [],
+  projectCategory: null,
+  articleCategories: [],
+  articleCategory: null,
+  loading: false,
   error: null,
 };
 
@@ -20,21 +25,43 @@ const categorySlice = createSlice({
   initialState,
   reducers: {
     fetchCategoriesStart: (state) => {
-      state.isLoading = true;
+      state.loading = true;
       state.error = null;
     },
-    fetchCategoriesSuccess: (state, action: PayloadAction<TCategory[]>) => {
-      state.isLoading = false;
-      state.categories = action.payload;
+    fetchProjectCategoriesSuccess: (
+      state,
+      action: PayloadAction<TProjectCategory[]>
+    ) => {
+      state.loading = false;
+      state.projectCategories = action.payload;
       state.error = null;
     },
-    fetchCategorySuccess: (state, action: PayloadAction<TCategory>) => {
-      state.isLoading = false;
-      state.category = action.payload;
+    fetchArticleCategoriesSuccess: (
+      state,
+      action: PayloadAction<TArticleCategory[]>
+    ) => {
+      state.loading = false;
+      state.articleCategories = action.payload;
+      state.error = null;
+    },
+    fetchProjectCategorySuccess: (
+      state,
+      action: PayloadAction<TProjectCategory>
+    ) => {
+      state.loading = false;
+      state.projectCategory = action.payload;
+      state.error = null;
+    },
+    fetchArticleCategorySuccess: (
+      state,
+      action: PayloadAction<TArticleCategory>
+    ) => {
+      state.loading = false;
+      state.articleCategory = action.payload;
       state.error = null;
     },
     categoryFailure: (state, action: PayloadAction<string>) => {
-      state.isLoading = false;
+      state.loading = false;
       state.error = action.payload;
     },
     clearCategoryError: (state) => {
@@ -45,8 +72,10 @@ const categorySlice = createSlice({
 
 export const {
   fetchCategoriesStart,
-  fetchCategoriesSuccess,
-  fetchCategorySuccess,
+  fetchProjectCategoriesSuccess,
+  fetchArticleCategoriesSuccess,
+  fetchProjectCategorySuccess,
+  fetchArticleCategorySuccess,
   categoryFailure,
   clearCategoryError,
 } = categorySlice.actions;

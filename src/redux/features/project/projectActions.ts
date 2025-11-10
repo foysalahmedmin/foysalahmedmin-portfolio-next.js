@@ -18,7 +18,7 @@ export const fetchProjects = createAsyncThunk(
       dispatch(fetchProjectsStart());
 
       const { page = 1, limit = 10, category } = params;
-      let url = `/api/projects?page=${page}&limit=${limit}`;
+      let url = `/api/public/projects?page=${page}&limit=${limit}`;
 
       if (category) {
         url += `&category=${category}`;
@@ -31,8 +31,13 @@ export const fetchProjects = createAsyncThunk(
         throw new Error(data.message || "Failed to fetch projects");
       }
 
-      dispatch(fetchProjectsSuccess(data.data));
-      return data.data;
+      const payload = {
+        projects: data.data.projects,
+        pagination: data.data.pagination,
+      };
+
+      dispatch(fetchProjectsSuccess(payload));
+      return payload;
     } catch (error: any) {
       dispatch(projectFailure(error.message || "Failed to fetch projects"));
       throw error;
@@ -47,7 +52,7 @@ export const fetchFeaturedProjects = createAsyncThunk(
     try {
       dispatch(fetchProjectsStart());
 
-      const response = await fetch("/api/projects?featured=true&limit=6");
+      const response = await fetch("/api/public/projects?featured=true&limit=6");
       const data = await response.json();
 
       if (!data.success) {
@@ -72,7 +77,7 @@ export const fetchProjectBySlug = createAsyncThunk(
     try {
       dispatch(fetchProjectsStart());
 
-      const response = await fetch(`/api/projects/${slug}`);
+      const response = await fetch(`/api/public/projects/${slug}`);
       const data = await response.json();
 
       if (!data.success) {

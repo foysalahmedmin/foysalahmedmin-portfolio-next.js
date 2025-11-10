@@ -9,15 +9,15 @@ const reviewSchema = new Schema<TReviewDocument>(
       required: true,
     },
 
-    content: {
-      type: Schema.Types.ObjectId,
-      ref: "type",
+    target_model: {
+      type: String,
+      enum: ["Project", "Article"],
       required: true,
     },
 
-    type: {
-      type: String,
-      enum: ["project", "article"],
+    target: {
+      type: Schema.Types.ObjectId,
+      refPath: "target_model",
       required: true,
     },
 
@@ -53,6 +53,7 @@ const reviewSchema = new Schema<TReviewDocument>(
     is_deleted: {
       type: Boolean,
       default: false,
+      select: false,
     },
   },
   {
@@ -65,7 +66,7 @@ const reviewSchema = new Schema<TReviewDocument>(
   }
 );
 
-reviewSchema.index({ content: 1, type: 1, user: 1 }, { unique: true });
+reviewSchema.index({ target: 1, target_model: 1, user: 1 }, { unique: true });
 
 // toJSON override to remove sensitive fields from output
 reviewSchema.methods.toJSON = function () {

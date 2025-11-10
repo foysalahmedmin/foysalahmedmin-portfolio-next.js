@@ -12,14 +12,13 @@ const projectSchema = new Schema<TProjectDocument>(
       required: true,
       trim: true,
     },
-
     slug: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
-
     description: {
       type: String,
       trim: true,
@@ -47,7 +46,8 @@ const projectSchema = new Schema<TProjectDocument>(
 
     category: {
       type: Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "ProjectCategory",
+      required: true,
     },
 
     author: {
@@ -56,16 +56,15 @@ const projectSchema = new Schema<TProjectDocument>(
       required: true,
     },
 
+    client: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     collaborators: {
       type: [Schema.Types.ObjectId],
       ref: "User",
       default: [],
-    },
-
-    client: {
-      type: Schema.Types.ObjectId,
-      ref: "Client",
-      required: true,
     },
 
     status: {
@@ -112,6 +111,7 @@ const projectSchema = new Schema<TProjectDocument>(
     is_deleted: {
       type: Boolean,
       default: false,
+      select: false,
     },
   },
   {
@@ -125,14 +125,14 @@ const projectSchema = new Schema<TProjectDocument>(
 );
 
 projectSchema.virtual("resources", {
-  ref: "Resource",
+  ref: "ProjectResource",
   localField: "_id",
   foreignField: "project",
   match: { is_deleted: { $ne: true } },
 });
 
 projectSchema.virtual("resource_count", {
-  ref: "Resource",
+  ref: "ProjectResource",
   localField: "_id",
   foreignField: "project",
   count: true,
@@ -142,16 +142,16 @@ projectSchema.virtual("resource_count", {
 projectSchema.virtual("reviews", {
   ref: "Review",
   localField: "_id",
-  foreignField: "project",
-  match: { type: "project", is_deleted: { $ne: true } },
+  foreignField: "target",
+  match: { target_model: "Project", is_deleted: { $ne: true } },
 });
 
 projectSchema.virtual("review_count", {
   ref: "Review",
   localField: "_id",
-  foreignField: "project",
+  foreignField: "target",
   count: true,
-  match: { type: "project", is_deleted: { $ne: true } },
+  match: { target_model: "Project", is_deleted: { $ne: true } },
 });
 
 // toJSON override to remove sensitive fields from output
@@ -185,7 +185,7 @@ projectSchema.pre("aggregate", function (next) {
 });
 
 // Static methods
-projectSchema.statics.isprojectExist = async function (_id: string) {
+projectSchema.statics.isProjectExist = async function (_id: string) {
   return await this.findById(_id);
 };
 
@@ -195,7 +195,8 @@ projectSchema.methods.softDelete = async function () {
   return await this.save();
 };
 
-export const Project = mongoose.model<TProjectDocument, TProjectModel>(
-  "Project",
-  projectSchema
-);
+export const Project =
+  (mongoose.models.Project as TProjectModel) ||
+  mongoose.model<TProjectDocument, TProjectModel>("Project", projectSchema);
+
+export default Project;

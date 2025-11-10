@@ -2,6 +2,10 @@ import { Document, Model, Types } from "mongoose";
 
 export type TStatus = "draft" | "pending" | "published" | "archived";
 
+type Ref = {
+  _id: Types.ObjectId;
+} & Record<string, any>;
+
 export type TArticle = {
   name: string;
   slug: string;
@@ -10,9 +14,9 @@ export type TArticle = {
   thumbnail?: string;
   images?: string[];
   tags?: string[];
-  category: Types.ObjectId;
-  author: Types.ObjectId;
-  collaborators?: Types.ObjectId[];
+  category: Types.ObjectId | Ref;
+  author: Types.ObjectId | Ref;
+  collaborators?: (Types.ObjectId | Ref)[];
   status: TStatus;
   is_featured: boolean;
   is_premium: boolean;
