@@ -54,6 +54,22 @@ export const getArticleBySlug = async (slug: string) => {
   return article;
 };
 
+export const getArticleById = async (id: string) => {
+  await connectDB();
+
+  const article = await Article.findById(id)
+    .populate('author', 'name email image')
+    .populate('category', 'name slug')
+    .populate('collaborators', 'name email')
+    .lean();
+
+  if (!article) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
+  }
+
+  return article;
+};
+
 export const createArticle = async (payload: {
   name: string;
   slug: string;
@@ -171,6 +187,68 @@ export const updateArticleBySlug = async (
     .populate('collaborators', 'name email');
 };
 
+export const updateArticleById = async (
+  id: string,
+  payload: Partial<{
+    name: string;
+    slug: string;
+    description: string;
+    content: string;
+    thumbnail: string;
+    images: string[];
+    tags: string[];
+    category: string;
+    collaborators: string[];
+    status: 'draft' | 'pending' | 'published' | 'archived';
+    is_featured: boolean;
+    is_premium: boolean;
+    published_at: Date | string;
+    expired_at: Date | string;
+    layout: string;
+  }>,
+) => {
+  await connectDB();
+
+  const article = await Article.findById(id);
+
+  if (!article) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
+  }
+
+  // Check if new slug conflicts with existing article
+  if (payload.slug) {
+    const existingArticle = await Article.findOne({ slug: payload.slug });
+    if (existingArticle && existingArticle._id.toString() !== id) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        'Article with this slug already exists',
+      );
+    }
+  }
+
+  // Handle date conversions
+  const updateData: any = { ...payload };
+  if (payload.published_at) {
+    updateData.published_at = new Date(payload.published_at);
+  }
+  if (payload.expired_at) {
+    updateData.expired_at = new Date(payload.expired_at);
+  }
+
+  // Ensure published_at present if status set to published
+  if (payload.status === 'published' && !updateData.published_at) {
+    updateData.published_at = new Date();
+  }
+
+  Object.assign(article, updateData);
+  await article.save();
+
+  return await article
+    .populate('author', 'name email')
+    .populate('category', 'name slug')
+    .populate('collaborators', 'name email');
+};
+
 export const updateArticles = async (
   slugs: string[],
   payload: Partial<{
@@ -212,6 +290,20 @@ export const deleteArticleBySlug = async (slug: string) => {
   return null;
 };
 
+export const deleteArticleById = async (id: string) => {
+  await connectDB();
+
+  const article = await Article.findById(id);
+
+  if (!article) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
+  }
+
+  await article.softDelete();
+
+  return null;
+};
+
 export const deleteArticlePermanent = async (slug: string): Promise<void> => {
   await connectDB();
   const article = await Article.findOne({ slug }).setOptions({ bypassDeleted: true });
@@ -220,6 +312,16 @@ export const deleteArticlePermanent = async (slug: string): Promise<void> => {
   }
 
   await Article.findByIdAndDelete(article._id);
+};
+
+export const deleteArticlePermanentById = async (id: string): Promise<void> => {
+  await connectDB();
+  const article = await Article.findById(id).setOptions({ bypassDeleted: true });
+  if (!article) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
+  }
+
+  await Article.findByIdAndDelete(id);
 };
 
 export const deleteArticles = async (
@@ -269,6 +371,21 @@ export const restoreArticle = async (slug: string) => {
   await connectDB();
   const article = await Article.findOneAndUpdate(
     { slug, is_deleted: true },
+    { is_deleted: false },
+    { new: true },
+  );
+
+  if (!article) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article not found or not deleted');
+  }
+
+  return article;
+};
+
+export const restoreArticleById = async (id: string) => {
+  await connectDB();
+  const article = await Article.findByIdAndUpdate(
+    id,
     { is_deleted: false },
     { new: true },
   );

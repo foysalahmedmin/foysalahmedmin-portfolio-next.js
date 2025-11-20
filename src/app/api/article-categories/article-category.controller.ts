@@ -39,6 +39,21 @@ export const getArticleCategoryBySlug = catchAsync(
   },
 );
 
+export const getArticleCategoryById = catchAsync(
+  async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
+    const category = await ArticleCategoryService.getArticleCategoryById(
+      params.id,
+    );
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Article category retrieved successfully',
+      data: category,
+    });
+  },
+);
+
 export const createArticleCategory = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
@@ -61,6 +76,26 @@ export const updateArticleCategoryBySlug = catchAsync(
     const body = req.parsedBody || (await req.json());
     const category = await ArticleCategoryService.updateArticleCategoryBySlug(
       params.slug,
+      body,
+    );
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Article category updated successfully',
+      data: category,
+    });
+  },
+);
+
+export const updateArticleCategoryById = catchAsync(
+  async (
+    req: AuthRequest & { parsedBody?: any },
+    { params }: { params: { id: string } },
+  ) => {
+    const body = req.parsedBody || (await req.json());
+    const category = await ArticleCategoryService.updateArticleCategoryById(
+      params.id,
       body,
     );
 
@@ -100,9 +135,34 @@ export const deleteArticleCategoryBySlug = catchAsync(
   },
 );
 
+export const deleteArticleCategoryById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    await ArticleCategoryService.deleteArticleCategoryById(params.id);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Article category deleted successfully',
+      data: null,
+    });
+  },
+);
+
 export const deleteArticleCategoryPermanent = catchAsync(
   async (req: AuthRequest, { params }: { params: { slug: string } }) => {
     await ArticleCategoryService.deleteArticleCategoryPermanent(params.slug);
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Article category permanently deleted successfully',
+      data: null,
+    });
+  },
+);
+
+export const deleteArticleCategoryPermanentById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    await ArticleCategoryService.deleteArticleCategoryPermanentById(params.id);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
@@ -148,6 +208,19 @@ export const restoreArticleCategory = catchAsync(
   async (req: AuthRequest, { params }: { params: { slug: string } }) => {
     const { slug } = params;
     const result = await ArticleCategoryService.restoreArticleCategory(slug);
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Article category restored successfully',
+      data: result,
+    });
+  },
+);
+
+export const restoreArticleCategoryById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    const { id } = params;
+    const result = await ArticleCategoryService.restoreArticleCategoryById(id);
     return sendResponse({
       status: httpStatus.OK,
       success: true,

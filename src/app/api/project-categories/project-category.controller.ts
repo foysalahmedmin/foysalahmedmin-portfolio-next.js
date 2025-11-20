@@ -39,6 +39,21 @@ export const getProjectCategoryBySlug = catchAsync(
   },
 );
 
+export const getProjectCategoryById = catchAsync(
+  async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
+    const category = await ProjectCategoryService.getProjectCategoryById(
+      params.id,
+    );
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project category retrieved successfully',
+      data: category,
+    });
+  },
+);
+
 export const createProjectCategory = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
@@ -61,6 +76,26 @@ export const updateProjectCategoryBySlug = catchAsync(
     const body = req.parsedBody || (await req.json());
     const category = await ProjectCategoryService.updateProjectCategoryBySlug(
       params.slug,
+      body,
+    );
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project category updated successfully',
+      data: category,
+    });
+  },
+);
+
+export const updateProjectCategoryById = catchAsync(
+  async (
+    req: AuthRequest & { parsedBody?: any },
+    { params }: { params: { id: string } },
+  ) => {
+    const body = req.parsedBody || (await req.json());
+    const category = await ProjectCategoryService.updateProjectCategoryById(
+      params.id,
       body,
     );
 
@@ -100,9 +135,34 @@ export const deleteProjectCategoryBySlug = catchAsync(
   },
 );
 
+export const deleteProjectCategoryById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    await ProjectCategoryService.deleteProjectCategoryById(params.id);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project category deleted successfully',
+      data: null,
+    });
+  },
+);
+
 export const deleteProjectCategoryPermanent = catchAsync(
   async (req: AuthRequest, { params }: { params: { slug: string } }) => {
     await ProjectCategoryService.deleteProjectCategoryPermanent(params.slug);
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project category permanently deleted successfully',
+      data: null,
+    });
+  },
+);
+
+export const deleteProjectCategoryPermanentById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    await ProjectCategoryService.deleteProjectCategoryPermanentById(params.id);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
@@ -148,6 +208,19 @@ export const restoreProjectCategory = catchAsync(
   async (req: AuthRequest, { params }: { params: { slug: string } }) => {
     const { slug } = params;
     const result = await ProjectCategoryService.restoreProjectCategory(slug);
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project category restored successfully',
+      data: result,
+    });
+  },
+);
+
+export const restoreProjectCategoryById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    const { id } = params;
+    const result = await ProjectCategoryService.restoreProjectCategoryById(id);
     return sendResponse({
       status: httpStatus.OK,
       success: true,

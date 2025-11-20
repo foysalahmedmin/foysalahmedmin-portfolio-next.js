@@ -56,6 +56,23 @@ export const getProjectBySlug = async (slug: string) => {
   return project;
 };
 
+export const getProjectById = async (id: string) => {
+  await connectDB();
+
+  const project = await Project.findById(id)
+    .populate('author', 'name email image')
+    .populate('category', 'name slug')
+    .populate('client', 'name email image')
+    .populate('collaborators', 'name email')
+    .lean();
+
+  if (!project) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
+  }
+
+  return project;
+};
+
 export const createProject = async (payload: {
   name: string;
   slug: string;
@@ -162,6 +179,65 @@ export const updateProjectBySlug = async (
     .populate('collaborators', 'name email');
 };
 
+export const updateProjectById = async (
+  id: string,
+  payload: Partial<{
+    name: string;
+    slug: string;
+    description: string;
+    content: string;
+    thumbnail: string;
+    images: string[];
+    tags: string[];
+    category: string;
+    client: string;
+    collaborators: string[];
+    status: 'planned' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+    is_featured: boolean;
+    is_premium: boolean;
+    started_at: Date | string;
+    ended_at: Date | string;
+    layout: string;
+  }>,
+) => {
+  await connectDB();
+
+  const project = await Project.findById(id);
+
+  if (!project) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
+  }
+
+  // Check if new slug conflicts with existing project
+  if (payload.slug) {
+    const existingProject = await Project.findOne({ slug: payload.slug });
+    if (existingProject && existingProject._id.toString() !== id) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        'Project with this slug already exists',
+      );
+    }
+  }
+
+  // Handle date conversions
+  const updateData: any = { ...payload };
+  if (payload.started_at) {
+    updateData.started_at = new Date(payload.started_at);
+  }
+  if (payload.ended_at) {
+    updateData.ended_at = new Date(payload.ended_at);
+  }
+
+  Object.assign(project, updateData);
+  await project.save();
+
+  return await project
+    .populate('author', 'name email')
+    .populate('category', 'name slug')
+    .populate('client', 'name email')
+    .populate('collaborators', 'name email');
+};
+
 export const updateProjects = async (
   slugs: string[],
   payload: Partial<{
@@ -203,6 +279,20 @@ export const deleteProjectBySlug = async (slug: string) => {
   return null;
 };
 
+export const deleteProjectById = async (id: string) => {
+  await connectDB();
+
+  const project = await Project.findById(id);
+
+  if (!project) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
+  }
+
+  await project.softDelete();
+
+  return null;
+};
+
 export const deleteProjectPermanent = async (slug: string): Promise<void> => {
   await connectDB();
   const project = await Project.findOne({ slug }).setOptions({ bypassDeleted: true });
@@ -211,6 +301,16 @@ export const deleteProjectPermanent = async (slug: string): Promise<void> => {
   }
 
   await Project.findByIdAndDelete(project._id);
+};
+
+export const deleteProjectPermanentById = async (id: string): Promise<void> => {
+  await connectDB();
+  const project = await Project.findById(id).setOptions({ bypassDeleted: true });
+  if (!project) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
+  }
+
+  await Project.findByIdAndDelete(id);
 };
 
 export const deleteProjects = async (
@@ -260,6 +360,21 @@ export const restoreProject = async (slug: string) => {
   await connectDB();
   const project = await Project.findOneAndUpdate(
     { slug, is_deleted: true },
+    { is_deleted: false },
+    { new: true },
+  );
+
+  if (!project) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project not found or not deleted');
+  }
+
+  return project;
+};
+
+export const restoreProjectById = async (id: string) => {
+  await connectDB();
+  const project = await Project.findByIdAndUpdate(
+    id,
     { is_deleted: false },
     { new: true },
   );

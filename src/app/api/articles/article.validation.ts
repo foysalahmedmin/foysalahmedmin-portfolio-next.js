@@ -59,9 +59,42 @@ export const updateArticlesSchema = z.object({
   }),
 });
 
+const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
+  message: 'Invalid ID format',
+});
+
+export const updateArticleByIdSchema = z.object({
+  params: z.object({
+    id: idSchema,
+  }),
+  body: z.object({
+    name: z.string().min(1).optional(),
+    slug: z.string().min(1).optional(),
+    description: z.string().max(300).optional(),
+    content: z.string().min(1).optional(),
+    thumbnail: z.string().optional(),
+    images: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
+    category: z.string().min(1).optional(),
+    collaborators: z.array(z.string()).optional(),
+    status: z.enum(['draft', 'pending', 'published', 'archived']).optional(),
+    is_featured: z.boolean().optional(),
+    is_premium: z.boolean().optional(),
+    published_at: z.string().datetime().optional(),
+    expired_at: z.string().datetime().optional(),
+    layout: z.string().optional(),
+  }),
+});
+
 export const articleOperationValidationSchema = z.object({
   params: z.object({
     slug: slugSchema,
+  }),
+});
+
+export const articleByIdOperationValidationSchema = z.object({
+  params: z.object({
+    id: idSchema,
   }),
 });
 
