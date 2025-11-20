@@ -44,14 +44,14 @@ export const signin = async (payload: TSignin) => {
 
   const accessToken = createToken(
     jwtPayload,
-    ENV.jwtAccessSecret,
-    ENV.jwtAccessSecretExpiresIn,
+    ENV.jwt_access_secret,
+    ENV.jwt_access_secret_expires_in,
   );
 
   const refreshToken = createToken(
     jwtPayload,
-    ENV.jwtRefreshSecret,
-    ENV.jwtRefreshSecretExpiresIn,
+    ENV.jwt_refresh_secret,
+    ENV.jwt_refresh_secret_expires_in,
   );
 
   return {
@@ -90,14 +90,14 @@ export const signup = async (payload: TSignup) => {
 
   const accessToken = createToken(
     jwtPayload,
-    ENV.jwtAccessSecret,
-    ENV.jwtAccessSecretExpiresIn,
+    ENV.jwt_access_secret,
+    ENV.jwt_access_secret_expires_in,
   );
 
   const refreshToken = createToken(
     jwtPayload,
-    ENV.jwtRefreshSecret,
-    ENV.jwtRefreshSecretExpiresIn,
+    ENV.jwt_refresh_secret,
+    ENV.jwt_refresh_secret_expires_in,
   );
 
   return {
@@ -108,7 +108,7 @@ export const signup = async (payload: TSignup) => {
 };
 
 export const refreshToken = async (token: string) => {
-  const { email, iat } = verifyToken(token, ENV.jwtRefreshSecret);
+  const { email, iat } = verifyToken(token, ENV.jwt_refresh_secret);
 
   if (!email || typeof iat !== 'number') {
     throw new AppError(
@@ -154,8 +154,8 @@ export const refreshToken = async (token: string) => {
 
   const accessToken = createToken(
     jwtPayload,
-    ENV.jwtAccessSecret,
-    ENV.jwtAccessSecretExpiresIn,
+    ENV.jwt_access_secret,
+    ENV.jwt_access_secret_expires_in,
   );
 
   return {
@@ -179,7 +179,7 @@ export const changePassword = async (
 
   const hashedNewPassword = await bcrypt.hash(
     payload.new_password,
-    Number(ENV.bcryptSaltRounds),
+    Number(ENV.bcrypt_salt_rounds),
   );
 
   const result = await User.findOneAndUpdate(
