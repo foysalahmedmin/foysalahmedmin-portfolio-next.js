@@ -7,10 +7,11 @@ import httpStatus from 'http-status';
 type TFile = {
   name: string;
   folder: string;
-  size?: number;
-  maxCount?: number;
-  minCount?: number;
-  allowedTypes?: string[];
+  max_size?: number;
+  min_size?: number;
+  max_count?: number;
+  min_count?: number;
+  allowed_types?: string[];
 };
 
 export const file = (...files: TFile[]) => {
@@ -30,18 +31,26 @@ export const file = (...files: TFile[]) => {
         for (const entry of formDataEntries) {
           if (entry instanceof File) {
             // Validate file type
-            if (fileConfig.allowedTypes && !fileConfig.allowedTypes.includes(entry.type)) {
+            if (fileConfig.allowed_types && !fileConfig.allowed_types.includes(entry.type)) {
               throw new AppError(
                 httpStatus.BAD_REQUEST,
-                `Invalid file type for field "${fileConfig.name}". Allowed types: ${fileConfig.allowedTypes.join(', ')}`,
+                `Invalid file type for field "${fileConfig.name}". Allowed types: ${fileConfig.allowed_types.join(', ')}`,
               );
             }
 
-            // Validate file size
-            if (fileConfig.size && entry.size > fileConfig.size) {
+            // Validate file size - max_size
+            if (fileConfig.max_size && entry.size > fileConfig.max_size) {
               throw new AppError(
                 httpStatus.BAD_REQUEST,
-                `File "${fileConfig.name}" exceeds maximum size of ${fileConfig.size} bytes`,
+                `File "${fileConfig.name}" exceeds maximum size of ${fileConfig.max_size} bytes`,
+              );
+            }
+
+            // Validate file size - min_size
+            if (fileConfig.min_size && entry.size < fileConfig.min_size) {
+              throw new AppError(
+                httpStatus.BAD_REQUEST,
+                `File "${fileConfig.name}" is below minimum size of ${fileConfig.min_size} bytes`,
               );
             }
 
@@ -49,19 +58,19 @@ export const file = (...files: TFile[]) => {
           }
         }
 
-        // Check minCount
-        if (fileConfig.minCount && fieldFiles.length < fileConfig.minCount) {
+        // Check min_count
+        if (fileConfig.min_count && fieldFiles.length < fileConfig.min_count) {
           throw new AppError(
             httpStatus.BAD_REQUEST,
-            `At least ${fileConfig.minCount} file(s) required for field "${fileConfig.name}"`,
+            `At least ${fileConfig.min_count} file(s) required for field "${fileConfig.name}"`,
           );
         }
 
-        // Check maxCount
-        if (fileConfig.maxCount && fieldFiles.length > fileConfig.maxCount) {
+        // Check max_count
+        if (fileConfig.max_count && fieldFiles.length > fileConfig.max_count) {
           throw new AppError(
             httpStatus.BAD_REQUEST,
-            `Maximum ${fileConfig.maxCount} file(s) allowed for field "${fileConfig.name}"`,
+            `Maximum ${fileConfig.max_count} file(s) allowed for field "${fileConfig.name}"`,
           );
         }
 
@@ -119,4 +128,3 @@ export const file = (...files: TFile[]) => {
     }
   };
 };
-

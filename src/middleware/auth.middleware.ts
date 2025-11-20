@@ -1,6 +1,6 @@
 import { ENV } from '@/config';
 import connectDB from '@/lib/db';
-import User from '@/models/user.model';
+import User from '@/app/api/users/user.model';
 import AppError from '@/builder/AppError';
 import httpStatus from 'http-status';
 import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
