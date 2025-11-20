@@ -1,5 +1,5 @@
 import connectDB from "@/lib/db";
-import ArticleCategory from "@/models/article-category.model";
+import ArticleCategory from "@/app/api/admin/article-categories/article-category.model";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(

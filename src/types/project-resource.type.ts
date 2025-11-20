@@ -1,30 +1,45 @@
-import { Document, Model, Types } from "mongoose";
+// Frontend types with populated data (for API responses)
 
 export type TProjectResourceType =
-  | "repository"
-  | "design"
-  | "documentation"
-  | "other";
+  | 'repository'
+  | 'design'
+  | 'documentation'
+  | 'other';
+
+export type TProjectPopulated = {
+  _id: string;
+  name: string;
+  slug: string;
+};
 
 export type TProjectResource = {
-  project: Types.ObjectId;
+  _id: string;
+  project: TProjectPopulated;
   sequence: number;
   type: TProjectResourceType;
   title: string;
   url: string;
   description?: string;
   is_private: boolean;
-  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
-export interface TProjectResourceDocument
-  extends TProjectResource,
-    Document {
-  _id: Types.ObjectId;
-  softDelete(): Promise<TProjectResourceDocument | null>;
-}
-
-export type TProjectResourceModel = Model<TProjectResourceDocument> & {
-  isResourceExist(_id: string): Promise<TProjectResourceDocument | null>;
+export type TProjectResourceResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TProjectResource;
 };
 
+export type TProjectResourcesResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TProjectResource[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+};

@@ -1,115 +1,34 @@
-import connectDB from "@/lib/db";
-import ProjectCategory from "@/models/project-category.model";
-import { AuthRequest, withAuth } from "@/middleware/auth";
-import { NextResponse } from "next/server";
+import { auth } from '@/middleware/auth.middleware';
+import { validation } from '@/middleware/validation.middleware';
+import { errorHandler } from '@/utils/errorHandler';
+import * as ProjectCategoryController from './project-category.controller';
+import * as ProjectCategoryValidation from './project-category.validation';
+import { TRole } from '@/types/jsonwebtoken.type';
+import { NextRequest } from 'next/server';
 
-const ADMIN_ROLES = new Set(["super-admin", "admin"]);
-
-const ensureAdmin = (role?: string) =>
-  role && ADMIN_ROLES.has(role.toLowerCase());
-
-export async function GET(req: AuthRequest) {
-  return withAuth(req, async (authedReq: AuthRequest) => {
-    if (!ensureAdmin(authedReq.user?.role)) {
-      return NextResponse.json(
-        { success: false, message: "Forbidden: Admin access required" },
-        { status: 403 }
-      );
-    }
-
-    await connectDB();
-
-    const url = new URL(authedReq.url);
-    const status = url.searchParams.get("status");
-
-    const query: Record<string, unknown> = {};
-
-    if (status) {
-      query.status = status;
-    }
-
-    const categories = await ProjectCategory.find(query)
-      .sort({ sequence: 1 })
-      .lean();
-
-    return NextResponse.json({
-      success: true,
-      message: "Project categories fetched successfully",
-      data: { categories },
-    });
-  });
-}
-
-export async function POST(req: AuthRequest) {
-  return withAuth(req, async (authedReq: AuthRequest) => {
-    if (!ensureAdmin(authedReq.user?.role)) {
-      return NextResponse.json(
-        { success: false, message: "Forbidden: Admin access required" },
-        { status: 403 }
-      );
-    }
-
-    await connectDB();
-
-    const body = await req.json();
-    const {
-      name,
-      slug,
-      sequence,
-      description,
-      icon,
-      thumbnail,
-      parent,
-      status = "active",
-      tags = [],
-      layout = "default",
-      seo = {},
-    } = body;
-
-    if (!name || !slug || typeof sequence !== "number") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "name, slug and sequence are required",
-        },
-        { status: 400 }
-      );
-    }
-
-    const existingCategory = await ProjectCategory.findOne({ slug });
-
-    if (existingCategory) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Project category with this slug already exists",
-        },
-        { status: 409 }
-      );
-    }
-
-    const category = await ProjectCategory.create({
-      name,
-      slug,
-      sequence,
-      description,
-      icon,
-      thumbnail,
-      parent: parent || null,
-      status,
-      tags,
-      layout,
-      seo,
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Project category created successfully",
-        data: { category },
-      },
-      { status: 201 }
+export async function GET(req: NextRequest) {
+  try {
+    return await auth('super-admin', 'admin' as TRole)(
+      req,
+      ProjectCategoryController.getProjectCategories,
     );
-  });
+  } catch (error) {
+    return errorHandler(error, req);
+  }
 }
 
+export async function POST(req: NextRequest) {
+  try {
+    return await auth('super-admin', 'admin' as TRole)(
+      req,
+      async (authedReq) => {
+        return await validation(ProjectCategoryValidation.createProjectCategorySchema)(
+          authedReq,
+          ProjectCategoryController.createProjectCategory,
+        );
+      },
+    );
+  } catch (error) {
+    return errorHandler(error, req);
+  }
+}

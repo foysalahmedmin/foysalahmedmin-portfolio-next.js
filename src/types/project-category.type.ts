@@ -1,6 +1,6 @@
-import { Document, Model, Types } from "mongoose";
+// Frontend types with populated data (for API responses)
 
-export type TProjectCategoryStatus = "active" | "inactive";
+export type TProjectCategoryStatus = 'active' | 'inactive';
 
 export type TProjectCategorySEO = {
   title?: string;
@@ -8,7 +8,14 @@ export type TProjectCategorySEO = {
   keywords?: string[];
 };
 
+export type TProjectCategoryPopulated = {
+  _id: string;
+  name: string;
+  slug: string;
+};
+
 export type TProjectCategory = {
+  _id: string;
   sequence: number;
   icon?: string;
   thumbnail?: string;
@@ -17,25 +24,32 @@ export type TProjectCategory = {
   description?: string;
   status: TProjectCategoryStatus;
   tags: string[];
-  parent?: Types.ObjectId | null;
+  parent?: TProjectCategoryPopulated | null;
   layout?: string;
   seo?: TProjectCategorySEO;
-  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type TProjectCategoryTree = TProjectCategory & {
-  _id: string;
   children?: TProjectCategoryTree[];
 };
 
-export interface TProjectCategoryDocument
-  extends TProjectCategory,
-    Document {
-  _id: Types.ObjectId;
-  softDelete(): Promise<TProjectCategoryDocument | null>;
-}
-
-export type TProjectCategoryModel = Model<TProjectCategoryDocument> & {
-  isCategoryExist(_id: string): Promise<TProjectCategoryDocument | null>;
+export type TProjectCategoryResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TProjectCategory;
 };
 
+export type TProjectCategoriesResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TProjectCategory[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+};
