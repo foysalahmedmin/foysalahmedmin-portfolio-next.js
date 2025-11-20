@@ -38,6 +38,20 @@ export const getProjectCategoryBySlug = async (slug: string) => {
   return category;
 };
 
+export const getProjectCategoryById = async (id: string) => {
+  await connectDB();
+
+  const category = await ProjectCategory.findById(id)
+    .populate('parent', 'name slug')
+    .lean();
+
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+  }
+
+  return category;
+};
+
 export const createProjectCategory = async (payload: {
   name: string;
   slug: string;
@@ -122,6 +136,51 @@ export const updateProjectCategoryBySlug = async (
   return category;
 };
 
+export const updateProjectCategoryById = async (
+  id: string,
+  payload: Partial<{
+    name: string;
+    slug: string;
+    sequence: number;
+    description: string;
+    icon: string;
+    thumbnail: string;
+    parent: string | null;
+    status: 'active' | 'inactive';
+    tags: string[];
+    layout: string;
+    seo: {
+      title?: string;
+      description?: string;
+      keywords?: string[];
+    };
+  }>,
+) => {
+  await connectDB();
+
+  const category = await ProjectCategory.findById(id);
+
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+  }
+
+  // Check if new slug conflicts with existing category
+  if (payload.slug) {
+    const existingCategory = await ProjectCategory.findOne({ slug: payload.slug });
+    if (existingCategory && existingCategory._id.toString() !== id) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        'Project category with this slug already exists',
+      );
+    }
+  }
+
+  Object.assign(category, payload);
+  await category.save();
+
+  return category;
+};
+
 export const updateProjectCategories = async (
   slugs: string[],
   payload: Partial<{
@@ -162,6 +221,20 @@ export const deleteProjectCategoryBySlug = async (slug: string) => {
   return null;
 };
 
+export const deleteProjectCategoryById = async (id: string) => {
+  await connectDB();
+
+  const category = await ProjectCategory.findById(id);
+
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+  }
+
+  await category.softDelete();
+
+  return null;
+};
+
 export const deleteProjectCategoryPermanent = async (slug: string): Promise<void> => {
   await connectDB();
   const category = await ProjectCategory.findOne({ slug }).setOptions({ bypassDeleted: true });
@@ -170,6 +243,16 @@ export const deleteProjectCategoryPermanent = async (slug: string): Promise<void
   }
 
   await ProjectCategory.findByIdAndDelete(category._id);
+};
+
+export const deleteProjectCategoryPermanentById = async (id: string): Promise<void> => {
+  await connectDB();
+  const category = await ProjectCategory.findById(id).setOptions({ bypassDeleted: true });
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+  }
+
+  await ProjectCategory.findByIdAndDelete(id);
 };
 
 export const deleteProjectCategories = async (
@@ -219,6 +302,21 @@ export const restoreProjectCategory = async (slug: string) => {
   await connectDB();
   const category = await ProjectCategory.findOneAndUpdate(
     { slug, is_deleted: true },
+    { is_deleted: false },
+    { new: true },
+  );
+
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found or not deleted');
+  }
+
+  return category;
+};
+
+export const restoreProjectCategoryById = async (id: string) => {
+  await connectDB();
+  const category = await ProjectCategory.findByIdAndUpdate(
+    id,
     { is_deleted: false },
     { new: true },
   );

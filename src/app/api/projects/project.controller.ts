@@ -35,6 +35,19 @@ export const getProjectBySlug = catchAsync(
   },
 );
 
+export const getProjectById = catchAsync(
+  async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
+    const project = await ProjectService.getProjectById(params.id);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project retrieved successfully',
+      data: project,
+    });
+  },
+);
+
 export const createProject = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
@@ -59,6 +72,23 @@ export const updateProjectBySlug = catchAsync(
   ) => {
     const body = req.parsedBody || (await req.json());
     const project = await ProjectService.updateProjectBySlug(params.slug, body);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project updated successfully',
+      data: project,
+    });
+  },
+);
+
+export const updateProjectById = catchAsync(
+  async (
+    req: AuthRequest & { parsedBody?: any },
+    { params }: { params: { id: string } },
+  ) => {
+    const body = req.parsedBody || (await req.json());
+    const project = await ProjectService.updateProjectById(params.id, body);
 
     return sendResponse({
       status: httpStatus.OK,
@@ -96,9 +126,34 @@ export const deleteProjectBySlug = catchAsync(
   },
 );
 
+export const deleteProjectById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    await ProjectService.deleteProjectById(params.id);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project deleted successfully',
+      data: null,
+    });
+  },
+);
+
 export const deleteProjectPermanent = catchAsync(
   async (req: AuthRequest, { params }: { params: { slug: string } }) => {
     await ProjectService.deleteProjectPermanent(params.slug);
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project permanently deleted successfully',
+      data: null,
+    });
+  },
+);
+
+export const deleteProjectPermanentById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    await ProjectService.deleteProjectPermanentById(params.id);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
@@ -144,6 +199,19 @@ export const restoreProject = catchAsync(
   async (req: AuthRequest, { params }: { params: { slug: string } }) => {
     const { slug } = params;
     const result = await ProjectService.restoreProject(slug);
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project restored successfully',
+      data: result,
+    });
+  },
+);
+
+export const restoreProjectById = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    const { id } = params;
+    const result = await ProjectService.restoreProjectById(id);
     return sendResponse({
       status: httpStatus.OK,
       success: true,

@@ -38,6 +38,20 @@ export const getArticleCategoryBySlug = async (slug: string) => {
   return category;
 };
 
+export const getArticleCategoryById = async (id: string) => {
+  await connectDB();
+
+  const category = await ArticleCategory.findById(id)
+    .populate('parent', 'name slug')
+    .lean();
+
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article category not found');
+  }
+
+  return category;
+};
+
 export const createArticleCategory = async (payload: {
   name: string;
   slug: string;
@@ -122,6 +136,51 @@ export const updateArticleCategoryBySlug = async (
   return category;
 };
 
+export const updateArticleCategoryById = async (
+  id: string,
+  payload: Partial<{
+    name: string;
+    slug: string;
+    sequence: number;
+    description: string;
+    icon: string;
+    thumbnail: string;
+    parent: string | null;
+    status: 'active' | 'inactive';
+    tags: string[];
+    layout: string;
+    seo: {
+      title?: string;
+      description?: string;
+      keywords?: string[];
+    };
+  }>,
+) => {
+  await connectDB();
+
+  const category = await ArticleCategory.findById(id);
+
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article category not found');
+  }
+
+  // Check if new slug conflicts with existing category
+  if (payload.slug) {
+    const existingCategory = await ArticleCategory.findOne({ slug: payload.slug });
+    if (existingCategory && existingCategory._id.toString() !== id) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        'Article category with this slug already exists',
+      );
+    }
+  }
+
+  Object.assign(category, payload);
+  await category.save();
+
+  return category;
+};
+
 export const updateArticleCategories = async (
   slugs: string[],
   payload: Partial<{
@@ -162,6 +221,20 @@ export const deleteArticleCategoryBySlug = async (slug: string) => {
   return null;
 };
 
+export const deleteArticleCategoryById = async (id: string) => {
+  await connectDB();
+
+  const category = await ArticleCategory.findById(id);
+
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article category not found');
+  }
+
+  await category.softDelete();
+
+  return null;
+};
+
 export const deleteArticleCategoryPermanent = async (slug: string): Promise<void> => {
   await connectDB();
   const category = await ArticleCategory.findOne({ slug }).setOptions({ bypassDeleted: true });
@@ -170,6 +243,16 @@ export const deleteArticleCategoryPermanent = async (slug: string): Promise<void
   }
 
   await ArticleCategory.findByIdAndDelete(category._id);
+};
+
+export const deleteArticleCategoryPermanentById = async (id: string): Promise<void> => {
+  await connectDB();
+  const category = await ArticleCategory.findById(id).setOptions({ bypassDeleted: true });
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article category not found');
+  }
+
+  await ArticleCategory.findByIdAndDelete(id);
 };
 
 export const deleteArticleCategories = async (
@@ -219,6 +302,21 @@ export const restoreArticleCategory = async (slug: string) => {
   await connectDB();
   const category = await ArticleCategory.findOneAndUpdate(
     { slug, is_deleted: true },
+    { is_deleted: false },
+    { new: true },
+  );
+
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article category not found or not deleted');
+  }
+
+  return category;
+};
+
+export const restoreArticleCategoryById = async (id: string) => {
+  await connectDB();
+  const category = await ArticleCategory.findByIdAndUpdate(
+    id,
     { is_deleted: false },
     { new: true },
   );
