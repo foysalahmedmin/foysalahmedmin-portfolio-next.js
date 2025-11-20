@@ -1,10 +1,10 @@
 import { errorHandler } from '@/utils/errorHandler';
-import * as AuthController from '../auth.controller';
+import * as ArticleController from './article.controller';
 import { NextRequest } from 'next/server';
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    return await AuthController.refreshToken(req);
+    return await ArticleController.getArticles(req);
   } catch (error) {
     return errorHandler(error, req);
   }
