@@ -1,6 +1,6 @@
-import { Document, Model, Types } from "mongoose";
+// Frontend types with populated data (for API responses)
 
-export type TArticleCategoryStatus = "active" | "inactive";
+export type TArticleCategoryStatus = 'active' | 'inactive';
 
 export type TArticleCategorySEO = {
   title?: string;
@@ -8,7 +8,14 @@ export type TArticleCategorySEO = {
   keywords?: string[];
 };
 
+export type TArticleCategoryPopulated = {
+  _id: string;
+  name: string;
+  slug: string;
+};
+
 export type TArticleCategory = {
+  _id: string;
   sequence: number;
   icon?: string;
   thumbnail?: string;
@@ -17,25 +24,32 @@ export type TArticleCategory = {
   description?: string;
   status: TArticleCategoryStatus;
   tags: string[];
-  parent?: Types.ObjectId | null;
+  parent?: TArticleCategoryPopulated | null;
   layout?: string;
   seo?: TArticleCategorySEO;
-  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type TArticleCategoryTree = TArticleCategory & {
-  _id: string;
   children?: TArticleCategoryTree[];
 };
 
-export interface TArticleCategoryDocument
-  extends TArticleCategory,
-    Document {
-  _id: Types.ObjectId;
-  softDelete(): Promise<TArticleCategoryDocument | null>;
-}
-
-export type TArticleCategoryModel = Model<TArticleCategoryDocument> & {
-  isCategoryExist(_id: string): Promise<TArticleCategoryDocument | null>;
+export type TArticleCategoryResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TArticleCategory;
 };
 
+export type TArticleCategoriesResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TArticleCategory[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+};

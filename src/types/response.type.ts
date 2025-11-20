@@ -1,27 +1,21 @@
-export type Response<T = unknown> = {
-  success?: boolean;
+export type TResponse<T> = {
+  status: number;
+  success: boolean;
   message?: string;
-  status?: number;
-  data?: T;
-  meta?: {
-    total?: number;
-    page?: number;
-    limit?: number;
-    statistics?: Record<string, number>;
-    [key: string]: unknown;
-  };
+  data: T;
+  meta?: Record<string, unknown>;
 };
 
-export type ErrorSource = {
-  path: string;
+export type TErrorSources = {
+  path: string | number;
   message: string;
-};
+}[];
 
-export type ErrorResponse = {
+export type TErrorResponse = {
   success: false;
   status: number;
   message: string;
-  sources?: ErrorSource[];
+  sources?: TErrorSources;
   error?: {
     status: number;
     name: string;

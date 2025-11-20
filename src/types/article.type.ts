@@ -1,12 +1,22 @@
-import { Document, Model, Types } from "mongoose";
+// Frontend types with populated data (for API responses)
 
-export type TStatus = "draft" | "pending" | "published" | "archived";
+export type TArticleStatus = 'draft' | 'pending' | 'published' | 'archived';
 
-type Ref = {
-  _id: Types.ObjectId;
-} & Record<string, any>;
+export type TUserPopulated = {
+  _id: string;
+  name: string;
+  email: string;
+  image?: string;
+};
+
+export type TArticleCategoryPopulated = {
+  _id: string;
+  name: string;
+  slug: string;
+};
 
 export type TArticle = {
+  _id: string;
   name: string;
   slug: string;
   description?: string;
@@ -14,23 +24,34 @@ export type TArticle = {
   thumbnail?: string;
   images?: string[];
   tags?: string[];
-  category: Types.ObjectId | Ref;
-  author: Types.ObjectId | Ref;
-  collaborators?: (Types.ObjectId | Ref)[];
-  status: TStatus;
+  category: TArticleCategoryPopulated;
+  author: TUserPopulated;
+  collaborators?: TUserPopulated[];
+  status: TArticleStatus;
   is_featured: boolean;
   is_premium: boolean;
-  published_at?: Date;
-  expired_at?: Date;
+  published_at?: string;
+  expired_at?: string;
   layout?: string;
-  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
-export interface TArticleDocument extends TArticle, Document {
-  _id: Types.ObjectId;
-  softDelete(): Promise<TArticleDocument | null>;
-}
+export type TArticleResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TArticle;
+};
 
-export type TArticleModel = Model<TArticleDocument> & {
-  isArticleExist(_id: string): Promise<TArticleDocument | null>;
+export type TArticlesResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TArticle[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
 };

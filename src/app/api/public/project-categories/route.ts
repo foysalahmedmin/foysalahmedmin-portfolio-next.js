@@ -1,5 +1,5 @@
 import connectDB from "@/lib/db";
-import ProjectCategory from "@/models/project-category.model";
+import ProjectCategory from "@/app/api/admin/project-categories/project-category.model";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {

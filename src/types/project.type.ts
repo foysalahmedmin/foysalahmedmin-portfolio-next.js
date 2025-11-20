@@ -1,17 +1,27 @@
-import { Document, Model, Types } from "mongoose";
+// Frontend types with populated data (for API responses)
 
-export type TStatus =
-  | "planned"
-  | "in_progress"
-  | "on_hold"
-  | "completed"
-  | "cancelled";
+export type TProjectStatus =
+  | 'planned'
+  | 'in_progress'
+  | 'on_hold'
+  | 'completed'
+  | 'cancelled';
 
-type Ref<T extends string = string> = {
-  _id: Types.ObjectId;
-} & Record<string, any>;
+export type TUserPopulated = {
+  _id: string;
+  name: string;
+  email: string;
+  image?: string;
+};
+
+export type TProjectCategoryPopulated = {
+  _id: string;
+  name: string;
+  slug: string;
+};
 
 export type TProject = {
+  _id: string;
   name: string;
   slug: string;
   description?: string;
@@ -19,24 +29,35 @@ export type TProject = {
   thumbnail?: string;
   images?: string[];
   tags?: string[];
-  category: Types.ObjectId | Ref;
-  author: Types.ObjectId | Ref;
-  collaborators?: (Types.ObjectId | Ref)[];
-  client?: Types.ObjectId | Ref;
-  status: TStatus;
+  category: TProjectCategoryPopulated;
+  author: TUserPopulated;
+  collaborators?: TUserPopulated[];
+  client?: TUserPopulated;
+  status: TProjectStatus;
   is_featured: boolean;
   is_premium: boolean;
-  started_at?: Date;
-  ended_at?: Date;
+  started_at?: string;
+  ended_at?: string;
   layout?: string;
-  is_deleted?: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
-export interface TProjectDocument extends TProject, Document {
-  _id: Types.ObjectId;
-  softDelete(): Promise<TProjectDocument | null>;
-}
+export type TProjectResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TProject;
+};
 
-export type TProjectModel = Model<TProjectDocument> & {
-  isProjectExist(_id: string): Promise<TProjectDocument | null>;
+export type TProjectsResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TProject[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
 };
