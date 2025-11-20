@@ -44,7 +44,7 @@ export const auth = (...roles: (TRole | 'guest')[]) => {
     try {
       decoded = jwt.verify(
         token,
-        ENV.jwtAccessSecret,
+        ENV.jwt_access_secret,
       ) as JwtPayload;
     } catch (err) {
       if (err instanceof TokenExpiredError) {

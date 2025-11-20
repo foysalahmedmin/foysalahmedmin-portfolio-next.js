@@ -1,7 +1,7 @@
 import { ENV } from '@/config';
 import mongoose from 'mongoose';
 
-const MONGODB_URI = ENV.databaseUrl;
+const MONGODB_URI = ENV.database_url;
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable');

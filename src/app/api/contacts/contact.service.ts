@@ -49,7 +49,7 @@ export const createContact = async (payload: {
   const contact = await Contact.create(payload);
 
   // Send email notification to admin
-  const adminEmail = ENV.authUserEmail;
+  const adminEmail = ENV.auth_user_email;
   const emailSubject = `New Contact Form Submission: ${payload.subject}`;
   const emailText = `You have received a new contact form submission.\n\nName: ${payload.name}\nEmail: ${payload.email}\nSubject: ${payload.subject}\nMessage: ${payload.message}`;
   const emailHtml = `
