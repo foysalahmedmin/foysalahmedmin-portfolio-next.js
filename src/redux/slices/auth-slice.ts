@@ -1,40 +1,42 @@
-import type { TUserState } from "@/types/state.type";
+import type { TAuthState } from "@/types/state.type";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 
-const getInitialUser = (): TUserState => {
+const LOCAL_STORAGE_KEY = "auth";
+
+const getInitialAuth = (): TAuthState => {
   try {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : { is_authenticated: false };
+    const auth = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return auth ? JSON.parse(auth) : { is_authenticated: false };
   } catch (error) {
     console.error("Error parsing user from localStorage", error);
     return { is_authenticated: false };
   }
 };
 
-const initialState: TUserState = getInitialUser();
+const initialState: TAuthState = getInitialAuth();
 
-export const userSlice = createSlice({
-  name: "user",
+export const authSlice = createSlice({
+  name: "auth",
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<TUserState>) => {
-      const user = action.payload;
-      if (user?.token) {
+    setAuth: (state, action: PayloadAction<TAuthState>) => {
+      const auth = action.payload;
+      if (auth?.token) {
         localStorage.setItem(
-          "user",
-          JSON.stringify({ ...user, is_authenticated: true }),
+          LOCAL_STORAGE_KEY,
+          JSON.stringify({ ...auth, is_authenticated: true }),
         );
-        return { ...user, is_authenticated: true };
+        return { ...auth, is_authenticated: true };
       }
       return state;
     },
-    clearUser: () => {
-      localStorage.removeItem("user");
+    clearAuth: () => {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
       return { is_authenticated: false };
     },
   },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
-export default userSlice.reducer;
+export const { setAuth, clearAuth } = authSlice.actions;
+export default authSlice.reducer;

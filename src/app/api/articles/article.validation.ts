@@ -19,41 +19,17 @@ export const createArticleSchema = z.object({
   }),
 });
 
-    content: z.string().min(1).optional(),
-    thumbnail: z.string().optional(),
-    images: z.array(z.string()).optional(),
-    tags: z.array(z.string()).optional(),
-    category: z.string().min(1).optional(),
-    collaborators: z.array(z.string()).optional(),
-    status: z.enum(['draft', 'pending', 'published', 'archived']).optional(),
-    is_featured: z.boolean().optional(),
-    is_premium: z.boolean().optional(),
-    published_at: z.string().datetime().optional(),
-    expired_at: z.string().datetime().optional(),
-    layout: z.string().optional(),
-  }),
-});
-
 const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
   message: 'Invalid ID format',
 });
 
 export const updateArticlesSchema = z.object({
   body: z.object({
-    ids: z
-      .array(idSchema, {
-        required_error: 'At least one article ID is required',
-        invalid_type_error: 'Article IDs must be an array of strings',
-      })
-      .nonempty('At least one article ID is required'),
+    ids: z.array(idSchema).min(1, 'At least one article ID is required'),
     status: z.enum(['draft', 'pending', 'published', 'archived']).optional(),
     is_featured: z.boolean().optional(),
     category: z.string().min(1).optional(),
   }),
-});
-
-const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
-  message: 'Invalid ID format',
 });
 
 export const updateArticleByIdSchema = z.object({
