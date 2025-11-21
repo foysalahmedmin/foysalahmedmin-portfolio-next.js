@@ -4,7 +4,6 @@ export type TStatus = 'draft' | 'pending' | 'published' | 'archived';
 
 export type TArticle = {
   name: string;
-  slug: string;
   description?: string;
   content: string;
   thumbnail?: string;

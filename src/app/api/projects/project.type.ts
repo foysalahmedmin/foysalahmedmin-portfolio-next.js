@@ -9,7 +9,6 @@ export type TStatus =
 
 export type TProject = {
   name: string;
-  slug: string;
   description?: string;
   content: string;
   thumbnail?: string;

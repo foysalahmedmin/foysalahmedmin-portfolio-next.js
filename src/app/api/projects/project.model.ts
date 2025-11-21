@@ -12,13 +12,6 @@ const projectSchema = new Schema<TProjectDocument>(
       required: true,
       trim: true,
     },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
     description: {
       type: String,
       trim: true,
