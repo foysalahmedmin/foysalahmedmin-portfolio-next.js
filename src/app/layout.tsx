@@ -26,14 +26,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
       <script
           dangerouslySetInnerHTML={{
             __html: `
                 (function () {
                   try {
-                    var raw = localStorage.getItem('settings');
+                    var raw = localStorage.getItem('setting');
                     var s = raw ? JSON.parse(raw) : null;
                     var root = document.documentElement;
 

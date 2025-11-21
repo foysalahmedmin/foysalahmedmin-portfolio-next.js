@@ -1,39 +1,18 @@
-import { Document, Model, Types } from "mongoose";
-import { Response } from "./response.type";
-
-export type TRole =
-  | "super-admin"
-  | "admin"
-  | "editor"
-  | "author"
-  | "contributor"
-  | "subscriber"
-  | "user";
+import { TRole } from "./jsonwebtoken.type";
+import type { TResponse } from "./response.type";
 
 export type TStatus = "in-progress" | "blocked";
 
 export type TUser = {
+  _id: string;
   image?: string;
   name: string;
   email: string;
-  password: string;
   password_changed_at?: Date;
   role: TRole;
   status: TStatus;
-  is_verified: boolean;
-  is_deleted: boolean;
+  is_verified?: boolean;
 };
 
-export interface TUserDocument extends TUser, Document {
-  _id: Types.ObjectId;
-  softDelete(): Promise<TUserDocument | null>;
-  isPasswordChanged(jwtTimestamp: number): boolean;
-}
-
-export type TUserModel = Model<TUserDocument> & {
-  isUserExist(_id: string): Promise<TUserDocument | null>;
-  isUserExistByEmail(email: string): Promise<TUserDocument | null>;
-};
-
-export type TUserResponse = Response<TUser>;
-export type TUsersResponse = Response<TUser[]>;
+export type TUserResponse = TResponse<TUser>;
+export type TUsersResponse = TResponse<TUser[]>;
