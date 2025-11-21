@@ -186,7 +186,10 @@ export class Fetch {
   ): Promise<FetchResponse<T>> {
     const processedConfig = await this.processRequest({
       url,
-      options,
+      options: {
+        ...options,
+        credentials: 'include', // ✅ Add credentials for cookie support
+      },
     });
 
     const fullUrl = this.baseURL + processedConfig.url;
