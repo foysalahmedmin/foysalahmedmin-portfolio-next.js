@@ -1,10 +1,10 @@
 import connectDB from '@/lib/db';
 import Contact from './contact.model';
-import AppError from '@/builder/AppError';
-import AppQuery from '@/builder/AppQuery';
+import AppError from '@/builder/app-error';
+import AppQuery from '@/builder/app-query';
 import httpStatus from 'http-status';
 import { TContactDocument } from './contact.type';
-import { sendEmail } from '@/utils/sendEmail';
+import { sendEmail } from '@/utils/send-email';
 import { ENV } from '@/config';
 
 export const getContacts = async (queryParams: Record<string, unknown>) => {

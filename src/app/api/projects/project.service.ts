@@ -1,10 +1,10 @@
 import connectDB from '@/lib/db';
 import Project from './project.model';
-import AppError from '@/builder/AppError';
-import AppQuery from '@/builder/AppQuery';
+import AppError from '@/builder/app-error';
+import AppQuery from '@/builder/app-query';
 import httpStatus from 'http-status';
 import { TProjectDocument } from './project.type';
-import { deleteFile, deleteFiles } from '@/utils/fileUtils';
+import { deleteFile, deleteFiles } from '@/utils/file-utils';
 
 export const getProjects = async (queryParams: Record<string, unknown>) => {
   await connectDB();

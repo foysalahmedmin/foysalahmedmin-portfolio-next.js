@@ -1,6 +1,6 @@
 "use client";
 
-import useClassIntersectionObserver from "@/hooks/observers/useClassIntersectionObserver";
+import useClassIntersectionObserver from "@/hooks/observers/use-class-intersection-observer";
 
 const AnimationApplier = () => {
   useClassIntersectionObserver({

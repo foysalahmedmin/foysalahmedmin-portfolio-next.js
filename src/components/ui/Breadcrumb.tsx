@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import Icon from "./Icon";
+import Icon from "./icon";
 
 export type TBreadcrumbs = {
   index: number;

@@ -1,10 +1,10 @@
 import connectDB from '@/lib/db';
 import Article from './article.model';
-import AppError from '@/builder/AppError';
-import AppQuery from '@/builder/AppQuery';
+import AppError from '@/builder/app-error';
+import AppQuery from '@/builder/app-query';
 import httpStatus from 'http-status';
 import { TArticleDocument } from './article.type';
-import { deleteFile, deleteFiles } from '@/utils/fileUtils';
+import { deleteFile, deleteFiles } from '@/utils/file-utils';
 
 export const getArticles = async (queryParams: Record<string, unknown>) => {
   await connectDB();

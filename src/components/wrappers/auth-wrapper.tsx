@@ -1,7 +1,7 @@
 "use client";
 
-import Loading from "@/components/partials/Loading";
-import useUser from "@/hooks/states/useUser";
+import Loading from "@/components/partials/loading";
+import useUser from "@/hooks/states/use-user";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 

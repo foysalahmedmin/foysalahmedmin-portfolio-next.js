@@ -1,9 +1,9 @@
-import AnimationApplier from "@/components/appliers/AnimationApplier";
+import AnimationApplier from "@/components/appliers/animation-applier";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import React from "react";
 import "./globals.css";
-import ReduxProvider from "@/providers/ReduxProvider";
+import ReduxProvider from "@/providers/redux-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

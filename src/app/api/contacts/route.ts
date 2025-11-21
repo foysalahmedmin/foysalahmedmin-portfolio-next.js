@@ -1,5 +1,5 @@
 import { validation } from '@/middleware/validation.middleware';
-import { errorHandler } from '@/utils/errorHandler';
+import { errorHandler } from '@/utils/error-handler';
 import * as ContactController from './contact.controller';
 import * as ContactValidation from './contact.validation';
 import { NextRequest } from 'next/server';
