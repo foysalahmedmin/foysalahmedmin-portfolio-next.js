@@ -292,8 +292,5 @@ const ModalCloseTrigger: React.FC<ButtonProps> = ({
 };
 
 
-// Export components separately (shadcn style)
-export { ModalRoot as Modal, ModalBackdrop, ModalContent, ModalHeader, ModalTitle, ModalBody, ModalFooter, ModalTrigger, ModalCloseTrigger as Close };
-
-// Export variants and hooks
+export { ModalRoot as Modal, ModalBackdrop, ModalContent, ModalHeader, ModalTitle, ModalBody, ModalFooter, ModalTrigger, ModalCloseTrigger};
 export { modalBackdropVariants , modalContentVariants, modalVariants, useModal, type ModalBackdropProps, type ModalContentProps , type ModalProps };
