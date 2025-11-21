@@ -1,8 +1,13 @@
-import type { User } from "./model";
+import { TUser } from "./user.type";
 
-export interface UserState {
+export type TUserState = {
   token?: string;
-  info?: User;
-  isAuthenticated?: boolean;
-  [key: string]: unknown;
-}
+  info?: TUser;
+  is_authenticated?: boolean;
+};
+
+export type TSettingState = {
+  theme?: "light" | "dark" | "system" | "semi-dark";
+  direction?: "ltr" | "rtl";
+  language?: "en" | "bn";
+};
