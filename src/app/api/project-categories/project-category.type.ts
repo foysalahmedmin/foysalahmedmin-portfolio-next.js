@@ -2,16 +2,9 @@ import { Document, Model, Types } from 'mongoose';
 
 export type TProjectCategoryStatus = 'active' | 'inactive';
 
-export type TProjectCategorySEO = {
-  title?: string;
-  description?: string;
-  keywords?: string[];
-};
-
 export type TProjectCategory = {
   sequence: number;
   icon?: string;
-  thumbnail?: string;
   name: string;
   slug: string;
   description?: string;
@@ -19,7 +12,6 @@ export type TProjectCategory = {
   tags: string[];
   parent?: Types.ObjectId | null;
   layout?: string;
-  seo?: TProjectCategorySEO;
   is_deleted?: boolean;
 };
 

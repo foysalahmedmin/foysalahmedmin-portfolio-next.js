@@ -14,9 +14,7 @@ const projectCategorySchema = new Schema<TProjectCategoryDocument>(
     icon: {
       type: String,
       default: "blocks",
-    },
-    thumbnail: {
-      type: String,
+      trim: true,
     },
     name: {
       type: String,
@@ -58,11 +56,6 @@ const projectCategorySchema = new Schema<TProjectCategoryDocument>(
     layout: {
       type: String,
       default: "default",
-    },
-    seo: {
-      title: String,
-      description: String,
-      keywords: [String],
     },
     is_deleted: { type: Boolean, default: false, select: false },
   },

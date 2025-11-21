@@ -57,6 +57,7 @@ export const getArticleCategoryById = catchAsync(
 export const createArticleCategory = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
+
     const category = await ArticleCategoryService.createArticleCategory(body);
 
     return sendResponse({
@@ -74,6 +75,7 @@ export const updateArticleCategoryBySlug = catchAsync(
     { params }: { params: { slug: string } },
   ) => {
     const body = req.parsedBody || (await req.json());
+
     const category = await ArticleCategoryService.updateArticleCategoryBySlug(
       params.slug,
       body,

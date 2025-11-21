@@ -2,16 +2,9 @@ import { Document, Model, Types } from 'mongoose';
 
 export type TArticleCategoryStatus = 'active' | 'inactive';
 
-export type TArticleCategorySEO = {
-  title?: string;
-  description?: string;
-  keywords?: string[];
-};
-
 export type TArticleCategory = {
   sequence: number;
   icon?: string;
-  thumbnail?: string;
   name: string;
   slug: string;
   description?: string;
@@ -19,7 +12,6 @@ export type TArticleCategory = {
   tags: string[];
   parent?: Types.ObjectId | null;
   layout?: string;
-  seo?: TArticleCategorySEO;
   is_deleted?: boolean;
 };
 

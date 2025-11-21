@@ -9,18 +9,10 @@ export const createProjectCategorySchema = z.object({
     sequence: z.number().min(1).max(100),
     description: z.string().max(500).optional(),
     icon: z.string().optional(),
-    thumbnail: z.string().optional(),
     parent: z.string().optional().nullable(),
     status: z.enum(['active', 'inactive']).default('active'),
     tags: z.array(z.string()).default([]),
     layout: z.string().default('default'),
-    seo: z
-      .object({
-        title: z.string().optional(),
-        description: z.string().optional(),
-        keywords: z.array(z.string()).optional(),
-      })
-      .optional(),
   }),
 });
 
@@ -34,18 +26,10 @@ export const updateProjectCategorySchema = z.object({
     sequence: z.number().min(1).max(100).optional(),
     description: z.string().max(500).optional(),
     icon: z.string().optional(),
-    thumbnail: z.string().optional(),
     parent: z.string().optional().nullable(),
     status: z.enum(['active', 'inactive']).optional(),
     tags: z.array(z.string()).optional(),
     layout: z.string().optional(),
-    seo: z
-      .object({
-        title: z.string().optional(),
-        description: z.string().optional(),
-        keywords: z.array(z.string()).optional(),
-      })
-      .optional(),
   }),
 });
 
@@ -73,18 +57,10 @@ export const updateProjectCategoryByIdSchema = z.object({
     sequence: z.number().min(1).max(100).optional(),
     description: z.string().max(500).optional(),
     icon: z.string().optional(),
-    thumbnail: z.string().optional(),
     parent: z.string().optional().nullable(),
     status: z.enum(['active', 'inactive']).optional(),
     tags: z.array(z.string()).optional(),
     layout: z.string().optional(),
-    seo: z
-      .object({
-        title: z.string().optional(),
-        description: z.string().optional(),
-        keywords: z.array(z.string()).optional(),
-      })
-      .optional(),
   }),
 });
 

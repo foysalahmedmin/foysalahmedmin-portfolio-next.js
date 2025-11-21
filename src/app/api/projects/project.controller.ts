@@ -36,10 +36,18 @@ export const getProjectById = catchAsync(
 );
 
 export const createProject = catchAsync(
-  async (req: AuthRequest & { parsedBody?: any }) => {
+  async (req: AuthRequest & { parsedBody?: any; savedFiles?: Record<string, string[]> }) => {
     const body = req.parsedBody || (await req.json());
+    const savedFiles = req.savedFiles as Record<string, string[]> | undefined;
+
+    // Get uploaded file paths
+    const thumbnail = savedFiles?.thumbnail?.[0] || body.thumbnail || '';
+    const images = savedFiles?.images || body.images || [];
+
     const project = await ProjectService.createProject({
       ...body,
+      thumbnail,
+      images,
       author: req.user?._id || req.user?.id,
     });
 
@@ -54,11 +62,43 @@ export const createProject = catchAsync(
 
 export const updateProjectById = catchAsync(
   async (
-    req: AuthRequest & { parsedBody?: any },
+    req: AuthRequest & { parsedBody?: any; savedFiles?: Record<string, string[]> },
     { params }: { params: { id: string } },
   ) => {
     const body = req.parsedBody || (await req.json());
-    const project = await ProjectService.updateProjectById(params.id, body);
+    const savedFiles = req.savedFiles as Record<string, string[]> | undefined;
+
+    // Get current project to handle file deletion
+    const currentProject = await ProjectService.getProjectById(params.id);
+
+    // Handle file updates
+    let thumbnail = body.thumbnail;
+    let images = body.images;
+
+    // If new thumbnail uploaded, use it (old one will be deleted in service)
+    if (savedFiles?.thumbnail?.[0]) {
+      thumbnail = savedFiles.thumbnail[0];
+    }
+
+    // If thumbnail is explicitly set to empty/null, delete old one
+    if (body.thumbnail === '' || body.thumbnail === null) {
+      thumbnail = '';
+    }
+
+    // Handle images array
+    if (savedFiles?.images && savedFiles.images.length > 0) {
+      // If new images uploaded, use them
+      images = savedFiles.images;
+    } else if (Array.isArray(body.images)) {
+      // Use provided images array (may contain paths to keep or "DELETE" markers)
+      images = body.images;
+    }
+
+    const project = await ProjectService.updateProjectById(params.id, {
+      ...body,
+      thumbnail,
+      images,
+    }, currentProject);
 
     return sendResponse({
       status: httpStatus.OK,

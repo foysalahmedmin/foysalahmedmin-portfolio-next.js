@@ -1,9 +1,9 @@
-import { TReview, TReviewDocument, TReviewModel } from "@/types/review.type";
+import { TReview, TReviewDocument, TReviewModel } from "./review.type";
 import mongoose, { Query, Schema } from "mongoose";
 
 const reviewSchema = new Schema<TReviewDocument>(
   {
-    user: {
+    author: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -66,7 +66,7 @@ const reviewSchema = new Schema<TReviewDocument>(
   }
 );
 
-reviewSchema.index({ target: 1, target_model: 1, user: 1 }, { unique: true });
+reviewSchema.index({ target: 1, target_model: 1, author: 1 }, { unique: true });
 
 // toJSON override to remove sensitive fields from output
 reviewSchema.methods.toJSON = function () {
