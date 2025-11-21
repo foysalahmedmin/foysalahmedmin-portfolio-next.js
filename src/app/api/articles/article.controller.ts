@@ -22,19 +22,6 @@ export const getArticles = catchAsync(async (req: AuthRequest | Request) => {
   });
 });
 
-export const getArticleBySlug = catchAsync(
-  async (req: AuthRequest | Request, { params }: { params: { slug: string } }) => {
-    const article = await ArticleService.getArticleBySlug(params.slug);
-
-    return sendResponse({
-      status: httpStatus.OK,
-      success: true,
-      message: 'Article retrieved successfully',
-      data: article,
-    });
-  },
-);
-
 export const getArticleById = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
     const article = await ArticleService.getArticleById(params.id);
@@ -65,23 +52,6 @@ export const createArticle = catchAsync(
   },
 );
 
-export const updateArticleBySlug = catchAsync(
-  async (
-    req: AuthRequest & { parsedBody?: any },
-    { params }: { params: { slug: string } },
-  ) => {
-    const body = req.parsedBody || (await req.json());
-    const article = await ArticleService.updateArticleBySlug(params.slug, body);
-
-    return sendResponse({
-      status: httpStatus.OK,
-      success: true,
-      message: 'Article updated successfully',
-      data: article,
-    });
-  },
-);
-
 export const updateArticleById = catchAsync(
   async (
     req: AuthRequest & { parsedBody?: any },
@@ -102,26 +72,13 @@ export const updateArticleById = catchAsync(
 export const updateArticles = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
-    const { slugs, ...payload } = body;
-    const result = await ArticleService.updateArticles(slugs, payload);
+    const { ids, ...payload } = body;
+    const result = await ArticleService.updateArticles(ids, payload);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
       message: 'Articles updated successfully',
       data: result,
-    });
-  },
-);
-
-export const deleteArticleBySlug = catchAsync(
-  async (req: AuthRequest, { params }: { params: { slug: string } }) => {
-    await ArticleService.deleteArticleBySlug(params.slug);
-
-    return sendResponse({
-      status: httpStatus.OK,
-      success: true,
-      message: 'Article deleted successfully',
-      data: null,
     });
   },
 );
@@ -134,18 +91,6 @@ export const deleteArticleById = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: 'Article deleted successfully',
-      data: null,
-    });
-  },
-);
-
-export const deleteArticlePermanent = catchAsync(
-  async (req: AuthRequest, { params }: { params: { slug: string } }) => {
-    await ArticleService.deleteArticlePermanent(params.slug);
-    return sendResponse({
-      status: httpStatus.OK,
-      success: true,
-      message: 'Article permanently deleted successfully',
       data: null,
     });
   },
@@ -166,14 +111,14 @@ export const deleteArticlePermanentById = catchAsync(
 export const deleteArticles = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
-    const { slugs } = body;
-    const result = await ArticleService.deleteArticles(slugs);
+    const { ids } = body;
+    const result = await ArticleService.deleteArticles(ids);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
       message: `${result.count} articles deleted successfully`,
       data: {
-        not_found_slugs: result.not_found_slugs,
+        not_found_ids: result.not_found_ids,
       },
     });
   },
@@ -182,28 +127,15 @@ export const deleteArticles = catchAsync(
 export const deleteArticlesPermanent = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
-    const { slugs } = body;
-    const result = await ArticleService.deleteArticlesPermanent(slugs);
+    const { ids } = body;
+    const result = await ArticleService.deleteArticlesPermanent(ids);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
       message: `${result.count} articles permanently deleted successfully`,
       data: {
-        not_found_slugs: result.not_found_slugs,
+        not_found_ids: result.not_found_ids,
       },
-    });
-  },
-);
-
-export const restoreArticle = catchAsync(
-  async (req: AuthRequest, { params }: { params: { slug: string } }) => {
-    const { slug } = params;
-    const result = await ArticleService.restoreArticle(slug);
-    return sendResponse({
-      status: httpStatus.OK,
-      success: true,
-      message: 'Article restored successfully',
-      data: result,
     });
   },
 );
@@ -224,14 +156,14 @@ export const restoreArticleById = catchAsync(
 export const restoreArticles = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
-    const { slugs } = body;
-    const result = await ArticleService.restoreArticles(slugs);
+    const { ids } = body;
+    const result = await ArticleService.restoreArticles(ids);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
       message: `${result.count} articles restored successfully`,
       data: {
-        not_found_slugs: result.not_found_slugs,
+        not_found_ids: result.not_found_ids,
       },
     });
   },

@@ -1,11 +1,8 @@
 import { z } from 'zod';
 
-const slugSchema = z.string().min(1).max(100);
-
 export const createProjectSchema = z.object({
   body: z.object({
     name: z.string().min(1),
-    slug: z.string().min(1),
     content: z.string().min(1),
     category: z.string().min(1),
     description: z.string().max(300).optional(),
@@ -23,14 +20,6 @@ export const createProjectSchema = z.object({
   }),
 });
 
-export const updateProjectSchema = z.object({
-  params: z.object({
-    slug: slugSchema,
-  }),
-  body: z.object({
-    name: z.string().min(1).optional(),
-    slug: z.string().min(1).optional(),
-    description: z.string().max(300).optional(),
     content: z.string().min(1).optional(),
     thumbnail: z.string().optional(),
     images: z.array(z.string()).optional(),
@@ -47,14 +36,18 @@ export const updateProjectSchema = z.object({
   }),
 });
 
+const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
+  message: 'Invalid ID format',
+});
+
 export const updateProjectsSchema = z.object({
   body: z.object({
-    slugs: z
-      .array(slugSchema, {
-        required_error: 'At least one project slug is required',
-        invalid_type_error: 'Project slugs must be an array of strings',
+    ids: z
+      .array(idSchema, {
+        required_error: 'At least one project ID is required',
+        invalid_type_error: 'Project IDs must be an array of strings',
       })
-      .nonempty('At least one project slug is required'),
+      .nonempty('At least one project ID is required'),
     status: z.enum(['planned', 'in_progress', 'on_hold', 'completed', 'cancelled']).optional(),
     is_featured: z.boolean().optional(),
     category: z.string().min(1).optional(),
@@ -71,7 +64,6 @@ export const updateProjectByIdSchema = z.object({
   }),
   body: z.object({
     name: z.string().min(1).optional(),
-    slug: z.string().min(1).optional(),
     description: z.string().max(300).optional(),
     content: z.string().min(1).optional(),
     thumbnail: z.string().optional(),
@@ -89,12 +81,6 @@ export const updateProjectByIdSchema = z.object({
   }),
 });
 
-export const projectOperationValidationSchema = z.object({
-  params: z.object({
-    slug: slugSchema,
-  }),
-});
-
 export const projectByIdOperationValidationSchema = z.object({
   params: z.object({
     id: idSchema,
@@ -103,6 +89,6 @@ export const projectByIdOperationValidationSchema = z.object({
 
 export const projectsOperationValidationSchema = z.object({
   body: z.object({
-    slugs: z.array(slugSchema).nonempty('At least one project slug is required'),
+    ids: z.array(idSchema).nonempty('At least one project ID is required'),
   }),
 });

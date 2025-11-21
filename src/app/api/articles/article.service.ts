@@ -14,7 +14,7 @@ export const getArticles = async (queryParams: Record<string, unknown>) => {
   );
 
   const result = await query
-    .search(['name', 'slug', 'description'])
+    .search(['name', 'description'])
     .filter(['status', 'category', 'author', 'is_featured'])
     .sort(['name', 'status', 'published_at'])
     .paginate()
@@ -38,22 +38,6 @@ export const getArticles = async (queryParams: Record<string, unknown>) => {
   };
 };
 
-export const getArticleBySlug = async (slug: string) => {
-  await connectDB();
-
-  const article = await Article.findOne({ slug })
-    .populate('author', 'name email image')
-    .populate('category', 'name slug')
-    .populate('collaborators', 'name email')
-    .lean();
-
-  if (!article) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
-  }
-
-  return article;
-};
-
 export const getArticleById = async (id: string) => {
   await connectDB();
 
@@ -72,7 +56,6 @@ export const getArticleById = async (id: string) => {
 
 export const createArticle = async (payload: {
   name: string;
-  slug: string;
   content: string;
   category: string;
   author: string;
@@ -89,15 +72,6 @@ export const createArticle = async (payload: {
   layout?: string;
 }) => {
   await connectDB();
-
-  const existingArticle = await Article.findOne({ slug: payload.slug });
-
-  if (existingArticle) {
-    throw new AppError(
-      httpStatus.CONFLICT,
-      'Article with this slug already exists',
-    );
-  }
 
   const status = payload.status || 'draft';
   const published_at =
@@ -125,73 +99,10 @@ export const createArticle = async (payload: {
     .populate('collaborators', 'name email');
 };
 
-export const updateArticleBySlug = async (
-  slug: string,
-  payload: Partial<{
-    name: string;
-    slug: string;
-    description: string;
-    content: string;
-    thumbnail: string;
-    images: string[];
-    tags: string[];
-    category: string;
-    collaborators: string[];
-    status: 'draft' | 'pending' | 'published' | 'archived';
-    is_featured: boolean;
-    is_premium: boolean;
-    published_at: Date | string;
-    expired_at: Date | string;
-    layout: string;
-  }>,
-) => {
-  await connectDB();
-
-  const article = await Article.findOne({ slug });
-
-  if (!article) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
-  }
-
-  // Check if new slug conflicts with existing article
-  if (payload.slug && payload.slug !== slug) {
-    const existingArticle = await Article.findOne({ slug: payload.slug });
-    if (existingArticle) {
-      throw new AppError(
-        httpStatus.CONFLICT,
-        'Article with this slug already exists',
-      );
-    }
-  }
-
-  // Handle date conversions
-  const updateData: any = { ...payload };
-  if (payload.published_at) {
-    updateData.published_at = new Date(payload.published_at);
-  }
-  if (payload.expired_at) {
-    updateData.expired_at = new Date(payload.expired_at);
-  }
-
-  // Ensure published_at present if status set to published
-  if (payload.status === 'published' && !updateData.published_at) {
-    updateData.published_at = new Date();
-  }
-
-  Object.assign(article, updateData);
-  await article.save();
-
-  return await article
-    .populate('author', 'name email')
-    .populate('category', 'name slug')
-    .populate('collaborators', 'name email');
-};
-
 export const updateArticleById = async (
   id: string,
   payload: Partial<{
     name: string;
-    slug: string;
     description: string;
     content: string;
     thumbnail: string;
@@ -215,16 +126,6 @@ export const updateArticleById = async (
     throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
   }
 
-  // Check if new slug conflicts with existing article
-  if (payload.slug) {
-    const existingArticle = await Article.findOne({ slug: payload.slug });
-    if (existingArticle && existingArticle._id.toString() !== id) {
-      throw new AppError(
-        httpStatus.CONFLICT,
-        'Article with this slug already exists',
-      );
-    }
-  }
 
   // Handle date conversions
   const updateData: any = { ...payload };
@@ -250,7 +151,7 @@ export const updateArticleById = async (
 };
 
 export const updateArticles = async (
-  slugs: string[],
+  ids: string[],
   payload: Partial<{
     status: 'draft' | 'pending' | 'published' | 'archived';
     is_featured: boolean;
@@ -258,36 +159,22 @@ export const updateArticles = async (
   }>,
 ): Promise<{
   count: number;
-  not_found_slugs: string[];
+  not_found_ids: string[];
 }> => {
   await connectDB();
-  const articles = await Article.find({ slug: { $in: slugs } }).lean();
-  const foundSlugs = articles.map((article) => article.slug);
-  const notFoundSlugs = slugs.filter((slug) => !foundSlugs.includes(slug));
+  const articles = await Article.find({ _id: { $in: ids } }).lean();
+  const foundIds = articles.map((article) => article._id.toString());
+  const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
   const result = await Article.updateMany(
-    { slug: { $in: foundSlugs } },
+    { _id: { $in: foundIds } },
     { ...payload },
   );
 
   return {
     count: result.modifiedCount,
-    not_found_slugs: notFoundSlugs,
+    not_found_ids: notFoundIds,
   };
-};
-
-export const deleteArticleBySlug = async (slug: string) => {
-  await connectDB();
-
-  const article = await Article.findOne({ slug });
-
-  if (!article) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
-  }
-
-  await article.softDelete();
-
-  return null;
 };
 
 export const deleteArticleById = async (id: string) => {
@@ -304,16 +191,6 @@ export const deleteArticleById = async (id: string) => {
   return null;
 };
 
-export const deleteArticlePermanent = async (slug: string): Promise<void> => {
-  await connectDB();
-  const article = await Article.findOne({ slug }).setOptions({ bypassDeleted: true });
-  if (!article) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
-  }
-
-  await Article.findByIdAndDelete(article._id);
-};
-
 export const deleteArticlePermanentById = async (id: string): Promise<void> => {
   await connectDB();
   const article = await Article.findById(id).setOptions({ bypassDeleted: true });
@@ -325,61 +202,46 @@ export const deleteArticlePermanentById = async (id: string): Promise<void> => {
 };
 
 export const deleteArticles = async (
-  slugs: string[],
+  ids: string[],
 ): Promise<{
   count: number;
-  not_found_slugs: string[];
+  not_found_ids: string[];
 }> => {
   await connectDB();
-  const articles = await Article.find({ slug: { $in: slugs } }).lean();
-  const foundSlugs = articles.map((article) => article.slug);
-  const notFoundSlugs = slugs.filter((slug) => !foundSlugs.includes(slug));
+  const articles = await Article.find({ _id: { $in: ids } }).lean();
+  const foundIds = articles.map((article) => article._id.toString());
+  const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
   await Article.updateMany(
-    { slug: { $in: foundSlugs } },
+    { _id: { $in: foundIds } },
     { is_deleted: true },
   );
 
   return {
-    count: foundSlugs.length,
-    not_found_slugs: notFoundSlugs,
+    count: foundIds.length,
+    not_found_ids: notFoundIds,
   };
 };
 
 export const deleteArticlesPermanent = async (
-  slugs: string[],
+  ids: string[],
 ): Promise<{
   count: number;
-  not_found_slugs: string[];
+  not_found_ids: string[];
 }> => {
   await connectDB();
-  const articles = await Article.find({ slug: { $in: slugs } }).lean();
-  const foundSlugs = articles.map((article) => article.slug);
-  const notFoundSlugs = slugs.filter((slug) => !foundSlugs.includes(slug));
+  const articles = await Article.find({ _id: { $in: ids } }).lean();
+  const foundIds = articles.map((article) => article._id.toString());
+  const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await Article.deleteMany({ slug: { $in: foundSlugs } }).setOptions({
+  await Article.deleteMany({ _id: { $in: foundIds } }).setOptions({
     bypassDeleted: true,
   });
 
   return {
-    count: foundSlugs.length,
-    not_found_slugs: notFoundSlugs,
+    count: foundIds.length,
+    not_found_ids: notFoundIds,
   };
-};
-
-export const restoreArticle = async (slug: string) => {
-  await connectDB();
-  const article = await Article.findOneAndUpdate(
-    { slug, is_deleted: true },
-    { is_deleted: false },
-    { new: true },
-  );
-
-  if (!article) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Article not found or not deleted');
-  }
-
-  return article;
 };
 
 export const restoreArticleById = async (id: string) => {
@@ -398,23 +260,23 @@ export const restoreArticleById = async (id: string) => {
 };
 
 export const restoreArticles = async (
-  slugs: string[],
+  ids: string[],
 ): Promise<{
   count: number;
-  not_found_slugs: string[];
+  not_found_ids: string[];
 }> => {
   await connectDB();
   const result = await Article.updateMany(
-    { slug: { $in: slugs }, is_deleted: true },
+    { _id: { $in: ids }, is_deleted: true },
     { is_deleted: false },
   );
 
-  const restoredArticles = await Article.find({ slug: { $in: slugs } }).lean();
-  const restoredSlugs = restoredArticles.map((article) => article.slug);
-  const notFoundSlugs = slugs.filter((slug) => !restoredSlugs.includes(slug));
+  const restoredArticles = await Article.find({ _id: { $in: ids } }).lean();
+  const restoredIds = restoredArticles.map((article) => article._id.toString());
+  const notFoundIds = ids.filter((id) => !restoredIds.includes(id));
 
   return {
     count: result.modifiedCount,
-    not_found_slugs: notFoundSlugs,
+    not_found_ids: notFoundIds,
   };
 };

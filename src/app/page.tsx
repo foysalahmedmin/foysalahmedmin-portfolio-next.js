@@ -84,7 +84,7 @@ export default function Home() {
                     <h3 className="text-xl font-semibold mb-2">{project.name}</h3>
                     <p className="text-gray-600 mb-4 line-clamp-2">{project.description}</p>
                     <Link 
-                      href={`/projects/${project.slug}`}
+                      href={`/projects/${project._id}`}
                       className="text-blue-600 hover:underline"
                     >
                       View Project
@@ -146,7 +146,7 @@ export default function Home() {
                     <p className="text-gray-600 mb-4 line-clamp-2">{article.description}</p>
                     <div className="flex justify-between items-center">
                       <Link 
-                        href={`/articles/${article.slug}`}
+                        href={`/articles/${article._id}`}
                         className="text-blue-600 hover:underline"
                       >
                         Read More
