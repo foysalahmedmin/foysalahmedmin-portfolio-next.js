@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import Icon from "./icon";
+import { Icon } from "./icon";
 
 export type TBreadcrumbs = {
   index: number;
@@ -83,4 +83,5 @@ const Breadcrumb = ({ items }: TBreadcrumbProps) => {
   );
 };
 
-export default Breadcrumb;
+export { Breadcrumb, BreadcrumbItem, type TBreadcrumbProps as BreadcrumbProps };
+

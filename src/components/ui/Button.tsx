@@ -113,10 +113,5 @@ const ButtonText: React.FC<ComponentProps<"span">> = ({
   </span>
 );
 
-// Button Compound Component
-const Button = Object.assign(ButtonRoot, {
-  Icon: ButtonIcon,
-  Text: ButtonText,
-});
-
-export { Button, buttonVariants, type ButtonProps };
+export { ButtonRoot as Button, ButtonIcon, ButtonText };
+export { buttonVariants, type ButtonProps };
