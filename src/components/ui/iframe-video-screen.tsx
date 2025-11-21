@@ -35,4 +35,4 @@ const IframeVideScreen: React.FC<IframeVideoScreenProps> = ({
   );
 };
 
-export default IframeVideScreen;
+export { IframeVideScreen as IframeVideoScreen, type IframeVideoScreenProps }; 

@@ -462,27 +462,5 @@ const ArrowIcon = ({ direction }: { direction: "left" | "right" }) => (
   </svg>
 );
 
-// ----- Compound Export -----
-const Carousel = Object.assign(CarouselRoot, {
-  Content: CarouselContent,
-  Item: CarouselItem,
-  PreviousTrigger: CarouselPreviousTrigger,
-  NextTrigger: CarouselNextTrigger,
-  Pagination: CarouselPagination,
-  PaginationTrigger: CarouselPaginationTrigger,
-});
-
-export { Carousel, useCarousel };
-export type {
-  CarouselAutoplayConfig,
-  CarouselContentProps,
-  CarouselContextValue,
-  CarouselDirection,
-  CarouselItemProps,
-  CarouselOrientation,
-  CarouselPaginationProps,
-  CarouselPaginationTriggerProps,
-  CarouselRootProps,
-  CarouselTriggerProps
-};
-
+export { CarouselRoot as Carousel, CarouselContent, CarouselItem, CarouselPreviousTrigger, CarouselNextTrigger, CarouselPagination, CarouselPaginationTrigger };
+export { useCarousel, type CarouselAutoplayConfig, type CarouselContentProps, type CarouselContextValue, type CarouselDirection, type CarouselItemProps, type CarouselOrientation, type CarouselPaginationProps, type CarouselPaginationTriggerProps, type CarouselRootProps, type CarouselTriggerProps };

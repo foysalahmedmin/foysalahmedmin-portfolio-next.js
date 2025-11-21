@@ -59,7 +59,7 @@ const useTabs = (): TabsContextValue => {
   const context = useContext(TabsContext);
 
   if (!context) {
-    throw new Error("Tabs compound components must be used within <Tabs.Root>");
+    throw new Error("Tabs components must be used within <Tabs>");
   }
 
   return context;
@@ -265,36 +265,7 @@ const TabsItem = ({
   );
 };
 
-// Compound Component Structure using Object.assign
-type TabsComponent = ComponentType<TabsRootProps> & {
-  Root: ComponentType<TabsRootProps>;
-  List: ComponentType<TabsListProps>;
-  Trigger: ComponentType<TabsTriggerProps>;
-  Content: ComponentType<TabsContentProps>;
-  Item: ComponentType<TabsItemProps>;
-};
-
-const Tabs = TabsRoot as TabsComponent;
-
-// Assign compound components
-Object.assign(Tabs, {
-  Root: TabsRoot,
-  List: TabsList,
-  Trigger: TabsTrigger,
-  Content: TabsContent,
-  Item: TabsItem,
-});
-
-// Export everything
-export {
-  Tabs,
-  useTabs,
-  type TabsContentProps,
-  type TabsContextValue,
-  type TabsItemProps,
-  type TabsListProps,
-  type TabsRootProps,
-  type TabsTriggerProps,
-  type TabValue
-};
+// Export components separately (shadcn style)
+export { TabsRoot as Tabs, TabsList, TabsTrigger, TabsContent, TabsItem };
+export { useTabs, type TabsContentProps, type TabsContextValue, type TabsItemProps, type TabsListProps, type TabsRootProps, type TabsTriggerProps, type TabValue };
 

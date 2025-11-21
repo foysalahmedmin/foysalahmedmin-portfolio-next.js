@@ -1,4 +1,4 @@
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalTrigger, ModalBackdrop, ModalContent } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Play } from "lucide-react";
 import Link from "next/link";
@@ -32,7 +32,7 @@ const HeroSection: React.FC = () => {
         <div className="animate-fade-in mr-auto max-w-2xl space-y-12">
           {/* Modal Trigger */}
           <Modal>
-            <Modal.Trigger
+            <ModalTrigger
               shape="icon"
               variant="outline"
               className={cn(
@@ -43,10 +43,10 @@ const HeroSection: React.FC = () => {
                 className="size-10 transition-transform group-hover:scale-110"
                 strokeWidth={1}
               />
-            </Modal.Trigger>
+            </ModalTrigger>
 
-            <Modal.Backdrop>
-              <Modal.Content className="max-w-[90vw] border-none bg-transparent p-0 sm:max-w-[80vw] lg:max-w-[70vw]">
+            <ModalBackdrop>
+              <ModalContent className="max-w-[90vw] border-none bg-transparent p-0 sm:max-w-[80vw] lg:max-w-[70vw]">
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
                   <iframe
                     className="h-full w-full"
@@ -56,8 +56,8 @@ const HeroSection: React.FC = () => {
                     allowFullScreen
                   />
                 </div>
-              </Modal.Content>
-            </Modal.Backdrop>
+              </ModalContent>
+            </ModalBackdrop>
           </Modal>
 
           {/* Text */}

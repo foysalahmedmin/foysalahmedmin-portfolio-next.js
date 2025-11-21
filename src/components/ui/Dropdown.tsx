@@ -202,21 +202,5 @@ const DropdownTrigger: React.FC<ButtonProps> = ({ onClick, ...props }) => {
   );
 };
 
-// Dropdown Compound Component
-const Dropdown = Object.assign(DropdownRoot, {
-  Content: DropdownContent,
-  Item: DropdownItem,
-  Separator: DropdownSeparator,
-  Label: DropdownLabel,
-  Trigger: DropdownTrigger,
-});
-
-export {
-  Dropdown,
-  dropdownContentVariants,
-  dropdownVariants,
-  useDropdown,
-  type DropdownContentProps,
-  type DropdownProps
-};
-
+export { DropdownRoot as Dropdown, DropdownContent, DropdownItem, DropdownSeparator, DropdownLabel, DropdownTrigger };
+export { dropdownContentVariants, dropdownVariants, useDropdown, type DropdownContentProps, type DropdownProps };

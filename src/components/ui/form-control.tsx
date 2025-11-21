@@ -106,11 +106,5 @@ const FormControlHelper: React.FC<ComponentProps<"div">> = ({
   />
 );
 
-// FormControl Compound Component
-const FormControl = Object.assign(FormControlRoot, {
-  Label: FormControlLabel,
-  Error: FormControlError,
-  Helper: FormControlHelper,
-});
-
-export { FormControl, formControlVariants, type FormControlProps };
+export { FormControlRoot as FormControl, FormControlLabel, FormControlError, FormControlHelper };
+export { formControlVariants, type FormControlProps };
