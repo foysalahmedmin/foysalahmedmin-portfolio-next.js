@@ -1,10 +1,28 @@
 import { Document, Model, Types } from "mongoose";
+import { TProject } from "./project.type";
 
 export type TStatus = "pending" | "approved" | "rejected";
 
+export type TUserPopulated = {
+  _id: string;
+  name: string;
+  email: string;
+  image?: string;
+};
+
+export type TProjectPopulated = {
+  _id: string;
+  name: string;
+};
+
+export type TArticlePopulated = {
+  _id: string;
+  name: string;
+};
+
 export type TReview = {
-  user?: Types.ObjectId;
-  target: Types.ObjectId;
+  author?: TUserPopulated;
+  target?: TProjectPopulated | TArticlePopulated;
   target_model: "Project" | "Article";
   rating: number;
   review: string;
@@ -14,11 +32,21 @@ export type TReview = {
   is_deleted?: boolean;
 };
 
-export interface TReviewDocument extends TReview, Document {
-  _id: Types.ObjectId;
-  softDelete(): Promise<TReviewDocument | null>;
-}
+export type TReviewResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TReview;
+};
 
-export type TReviewModel = Model<TReviewDocument> & {
-  isReviewExist(_id: string): Promise<TReviewDocument | null>;
+export type TReviewsResponse = {
+  success: boolean;
+  status: number;
+  message?: string;
+  data: TReview[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+  };
 };

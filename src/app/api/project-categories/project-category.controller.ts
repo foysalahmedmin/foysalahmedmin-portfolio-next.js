@@ -57,6 +57,7 @@ export const getProjectCategoryById = catchAsync(
 export const createProjectCategory = catchAsync(
   async (req: AuthRequest & { parsedBody?: any }) => {
     const body = req.parsedBody || (await req.json());
+
     const category = await ProjectCategoryService.createProjectCategory(body);
 
     return sendResponse({
@@ -74,6 +75,7 @@ export const updateProjectCategoryBySlug = catchAsync(
     { params }: { params: { slug: string } },
   ) => {
     const body = req.parsedBody || (await req.json());
+
     const category = await ProjectCategoryService.updateProjectCategoryBySlug(
       params.slug,
       body,

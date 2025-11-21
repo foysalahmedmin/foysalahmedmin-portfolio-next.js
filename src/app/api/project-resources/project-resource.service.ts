@@ -25,7 +25,7 @@ export const getProjectResources = async (queryParams: Record<string, unknown>) 
   const populatedData = await Promise.all(
     result.data.map(async (resource: any) => {
       return await ProjectResource.findById(resource._id)
-        .populate('project', 'name slug')
+        .populate([{ path: 'project', select: '_id name' }])
         .lean();
     }),
   );
@@ -40,7 +40,7 @@ export const getProjectResourceById = async (id: string) => {
   await connectDB();
 
   const resource = await ProjectResource.findById(id)
-    .populate('project', 'name slug')
+    .populate([{ path: 'project', select: '_id name' }])
     .lean();
 
   if (!resource) {
@@ -67,7 +67,7 @@ export const createProjectResource = async (payload: {
     is_private: payload.is_private || false,
   });
 
-  return await resource.populate('project', 'name slug');
+  return await resource.populate([{ path: 'project', select: '_id name' }]);
 };
 
 export const updateProjectResourceById = async (
@@ -92,7 +92,7 @@ export const updateProjectResourceById = async (
   Object.assign(resource, payload);
   await resource.save();
 
-  return await resource.populate('project', 'name slug');
+  return await resource.populate([{ path: 'project', select: '_id name' }]);
 };
 
 export const updateProjectResources = async (

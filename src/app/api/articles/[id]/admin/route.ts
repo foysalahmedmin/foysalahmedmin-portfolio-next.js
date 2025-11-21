@@ -1,4 +1,5 @@
 import { auth } from '@/middleware/auth.middleware';
+import { file } from '@/middleware/file.middleware';
 import { validation } from '@/middleware/validation.middleware';
 import { errorHandler } from '@/utils/errorHandler';
 import * as ArticleController from '../../article.controller';
@@ -32,10 +33,30 @@ export async function PATCH(
       req,
       async (authedReq) => {
         authedReq.params = params;
-        return await validation(ArticleValidation.updateArticleByIdSchema)(
+        return await file(
+          {
+            name: 'thumbnail',
+            folder: 'articles',
+            max_size: 5_000_000,
+            max_count: 1,
+            allowed_types: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+          },
+          {
+            name: 'images',
+            folder: 'articles',
+            max_size: 5_000_000,
+            max_count: 10,
+            allowed_types: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+          },
+        )(
           authedReq,
-          (validatedReq) =>
-            ArticleController.updateArticleById(validatedReq, { params }),
+          async (fileReq) => {
+            return await validation(ArticleValidation.updateArticleByIdSchema)(
+              fileReq,
+              (validatedReq) =>
+                ArticleController.updateArticleById(validatedReq, { params }),
+            );
+          },
         );
       },
     );

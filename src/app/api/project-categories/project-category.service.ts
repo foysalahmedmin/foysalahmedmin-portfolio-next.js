@@ -58,16 +58,10 @@ export const createProjectCategory = async (payload: {
   sequence: number;
   description?: string;
   icon?: string;
-  thumbnail?: string;
   parent?: string | null;
   status?: 'active' | 'inactive';
   tags?: string[];
   layout?: string;
-  seo?: {
-    title?: string;
-    description?: string;
-    keywords?: string[];
-  };
 }) => {
   await connectDB();
 
@@ -99,16 +93,10 @@ export const updateProjectCategoryBySlug = async (
     sequence: number;
     description: string;
     icon: string;
-    thumbnail: string;
     parent: string | null;
     status: 'active' | 'inactive';
     tags: string[];
     layout: string;
-    seo: {
-      title?: string;
-      description?: string;
-      keywords?: string[];
-    };
   }>,
 ) => {
   await connectDB();
@@ -144,16 +132,10 @@ export const updateProjectCategoryById = async (
     sequence: number;
     description: string;
     icon: string;
-    thumbnail: string;
     parent: string | null;
     status: 'active' | 'inactive';
     tags: string[];
     layout: string;
-    seo: {
-      title?: string;
-      description?: string;
-      keywords?: string[];
-    };
   }>,
 ) => {
   await connectDB();

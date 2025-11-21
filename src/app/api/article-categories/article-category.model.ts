@@ -14,9 +14,7 @@ const articleCategorySchema = new Schema<TArticleCategoryDocument>(
     icon: {
       type: String,
       default: "blocks",
-    },
-    thumbnail: {
-      type: String,
+      trim: true,
     },
     name: {
       type: String,
@@ -58,11 +56,6 @@ const articleCategorySchema = new Schema<TArticleCategoryDocument>(
     layout: {
       type: String,
       default: "default",
-    },
-    seo: {
-      title: String,
-      description: String,
-      keywords: [String],
     },
     is_deleted: { type: Boolean, default: false, select: false },
   },

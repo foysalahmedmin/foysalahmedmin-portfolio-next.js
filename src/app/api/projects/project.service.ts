@@ -4,6 +4,7 @@ import AppError from '@/builder/AppError';
 import AppQuery from '@/builder/AppQuery';
 import httpStatus from 'http-status';
 import { TProjectDocument } from './project.type';
+import { deleteFile, deleteFiles } from '@/utils/fileUtils';
 
 export const getProjects = async (queryParams: Record<string, unknown>) => {
   await connectDB();
@@ -25,10 +26,12 @@ export const getProjects = async (queryParams: Record<string, unknown>) => {
   const populatedData = await Promise.all(
     result.data.map(async (project: any) => {
       return await Project.findById(project._id)
-        .populate('author', 'name email image')
-        .populate('category', 'name slug')
-        .populate('client', 'name email image')
-        .populate('collaborators', 'name email')
+        .populate([
+          { path: 'author', select: '_id name email image' },
+          { path: 'category', select: '_id name' },
+          { path: 'client', select: '_id name email image' },
+          { path: 'collaborators', select: '_id name email' }
+        ])
         .lean();
     }),
   );
@@ -43,10 +46,12 @@ export const getProjectById = async (id: string) => {
   await connectDB();
 
   const project = await Project.findById(id)
-    .populate('author', 'name email image')
-    .populate('category', 'name slug')
-    .populate('client', 'name email image')
-    .populate('collaborators', 'name email')
+    .populate([
+      { path: 'author', select: '_id name email image' },
+      { path: 'category', select: '_id name' },
+      { path: 'client', select: '_id name email image' },
+      { path: 'collaborators', select: '_id name email' }
+    ])
     .lean();
 
   if (!project) {
@@ -86,11 +91,12 @@ export const createProject = async (payload: {
     layout: payload.layout || 'default',
   });
 
-  return await project
-    .populate('author', 'name email')
-    .populate('category', 'name slug')
-    .populate('client', 'name email')
-    .populate('collaborators', 'name email');
+  return await project.populate([
+    { path: 'author', select: '_id name email' },
+    { path: 'category', select: '_id name' },
+    { path: 'client', select: '_id name email' },
+    { path: 'collaborators', select: '_id name email' }
+  ]);
 };
 
 export const updateProjectById = async (
@@ -112,6 +118,7 @@ export const updateProjectById = async (
     ended_at: Date | string;
     layout: string;
   }>,
+  currentProject?: any,
 ) => {
   await connectDB();
 
@@ -121,6 +128,36 @@ export const updateProjectById = async (
     throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
   }
 
+  // Get current project data if not provided
+  const current = currentProject || project.toObject();
+
+  // Handle file deletion/replacement
+  // Delete old thumbnail if it's being replaced or removed
+  if (payload.thumbnail !== undefined) {
+    if (current.thumbnail && current.thumbnail !== payload.thumbnail) {
+      // Old thumbnail exists and is being changed
+      deleteFile(current.thumbnail);
+    }
+  }
+
+  // Handle images array - delete removed images
+  if (payload.images !== undefined && Array.isArray(payload.images)) {
+    const currentImages = current.images || [];
+    const newImages = payload.images.filter((img) => img !== 'DELETE' && typeof img === 'string');
+    
+    // Find images that were removed
+    const removedImages = currentImages.filter(
+      (oldImg: string) => !newImages.includes(oldImg),
+    );
+    
+    // Delete removed images
+    if (removedImages.length > 0) {
+      deleteFiles(removedImages);
+    }
+    
+    // Update payload with cleaned images array
+    payload.images = newImages;
+  }
 
   // Handle date conversions
   const updateData: any = { ...payload };
@@ -132,13 +169,14 @@ export const updateProjectById = async (
   }
 
   Object.assign(project, updateData);
-  await project.save();
+  const savedProject = await project.save();
 
-  return await project
-    .populate('author', 'name email')
-    .populate('category', 'name slug')
-    .populate('client', 'name email')
-    .populate('collaborators', 'name email');
+  return await savedProject.populate([
+    { path: 'author', select: '_id name email' },
+    { path: 'category', select: '_id name' },
+    { path: 'client', select: '_id name email' },
+    { path: 'collaborators', select: '_id name email' }
+  ]);
 };
 
 export const updateProjects = async (
@@ -189,6 +227,14 @@ export const deleteProjectPermanentById = async (id: string): Promise<void> => {
     throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
   }
 
+  // Delete associated files
+  if (project.thumbnail) {
+    deleteFile(project.thumbnail);
+  }
+  if (project.images && project.images.length > 0) {
+    deleteFiles(project.images);
+  }
+
   await Project.findByIdAndDelete(id);
 };
 
@@ -224,6 +270,16 @@ export const deleteProjectsPermanent = async (
   const projects = await Project.find({ _id: { $in: ids } }).lean();
   const foundIds = projects.map((project) => project._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
+
+  // Delete all associated files
+  for (const project of projects) {
+    if (project.thumbnail) {
+      deleteFile(project.thumbnail);
+    }
+    if (project.images && project.images.length > 0) {
+      deleteFiles(project.images);
+    }
+  }
 
   await Project.deleteMany({ _id: { $in: foundIds } }).setOptions({
     bypassDeleted: true,
