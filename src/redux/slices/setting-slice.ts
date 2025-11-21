@@ -30,7 +30,7 @@ const saveState = (state: TSettingState) : void => {
 };
 
 const settingSlice = createSlice({
-  name: "settings",
+  name: "setting",
   initialState: initialState,
   reducers: {
     // Setting
