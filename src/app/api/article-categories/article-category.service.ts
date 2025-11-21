@@ -1,7 +1,7 @@
 import connectDB from '@/lib/db';
 import ArticleCategory from './article-category.model';
-import AppError from '@/builder/AppError';
-import AppQuery from '@/builder/AppQuery';
+import AppError from '@/builder/app-error';
+import AppQuery from '@/builder/app-query';
 import httpStatus from 'http-status';
 import { TArticleCategoryDocument } from './article-category.type';
 

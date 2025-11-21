@@ -1,6 +1,6 @@
 "use client";
 
-import useScreenSize from "@/hooks/ui/useScreenSize";
+import useScreenSize from "@/hooks/ui/use-screen-size";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import React from "react";

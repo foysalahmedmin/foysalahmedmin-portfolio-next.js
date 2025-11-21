@@ -1,6 +1,6 @@
 "use client";
 
-import useHash from "@/hooks/utils/useHash";
+import useHash from "@/hooks/utils/use-hash";
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 

@@ -1,4 +1,4 @@
-import { Modal } from "@/components/ui/Modal";
+import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Play } from "lucide-react";
 import Link from "next/link";

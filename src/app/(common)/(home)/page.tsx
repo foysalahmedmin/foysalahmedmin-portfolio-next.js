@@ -1,5 +1,5 @@
-import AboutSection from "@/components/(common)/home-page/AboutSection";
-import HeroSection from "@/components/(common)/home-page/HeroSection";
+import AboutSection from "@/components/(common)/home-page/about-section";
+import HeroSection from "@/components/(common)/home-page/hero-section";
 import React from "react";
 
 const HomePage: React.FC = () => {

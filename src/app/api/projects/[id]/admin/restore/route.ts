@@ -1,6 +1,6 @@
 import { auth } from '@/middleware/auth.middleware';
 import { validation } from '@/middleware/validation.middleware';
-import { errorHandler } from '@/utils/errorHandler';
+import { errorHandler } from '@/utils/error-handler';
 import * as ProjectController from '../../../project.controller';
 import * as ProjectValidation from '../../../project.validation';
 import { TRole } from '@/types/jsonwebtoken.type';

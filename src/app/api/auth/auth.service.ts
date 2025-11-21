@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
 import { JwtPayload } from 'jsonwebtoken';
-import AppError from '@/builder/AppError';
+import AppError from '@/builder/app-error';
 import { ENV } from '@/config';
 import { TJwtPayload } from '@/types/jsonwebtoken.type';
 import { User } from '../users/user.model';

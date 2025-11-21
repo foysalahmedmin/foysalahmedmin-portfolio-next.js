@@ -1,4 +1,4 @@
-import { errorHandler } from '@/utils/errorHandler';
+import { errorHandler } from '@/utils/error-handler';
 import * as UserController from '../user.controller';
 import { NextRequest } from 'next/server';
 

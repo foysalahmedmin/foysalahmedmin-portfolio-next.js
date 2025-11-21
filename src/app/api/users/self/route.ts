@@ -1,7 +1,7 @@
 import { auth } from '@/middleware/auth.middleware';
 import { file } from '@/middleware/file.middleware';
 import { validation } from '@/middleware/validation.middleware';
-import { errorHandler } from '@/utils/errorHandler';
+import { errorHandler } from '@/utils/error-handler';
 import * as UserController from '../user.controller';
 import * as UserValidation from '../user.validation';
 import { TRole } from '@/types/jsonwebtoken.type';

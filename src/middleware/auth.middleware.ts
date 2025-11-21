@@ -1,7 +1,7 @@
 import { ENV } from '@/config';
 import connectDB from '@/lib/db';
 import User from '@/app/api/users/user.model';
-import AppError from '@/builder/AppError';
+import AppError from '@/builder/app-error';
 import httpStatus from 'http-status';
 import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';

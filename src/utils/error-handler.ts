@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import mongoose from 'mongoose';
-import AppError from '@/builder/AppError';
+import AppError from '@/builder/app-error';
 import { ENV } from '@/config';
 import { TErrorResponse, TErrorSources } from '@/types/response.type';
 

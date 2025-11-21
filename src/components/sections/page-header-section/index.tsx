@@ -1,4 +1,4 @@
-import { TBreadcrumbs } from "@/components/ui/Breadcrumb";
+import { TBreadcrumbs } from "@/components/ui/breadcrumb";
 
 type PageHeaderSectionProps = {
   className?: string;

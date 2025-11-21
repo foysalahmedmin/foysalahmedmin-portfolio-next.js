@@ -1,5 +1,5 @@
-import { errorHandler } from '@/utils/errorHandler';
-import sendResponse from '@/utils/sendResponse';
+import { errorHandler } from '@/utils/error-handler';
+import sendResponse from '@/utils/send-response';
 import httpStatus from 'http-status';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';

@@ -1,6 +1,6 @@
 import { auth } from '@/middleware/auth.middleware';
 import { validation } from '@/middleware/validation.middleware';
-import { errorHandler } from '@/utils/errorHandler';
+import { errorHandler } from '@/utils/error-handler';
 import * as ReviewController from '../../review.controller';
 import * as ReviewValidation from '../../review.validation';
 import { TRole } from '@/types/jsonwebtoken.type';

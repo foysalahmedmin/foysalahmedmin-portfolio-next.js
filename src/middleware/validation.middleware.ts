@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodTypeAny, ZodError } from 'zod';
-import AppError from '@/builder/AppError';
+import AppError from '@/builder/app-error';
 import httpStatus from 'http-status';
 import { TErrorSources } from '@/types/response.type';
 
