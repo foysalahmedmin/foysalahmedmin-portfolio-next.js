@@ -28,7 +28,7 @@ export const getProjectCategoryBySlug = async (slug: string) => {
   await connectDB();
 
   const category = await ProjectCategory.findOne({ slug })
-    .populate('parent', 'name slug')
+    .populate({ path: 'parent', select: '_id name' })
     .lean();
 
   if (!category) {
@@ -42,7 +42,7 @@ export const getProjectCategoryById = async (id: string) => {
   await connectDB();
 
   const category = await ProjectCategory.findById(id)
-    .populate('parent', 'name slug')
+    .populate({ path: 'parent', select: '_id name' })
     .lean();
 
   if (!category) {

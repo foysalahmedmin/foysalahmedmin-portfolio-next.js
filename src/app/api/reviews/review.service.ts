@@ -1,9 +1,9 @@
 import connectDB from '@/lib/db';
-import Review from './review.model';
 import AppError from '@/builder/AppError';
 import AppQuery from '@/builder/AppQuery';
 import httpStatus from 'http-status';
 import { TReviewDocument } from './review.type';
+import { Review } from './review.model';
 
 export const getReviews = async (queryParams: Record<string, unknown>) => {
   await connectDB();
@@ -108,7 +108,7 @@ export const updateReviewById = async (
   }
 
   // Check if user is the author or admin
-  if (review.author.toString() !== authorId) {
+  if (review.author?.toString() !== authorId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       'You can only update your own reviews',
@@ -165,7 +165,7 @@ export const deleteReviewById = async (id: string, authorId: string) => {
   }
 
   // Check if user is the author or admin
-  if (review.author.toString() !== authorId) {
+  if (review.author?.toString() !== authorId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       'You can only delete your own reviews',

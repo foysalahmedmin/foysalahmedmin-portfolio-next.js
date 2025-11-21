@@ -21,10 +21,12 @@ export type TProject = {
   status: TStatus;
   is_featured: boolean;
   is_premium: boolean;
-  started_at?: Date;
-  ended_at?: Date;
+  started_at?: Date | string;
+  ended_at?: Date | string;
   layout?: string;
   is_deleted?: boolean;
+  created_at?: Date | string;
+  updated_at?: Date | string;
 };
 
 export interface TProjectDocument extends TProject, Document {

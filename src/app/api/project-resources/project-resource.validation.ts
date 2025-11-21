@@ -32,12 +32,7 @@ export const updateProjectResourceSchema = z.object({
 
 export const updateProjectResourcesSchema = z.object({
   body: z.object({
-    ids: z
-      .array(idSchema, {
-        required_error: 'At least one project resource ID is required',
-        invalid_type_error: 'Project resource IDs must be an array of strings',
-      })
-      .nonempty('At least one project resource ID is required'),
+    ids: z.array(idSchema).min(1, 'At least one project resource ID is required'),
     type: z.enum(['repository', 'design', 'documentation', 'other']).optional(),
     is_private: z.boolean().optional(),
   }),

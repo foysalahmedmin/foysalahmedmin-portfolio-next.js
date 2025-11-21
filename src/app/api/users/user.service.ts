@@ -5,6 +5,7 @@ import AppQuery from '@/builder/AppQuery';
 import { TJwtPayload } from '@/types/jsonwebtoken.type';
 import { User } from './user.model';
 import { TUser } from './user.type';
+import { deleteFile } from '@/utils/fileUtils';
 
 export const getUser = async (id: string): Promise<TUser> => {
   await connectDB();
@@ -52,6 +53,20 @@ export const updateSelf = async (
     }
   }
 
+  // Handle file deletion/replacement
+  // Delete old image if it's being replaced or removed
+  if (payload.image !== undefined) {
+    if (data.image && data.image !== payload.image) {
+      deleteFile(data.image);
+    }
+    // If image is explicitly set to empty/null, delete old one
+    if (payload.image === '' || payload.image === null) {
+      if (data.image) {
+        deleteFile(data.image);
+      }
+    }
+  }
+
   const result = await User.findByIdAndUpdate(user._id, payload, {
     new: true,
     runValidators: true,
@@ -63,13 +78,27 @@ export const updateSelf = async (
 export const updateUser = async (
   id: string,
   payload: Partial<
-    Pick<TUser, 'name' | 'email' | 'role' | 'status' | 'is_verified'>
+    Pick<TUser, 'name' | 'email' | 'image' | 'role' | 'status' | 'is_verified'>
   >,
 ): Promise<TUser> => {
   await connectDB();
   const data = await User.findById(id);
   if (!data) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  // Handle file deletion/replacement
+  // Delete old image if it's being replaced or removed
+  if (payload.image !== undefined) {
+    if (data.image && data.image !== payload.image) {
+      deleteFile(data.image);
+    }
+    // If image is explicitly set to empty/null, delete old one
+    if (payload.image === '' || payload.image === null) {
+      if (data.image) {
+        deleteFile(data.image);
+      }
+    }
   }
 
   const updatedUser = await User.findByIdAndUpdate(id, payload, {
@@ -120,6 +149,11 @@ export const deleteUserPermanent = async (id: string): Promise<void> => {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
+  // Delete associated files
+  if (user.image) {
+    deleteFile(user.image);
+  }
+
   await User.findByIdAndDelete(id);
 };
 
@@ -152,6 +186,13 @@ export const deleteUsersPermanent = async (
   const users = await User.find({ _id: { $in: ids } }).lean();
   const foundIds = users.map((user) => user._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
+
+  // Delete all associated files
+  for (const user of users) {
+    if (user.image) {
+      deleteFile(user.image);
+    }
+  }
 
   await User.deleteMany({ _id: { $in: foundIds } }).setOptions({
     bypassDeleted: true,

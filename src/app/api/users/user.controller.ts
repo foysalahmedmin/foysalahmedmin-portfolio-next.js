@@ -54,12 +54,23 @@ export const getUsers = catchAsync(async (req: AuthRequest | Request) => {
 export const updateSelf = catchAsync(
   async (req: AuthRequest & { parsedBody?: any; savedFiles?: Record<string, string[]> }) => {
     const body = req.parsedBody || (await req.json());
-    const savedFiles = req.savedFiles as Record<string, string[]>;
-    const image = savedFiles?.image?.[0] || '';
+    const savedFiles = req.savedFiles as Record<string, string[]> | undefined;
+
+    // Handle file updates
+    let image = body.image;
+
+    // If new image uploaded, use it (old one will be deleted in service)
+    if (savedFiles?.image?.[0]) {
+      image = savedFiles.image[0];
+    }
+    // If image is explicitly set to empty/null, delete old one
+    if (body.image === '' || body.image === null) {
+      image = '';
+    }
 
     const payload = {
       ...body,
-      ...(image ? { image } : {}),
+      image,
     };
 
     const result = await UserService.updateSelf(req.user!, payload);
@@ -79,12 +90,23 @@ export const updateUser = catchAsync(
   ) => {
     const { id } = params;
     const body = req.parsedBody || (await req.json());
-    const savedFiles = req.savedFiles as Record<string, string[]>;
-    const image = savedFiles?.image?.[0] || '';
+    const savedFiles = req.savedFiles as Record<string, string[]> | undefined;
+
+    // Handle file updates
+    let image = body.image;
+
+    // If new image uploaded, use it (old one will be deleted in service)
+    if (savedFiles?.image?.[0]) {
+      image = savedFiles.image[0];
+    }
+    // If image is explicitly set to empty/null, delete old one
+    if (body.image === '' || body.image === null) {
+      image = '';
+    }
 
     const payload = {
       ...body,
-      ...(image ? { image } : {}),
+      image,
     };
 
     const result = await UserService.updateUser(id, payload);

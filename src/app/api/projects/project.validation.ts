@@ -20,42 +20,17 @@ export const createProjectSchema = z.object({
   }),
 });
 
-    content: z.string().min(1).optional(),
-    thumbnail: z.string().optional(),
-    images: z.array(z.string()).optional(),
-    tags: z.array(z.string()).optional(),
-    category: z.string().min(1).optional(),
-    client: z.string().optional(),
-    collaborators: z.array(z.string()).optional(),
-    status: z.enum(['planned', 'in_progress', 'on_hold', 'completed', 'cancelled']).optional(),
-    is_featured: z.boolean().optional(),
-    is_premium: z.boolean().optional(),
-    started_at: z.string().datetime().optional(),
-    ended_at: z.string().datetime().optional(),
-    layout: z.string().optional(),
-  }),
-});
-
 const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
   message: 'Invalid ID format',
 });
 
 export const updateProjectsSchema = z.object({
   body: z.object({
-    ids: z
-      .array(idSchema, {
-        required_error: 'At least one project ID is required',
-        invalid_type_error: 'Project IDs must be an array of strings',
-      })
-      .nonempty('At least one project ID is required'),
+    ids: z.array(idSchema).min(1, 'At least one project ID is required'),
     status: z.enum(['planned', 'in_progress', 'on_hold', 'completed', 'cancelled']).optional(),
     is_featured: z.boolean().optional(),
     category: z.string().min(1).optional(),
   }),
-});
-
-const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
-  message: 'Invalid ID format',
 });
 
 export const updateProjectByIdSchema = z.object({

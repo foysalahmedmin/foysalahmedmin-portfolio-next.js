@@ -1,6 +1,6 @@
 import { TUser } from "./user.type";
 
-export type TUserState = {
+export type TAuthState = {
   token?: string;
   info?: TUser;
   is_authenticated?: boolean;

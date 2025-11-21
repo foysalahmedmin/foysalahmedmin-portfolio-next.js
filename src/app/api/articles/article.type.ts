@@ -15,10 +15,12 @@ export type TArticle = {
   status: TStatus;
   is_featured: boolean;
   is_premium: boolean;
-  published_at?: Date;
-  expired_at?: Date;
+  published_at?: Date | string;
+  expired_at?: Date | string;
   layout?: string;
   is_deleted?: boolean;
+  created_at?: Date | string;
+  updated_at?: Date | string;
 };
 
 export interface TArticleDocument extends TArticle, Document {

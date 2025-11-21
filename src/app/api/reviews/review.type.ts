@@ -12,6 +12,8 @@ export type TReview = {
   is_edited?: boolean;
   edited_at?: Date;
   is_deleted?: boolean;
+  created_at?: Date | string;
+  updated_at?: Date | string;
 };
 
 export interface TReviewDocument extends TReview, Document {

@@ -13,6 +13,8 @@ export type TProjectCategory = {
   parent?: Types.ObjectId | null;
   layout?: string;
   is_deleted?: boolean;
+  created_at?: Date | string;
+  updated_at?: Date | string;
 };
 
 export interface TProjectCategoryDocument
