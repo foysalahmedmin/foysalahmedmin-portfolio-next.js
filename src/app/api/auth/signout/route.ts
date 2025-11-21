@@ -4,12 +4,16 @@ import httpStatus from 'http-status';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-const COOKIE_NAME = 'refresh_token';
+const REFRESH_TOKEN_COOKIE = 'refresh_token';
+const ACCESS_TOKEN_COOKIE = 'access_token';
 
 export async function POST(req: NextRequest) {
   try {
     const cookieStore = await cookies();
-    cookieStore.delete(COOKIE_NAME);
+    
+    // Delete both tokens
+    cookieStore.delete(REFRESH_TOKEN_COOKIE);
+    cookieStore.delete(ACCESS_TOKEN_COOKIE);
 
     return sendResponse({
       status: httpStatus.OK,

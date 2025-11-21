@@ -5,6 +5,11 @@ import { createSlice } from "@reduxjs/toolkit";
 const LOCAL_STORAGE_KEY = "auth";
 
 const getInitialAuth = (): TAuthState => {
+  // Check if we're in browser environment
+  if (typeof window === "undefined") {
+    return { is_authenticated: false };
+  }
+
   try {
     const auth = localStorage.getItem(LOCAL_STORAGE_KEY);
     return auth ? JSON.parse(auth) : { is_authenticated: false };
@@ -23,16 +28,22 @@ export const authSlice = createSlice({
     setAuth: (state, action: PayloadAction<TAuthState>) => {
       const auth = action.payload;
       if (auth?.token) {
-        localStorage.setItem(
-          LOCAL_STORAGE_KEY,
-          JSON.stringify({ ...auth, is_authenticated: true }),
-        );
+        // Only access localStorage in browser environment
+        if (typeof window !== "undefined") {
+          localStorage.setItem(
+            LOCAL_STORAGE_KEY,
+            JSON.stringify({ ...auth, is_authenticated: true }),
+          );
+        }
         return { ...auth, is_authenticated: true };
       }
       return state;
     },
     clearAuth: () => {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      // Only access localStorage in browser environment
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+      }
       return { is_authenticated: false };
     },
   },

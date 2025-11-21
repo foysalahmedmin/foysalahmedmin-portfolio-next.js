@@ -5,6 +5,7 @@ import AppError from '@/builder/app-error';
 import httpStatus from 'http-status';
 import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { TRole, TJwtPayload } from '@/types/jsonwebtoken.type';
 
 export type AuthUser = JwtPayload & TJwtPayload;
@@ -29,8 +30,14 @@ export const auth = (...roles: (TRole | 'guest')[]) => {
     handler: (req: AuthRequest) => Promise<NextResponse>,
   ): Promise<NextResponse> => {
     const authReq = req as AuthRequest;
-    const authorization = authReq.headers.get('authorization');
-    const token = authorization?.split(' ')?.[1];
+    
+    const cookieStore = await cookies();
+    let token = cookieStore.get('access_token')?.value;
+    
+    if (!token) {
+      const authorization = authReq.headers.get('authorization');
+      token = authorization?.split(' ')?.[1];
+    }
 
     if (roles.includes('guest') && !token) {
       return await handler(authReq);
