@@ -49,7 +49,7 @@ export const useClassIntersectionObserver = ({
       const safeAttr = selector.replace(/[^a-z0-9_-]/gi, "") || "default";
 
       const elements = document.querySelectorAll(
-        `${selector}:not([data-observed-${safeAttr}])`,
+        `${selector}:not([data-observed-${safeAttr}])`
       );
       elements.forEach((el) => {
         el.setAttribute(`data-observed-${safeAttr}`, "true");
@@ -67,10 +67,7 @@ export const useClassIntersectionObserver = ({
       mutationObserver = new MutationObserver((mutations) => {
         let shouldObserve = false;
         for (const mutation of mutations) {
-          if (
-            mutation.type === "childList" &&
-            mutation.addedNodes.length > 0
-          ) {
+          if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
             shouldObserve = true;
             break;
           }
@@ -102,5 +99,3 @@ export const useClassIntersectionObserver = ({
     dynamic,
   ]);
 };
-
-export default useClassIntersectionObserver;
