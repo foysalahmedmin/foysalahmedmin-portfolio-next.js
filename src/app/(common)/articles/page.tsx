@@ -135,8 +135,8 @@ const ArticlesPage = () => {
                     : 'Recently';
 
                 return (
-                  <article key={(article as any)._id} className="group flex flex-col">
-                    <Link href={`/articles/${(article as any)._id}`} className="block relative aspect-[16/10] overflow-hidden rounded-2xl border border-border transition-all group-hover:border-primary/50 group-hover:shadow-xl">
+                  <article key={article._id} className="group flex flex-col">
+                    <Link href={`/articles/${article._id}`} className="block relative aspect-[16/10] overflow-hidden rounded-2xl border border-border transition-all group-hover:border-primary/50 group-hover:shadow-xl">
                         <img src={article.thumbnail || "/images/placeholder-article.png"} alt={article.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </Link>
                     <div className="pt-8">
@@ -144,13 +144,13 @@ const ArticlesPage = () => {
                             <span className="flex items-center gap-1.5"><Calendar className="size-3.5" /> {date}</span>
                         </div>
                         <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors lg:text-2xl">
-                            <Link href={`/articles/${(article as any)._id}`}>
+                            <Link href={`/articles/${article._id}`}>
                                 {article.name}
                             </Link>
                         </h3>
                         <p className="text-muted-foreground mt-4 line-clamp-3 text-sm leading-relaxed">{article.description}</p>
                         <div className="mt-8">
-                            <Link href={`/articles/${(article as any)._id}`} className="inline-flex items-center gap-2 text-sm font-bold text-primary tracking-widest uppercase transition-all hover:gap-3">
+                            <Link href={`/articles/${article._id}`} className="inline-flex items-center gap-2 text-sm font-bold text-primary tracking-widest uppercase transition-all hover:gap-3">
                                 Read More <ArrowRight className="size-4" />
                             </Link>
                         </div>

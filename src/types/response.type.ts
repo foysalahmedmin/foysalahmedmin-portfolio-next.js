@@ -1,9 +1,17 @@
+export type TMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage?: number;
+  statistics?: Record<string, number>;
+};
+
 export type TResponse<T> = {
   status: number;
   success: boolean;
   message?: string;
   data: T;
-  meta?: Record<string, unknown>;
+  meta?: TMeta;
 };
 
 export type TErrorSources = {

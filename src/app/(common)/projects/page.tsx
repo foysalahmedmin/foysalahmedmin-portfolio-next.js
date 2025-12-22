@@ -44,8 +44,8 @@ const ProjectsPage = () => {
         const res = await getProjects(params);
         if (res.success && Array.isArray(res.data)) {
           setProjects(res.data);
-          const total = (res.meta?.total as number) || 0;
-          const limit = (res.meta?.limit as number) || 9;
+          const total = res.meta?.total || 0;
+          const limit = res.meta?.limit || 9;
           setTotalPages(Math.ceil(total / limit) || 1);
         }
       } catch (e) {
