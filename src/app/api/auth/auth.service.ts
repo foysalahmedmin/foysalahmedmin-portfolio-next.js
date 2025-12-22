@@ -1,43 +1,37 @@
-import bcrypt from 'bcrypt';
-import httpStatus from 'http-status';
-import { JwtPayload } from 'jsonwebtoken';
-import AppError from '@/builder/app-error';
-import { ENV } from '@/config';
-import { TJwtPayload } from '@/types/jsonwebtoken.type';
-import { User } from '../users/user.model';
-import {
-  TChangePassword,
-  TForgetPassword,
-  TResetPassword,
-  TSignin,
-  TSignup,
-} from './auth.type';
-import { createToken, verifyToken } from './auth.utils';
+import AppError from "@/builder/app-error";
+import { ENV } from "@/config";
+import { TJwtPayload } from "@/types/jsonwebtoken.type";
+import bcrypt from "bcrypt";
+import httpStatus from "http-status";
+import { JwtPayload } from "jsonwebtoken";
+import { User } from "../users/user.model";
+import { TChangePassword, TSignin, TSignup } from "./auth.type";
+import { createToken, verifyToken } from "./auth.utils";
 
 export const signin = async (payload: TSignin) => {
   const user = await User.isUserExistByEmail(payload.email);
 
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+    throw new AppError(httpStatus.NOT_FOUND, "User not found!");
   }
 
   if (user?.is_deleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'User is deleted!');
+    throw new AppError(httpStatus.FORBIDDEN, "User is deleted!");
   }
 
-  if (user?.status == 'blocked') {
-    throw new AppError(httpStatus.FORBIDDEN, 'User is blocked!');
+  if (user?.status == "blocked") {
+    throw new AppError(httpStatus.FORBIDDEN, "User is blocked!");
   }
 
   if (!(await bcrypt.compare(payload?.password, user?.password))) {
-    throw new AppError(httpStatus.FORBIDDEN, 'Password do not matched!');
+    throw new AppError(httpStatus.FORBIDDEN, "Password do not matched!");
   }
 
   const jwtPayload: TJwtPayload = {
     _id: user._id.toString(),
     name: user.name,
     email: user.email,
-    role: user.role || 'user',
+    role: user.role || "user",
     is_verified: user?.is_verified || false,
     ...(user.image && { image: user.image }),
   };
@@ -45,13 +39,13 @@ export const signin = async (payload: TSignin) => {
   const accessToken = createToken(
     jwtPayload,
     ENV.jwt_access_secret,
-    ENV.jwt_access_secret_expires_in,
+    ENV.jwt_access_secret_expires_in
   );
 
   const refreshToken = createToken(
     jwtPayload,
     ENV.jwt_refresh_secret,
-    ENV.jwt_refresh_secret_expires_in,
+    ENV.jwt_refresh_secret_expires_in
   );
 
   return {
@@ -64,18 +58,18 @@ export const signin = async (payload: TSignin) => {
 export const signup = async (payload: TSignup) => {
   const isExist = await User.isUserExistByEmail(payload.email);
   if (isExist) {
-    throw new AppError(httpStatus.CONFLICT, 'User already exists!');
+    throw new AppError(httpStatus.CONFLICT, "User already exists!");
   }
 
   const user = await User.create({
     ...payload,
-    role: 'user',
+    role: "user",
   });
 
   if (!user) {
     throw new AppError(
       httpStatus.INTERNAL_SERVER_ERROR,
-      'Failed to create user!',
+      "Failed to create user!"
     );
   }
 
@@ -83,7 +77,7 @@ export const signup = async (payload: TSignup) => {
     _id: user._id.toString(),
     name: user.name,
     email: user.email,
-    role: user.role || 'user',
+    role: user.role || "user",
     is_verified: user?.is_verified || false,
     ...(user.image && { image: user.image }),
   };
@@ -91,13 +85,13 @@ export const signup = async (payload: TSignup) => {
   const accessToken = createToken(
     jwtPayload,
     ENV.jwt_access_secret,
-    ENV.jwt_access_secret_expires_in,
+    ENV.jwt_access_secret_expires_in
   );
 
   const refreshToken = createToken(
     jwtPayload,
     ENV.jwt_refresh_secret,
-    ENV.jwt_refresh_secret_expires_in,
+    ENV.jwt_refresh_secret_expires_in
   );
 
   return {
@@ -110,25 +104,25 @@ export const signup = async (payload: TSignup) => {
 export const refreshToken = async (token: string) => {
   const { email, iat } = verifyToken(token, ENV.jwt_refresh_secret);
 
-  if (!email || typeof iat !== 'number') {
+  if (!email || typeof iat !== "number") {
     throw new AppError(
       httpStatus.UNAUTHORIZED,
-      'You do not have the necessary permissions to access this resource.',
+      "You do not have the necessary permissions to access this resource."
     );
   }
 
   const user = await User.isUserExistByEmail(email);
 
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+    throw new AppError(httpStatus.NOT_FOUND, "User not found!");
   }
 
   if (user?.is_deleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'User is deleted!');
+    throw new AppError(httpStatus.FORBIDDEN, "User is deleted!");
   }
 
-  if (user?.status == 'blocked') {
-    throw new AppError(httpStatus.FORBIDDEN, 'User is blocked!');
+  if (user?.status == "blocked") {
+    throw new AppError(httpStatus.FORBIDDEN, "User is blocked!");
   }
 
   if (user?.password_changed_at) {
@@ -138,7 +132,7 @@ export const refreshToken = async (token: string) => {
     if (passwordChangedAt > tokenIssuedAt) {
       throw new AppError(
         httpStatus.FORBIDDEN,
-        'Password recently changed. Please login again.',
+        "Password recently changed. Please signin again."
       );
     }
   }
@@ -147,7 +141,7 @@ export const refreshToken = async (token: string) => {
     _id: user._id.toString(),
     name: user.name,
     email: user.email,
-    role: user.role || 'user',
+    role: user.role || "user",
     is_verified: user?.is_verified || false,
     ...(user.image && { image: user.image }),
   };
@@ -155,7 +149,7 @@ export const refreshToken = async (token: string) => {
   const accessToken = createToken(
     jwtPayload,
     ENV.jwt_access_secret,
-    ENV.jwt_access_secret_expires_in,
+    ENV.jwt_access_secret_expires_in
   );
 
   return {
@@ -166,20 +160,20 @@ export const refreshToken = async (token: string) => {
 
 export const changePassword = async (
   user: JwtPayload,
-  payload: TChangePassword,
+  payload: TChangePassword
 ) => {
   const userData = await User.isUserExist(user._id);
   if (!userData) {
-    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+    throw new AppError(httpStatus.NOT_FOUND, "User not found!");
   }
 
   if (!(await bcrypt.compare(payload?.current_password, userData?.password))) {
-    throw new AppError(httpStatus.FORBIDDEN, 'Password do not matched!');
+    throw new AppError(httpStatus.FORBIDDEN, "Password do not matched!");
   }
 
   const hashedNewPassword = await bcrypt.hash(
     payload.new_password,
-    Number(ENV.bcrypt_salt_rounds),
+    Number(ENV.bcrypt_salt_rounds)
   );
 
   const result = await User.findOneAndUpdate(
@@ -193,9 +187,8 @@ export const changePassword = async (
     {
       new: true,
       runValidators: true,
-    },
+    }
   );
 
   return result;
 };
-

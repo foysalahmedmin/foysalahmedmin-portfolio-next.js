@@ -6,7 +6,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./auth.middleware";
-import type { AuthUser as NewAuthUser } from "./auth.middleware";
 
 // Legacy types for backward compatibility
 export type AuthUser = {
@@ -25,19 +24,24 @@ export async function withAuth(
 ) {
   try {
     // Use the new auth middleware with all roles allowed
-    return await auth('super-admin', 'admin', 'editor', 'author', 'contributor', 'subscriber', 'user')(
-      req,
-      async (authedReq) => {
-        // Map new format to old format for backward compatibility
-        if (authedReq.user) {
-          req.user = {
-            id: authedReq.user._id,
-            role: authedReq.user.role || 'user',
-          };
-        }
-        return await handler(req);
-      },
-    );
+    return await auth(
+      "super-admin",
+      "admin",
+      "editor",
+      "author",
+      "contributor",
+      "subscriber",
+      "user"
+    )(req, async (authedReq) => {
+      // Map new format to old format for backward compatibility
+      if (authedReq.user) {
+        req.user = {
+          id: authedReq.user._id,
+          role: authedReq.user.role || "user",
+        };
+      }
+      return await handler(req);
+    });
   } catch (error: any) {
     // Handle errors in old format
     return NextResponse.json(
