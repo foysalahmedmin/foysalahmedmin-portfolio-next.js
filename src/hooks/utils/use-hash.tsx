@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-const getCurrentHash = (): string =>
+export const getCurrentHash = (): string =>
   typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : "";
 
-const useHash = (): { hash: string } => {
+export const useHash = (): { hash: string } => {
   const [hash, setHash] = useState<string>(getCurrentHash);
 
   useEffect(() => {
@@ -19,5 +19,3 @@ const useHash = (): { hash: string } => {
 
   return { hash };
 };
-
-export default useHash;

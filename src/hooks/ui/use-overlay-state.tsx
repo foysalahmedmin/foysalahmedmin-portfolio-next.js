@@ -8,9 +8,9 @@ export type OverlayState = {
   onOpenChange: (open: boolean) => void;
 };
 
-const useOverlayState = (
+export const useOverlayState = (
   isOpenProp?: boolean,
-  setIsOpenProp?: (open: boolean) => void,
+  setIsOpenProp?: (open: boolean) => void
 ): OverlayState => {
   const [isOpen, setIsOpen] = useState(isOpenProp ?? false);
 
@@ -43,5 +43,3 @@ const useOverlayState = (
 
   return { isOpen, onOpen, onClose, onToggle, onOpenChange };
 };
-
-export default useOverlayState;

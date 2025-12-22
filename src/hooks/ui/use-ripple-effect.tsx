@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-const useRippleEffect = <T extends HTMLElement>(
+export const useRippleEffect = <T extends HTMLElement>(
   disabled: boolean = false
 ) => {
   const ref = useRef<T>(null);
@@ -62,5 +62,3 @@ const useRippleEffect = <T extends HTMLElement>(
 
   return ref;
 };
-
-export default useRippleEffect;

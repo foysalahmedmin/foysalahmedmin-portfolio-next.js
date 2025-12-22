@@ -8,7 +8,7 @@ type ScrollPosition = {
   scrollDirection: "up" | "down";
 };
 
-const useScrollPosition = (
+export const useScrollPosition = (
   ref: RefObject<HTMLElement> | null = null
 ): ScrollPosition => {
   const [scrollTop, setScrollTop] = useState(0);
@@ -45,5 +45,3 @@ const useScrollPosition = (
 
   return { scrollTop, scrollBottom, scrollDirection };
 };
-
-export default useScrollPosition;
