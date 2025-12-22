@@ -1,91 +1,88 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+"use client";
 
-const stats = [
-  { number: "1+", label: "Year Experience" },
-  { number: "15+", label: "Projects Completed" },
-  { number: "100%", label: "Passion for Coding" },
-];
+import { Button } from "@/components/ui/button";
+import { ArrowRight, CheckCircle2, Quote } from "lucide-react";
+import Link from "next/link";
+import React from "react";
 
 const AboutSection: React.FC = () => {
+  const highlights = [
+    "Modular & Scalable Backend",
+    "Interactive Frontend with Next.js",
+    "System Architecture Optimization",
+    "Clean & Maintainable Codebase"
+  ];
+
   return (
-    <section className={cn("bg-background text-foreground py-24")}>
-      <div className="container flex w-full items-center">
-        <div className="grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Text Section */}
-          <div className="order-2 space-y-6 lg:order-1">
-            <span className="text-primary inline-block text-sm font-medium tracking-wider uppercase">
-              About Me
-            </span>
-            <h2 className="text-4xl font-bold tracking-tight md:text-5xl">
-              Node.js Developer & Passionate Learner
-            </h2>
-            <p className="text-muted-foreground text-base leading-relaxed md:text-lg">
-              Hi, I’m <strong>Foysal Ahmed</strong>, a dedicated web developer
-              with a strong focus on building scalable, high-quality
-              applications using
-              <span className="text-primary"> Node.js</span>,
-              <span className="text-primary"> React</span>, and modern
-              JavaScript technologies. With a growing skill set in backend and
-              frontend development, I’m constantly exploring new technologies
-              and best practices to deliver exceptional solutions.
-            </p>
-            <p className="text-muted-foreground text-base leading-relaxed md:text-lg">
-              I believe in writing clean, maintainable code, following
-              <strong> conventional naming practices</strong>, and creating
-              efficient, user-friendly applications. My journey includes
-              contributing to multiple projects and continuously improving my
-              skills to become a versatile full-stack developer.
+    <section id="about" className="py-24 lg:py-32">
+      <div className="container px-6 mx-auto">
+        <div className="grid grid-cols-1 gap-20 lg:grid-cols-2 lg:items-center">
+          {/* Left: Interactive Card / Image */}
+          <div className="fade-left relative">
+            <div className="relative aspect-square max-w-[500px] overflow-hidden rounded-3xl group">
+                <img 
+                    src="/images/profile-hero.png" 
+                    alt="Foysal Ahmed" 
+                    className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            </div>
+            
+            {/* Float Card */}
+            <div className="absolute -bottom-10 -right-6 md:right-10 max-w-[280px] rounded-2xl bg-card p-6 shadow-2xl border border-border animate-float">
+                <Quote className="text-primary mb-4 size-8 opacity-20" />
+                <p className="text-sm font-medium leading-relaxed italic">
+                    "I believe in creating digital solutions that are not just working, but excel in performance and user experience."
+                </p>
+                <div className="mt-4 flex items-center gap-3">
+                    <div className="h-0.5 w-8 bg-primary" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Foysal Ahmed</span>
+                </div>
+            </div>
+
+            {/* Background elements */}
+            <div className="bg-primary/5 absolute -left-10 -top-10 -z-10 size-64 rounded-full blur-3xl" />
+          </div>
+
+          {/* Right: Text Content */}
+          <div className="fade-right space-y-8">
+            <div>
+              <span className="text-primary mb-3 inline-block text-sm font-bold uppercase tracking-widest">
+                Brief Introduction
+              </span>
+              <h2 className="text-3xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+                Dedicated Full Stack <span className="text-primary">Software Engineer</span>
+              </h2>
+            </div>
+
+            <p className="text-muted-foreground text-lg leading-relaxed">
+                With a deep understanding of modern web ecosystems, I specialize in crafting performant architectures using Node.js and building immersive user interfaces with Next.js. My goal is to bridge the gap between complex backend systems and intuitive frontend experiences.
             </p>
 
-            {/* Stats */}
-            <div className="mt-8 grid grid-cols-3 gap-8">
-              {stats.map((stat, index) => (
-                <div key={index}>
-                  <h3 className="text-primary mb-2 text-2xl font-bold lg:text-4xl">
-                    {stat.number}
-                  </h3>
-                  <p className="text-muted-foreground text-xs lg:text-sm">
-                    {stat.label}
-                  </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {highlights.map((item, i) => (
+                <div key={i} className="flex items-center gap-3">
+                    <CheckCircle2 className="text-primary size-5" />
+                    <span className="text-sm font-bold text-foreground/80">{item}</span>
                 </div>
               ))}
             </div>
 
-            {/* Buttons */}
-            <div className="mt-10 flex items-center gap-4">
+            <div className="pt-8 flex flex-wrap gap-6 items-center">
               <Link href="/about">
-                <Button>
-                  <span>Read More</span>
+                <Button size="lg" className="group rounded-xl px-10 font-bold uppercase tracking-widest">
+                  More About Me <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <Link href="#contact">
-                <Button variant="outline">
-                  <span>Get in Touch</span>
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Profile Image Card */}
-          <div className="order-1 lg:order-2">
-            <div className="group relative">
-              <div className="bg-muted/50 aspect-[3/4] overflow-hidden rounded-lg shadow-lg">
-                <img
-                  src="/images/profile.png"
-                  alt="Portrait of Foysal Ahmed"
-                  className="size-full object-cover object-bottom transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-              <div className="bg-card border-muted/30 relative mx-6 -mt-20 rounded-lg border p-6 shadow-lg">
-                <p className="text-foreground text-sm font-medium italic">
-                  "Coding is not just my profession—it's my passion. I aim to
-                  craft solutions that are both functional and elegant."
-                </p>
-                <p className="text-muted-foreground mt-2 text-sm">
-                  — Foysal Ahmed
-                </p>
+              <div className="flex -space-x-3">
+                 {[1,2,3].map(i => (
+                    <div key={i} className="size-10 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] font-bold">
+                        {i === 3 ? "20+" : "🚀"}
+                    </div>
+                 ))}
+                 <div className="pl-6 flex flex-col justify-center">
+                    <span className="text-xs font-bold uppercase tracking-tight">20+ Projects Completed</span>
+                 </div>
               </div>
             </div>
           </div>

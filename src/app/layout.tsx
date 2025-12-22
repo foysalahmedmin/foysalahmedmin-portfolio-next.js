@@ -1,9 +1,10 @@
 import AnimationApplier from "@/components/appliers/animation-applier";
+import ThemeApplier from "@/components/appliers/theme-applier";
+import ReduxProvider from "@/providers/redux-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import React from "react";
 import "./globals.css";
-import ReduxProvider from "@/providers/redux-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,9 +73,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReduxProvider>
-          {children}
-
           {/* Appliers */}
+          <ThemeApplier />
+          {children}
           <AnimationApplier />
         </ReduxProvider>
       </body>

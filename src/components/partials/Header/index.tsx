@@ -1,7 +1,9 @@
 "use client";
 
+import ThemeSwitcher from "@/components/ui/theme-switcher";
 import useHash from "@/hooks/utils/use-hash";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import React, { useState } from "react";
 
 type NavLink = {
@@ -9,9 +11,12 @@ type NavLink = {
   name: string;
 };
 
-const navLinks: NavLink[] = [
-  { href: "#home", name: "Home" },
-  { href: "#about", name: "About" },
+const navLinks = [
+  { href: "/", name: "Home" },
+  { href: "/about", name: "About" },
+  { href: "/projects", name: "Projects" },
+  { href: "/articles", name: "Articles" },
+  { href: "/contact", name: "Contact" },
 ];
 
 type THeaderProps = {
@@ -49,18 +54,18 @@ const Header : React.FC<THeaderProps> = ({ className }) => {
         )}
       >
         <div className="flex h-full items-center justify-between px-8">
-          <a
-            href="#home"
+          <Link
+            href="/"
             className="font-display text-xl font-medium tracking-tight transition-opacity duration-300 hover:opacity-80"
             aria-label="Home"
           >
             Foysal<span className="text-primary">.</span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="container hidden flex-1 items-center gap-4 px-0 lg:flex lg:px-16">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
                 href={link.href}
                 className={cn(
@@ -69,12 +74,13 @@ const Header : React.FC<THeaderProps> = ({ className }) => {
                 )}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </nav>
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-4">
+            <ThemeSwitcher />
             <button
               className="flex flex-col space-y-1.5 focus:outline-none lg:hidden"
               onClick={toggleMobileMenu}
@@ -114,7 +120,7 @@ const Header : React.FC<THeaderProps> = ({ className }) => {
       >
         <nav className="flex flex-col items-center gap-4">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
               href={link.href}
               className={cn(
@@ -124,7 +130,7 @@ const Header : React.FC<THeaderProps> = ({ className }) => {
               onClick={closeMobileMenu}
             >
               {link.name}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>

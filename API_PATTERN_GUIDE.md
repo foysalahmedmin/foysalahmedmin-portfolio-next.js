@@ -1,6 +1,6 @@
 # API Pattern Guide
 
-This project follows a consistent pattern similar to `payment-system-server` for handling API routes with proper separation of concerns.
+This project follows a consistent pattern similar for handling API routes with proper separation of concerns.
 
 ## Architecture Pattern
 
