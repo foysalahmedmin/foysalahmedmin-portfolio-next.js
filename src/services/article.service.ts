@@ -3,11 +3,18 @@ import { TArticle } from "@/types/article.type";
 import { TResponse } from "@/types/response.type";
 
 async function handleResponse<T>(res: Response): Promise<TResponse<T>> {
-  const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.message || "Request failed");
+    const errorData = await res.text();
+    let message = "Request failed";
+    try {
+      const parsed = JSON.parse(errorData);
+      message = parsed.message || message;
+    } catch (e) {
+      message = errorData || message;
+    }
+    throw new Error(message);
   }
-  return data;
+  return res.json();
 }
 
 export async function getArticles(params?: Record<string, string>) {
