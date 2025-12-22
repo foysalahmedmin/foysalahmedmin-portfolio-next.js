@@ -28,7 +28,7 @@ export const useClassMutationObserver = ({
   useEffect(() => {
     // Store observers for each element to disconnect on cleanup
     const elementObservers = new Map<Element, MutationObserver>();
-    
+
     // Observe mutations on a single element
     const observeElement = (el: Element) => {
       if (elementObservers.has(el)) return;
@@ -37,7 +37,7 @@ export const useClassMutationObserver = ({
         mutationsList.forEach((mutation) => {
           const target = mutation.target as Element;
 
-          if (callback){
+          if (callback) {
             callback(mutationsList, target);
           }
 
@@ -63,7 +63,6 @@ export const useClassMutationObserver = ({
         observeElement(el);
       });
     };
-
 
     // Initial observation
     observeElements();
@@ -99,5 +98,3 @@ export const useClassMutationObserver = ({
     };
   }, [selector, classNames, options, callback, dynamic]);
 };
-
-export default useClassMutationObserver;
