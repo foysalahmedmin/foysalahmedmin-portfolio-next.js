@@ -1,7 +1,7 @@
 "use client";
 
 import type { OverlayState } from "@/hooks/ui/use-overlay-state";
-import useOverlayState from "@/hooks/ui/use-overlay-state";
+import { useOverlayState } from "@/hooks/ui/use-overlay-state";
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
@@ -291,6 +291,21 @@ const ModalCloseTrigger: React.FC<ButtonProps> = ({
   );
 };
 
-
-export { ModalRoot as Modal, ModalBackdrop, ModalContent, ModalHeader, ModalTitle, ModalBody, ModalFooter, ModalTrigger, ModalCloseTrigger};
-export { modalBackdropVariants , modalContentVariants, modalVariants, useModal, type ModalBackdropProps, type ModalContentProps , type ModalProps };
+export {
+  ModalRoot as Modal,
+  ModalBackdrop,
+  modalBackdropVariants,
+  ModalBody,
+  ModalCloseTrigger,
+  ModalContent,
+  modalContentVariants,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+  ModalTrigger,
+  modalVariants,
+  useModal,
+  type ModalBackdropProps,
+  type ModalContentProps,
+  type ModalProps,
+};
