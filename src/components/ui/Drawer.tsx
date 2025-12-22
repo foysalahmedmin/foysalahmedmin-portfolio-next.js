@@ -2,7 +2,7 @@
 
 import { useClickOutside } from "@/hooks/ui/use-click-outside";
 import type { OverlayState } from "@/hooks/ui/use-overlay-state";
-import useOverlayState from "@/hooks/ui/use-overlay-state";
+import { useOverlayState } from "@/hooks/ui/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
@@ -24,7 +24,7 @@ const drawerVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 const drawerBackdropVariants = cva(
@@ -50,7 +50,7 @@ const drawerBackdropVariants = cva(
       size: "default",
       side: "center",
     },
-  },
+  }
 );
 
 const drawerContentVariants = cva(
@@ -80,7 +80,7 @@ const drawerContentVariants = cva(
       size: "default",
       side: "left",
     },
-  },
+  }
 );
 
 type DrawerContextType = OverlayState &
@@ -163,7 +163,7 @@ const DrawerBackdrop: React.FC<DrawerBackdropProps> = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
       className={cn(
         drawerBackdropVariants({ variant, size, side, className }),
-        { [cn("opacity-100", activeClassName)]: isOpen },
+        { [cn("opacity-100", activeClassName)]: isOpen }
       )}
       {...props}
     >
@@ -243,7 +243,7 @@ const DrawerFooter: React.FC<ComponentProps<"div">> = ({
   <div
     className={cn(
       "flex items-center justify-end gap-3 border-t p-6",
-      className,
+      className
     )}
     {...props}
   >
@@ -298,6 +298,21 @@ const DrawerCloseTrigger: React.FC<ButtonProps> = ({
 };
 
 // Export components separately (shadcn style)
-export { DrawerRoot as Drawer, DrawerBackdrop, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody, DrawerFooter, DrawerTrigger, DrawerCloseTrigger };
-export { drawerBackdropVariants, drawerContentVariants, drawerVariants, useDrawer, type DrawerBackdropProps, type DrawerContentProps, type DrawerProps };
-
+export {
+  DrawerRoot as Drawer,
+  DrawerBackdrop,
+  drawerBackdropVariants,
+  DrawerBody,
+  DrawerCloseTrigger,
+  DrawerContent,
+  drawerContentVariants,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  drawerVariants,
+  useDrawer,
+  type DrawerBackdropProps,
+  type DrawerContentProps,
+  type DrawerProps,
+};

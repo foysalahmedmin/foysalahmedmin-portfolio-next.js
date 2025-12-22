@@ -93,7 +93,7 @@ type CarouselContextValue = {
 
 // ----- Custom Hooks -----
 const useCarouselNavigation = (
-  api?: EmblaCarouselType,
+  api?: EmblaCarouselType
 ): CarouselNavigationState => {
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
@@ -123,14 +123,14 @@ const useCarouselNavigation = (
 };
 
 const useCarouselPagination = (
-  api?: EmblaCarouselType,
+  api?: EmblaCarouselType
 ): CarouselPaginationState => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
 
   const scrollToIndex = useCallback(
     (index: number) => api?.scrollTo(index),
-    [api],
+    [api]
   );
 
   const updatePaginationState = useCallback(() => {
@@ -155,7 +155,7 @@ const useCarouselPagination = (
 };
 
 const useCarouselAutoplay = (
-  api?: EmblaCarouselType,
+  api?: EmblaCarouselType
 ): CarouselAutoplayState => {
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -200,7 +200,7 @@ const useCarouselAutoplay = (
 
 const useCarouselKeyboard = (
   navigation: CarouselNavigationState,
-  direction: CarouselDirection = "ltr",
+  direction: CarouselDirection = "ltr"
 ) => {
   return useCallback(
     (event: KeyboardEvent | KeyboardEvent) => {
@@ -217,7 +217,7 @@ const useCarouselKeyboard = (
         else navigation.scrollNext();
       }
     },
-    [navigation, direction],
+    [navigation, direction]
   );
 };
 
@@ -232,7 +232,7 @@ const useCarousel = (): CarouselContextValue => {
 
 // ----- Utility Functions -----
 const normalizeAutoplayConfig = (
-  autoplay?: boolean | CarouselAutoplayConfig,
+  autoplay?: boolean | CarouselAutoplayConfig
 ): CarouselAutoplayConfig => ({
   enabled: false,
   delay: 5000,
@@ -265,7 +265,7 @@ const CarouselRoot = ({
 
   const [carouselRef, api] = useEmblaCarousel(
     { ...opts, axis: orientation === "horizontal" ? "x" : "y", direction },
-    emblaPlugins,
+    emblaPlugins
   );
 
   const navigation = useCarouselNavigation(api);
@@ -312,7 +312,7 @@ const CarouselContent = ({ className, ...props }: CarouselContentProps) => {
         className={cn(
           "flex h-full",
           orientation === "vertical" && "flex-col",
-          className,
+          className
         )}
         {...props}
       />
@@ -346,7 +346,7 @@ const CarouselPreviousTrigger = ({
         orientation === "horizontal"
           ? "top-1/2 left-0 -translate-y-1/2"
           : "top-0 left-1/2 -translate-x-1/2 rotate-90",
-        className,
+        className
       )}
       disabled={!navigation.canScrollPrev}
       onClick={navigation.scrollPrev}
@@ -375,7 +375,7 @@ const CarouselNextTrigger = ({
         orientation === "horizontal"
           ? "top-1/2 right-0 -translate-y-1/2"
           : "bottom-0 left-1/2 -translate-x-1/2 rotate-90",
-        className,
+        className
       )}
       disabled={!navigation.canScrollNext}
       onClick={navigation.scrollNext}
@@ -399,7 +399,7 @@ const CarouselPaginationTrigger = ({
     className={cn(
       "bg-muted h-0.5 w-full rounded-full px-0",
       isActive && cn("bg-accent", activeClassName),
-      className,
+      className
     )}
     variant={variant}
     size={size}
@@ -418,7 +418,7 @@ const CarouselPagination = ({
     <div
       className={cn(
         "absolute right-0 bottom-4 left-0 mx-auto flex justify-center gap-1",
-        className,
+        className
       )}
       role="tablist"
       aria-label="Carousel pagination"
@@ -462,5 +462,23 @@ const ArrowIcon = ({ direction }: { direction: "left" | "right" }) => (
   </svg>
 );
 
-export { CarouselRoot as Carousel, CarouselContent, CarouselItem, CarouselPreviousTrigger, CarouselNextTrigger, CarouselPagination, CarouselPaginationTrigger };
-export { useCarousel, type CarouselAutoplayConfig, type CarouselContentProps, type CarouselContextValue, type CarouselDirection, type CarouselItemProps, type CarouselOrientation, type CarouselPaginationProps, type CarouselPaginationTriggerProps, type CarouselRootProps, type CarouselTriggerProps };
+export {
+  CarouselRoot as Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNextTrigger,
+  CarouselPagination,
+  CarouselPaginationTrigger,
+  CarouselPreviousTrigger,
+  useCarousel,
+  type CarouselAutoplayConfig,
+  type CarouselContentProps,
+  type CarouselContextValue,
+  type CarouselDirection,
+  type CarouselItemProps,
+  type CarouselOrientation,
+  type CarouselPaginationProps,
+  type CarouselPaginationTriggerProps,
+  type CarouselRootProps,
+  type CarouselTriggerProps,
+};
