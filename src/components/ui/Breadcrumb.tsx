@@ -84,4 +84,3 @@ const Breadcrumb = ({ items }: TBreadcrumbProps) => {
 };
 
 export { Breadcrumb, BreadcrumbItem, type TBreadcrumbProps as BreadcrumbProps };
-

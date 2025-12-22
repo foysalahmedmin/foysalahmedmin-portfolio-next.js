@@ -1,12 +1,12 @@
-import { ENV } from '@/config';
-import connectDB from '@/lib/db';
-import User from '@/app/api/users/user.model';
-import AppError from '@/builder/app-error';
-import httpStatus from 'http-status';
-import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { TRole, TJwtPayload } from '@/types/jsonwebtoken.type';
+import User from "@/app/api/users/user.model";
+import AppError from "@/builder/app-error";
+import { ENV } from "@/config";
+import connectDB from "@/lib/db";
+import { TJwtPayload, TRole } from "@/types/jsonwebtoken.type";
+import httpStatus from "http-status";
+import jwt, { JwtPayload, TokenExpiredError } from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
 export type AuthUser = JwtPayload & TJwtPayload;
 
@@ -18,66 +18,67 @@ export interface AuthRequest extends NextRequest {
 const getUser = async (_id: string) => {
   await connectDB();
   const user = await User.findById(_id)
-    .select('+password_changed_at +is_deleted')
+    .select("+password_changed_at +is_deleted")
     .lean();
 
   return user;
 };
 
-export const auth = (...roles: (TRole | 'guest')[]) => {
+export const auth = (...roles: (TRole | "guest")[]) => {
   return async (
     req: Request,
-    handler: (req: AuthRequest) => Promise<NextResponse>,
+    handler: (req: AuthRequest) => Promise<NextResponse>
   ): Promise<NextResponse> => {
     const authReq = req as AuthRequest;
-    
+
     const cookieStore = await cookies();
-    let token = cookieStore.get('access_token')?.value;
-    
+    let token = cookieStore.get("access_token")?.value;
+
     if (!token) {
-      const authorization = authReq.headers.get('authorization');
-      token = authorization?.split(' ')?.[1];
+      const authorization = authReq.headers.get("authorization");
+      token = authorization?.split(" ")?.[1];
     }
 
-    if (roles.includes('guest') && !token) {
+    if (roles.includes("guest") && !token) {
       return await handler(authReq);
     }
 
     if (!token) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'No token provided.');
+      throw new AppError(httpStatus.UNAUTHORIZED, "No token provided.");
     }
 
     let decoded: JwtPayload;
     try {
-      decoded = jwt.verify(
-        token,
-        ENV.jwt_access_secret,
-      ) as JwtPayload;
+      decoded = jwt.verify(token, ENV.jwt_access_secret) as JwtPayload;
     } catch (err) {
       if (err instanceof TokenExpiredError) {
-        throw new AppError(httpStatus.UNAUTHORIZED, 'Token expired');
+        throw new AppError(httpStatus.UNAUTHORIZED, "Token expired");
       }
-      throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid token');
+      throw new AppError(httpStatus.UNAUTHORIZED, "Invalid token");
     }
 
-    const { _id, role = 'user', iat } = decoded as TJwtPayload & { iat?: number };
+    const {
+      _id,
+      role = "user",
+      iat,
+    } = decoded as TJwtPayload & { iat?: number };
 
-    if (!_id || !role || typeof iat !== 'number') {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid token.');
+    if (!_id || !role || typeof iat !== "number") {
+      throw new AppError(httpStatus.UNAUTHORIZED, "Invalid token.");
     }
 
     const user = await getUser(_id);
 
     if (!user) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
+      throw new AppError(httpStatus.UNAUTHORIZED, "User not found");
     }
 
     if (user.is_deleted) {
-      throw new AppError(httpStatus.FORBIDDEN, 'User is deleted');
+      throw new AppError(httpStatus.FORBIDDEN, "User is deleted");
     }
 
-    if (user?.status === 'blocked') {
-      throw new AppError(httpStatus.FORBIDDEN, 'User is blocked');
+    if (user?.status === "blocked") {
+      throw new AppError(httpStatus.FORBIDDEN, "User is blocked");
     }
 
     if (user?.password_changed_at) {
@@ -87,13 +88,16 @@ export const auth = (...roles: (TRole | 'guest')[]) => {
       if (passwordChangedAt > tokenIssuedAt) {
         throw new AppError(
           httpStatus.FORBIDDEN,
-          'Password recently changed. Please login again.',
+          "Password recently changed. Please signin again."
         );
       }
     }
 
-    if (!roles.includes(role as TRole) || !roles.includes(user?.role as TRole)) {
-      throw new AppError(httpStatus.FORBIDDEN, 'Access denied');
+    if (
+      !roles.includes(role as TRole) ||
+      !roles.includes(user?.role as TRole)
+    ) {
+      throw new AppError(httpStatus.FORBIDDEN, "Access denied");
     }
 
     authReq.user = {
@@ -113,8 +117,15 @@ export const auth = (...roles: (TRole | 'guest')[]) => {
 // Legacy wrapper for backward compatibility
 export async function withAuth(
   req: AuthRequest,
-  handler: (req: AuthRequest) => Promise<NextResponse>,
+  handler: (req: AuthRequest) => Promise<NextResponse>
 ) {
-  return auth('user', 'admin', 'super-admin', 'editor', 'author', 'contributor', 'subscriber')(req, handler);
+  return auth(
+    "user",
+    "admin",
+    "super-admin",
+    "editor",
+    "author",
+    "contributor",
+    "subscriber"
+  )(req, handler);
 }
-
