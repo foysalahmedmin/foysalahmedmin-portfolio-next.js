@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import Magnetic from "@/components/ui/magnetic";
 import { TProject } from "@/types/project.type";
-import { ArrowLeft, ExternalLink, Github, Tag } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowLeft, Calendar, ExternalLink, Eye, Github, Layout, Tag, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -21,110 +23,202 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
   );
 
   return (
-    <main className="min-h-screen pt-16">
-      {/* Hero Section */}
-      <section className="bg-muted/30 border-b border-border py-20 lg:py-32">
-        <div className="container px-6 mx-auto">
-          <Button 
-            onClick={() => router.back()} 
-            variant="ghost" 
-            className="mb-12 hover:bg-transparent hover:text-primary transition-colors pl-0"
+    <main className="min-h-screen bg-background">
+      {/* Hero Header */}
+      <section className="relative overflow-hidden pt-32 pb-20 lg:pt-48 lg:pb-32">
+        <div className="absolute inset-0 z-0">
+            <div className="absolute top-0 left-1/2 h-[600px] w-full -translate-x-1/2 bg-primary/5 blur-[120px] mask-radial" />
+        </div>
+        
+        <div className="container relative z-10 px-6 mx-auto">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <ArrowLeft className="mr-2 size-4" /> Back to Projects
-          </Button>
+            <Button 
+                onClick={() => router.back()} 
+                variant="ghost" 
+                className="group mb-12 text-muted-foreground hover:text-primary pl-0"
+            >
+                <ArrowLeft className="mr-2 size-4 transition-transform group-hover:-translate-x-1" /> Back to Projects
+            </Button>
+          </motion.div>
           
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-            <div>
-              <div className="mb-6 flex flex-wrap gap-3">
+          <div className="max-w-4xl">
+            <motion.div 
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.1 }}
+               className="mb-8 flex flex-wrap gap-3"
+            >
                 {project.tags?.map((tag, i) => (
-                    <span key={i} className="flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                    <span key={i} className="flex items-center gap-1.5 rounded-full glass border-primary/20 px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-primary">
                         <Tag className="size-3" /> {tag}
                     </span>
                 ))}
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">{project.name}</h1>
-              <p className="text-muted-foreground mt-8 text-lg leading-relaxed md:text-xl">
-                {project.description}
-              </p>
-              
-              <div className="mt-12 flex flex-wrap gap-8 text-sm">
-                  <div>
-                      <p className="font-bold text-foreground">Date</p>
-                      <p className="text-muted-foreground mt-1">
-                          {project.started_at ? new Date(project.started_at).toLocaleDateString() : 'Recently'}
-                      </p>
-                  </div>
-                  <div>
-                      <p className="font-bold text-foreground">Status</p>
-                      <p className="text-primary mt-1 font-bold uppercase tracking-widest">{project.status}</p>
-                  </div>
-              </div>
-            </div>
+            </motion.div>
+
+            <motion.h1 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="text-5xl font-black tracking-tighter md:text-7xl lg:text-9xl leading-[0.9] text-foreground"
+            >
+                {project.name}
+            </motion.h1>
+
+            <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-muted-foreground mt-12 text-xl leading-relaxed md:text-2xl max-w-2xl font-medium"
+            >
+            {project.description}
+            </motion.p>
           </div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="py-24 lg:py-32">
+      {/* Main Content Grid */}
+      <section className="pb-32">
         <div className="container px-6 mx-auto">
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
-            {/* Project Banner & Content */}
-            <div className="lg:col-span-8 space-y-16">
-                <div className="relative aspect-video w-full overflow-hidden rounded-3xl shadow-2xl">
+            
+            {/* Left Column: Visuals & Content */}
+            <div className="lg:col-span-8 space-y-20">
+                <motion.div 
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] bg-card shadow-2xl border border-border/50"
+                >
                     <img 
                         src={project.thumbnail || "/images/placeholder.png"} 
                         alt={project.name} 
                         className="h-full w-full object-cover" 
                     />
-                </div>
+                    <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[2.5rem]" />
+                </motion.div>
 
-                <div 
-                    className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary"
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="prose prose-xl dark:prose-invert max-w-none 
+                        prose-headings:text-foreground prose-headings:font-black prose-headings:tracking-tighter
+                        prose-p:text-muted-foreground/80 prose-p:leading-relaxed
+                        prose-a:text-primary prose-a:font-bold prose-a:no-underline hover:prose-a:underline
+                        prose-strong:text-foreground prose-strong:font-bold"
                     dangerouslySetInnerHTML={{ __html: project.content }}
                 />
 
                 {/* Gallery */}
                 {project.images && project.images.length > 0 && (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {project.images.map((img, i) => (
-                            <div key={i} className="aspect-video overflow-hidden rounded-2xl border border-border">
-                                <img src={img} alt={`${project.name} screenshot ${i+1}`} className="h-full w-full object-cover hover:scale-105 transition-transform duration-500" />
-                            </div>
-                        ))}
+                    <div className="space-y-10 pt-10">
+                        <h3 className="text-3xl font-black tracking-tighter">Project Highlights</h3>
+                        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                            {project.images.map((img, i) => (
+                                <motion.div 
+                                    key={i}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="group relative aspect-[4/3] overflow-hidden rounded-3xl border border-border/50 shadow-lg cursor-zoom-in"
+                                >
+                                    <img 
+                                        src={img} 
+                                        alt={`${project.name} screenshot ${i+1}`} 
+                                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                    />
+                                    <div className="absolute inset-0 bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
+                                       <Eye className="text-white size-10" />
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* Sidebar Tools/Resources */}
-            <aside className="lg:col-span-4 space-y-12 h-fit lg:sticky lg:top-32">
-                <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-                    <h3 className="mb-6 text-xl font-bold">Project Info</h3>
-                    <div className="space-y-6 text-sm">
-                        <div className="flex items-center justify-between border-b border-border pb-4">
-                            <span className="text-muted-foreground">Category</span>
-                            <span className="font-bold text-foreground">{project.category?.name || "Web Development"}</span>
-                        </div>
-                        <div className="flex items-center justify-between border-b border-border pb-4">
-                            <span className="text-muted-foreground">Author</span>
-                            <span className="font-bold text-foreground">{project.author?.name || "Foysal Ahmed"}</span>
+            {/* Right Column: Sticky Sidebar */}
+            <aside className="lg:col-span-4 h-fit lg:sticky lg:top-32 space-y-8">
+                <motion.div 
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="rounded-[2.5rem] glass-card p-10 space-y-10"
+                >
+                    <div className="space-y-6">
+                        <h3 className="text-2xl font-black tracking-tighter">Project Logistics</h3>
+                        
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-4">
+                                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                    <Layout className="size-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Category</p>
+                                    <p className="font-bold">{project.category?.name || "Web Development"}</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                    <Calendar className="size-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Release Date</p>
+                                    <p className="font-bold">
+                                        {project.started_at ? new Date(project.started_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                    <User className="size-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Project Lead</p>
+                                    <p className="font-bold">{project.author?.name || "Foysal Ahmed"}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div className="mt-10 space-y-4">
-                        <Button className="w-full uppercase font-bold tracking-widest" size="lg">
-                            Live Demo <ExternalLink className="ml-2 size-4" />
-                        </Button>
-                        <Button variant="outline" className="w-full uppercase font-bold tracking-widest" size="lg">
-                            Source Code <Github className="ml-2 size-4" />
-                        </Button>
+                    <div className="space-y-4">
+                        <Magnetic strength={0.1}>
+                           <Button className="w-full h-16 rounded-2xl text-base font-black uppercase tracking-widest shadow-xl shadow-primary/20">
+                                Live Preview <ExternalLink className="ml-2 size-5" />
+                           </Button>
+                        </Magnetic>
+                        <Magnetic strength={0.1}>
+                           <Button variant="outline" className="w-full h-16 rounded-2xl text-base font-black uppercase tracking-widest border-2">
+                                Source Code <Github className="ml-2 size-5" />
+                           </Button>
+                        </Magnetic>
                     </div>
-                </div>
+                </motion.div>
 
-                <div className="rounded-2xl border border-border bg-muted/30 p-8 text-center lg:text-left">
-                     <h4 className="mb-4 font-bold">Interested in this?</h4>
-                     <p className="text-muted-foreground text-sm leading-relaxed">Let's collaborate on your next project and build something amazing together.</p>
-                     <Link href="/contact" className="mt-6 inline-block text-sm font-bold text-primary uppercase tracking-widest hover:underline underline-offset-4">Get in touch →</Link>
-                </div>
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 }}
+                    className="rounded-[2.5rem] bg-primary p-10 text-primary-foreground overflow-hidden relative group"
+                >
+                     <div className="relative z-10">
+                        <h4 className="text-2xl font-black tracking-tighter leading-tight">Ready to build something phenomenal?</h4>
+                        <p className="mt-4 text-primary-foreground/80 font-medium">I'm currently accepting new projects and collaborations.</p>
+                        <Link href="/contact" className="mt-8 inline-flex items-center gap-2 font-black uppercase tracking-[0.2em] text-sm group/link">
+                            Start Conversation 
+                            <ArrowLeft className="size-4 rotate-180 transition-transform group-hover/link:translate-x-2" />
+                        </Link>
+                     </div>
+                     <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 size-40 rounded-full bg-white/10 blur-3xl group-hover:scale-150 transition-transform duration-1000" />
+                </motion.div>
             </aside>
           </div>
         </div>
