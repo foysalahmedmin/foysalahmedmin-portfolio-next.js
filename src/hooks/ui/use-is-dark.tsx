@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const useIsDark = () => {
+export const useIsDark = () => {
   const getIsDark = () =>
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");
@@ -24,5 +24,3 @@ const useIsDark = () => {
 
   return isDark;
 };
-
-export default useIsDark;

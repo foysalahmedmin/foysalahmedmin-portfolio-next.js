@@ -12,10 +12,10 @@ const breakpoints = {
 type Breakpoint = keyof typeof breakpoints;
 type QueryType = "up" | "down" | "between" | "only";
 
-const useResponsive = (
+export const useResponsive = (
   query: QueryType,
   start?: Breakpoint,
-  end?: Breakpoint,
+  end?: Breakpoint
 ): boolean => {
   const getMatches = (): boolean => {
     const min = start ? breakpoints[start] : null;
@@ -44,7 +44,7 @@ const useResponsive = (
   };
 
   const [matches, setMatches] = useState<boolean>(
-    typeof window !== "undefined" ? getMatches() : false,
+    typeof window !== "undefined" ? getMatches() : false
   );
 
   useEffect(() => {
@@ -55,5 +55,3 @@ const useResponsive = (
 
   return matches;
 };
-
-export default useResponsive;

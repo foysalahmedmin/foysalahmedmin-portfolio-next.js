@@ -9,7 +9,7 @@ type TUsePageScrollOptions = {
   enabled?: boolean;
 };
 
-const usePageScroll = ({
+export const usePageScroll = ({
   onNext,
   onPrev,
   buffer = 0,
@@ -143,5 +143,3 @@ const usePageScroll = ({
 
   return { setRef };
 };
-
-export default usePageScroll;

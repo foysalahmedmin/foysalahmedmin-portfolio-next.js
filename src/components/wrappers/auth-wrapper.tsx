@@ -1,26 +1,28 @@
 "use client";
 
 import Loading from "@/components/partials/loading";
-import useUser from "@/hooks/states/use-user";
+import { RootState } from "@/redux/store";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
+import { useSelector } from "react-redux";
 
 interface PrivateRouteProps {
   children: ReactNode;
 }
 
 const AuthWrapper = ({ children }: PrivateRouteProps) => {
-  const { user, isLoading } = useUser();
+  const isLoading = false;
+  const { is_authenticated } = useSelector((store: RootState) => store.auth);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !user?.isAuthenticated) {
+    if (!isLoading && !is_authenticated) {
       router.replace(`/auth/sign-in?from=${encodeURIComponent(pathname)}`);
     }
-  }, [isLoading, user, pathname, router]);
+  }, [isLoading, is_authenticated, pathname, router]);
 
-  if (isLoading || (!user?.isAuthenticated && typeof window !== "undefined")) {
+  if (isLoading || (!is_authenticated && typeof window !== "undefined")) {
     return <Loading />;
   }
 
