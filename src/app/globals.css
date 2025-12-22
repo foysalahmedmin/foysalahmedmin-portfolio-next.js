@@ -43,6 +43,7 @@
   /* animation */
   --animate-checkbox: checkbox 0.3s ease-in-out;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
   @keyframes checkbox {
     0% {
@@ -64,6 +65,35 @@
       transform: translateY(-20px);
     }
   }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 0.1;
+    }
+  }
+}
+
+/* Glassmorphism */
+@utility glass {
+  background: color-mix(in srgb, var(--background) 70%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+@utility glass-card {
+  background: color-mix(in srgb, var(--card) 40%, transparent);
+  backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+@utility glass-dark {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* accent color */
@@ -131,4 +161,16 @@
 @layer utilities {
   @import "../assets/styles/utilities/loading.css";
   @import "../assets/styles/utilities/intersection-observer.css";
+
+  .text-glow {
+    text-shadow: 0 0 15px color-mix(in srgb, var(--primary) 50%, transparent);
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .mask-radial {
+    mask-image: radial-gradient(circle, black, transparent 80%);
+  }
 }
