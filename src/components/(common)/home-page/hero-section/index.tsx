@@ -2,13 +2,12 @@
 
 import Magnetic from "@/components/ui/magnetic";
 import {
-  Modal,
-  ModalBackdrop,
-  ModalContent,
-  ModalTrigger,
+    Modal,
+    ModalBackdrop,
+    ModalContent,
+    ModalTrigger,
 } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -36,15 +35,28 @@ const slides = [
 
 const HeroSection: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const youtubeVideoId = "UKpICjcmWZg";
   const youtubeVideoLink = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&loop=1&playlist=${youtubeVideoId}&controls=0&mute=1`;
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setSelectedIndex((prev) => (prev + 1) % slides.length);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setSelectedIndex((prev) => (prev + 1) % slides.length);
+        setIsTransitioning(false);
+      }, 500);
     }, 6000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleSlideChange = (index: number) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setSelectedIndex(index);
+      setIsTransitioning(false);
+    }, 500);
+  };
 
   return (
     <section className="bg-background relative h-screen min-h-[800px] w-full overflow-hidden">
@@ -56,76 +68,66 @@ const HeroSection: React.FC = () => {
           style={{ animationDelay: "2s" }}
         />
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedIndex}
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0"
-          >
-            <img
-              src={slides[selectedIndex].image || "/images/hero-banner.png"}
-              alt=""
-              className="h-full w-full object-cover brightness-[0.2] grayscale"
-            />
-            <div className="from-background/80 to-background absolute inset-0 bg-gradient-to-b via-transparent" />
-          </motion.div>
-        </AnimatePresence>
+        <div className="absolute inset-0">
+          {slides.map((slide, index) => (
+            <div
+              key={index}
+              className={cn(
+                "absolute inset-0 transition-opacity duration-1000 ease-in-out",
+                selectedIndex === index ? "opacity-100 scale-100" : "opacity-0 scale-110"
+              )}
+            >
+              <img
+                src={slide.image || "/images/hero-banner.png"}
+                alt=""
+                className="h-full w-full object-cover brightness-[0.2] grayscale"
+              />
+              <div className="from-background/80 to-background absolute inset-0 bg-gradient-to-b via-transparent" />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 container mx-auto flex h-full flex-col justify-center px-6">
         <div className="max-w-4xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="glass border-primary/20 text-primary mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2 text-[11px] font-bold tracking-[0.2em] uppercase"
-          >
+          <div className="fade-down active mb-8 inline-flex items-center gap-3 rounded-full border border-primary/20 bg-background/20 backdrop-blur-md px-5 py-2 text-[11px] font-bold tracking-[0.2em] uppercase text-primary">
             <Sparkles className="size-4 animate-pulse" />
             <span>Available for new projects</span>
-          </motion.div>
+          </div>
 
-          <div className="overflow-visible">
-            <h1 className="text-foreground text-6xl leading-[0.9] font-black tracking-tighter md:text-8xl lg:text-9xl">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={selectedIndex}
-                  initial={{ opacity: 0, y: 40, skewY: 7 }}
-                  animate={{ opacity: 1, y: 0, skewY: 0 }}
-                  exit={{ opacity: 0, y: -40, skewY: -7 }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          <div className="overflow-hidden">
+            <h1 
+              className={cn(
+                "text-foreground text-6xl leading-[0.9] font-black tracking-tighter md:text-8xl lg:text-9xl transition-all duration-700 ease-out",
+                isTransitioning ? "opacity-0 translate-y-10 skew-y-6" : "opacity-100 translate-y-0 skew-y-0"
+              )}
+            >
+              {slides[selectedIndex].title.split(" ").map((word, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    word === slides[selectedIndex].highlight
+                      ? "text-primary text-glow"
+                      : "text-foreground"
+                  )}
                 >
-                  {slides[selectedIndex].title.split(" ").map((word, i) => (
-                    <span
-                      key={i}
-                      className={cn(
-                        word === slides[selectedIndex].highlight
-                          ? "text-primary text-glow"
-                          : "text-foreground"
-                      )}
-                    >
-                      {word}{" "}
-                    </span>
-                  ))}
-                </motion.div>
-              </AnimatePresence>
+                  {word}{" "}
+                </span>
+              ))}
             </h1>
           </div>
 
-          <motion.p
-            key={`p-${selectedIndex}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-muted-foreground/80 mt-10 max-w-2xl text-xl leading-relaxed md:text-2xl"
+          <p
+            className={cn(
+              "text-muted-foreground/80 mt-10 max-w-2xl text-xl leading-relaxed md:text-2xl transition-all duration-700 delay-100 ease-out",
+              isTransitioning ? "opacity-0 translate-y-10" : "opacity-100 translate-y-0"
+            )}
           >
             {slides[selectedIndex].subtitle}
-          </motion.p>
+          </p>
 
-          <div className="mt-14 flex flex-wrap items-center gap-6">
+          <div className="mt-14 flex flex-wrap items-center gap-6 fade-up active delay-300">
             <Magnetic strength={0.2}>
               <Link
                 href="/projects"
@@ -171,7 +173,7 @@ const HeroSection: React.FC = () => {
         {slides.map((_, i) => (
           <button
             key={i}
-            onClick={() => setSelectedIndex(i)}
+            onClick={() => handleSlideChange(i)}
             className="group flex items-center gap-4"
           >
             <span
@@ -197,24 +199,16 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Unique Scroll indicator */}
-      <motion.div
-        animate={{ y: [0, 15, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2"
-      >
+      <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2">
         <Link href="#about" className="flex flex-col items-center gap-3">
-          <div className="border-muted-foreground/20 h-12 w-7 rounded-full border-2 p-1">
-            <motion.div
-              animate={{ y: [0, 20, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="bg-primary h-2 w-full rounded-full"
-            />
+          <div className="border-muted-foreground/20 h-12 w-7 rounded-full border-2 p-1 relative">
+            <div className="bg-primary h-2 w-full rounded-full animate-bounce-slow absolute top-1 left-0 right-0 px-1" />
           </div>
           <span className="text-muted-foreground/50 text-[10px] font-bold tracking-[0.3em] uppercase">
             Scroll
           </span>
         </Link>
-      </motion.div>
+      </div>
     </section>
   );
 };

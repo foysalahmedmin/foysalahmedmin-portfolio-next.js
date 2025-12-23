@@ -20,7 +20,6 @@
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-class-names": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "^12.23.26",
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.526.0",

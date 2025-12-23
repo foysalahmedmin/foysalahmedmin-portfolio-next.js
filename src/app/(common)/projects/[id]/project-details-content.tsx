@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import Magnetic from "@/components/ui/magnetic";
 import { TProject } from "@/types/project.type";
-import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, ExternalLink, Eye, Github, Layout, Tag, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -31,11 +30,7 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
         </div>
         
         <div className="container relative z-10 px-6 mx-auto">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="fade-left active">
             <Button 
                 onClick={() => router.back()} 
                 variant="ghost" 
@@ -43,39 +38,24 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
             >
                 <ArrowLeft className="mr-2 size-4 transition-transform group-hover:-translate-x-1" /> Back to Projects
             </Button>
-          </motion.div>
+          </div>
           
           <div className="max-w-4xl">
-            <motion.div 
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ delay: 0.1 }}
-               className="mb-8 flex flex-wrap gap-3"
-            >
+            <div className="mb-8 flex flex-wrap gap-3 fade-up active delay-100">
                 {project.tags?.map((tag, i) => (
                     <span key={i} className="flex items-center gap-1.5 rounded-full glass border-primary/20 px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-primary">
                         <Tag className="size-3" /> {tag}
                     </span>
                 ))}
-            </motion.div>
+            </div>
 
-            <motion.h1 
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="text-5xl font-black tracking-tighter md:text-7xl lg:text-9xl leading-[0.9] text-foreground"
-            >
+            <h1 className="text-5xl font-black tracking-tighter md:text-7xl lg:text-9xl leading-[0.9] text-foreground skew-up active delay-200">
                 {project.name}
-            </motion.h1>
+            </h1>
 
-            <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-muted-foreground mt-12 text-xl leading-relaxed md:text-2xl max-w-2xl font-medium"
-            >
+            <p className="text-muted-foreground mt-12 text-xl leading-relaxed md:text-2xl max-w-2xl font-medium fade-up active delay-300">
             {project.description}
-            </motion.p>
+            </p>
           </div>
         </div>
       </section>
@@ -87,45 +67,34 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
             
             {/* Left Column: Visuals & Content */}
             <div className="lg:col-span-8 space-y-20">
-                <motion.div 
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] bg-card shadow-2xl border border-border/50"
-                >
+                <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] bg-card shadow-2xl border border-border/50 fade-up">
                     <img 
                         src={project.thumbnail || "/images/placeholder.png"} 
                         alt={project.name} 
                         className="h-full w-full object-cover" 
                     />
                     <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[2.5rem]" />
-                </motion.div>
+                </div>
 
-                <motion.div 
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                <div 
                     className="prose prose-xl dark:prose-invert max-w-none 
                         prose-headings:text-foreground prose-headings:font-black prose-headings:tracking-tighter
                         prose-p:text-muted-foreground/80 prose-p:leading-relaxed
                         prose-a:text-primary prose-a:font-bold prose-a:no-underline hover:prose-a:underline
-                        prose-strong:text-foreground prose-strong:font-bold"
+                        prose-strong:text-foreground prose-strong:font-bold fade-up"
                     dangerouslySetInnerHTML={{ __html: project.content }}
                 />
 
                 {/* Gallery */}
                 {project.images && project.images.length > 0 && (
                     <div className="space-y-10 pt-10">
-                        <h3 className="text-3xl font-black tracking-tighter">Project Highlights</h3>
+                        <h3 className="text-3xl font-black tracking-tighter fade-up">Project Highlights</h3>
                         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                             {project.images.map((img, i) => (
-                                <motion.div 
+                                <div 
                                     key={i}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="group relative aspect-[4/3] overflow-hidden rounded-3xl border border-border/50 shadow-lg cursor-zoom-in"
+                                    className="group relative aspect-[4/3] overflow-hidden rounded-3xl border border-border/50 shadow-lg cursor-zoom-in scale-in"
+                                    style={{ transitionDelay: `${i * 100}ms` } as React.CSSProperties}
                                 >
                                     <img 
                                         src={img} 
@@ -135,7 +104,7 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
                                     <div className="absolute inset-0 bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
                                        <Eye className="text-white size-10" />
                                     </div>
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -144,12 +113,7 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
 
             {/* Right Column: Sticky Sidebar */}
             <aside className="lg:col-span-4 h-fit lg:sticky lg:top-32 space-y-8">
-                <motion.div 
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="rounded-[2.5rem] glass-card p-10 space-y-10"
-                >
+                <div className="rounded-[2.5rem] glass-card p-10 space-y-10 fade-left">
                     <div className="space-y-6">
                         <h3 className="text-2xl font-black tracking-tighter">Project Logistics</h3>
                         
@@ -200,15 +164,9 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
                            </Button>
                         </Magnetic>
                     </div>
-                </motion.div>
+                </div>
 
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 }}
-                    className="rounded-[2.5rem] bg-primary p-10 text-primary-foreground overflow-hidden relative group"
-                >
+                <div className="rounded-[2.5rem] bg-primary p-10 text-primary-foreground overflow-hidden relative group fade-up">
                      <div className="relative z-10">
                         <h4 className="text-2xl font-black tracking-tighter leading-tight">Ready to build something phenomenal?</h4>
                         <p className="mt-4 text-primary-foreground/80 font-medium">I'm currently accepting new projects and collaborations.</p>
@@ -218,7 +176,7 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
                         </Link>
                      </div>
                      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 size-40 rounded-full bg-white/10 blur-3xl group-hover:scale-150 transition-transform duration-1000" />
-                </motion.div>
+                </div>
             </aside>
           </div>
         </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import React, { useRef, useState } from "react";
 
 interface MagneticProps {
@@ -14,10 +13,12 @@ export default function Magnetic({ children, strength = 0.5 }: MagneticProps) {
 
   const handleMouse = (e: React.MouseEvent) => {
     const { clientX, clientY } = e;
-    const { height, width, left, top } = ref.current!.getBoundingClientRect();
-    const middleX = clientX - (left + width / 2);
-    const middleY = clientY - (top + height / 2);
-    setPosition({ x: middleX * strength, y: middleY * strength });
+    if (ref.current) {
+      const { height, width, left, top } = ref.current.getBoundingClientRect();
+      const middleX = clientX - (left + width / 2);
+      const middleY = clientY - (top + height / 2);
+      setPosition({ x: middleX * strength, y: middleY * strength });
+    }
   };
 
   const reset = () => {
@@ -27,15 +28,17 @@ export default function Magnetic({ children, strength = 0.5 }: MagneticProps) {
   const { x, y } = position;
 
   return (
-    <motion.div
-      style={{ position: "relative" }}
+    <div
+      style={{ 
+        position: "relative",
+        transform: `translate(${x}px, ${y}px)`,
+        transition: "transform 0.3s cubic-bezier(0.33, 1, 0.68, 1)"
+      }}
       ref={ref}
       onMouseMove={handleMouse}
       onMouseLeave={reset}
-      animate={{ x, y }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

@@ -18,10 +18,10 @@ const SkillsSection: React.FC = () => {
     <section id="skills" className="py-24 lg:py-32 overflow-hidden">
       <div className="container px-6 mx-auto">
         <div className="mb-16 text-center">
-          <span className="text-primary mb-3 inline-block text-sm font-bold uppercase tracking-widest">
+          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold uppercase tracking-widest">
             Expertise
           </span>
-          <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
+          <h2 className="fade-up text-3xl font-bold tracking-tight md:text-5xl delay-100">
             My Skills & Tools
           </h2>
         </div>
@@ -31,7 +31,7 @@ const SkillsSection: React.FC = () => {
             <div 
               key={index} 
               className="fade-up group relative flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:border-primary/50 hover:shadow-lg"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              style={{ transitionDelay: `${index * 100}ms` } as React.CSSProperties}
             >
               <div className="mb-4 text-4xl transition-transform duration-300 group-hover:scale-110">
                 {skill.icon}
@@ -48,10 +48,10 @@ const SkillsSection: React.FC = () => {
 
         {/* Marquee effect for tools (Optional enhancement) */}
         <div className="mt-20">
-            <p className="text-muted-foreground mb-8 text-center text-sm font-medium uppercase tracking-widest">
+            <p className="text-muted-foreground mb-8 text-center text-sm font-medium uppercase tracking-widest fade-up delay-300">
                 Others tools I use
             </p>
-            <div className="flex flex-wrap justify-center gap-6 opacity-50 grayscale transition-all hover:grayscale-0">
+            <div className="flex flex-wrap justify-center gap-6 opacity-50 grayscale transition-all hover:grayscale-0 fade-up delay-400">
                 {["VS Code", "Postman", "Git / GitHub", "Vercel", "Docker", "Figma"].map((tool) => (
                     <span key={tool} className="text-lg font-bold">{tool}</span>
                 ))}

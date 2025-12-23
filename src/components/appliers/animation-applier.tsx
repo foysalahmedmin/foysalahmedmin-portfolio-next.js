@@ -39,6 +39,24 @@ const AnimationApplier = () => {
     dynamic: true,
   });
 
+  useClassIntersectionObserver({
+    selector: ".skew-up",
+    classNames: "active",
+    options: { threshold: 0 },
+    isToggle: false,
+    isUnobservable: true,
+    dynamic: true,
+  });
+
+  useClassIntersectionObserver({
+    selector: ".scale-in",
+    classNames: "active",
+    options: { threshold: 0 },
+    isToggle: false,
+    isUnobservable: true,
+    dynamic: true,
+  });
+
   return null;
 };
 
