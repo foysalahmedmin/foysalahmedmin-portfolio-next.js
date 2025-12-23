@@ -1,24 +1,25 @@
 import { auth } from '@/middleware/auth.middleware';
 import { file } from '@/middleware/file.middleware';
 import { validation } from '@/middleware/validation.middleware';
+import type { TRole } from '@/types/jsonwebtoken.type';
 import { errorHandler } from '@/utils/error-handler';
+import type { NextRequest } from 'next/server';
 import * as UserController from '../../user.controller';
 import * as UserValidation from '../../user.validation';
-import { TRole } from '@/types/jsonwebtoken.type';
-import { NextRequest } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const resolvedParams = await params;
     return await auth('super-admin', 'admin' as TRole)(
       req,
       async (authedReq) => {
-        authedReq.params = params;
+        authedReq.params = resolvedParams;
         return await validation(UserValidation.userOperationValidationSchema)(
           authedReq,
-          (validatedReq) => UserController.getUser(validatedReq, { params }),
+          (validatedReq) => UserController.getUser(validatedReq, { params: resolvedParams }),
         );
       },
     );
@@ -29,13 +30,14 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const resolvedParams = await params;
     return await auth('super-admin', 'admin' as TRole)(
       req,
       async (authedReq) => {
-        authedReq.params = params;
+        authedReq.params = resolvedParams;
         return await file({
           name: 'image',
           folder: 'users',
@@ -48,7 +50,7 @@ export async function PATCH(
             return await validation(UserValidation.updateUserValidationSchema)(
               fileReq,
               (validatedReq) =>
-                UserController.updateUser(validatedReq, { params }),
+                UserController.updateUser(validatedReq, { params: resolvedParams }),
             );
           },
         );
@@ -61,16 +63,17 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const resolvedParams = await params;
     return await auth('super-admin', 'admin' as TRole)(
       req,
       async (authedReq) => {
-        authedReq.params = params;
+        authedReq.params = resolvedParams;
         return await validation(UserValidation.userOperationValidationSchema)(
           authedReq,
-          (validatedReq) => UserController.deleteUser(validatedReq, { params }),
+          (validatedReq) => UserController.deleteUser(validatedReq, { params: resolvedParams }),
         );
       },
     );

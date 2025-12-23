@@ -1,5 +1,5 @@
 import { FlatCompat } from "@eslint/eslintrc";
-import prettierConfig from "eslint-config-prettier/flat";
+import prettierConfig from "eslint-config-prettier";
 import globals from "globals";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -18,7 +18,7 @@ export default [
       /* Base Rules */
       "no-undef": "error",
       "no-unused-vars": "off",
-      "no-console": "warn",
+      "no-console": "off",
 
       /* TypeScript Rules */
       "@typescript-eslint/no-unused-vars": "off",
@@ -27,6 +27,9 @@ export default [
 
       /* Next.js Rules */
       "@next/next/no-img-element": "off",
+
+      /* React Rules */
+      "react/no-unescaped-entities": "off",
     },
   }),
   {
@@ -35,6 +38,8 @@ export default [
       ecmaVersion: 2022,
       sourceType: "module",
       globals: {
+        React: "writable",
+        JSX: "writable",
         ...globals.browser,
         ...globals.node,
         ...globals.es2021,
@@ -60,6 +65,7 @@ export default [
       "**/*.config.cjs",
     ],
   },
-  // Prettier configuration is now applied
-  ...prettierConfig,
+
+  // Prettier configuration
+  prettierConfig,
 ];

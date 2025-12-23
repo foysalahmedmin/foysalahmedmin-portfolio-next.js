@@ -7,7 +7,7 @@ import ServicesSection from "@/components/sections/services-section";
 import SkillsSection from "@/components/sections/skills-section";
 import StatisticsSection from "@/components/sections/statistics-section";
 import TestimonialsSection from "@/components/sections/testimonials-section";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import React from "react";
 
 export const metadata: Metadata = {

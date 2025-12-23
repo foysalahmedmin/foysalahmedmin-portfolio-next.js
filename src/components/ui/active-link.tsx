@@ -3,7 +3,8 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { forwardRef, ReactNode } from "react";
+import type { ReactNode } from "react";
+import React, { forwardRef } from "react";
 
 interface ActiveLinkProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {

@@ -1,5 +1,5 @@
-import { Document, Model, Types } from 'mongoose';
-import { TRole } from '@/types/jsonwebtoken.type';
+import type { Document, Model, Types } from 'mongoose';
+import type { TRole } from '@/types/jsonwebtoken.type';
 
 export type TStatus = 'in-progress' | 'blocked';
 

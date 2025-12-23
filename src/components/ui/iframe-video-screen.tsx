@@ -1,6 +1,6 @@
 "use client";
 
-import useScreenSize from "@/hooks/ui/use-screen-size";
+import { useScreenSize } from "@/hooks/ui/use-screen-size";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import React from "react";
@@ -35,4 +35,5 @@ const IframeVideScreen: React.FC<IframeVideoScreenProps> = ({
   );
 };
 
-export { IframeVideScreen as IframeVideoScreen, type IframeVideoScreenProps }; 
+export { IframeVideScreen as IframeVideoScreen, type IframeVideoScreenProps };
+

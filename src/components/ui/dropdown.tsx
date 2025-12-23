@@ -1,8 +1,7 @@
 "use client";
 
 import { useClickOutside } from "@/hooks/ui/use-click-outside";
-import type { OverlayState } from "@/hooks/ui/use-overlay-state";
-import useOverlayState from "@/hooks/ui/use-overlay-state";
+import { useOverlayState, type OverlayState } from "@/hooks/ui/use-overlay-state";
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
@@ -202,5 +201,4 @@ const DropdownTrigger: React.FC<ButtonProps> = ({ onClick, ...props }) => {
   );
 };
 
-export { DropdownRoot as Dropdown, DropdownContent, DropdownItem, DropdownSeparator, DropdownLabel, DropdownTrigger };
-export { dropdownContentVariants, dropdownVariants, useDropdown, type DropdownContentProps, type DropdownProps };
+export { DropdownRoot as Dropdown, DropdownContent, dropdownContentVariants, DropdownItem, DropdownLabel, DropdownSeparator, DropdownTrigger, dropdownVariants, useDropdown, type DropdownContentProps, type DropdownProps };

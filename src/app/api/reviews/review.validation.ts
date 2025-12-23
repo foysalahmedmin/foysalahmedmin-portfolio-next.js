@@ -38,10 +38,7 @@ export const reviewsOperationValidationSchema = z.object({
 export const updateReviewsSchema = z.object({
   body: z.object({
     ids: z
-      .array(idSchema, {
-        required_error: 'At least one review ID is required',
-        invalid_type_error: 'Review IDs must be an array of strings',
-      })
+      .array(idSchema)
       .nonempty('At least one review ID is required'),
     status: z.enum(['pending', 'approved', 'rejected']).optional(),
   }),

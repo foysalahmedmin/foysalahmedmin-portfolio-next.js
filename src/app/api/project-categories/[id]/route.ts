@@ -1,13 +1,14 @@
 import { errorHandler } from '@/utils/error-handler';
+import type { NextRequest } from 'next/server';
 import * as ProjectCategoryController from '../project-category.controller';
-import { NextRequest } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    return await ProjectCategoryController.getProjectCategoryById(req, { params });
+    const resolvedParams = await params;
+    return await ProjectCategoryController.getProjectCategoryById(req, { params: resolvedParams });
   } catch (error) {
     return errorHandler(error, req);
   }

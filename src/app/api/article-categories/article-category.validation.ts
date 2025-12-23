@@ -36,10 +36,7 @@ export const updateArticleCategorySchema = z.object({
 export const updateArticleCategoriesSchema = z.object({
   body: z.object({
     slugs: z
-      .array(slugSchema, {
-        required_error: 'At least one article category slug is required',
-        invalid_type_error: 'Article category slugs must be an array of strings',
-      })
+      .array(slugSchema)
       .nonempty('At least one article category slug is required'),
     status: z.enum(['active', 'inactive']).optional(),
     parent: z.string().optional().nullable(),

@@ -3,8 +3,8 @@ import { validation } from '@/middleware/validation.middleware';
 import { errorHandler } from '@/utils/error-handler';
 import * as ProjectResourceController from '../project-resource.controller';
 import * as ProjectResourceValidation from '../project-resource.validation';
-import { TRole } from '@/types/jsonwebtoken.type';
-import { NextRequest } from 'next/server';
+import type { TRole } from '@/types/jsonwebtoken.type';
+import type { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getProjects } from "@/services/project.service";
-import { TProject } from "@/types/project.type";
+import type { TProject } from "@/types/project.type";
 import {
     Edit,
     Filter,

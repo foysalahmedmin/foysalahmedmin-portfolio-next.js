@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Magnetic from "@/components/ui/magnetic";
-import { TProject } from "@/types/project.type";
+import type { TProject } from "@/types/project.type";
 import {
     ArrowLeft,
     Calendar,

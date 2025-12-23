@@ -1,4 +1,4 @@
-import { Document, FilterQuery, Model, Query } from 'mongoose';
+import type { Document, FilterQuery, Model, Query } from 'mongoose';
 
 interface QueryParams {
   search?: string;

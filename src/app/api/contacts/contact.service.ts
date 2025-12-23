@@ -1,24 +1,21 @@
-import connectDB from '@/lib/db';
-import Contact from './contact.model';
-import AppError from '@/builder/app-error';
-import AppQuery from '@/builder/app-query';
-import httpStatus from 'http-status';
-import { TContactDocument } from './contact.type';
-import { sendEmail } from '@/utils/send-email';
-import { ENV } from '@/config';
+import AppError from "@/builder/app-error";
+import AppQuery from "@/builder/app-query";
+import { ENV } from "@/config";
+import connectDB from "@/lib/db";
+import { sendEmail } from "@/utils/send-email";
+import httpStatus from "http-status";
+import Contact from "./contact.model";
+import type { TContactDocument } from "./contact.type";
 
 export const getContacts = async (queryParams: Record<string, unknown>) => {
   await connectDB();
 
-  const query = new AppQuery<TContactDocument>(
-    Contact.find(),
-    queryParams,
-  );
+  const query = new AppQuery<TContactDocument>(Contact.find(), queryParams);
 
   const result = await query
-    .search(['name', 'email', 'subject', 'message'])
+    .search(["name", "email", "subject", "message"])
     .filter()
-    .sort(['created_at', 'name', 'email'])
+    .sort(["created_at", "name", "email"])
     .paginate()
     .fields()
     .execute();
@@ -32,7 +29,7 @@ export const getContactById = async (id: string) => {
   const contact = await Contact.findById(id).lean();
 
   if (!contact) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Contact not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Contact not found");
   }
 
   return contact;
@@ -74,7 +71,7 @@ export const createContact = async (payload: {
     });
   } catch (error) {
     // Log error but don't fail the contact creation
-    console.error('Failed to send contact notification email:', error);
+    console.error("Failed to send contact notification email:", error);
   }
 
   return contact;
@@ -87,14 +84,14 @@ export const updateContactById = async (
     email: string;
     subject: string;
     message: string;
-  }>,
+  }>
 ) => {
   await connectDB();
 
   const contact = await Contact.findById(id);
 
   if (!contact) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Contact not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Contact not found");
   }
 
   Object.assign(contact, payload);
@@ -105,7 +102,7 @@ export const updateContactById = async (
 
 export const updateContacts = async (
   ids: string[],
-  payload: Partial<{}>,
+  payload: Partial<{}>
 ): Promise<{
   count: number;
   not_found_ids: string[];
@@ -117,7 +114,7 @@ export const updateContacts = async (
 
   const result = await Contact.updateMany(
     { _id: { $in: foundIds } },
-    { ...payload },
+    { ...payload }
   );
 
   return {
@@ -132,7 +129,7 @@ export const deleteContactById = async (id: string) => {
   const contact = await Contact.findById(id);
 
   if (!contact) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Contact not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Contact not found");
   }
 
   await contact.softDelete();
@@ -142,16 +139,18 @@ export const deleteContactById = async (id: string) => {
 
 export const deleteContactPermanentById = async (id: string): Promise<void> => {
   await connectDB();
-  const contact = await Contact.findById(id).setOptions({ bypassDeleted: true });
+  const contact = await Contact.findById(id).setOptions({
+    bypassDeleted: true,
+  });
   if (!contact) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Contact not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Contact not found");
   }
 
   await Contact.findByIdAndDelete(id);
 };
 
 export const deleteContacts = async (
-  ids: string[],
+  ids: string[]
 ): Promise<{
   count: number;
   not_found_ids: string[];
@@ -161,10 +160,7 @@ export const deleteContacts = async (
   const foundIds = contacts.map((contact) => contact._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await Contact.updateMany(
-    { _id: { $in: foundIds } },
-    { is_deleted: true },
-  );
+  await Contact.updateMany({ _id: { $in: foundIds } }, { is_deleted: true });
 
   return {
     count: foundIds.length,
@@ -173,7 +169,7 @@ export const deleteContacts = async (
 };
 
 export const deleteContactsPermanent = async (
-  ids: string[],
+  ids: string[]
 ): Promise<{
   count: number;
   not_found_ids: string[];
@@ -198,18 +194,21 @@ export const restoreContactById = async (id: string) => {
   const contact = await Contact.findByIdAndUpdate(
     id,
     { is_deleted: false },
-    { new: true },
+    { new: true }
   );
 
   if (!contact) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Contact not found or not deleted');
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Contact not found or not deleted"
+    );
   }
 
   return contact;
 };
 
 export const restoreContacts = async (
-  ids: string[],
+  ids: string[]
 ): Promise<{
   count: number;
   not_found_ids: string[];
@@ -217,7 +216,7 @@ export const restoreContacts = async (
   await connectDB();
   const result = await Contact.updateMany(
     { _id: { $in: ids }, is_deleted: true },
-    { is_deleted: false },
+    { is_deleted: false }
   );
 
   const restoredContacts = await Contact.find({ _id: { $in: ids } }).lean();
@@ -229,4 +228,3 @@ export const restoreContacts = async (
     not_found_ids: notFoundIds,
   };
 };
-

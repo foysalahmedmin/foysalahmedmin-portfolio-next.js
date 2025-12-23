@@ -3,7 +3,7 @@ import ArticleCategory from './article-category.model';
 import AppError from '@/builder/app-error';
 import AppQuery from '@/builder/app-query';
 import httpStatus from 'http-status';
-import { TArticleCategoryDocument } from './article-category.type';
+import type { TArticleCategoryDocument } from './article-category.type';
 
 export const getArticleCategories = async (queryParams: Record<string, unknown>) => {
   await connectDB();

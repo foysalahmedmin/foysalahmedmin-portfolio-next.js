@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Magnetic from "@/components/ui/magnetic";
-import { TProject } from "@/types/project.type";
+import type { TProject } from "@/types/project.type";
 import { ArrowLeft, Calendar, ExternalLink, Eye, Github, Layout, Tag, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

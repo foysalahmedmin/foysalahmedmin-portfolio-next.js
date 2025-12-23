@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
-import mongoose, { Query, Schema } from 'mongoose';
+import type { Query} from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { ENV } from '@/config';
-import { TUser, TUserDocument, TUserModel } from './user.type';
+import type { TUser, TUserDocument, TUserModel } from './user.type';
 
 const userSchema = new Schema<TUserDocument>(
   {

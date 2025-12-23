@@ -2,7 +2,7 @@ import connectDB from '@/lib/db';
 import AppError from '@/builder/app-error';
 import AppQuery from '@/builder/app-query';
 import httpStatus from 'http-status';
-import { TReviewDocument } from './review.type';
+import type { TReviewDocument } from './review.type';
 import { Review } from './review.model';
 
 export const getReviews = async (queryParams: Record<string, unknown>) => {

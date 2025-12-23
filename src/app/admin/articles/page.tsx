@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getArticles } from "@/services/article.service";
-import { TArticle } from "@/types/article.type";
+import type { TArticle } from "@/types/article.type";
 import {
     Calendar,
     Edit,

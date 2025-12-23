@@ -1,9 +1,10 @@
-import {
+import type {
   TProjectCategory,
   TProjectCategoryDocument,
   TProjectCategoryModel,
 } from "./project-category.type";
-import mongoose, { Query, Schema } from "mongoose";
+import type { Query} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const projectCategorySchema = new Schema<TProjectCategoryDocument>(
   {

@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ZodError } from 'zod';
-import mongoose from 'mongoose';
 import AppError from '@/builder/app-error';
 import { ENV } from '@/config';
-import { TErrorResponse, TErrorSources } from '@/types/response.type';
+import type { TErrorResponse, TErrorSources } from '@/types/response.type';
+import mongoose from 'mongoose';
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 
 const handleZodError = (err: ZodError): TErrorResponse => {
   const sources: TErrorSources = err.issues.map((issue) => {
     return {
-      path: issue?.path[issue.path.length - 1] ?? '',
+      path: (issue?.path[issue.path.length - 1] as string | number) ?? '',
       message: issue.message,
     };
   });

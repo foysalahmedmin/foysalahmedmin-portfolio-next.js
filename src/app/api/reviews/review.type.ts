@@ -1,4 +1,4 @@
-import { Document, Model, Types } from "mongoose";
+import type { Document, Model, Types } from "mongoose";
 
 export type TStatus = "pending" | "approved" | "rejected";
 

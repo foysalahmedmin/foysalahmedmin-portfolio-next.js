@@ -1,11 +1,11 @@
 import AppError from "@/builder/app-error";
 import { ENV } from "@/config";
-import { TJwtPayload } from "@/types/jsonwebtoken.type";
+import type { TJwtPayload } from "@/types/jsonwebtoken.type";
 import bcrypt from "bcrypt";
 import httpStatus from "http-status";
-import { JwtPayload } from "jsonwebtoken";
+import type { JwtPayload } from "jsonwebtoken";
 import { User } from "../users/user.model";
-import { TChangePassword, TSignin, TSignup } from "./auth.type";
+import type { TChangePassword, TSignin, TSignup } from "./auth.type";
 import { createToken, verifyToken } from "./auth.utils";
 
 export const signin = async (payload: TSignin) => {

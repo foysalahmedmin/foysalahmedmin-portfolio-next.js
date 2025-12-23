@@ -1,22 +1,23 @@
 import { auth } from '@/middleware/auth.middleware';
 import { validation } from '@/middleware/validation.middleware';
+import type { TRole } from '@/types/jsonwebtoken.type';
 import { errorHandler } from '@/utils/error-handler';
+import type { NextRequest } from 'next/server';
 import * as ArticleCategoryController from '../../article-category.controller';
 import * as ArticleCategoryValidation from '../../article-category.validation';
-import { TRole } from '@/types/jsonwebtoken.type';
-import { NextRequest } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const resolvedParams = await params;
     return await auth('super-admin', 'admin' as TRole)(
       req,
       (authedReq) => {
-        authedReq.params = params;
+        authedReq.params = resolvedParams;
         return ArticleCategoryController.getArticleCategoryById(authedReq, {
-          params,
+          params: resolvedParams,
         });
       },
     );
@@ -27,18 +28,19 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const resolvedParams = await params;
     return await auth('super-admin', 'admin' as TRole)(
       req,
       async (authedReq) => {
-        authedReq.params = params;
+        authedReq.params = resolvedParams;
         return await validation(ArticleCategoryValidation.updateArticleCategoryByIdSchema)(
           authedReq,
           (validatedReq) =>
             ArticleCategoryController.updateArticleCategoryById(validatedReq, {
-              params,
+              params: resolvedParams,
             }),
         );
       },
@@ -50,18 +52,19 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const resolvedParams = await params;
     return await auth('super-admin', 'admin' as TRole)(
       req,
       async (authedReq) => {
-        authedReq.params = params;
+        authedReq.params = resolvedParams;
         return await validation(ArticleCategoryValidation.articleCategoryByIdOperationValidationSchema)(
           authedReq,
           (validatedReq) =>
             ArticleCategoryController.deleteArticleCategoryById(validatedReq, {
-              params,
+              params: resolvedParams,
             }),
         );
       },

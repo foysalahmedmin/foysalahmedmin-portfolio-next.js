@@ -3,7 +3,7 @@ import ProjectResource from './project-resource.model';
 import AppError from '@/builder/app-error';
 import AppQuery from '@/builder/app-query';
 import httpStatus from 'http-status';
-import { TProjectResourceDocument } from './project-resource.type';
+import type { TProjectResourceDocument } from './project-resource.type';
 
 export const getProjectResources = async (queryParams: Record<string, unknown>) => {
   await connectDB();

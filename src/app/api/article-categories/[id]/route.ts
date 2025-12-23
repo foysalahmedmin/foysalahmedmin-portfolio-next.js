@@ -1,13 +1,14 @@
 import { errorHandler } from '@/utils/error-handler';
+import type { NextRequest } from 'next/server';
 import * as ArticleCategoryController from '../article-category.controller';
-import { NextRequest } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    return await ArticleCategoryController.getArticleCategoryById(req, { params });
+    const resolvedParams = await params;
+    return await ArticleCategoryController.getArticleCategoryById(req, { params: resolvedParams });
   } catch (error) {
     return errorHandler(error, req);
   }

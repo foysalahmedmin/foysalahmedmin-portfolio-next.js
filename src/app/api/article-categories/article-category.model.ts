@@ -1,9 +1,10 @@
-import {
+import type {
   TArticleCategory,
   TArticleCategoryDocument,
   TArticleCategoryModel,
 } from "./article-category.type";
-import mongoose, { Query, Schema } from "mongoose";
+import type { Query} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const articleCategorySchema = new Schema<TArticleCategoryDocument>(
   {

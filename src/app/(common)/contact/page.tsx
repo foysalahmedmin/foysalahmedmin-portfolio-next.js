@@ -1,7 +1,7 @@
 import ContactContentSection from "@/components/(common)/contact-page/contact-content-section";
 import GoogleMapSection from "@/components/(common)/contact-page/google-map-section";
 import PageHeaderSection from "@/components/sections/page-header-section";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact | Foysal Ahmed",

@@ -49,10 +49,7 @@ export const updateContactByIdSchema = z.object({
 export const updateContactsSchema = z.object({
   body: z.object({
     ids: z
-      .array(idSchema, {
-        required_error: 'At least one contact ID is required',
-        invalid_type_error: 'Contact IDs must be an array of strings',
-      })
+      .array(idSchema)
       .min(1, 'At least one contact ID is required'),
   }),
 });
