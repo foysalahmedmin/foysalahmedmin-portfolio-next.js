@@ -21,7 +21,7 @@ const AboutSection: React.FC = () => {
           <div className="fade-left relative">
             <div className="group relative aspect-square max-w-[500px] overflow-hidden rounded-3xl">
               <img
-                src="/images/profile-hero.png"
+                src="/images/profile.png"
                 alt="Foysal Ahmed"
                 className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
               />
