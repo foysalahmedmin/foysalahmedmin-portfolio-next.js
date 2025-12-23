@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 // Tailwind's default breakpoints (you can edit these if customized)
 const breakpoints = {
@@ -17,7 +17,7 @@ export const useResponsive = (
   start?: Breakpoint,
   end?: Breakpoint
 ): boolean => {
-  const getMatches = (): boolean => {
+  const getMatches = useCallback((): boolean => {
     const min = start ? breakpoints[start] : null;
     const max = end ? breakpoints[end] - 0.02 : null; // small offset to match Tailwind’s max-width logic
 
@@ -41,7 +41,7 @@ export const useResponsive = (
             ? window.matchMedia(`(min-width:${min}px)`).matches
             : false;
     }
-  };
+  }, [query, start, end]);
 
   const [matches, setMatches] = useState<boolean>(
     typeof window !== "undefined" ? getMatches() : false
@@ -51,7 +51,7 @@ export const useResponsive = (
     const handleResize = () => setMatches(getMatches());
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [query, start, end]);
+  }, [getMatches]);
 
   return matches;
 };
