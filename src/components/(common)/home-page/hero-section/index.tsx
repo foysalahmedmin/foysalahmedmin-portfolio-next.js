@@ -2,10 +2,10 @@
 
 import Magnetic from "@/components/ui/magnetic";
 import {
-    Modal,
-    ModalBackdrop,
-    ModalContent,
-    ModalTrigger,
+  Modal,
+  ModalBackdrop,
+  ModalContent,
+  ModalTrigger,
 } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
@@ -21,14 +21,14 @@ const slides = [
   },
   {
     image: "/images/hero-2.jpg",
-    title: "UI/UX Focused",
-    subtitle: "Creating beautiful, interactive, and user-friendly interfaces.",
-    highlight: "UI/UX",
+    title: "AI & Automation",
+    subtitle: "Integrating cutting-edge AI models and automating repetitive workflows.",
+    highlight: "AI &",
   },
   {
     image: "/images/hero-3.jpg",
-    title: "System Engineer",
-    subtitle: "Optimizing Performance & Architecture for high-load systems.",
+    title: "System Architect",
+    subtitle: "Designing complex infrastructures optimized for high-traffic environments.",
     highlight: "System",
   },
 ];

@@ -51,7 +51,7 @@ const Footer = () => {
               className="flex items-center gap-3 transition-opacity hover:opacity-80"
             >
               <Image
-                src="/logo-star.png"
+                src="/logo.png"
                 alt="Foysal Ahmed Logo"
                 width={48}
                 height={48}
