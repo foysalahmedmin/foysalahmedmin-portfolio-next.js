@@ -307,5 +307,6 @@ export {
   useModal,
   type ModalBackdropProps,
   type ModalContentProps,
-  type ModalProps,
+  type ModalProps
 };
+
