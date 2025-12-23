@@ -1,6 +1,8 @@
-import SkillsSection from "@/components/(common)/home-page/skills-section";
-import StatisticsSection from "@/components/(common)/home-page/statistics-section";
-import TestimonialsSection from "@/components/(common)/home-page/testimonials-section";
+import PageHeaderSection from "@/components/sections/page-header-section";
+import ServicesSection from "@/components/sections/services-section";
+import SkillsSection from "@/components/sections/skills-section";
+import StatisticsSection from "@/components/sections/statistics-section";
+import TestimonialsSection from "@/components/sections/testimonials-section";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Briefcase, Download, GraduationCap } from "lucide-react";
 
@@ -39,20 +41,18 @@ const CoursesData = [
 ];
 
 const AboutPage = () => {
+  const breadcrumbItems = [
+    { index: 1, name: "Home", href: "/", icon: "house" },
+    { index: 2, name: "About", href: "/about" },
+  ];
+
   return (
     <main className="min-h-screen">
-      {/* Page Header */}
-      <section className="bg-muted/30 py-20 lg:py-32">
-        <div className="container mx-auto px-6 text-center">
-          <h1 className="fade-down text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
-            About <span className="text-primary">Me</span>
-          </h1>
-          <p className="fade-up text-muted-foreground mx-auto mt-6 max-w-2xl text-lg">
-            Dedicated web developer with a passion for building scalable
-            applications and solving complex problems.
-          </p>
-        </div>
-      </section>
+      <PageHeaderSection
+        title="About Me"
+        description="Dedicated web developer with a passion for building scalable applications and solving complex problems."
+        breadcrumbItems={breadcrumbItems}
+      />
 
       {/* About Details */}
       <section className="py-24 lg:py-32">
@@ -103,6 +103,8 @@ const AboutPage = () => {
           </div>
         </div>
       </section>
+
+      <ServicesSection />
 
       <StatisticsSection />
 

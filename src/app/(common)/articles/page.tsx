@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeaderSection from "@/components/sections/page-header-section";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getArticles } from "@/services/article.service";
@@ -17,6 +18,11 @@ const ArticlesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const breadcrumbItems = [
+    { index: 1, name: "Home", href: "/", icon: "house" },
+    { index: 2, name: "Articles", href: "/articles" },
+  ];
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -65,21 +71,11 @@ const ArticlesPage = () => {
 
   return (
     <main className="min-h-screen">
-      <section className="bg-muted/30 border-border border-b py-20">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-                My <span className="text-primary">Articles</span>
-              </h1>
-              <p className="text-muted-foreground mt-4 max-w-xl text-lg">
-                Thoughts, tutorials, and insights about web development and
-                technology.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHeaderSection
+        title="My Articles"
+        description="Thoughts, tutorials, and insights about web development and technology."
+        breadcrumbItems={breadcrumbItems}
+      />
 
       <section className="bg-background/80 border-border sticky top-16 z-30 border-b py-6 backdrop-blur-md">
         <div className="container mx-auto px-6">

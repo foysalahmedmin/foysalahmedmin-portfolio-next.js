@@ -1,14 +1,15 @@
 "use client";
 
+import PageHeaderSection from "@/components/sections/page-header-section";
 import { Button } from "@/components/ui/button";
 import {
-  Github,
-  Linkedin,
-  Mail,
-  MapPin,
-  Phone,
-  Send,
-  Twitter,
+    Github,
+    Linkedin,
+    Mail,
+    MapPin,
+    Phone,
+    Send,
+    Twitter,
 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -22,6 +23,11 @@ const ContactPage = () => {
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
+
+  const breadcrumbItems = [
+    { index: 1, name: "Home", href: "/", icon: "house" },
+    { index: 2, name: "Contact", href: "/contact" },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,21 +78,11 @@ const ContactPage = () => {
 
   return (
     <main className="min-h-screen">
-      {/* Header */}
-      <section className="bg-muted/30 border-border border-b py-20 lg:py-32">
-        <div className="container mx-auto px-6">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-              Get in <span className="text-primary">Touch</span>
-            </h1>
-            <p className="text-muted-foreground mt-6 text-lg leading-relaxed md:text-xl">
-              I'm always open to new opportunities, collaborations, or just a
-              friendly chat. Feel free to reach out using the form below or
-              through my contact details.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeaderSection
+        title="Get in Touch"
+        description="I'm always open to new opportunities, collaborations, or just a friendly chat. Feel free to reach out using the form below or through my contact details."
+        breadcrumbItems={breadcrumbItems}
+      />
 
       <section className="py-24 lg:py-32">
         <div className="container mx-auto px-6">
