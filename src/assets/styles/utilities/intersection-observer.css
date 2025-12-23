@@ -1,27 +1,77 @@
 .fade-up[data-observed-fade-up=true] {
-  @apply opacity-0 translate-y-10 transition-all duration-500 ease-out;
+  @apply opacity-0 translate-y-10 transition-all duration-700 ease-out;
 }
 .fade-up[data-observed-fade-up=true].active {
   @apply opacity-100 translate-y-0;
 }
 
 .fade-down[data-observed-fade-down=true] {
-  @apply opacity-0 -translate-y-10 transition-all duration-500 ease-out;
+  @apply opacity-0 -translate-y-10 transition-all duration-700 ease-out;
 }
 .fade-down[data-observed-fade-down=true].active {
   @apply opacity-100 translate-y-0;
 }
 
 .fade-left[data-observed-fade-left=true] {
-  @apply opacity-0 -translate-x-10 transition-all duration-500 ease-out;
+  @apply opacity-0 -translate-x-10 transition-all duration-700 ease-out;
 }
 .fade-left[data-observed-fade-left=true].active {
   @apply opacity-100 translate-x-0;
 }
 
 .fade-right[data-observed-fade-right=true] {
-  @apply opacity-0 translate-x-10 transition-all duration-500 ease-out;
+  @apply opacity-0 translate-x-10 transition-all duration-700 ease-out;
 }
 .fade-right[data-observed-fade-right=true].active {
   @apply opacity-100 translate-x-0;
 }
+
+.skew-up[data-observed-skew-up=true] {
+  @apply opacity-0 translate-y-20 skew-y-6 transition-all duration-1000 ease-out;
+}
+.skew-up[data-observed-skew-up=true].active {
+  @apply opacity-100 translate-y-0 skew-y-0;
+}
+
+.scale-in[data-observed-scale-in=true] {
+  @apply opacity-0 scale-90 transition-all duration-700 ease-out;
+}
+.scale-in[data-observed-scale-in=true].active {
+  @apply opacity-100 scale-100;
+}
+
+/* Arrow Animations */
+.arrow-slide-right {
+  @apply transition-transform duration-300;
+}
+.group:hover .arrow-slide-right {
+  @apply translate-x-2;
+}
+
+.arrow-slide-left {
+  @apply transition-transform duration-300;
+}
+.group:hover .arrow-slide-left {
+  @apply -translate-x-2;
+}
+
+.arrow-bounce-right {
+  @apply transition-transform duration-300;
+}
+.group:hover .arrow-bounce-right {
+  animation: bounce-x 1s infinite;
+}
+
+@keyframes bounce-x {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+/* Animation Delays */
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+.delay-700 { transition-delay: 700ms; }
+.delay-1000 { transition-delay: 1000ms; }

@@ -3,19 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { getProjects } from "@/services/project.service";
 import { TProject } from "@/types/project.type";
-import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const ProjectCard: React.FC<{ project: TProject; index: number }> = ({ project, index }) => {
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      className="group relative overflow-hidden rounded-[2rem] bg-card border border-border/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 shadow-sm"
+    <div 
+      className="fade-up group relative overflow-hidden rounded-[2rem] bg-card border border-border/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 shadow-sm"
+      style={{ transitionDelay: `${index * 100}ms` } as React.CSSProperties}
     >
       <div className="aspect-[4/3] w-full overflow-hidden">
         <img
@@ -53,11 +49,11 @@ const ProjectCard: React.FC<{ project: TProject; index: number }> = ({ project, 
             href={`/projects/${project._id}`} 
             className="text-primary flex items-center gap-2 text-sm font-black uppercase tracking-widest hover:underline underline-offset-8"
           >
-            Case Study <ArrowRight className="size-4" />
+            Case Study <ArrowRight className="size-4 arrow-slide-right" />
           </Link>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -102,37 +98,21 @@ const ProjectsSection: React.FC = () => {
       <div className="container px-6 mx-auto">
         <div className="mb-20 flex flex-col items-center justify-between gap-8 md:flex-row md:items-end">
           <div className="max-w-xl text-center md:text-left">
-            <motion.span 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="text-primary mb-4 inline-block text-[11px] font-black uppercase tracking-[0.3em]"
-            >
+            <span className="fade-left text-primary mb-4 inline-block text-[11px] font-black uppercase tracking-[0.3em]">
               Curated Works
-            </motion.span>
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-5xl font-black tracking-tighter md:text-7xl leading-tight"
-            >
+            </span>
+            <h2 className="fade-up text-5xl font-black tracking-tighter md:text-7xl leading-tight delay-100">
               Selected Projects
-            </motion.h2>
+            </h2>
           </div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
+          <div className="scale-in delay-200">
             <Link href="/projects">
               <Button variant="none" className="group rounded-2xl glass px-8 py-6 font-black uppercase tracking-widest text-sm hover:bg-primary hover:text-primary-foreground transition-all">
                 The Archive
                 <ArrowRight className="ml-3 size-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-          </motion.div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">

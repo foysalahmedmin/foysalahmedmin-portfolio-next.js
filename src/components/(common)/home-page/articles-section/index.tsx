@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { getArticles } from "@/services/article.service";
 import { TArticle } from "@/types/article.type";
-import { motion } from "framer-motion";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -14,12 +13,9 @@ const ArticleCard: React.FC<{ article: TArticle; index: number }> = ({ article, 
     : 'Recently';
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      className="group flex flex-col overflow-hidden rounded-[2rem] bg-card border border-border/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5"
+    <div 
+      className="fade-up group flex flex-col overflow-hidden rounded-[2rem] bg-card border border-border/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5"
+      style={{ transitionDelay: `${index * 100}ms` } as React.CSSProperties}
     >
       <div className="relative aspect-[16/10] overflow-hidden">
         <img
@@ -66,7 +62,7 @@ const ArticleCard: React.FC<{ article: TArticle; index: number }> = ({ article, 
           </Link>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -99,26 +95,15 @@ const ArticlesSection: React.FC = () => {
       <div className="container px-6 mx-auto">
         <div className="mb-20 flex flex-col items-center justify-between gap-8 md:flex-row md:items-end">
           <div className="max-w-xl text-center md:text-left">
-            <motion.span 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="text-primary mb-4 inline-block text-[11px] font-black uppercase tracking-[0.3em]"
-            >
+            <span className="fade-left text-primary mb-4 inline-block text-[11px] font-black uppercase tracking-[0.3em]">
               Latest Insights
-            </motion.span>
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-5xl font-black tracking-tighter md:text-7xl leading-tight"
-            >
+            </span>
+            <h2 className="fade-up text-5xl font-black tracking-tighter md:text-7xl leading-tight delay-100">
               The Blog
-            </motion.h2>
+            </h2>
           </div>
           <Link href="/articles">
-            <Button variant="none" className="group rounded-2xl glass px-8 py-6 font-black uppercase tracking-widest text-sm hover:bg-primary hover:text-primary-foreground transition-all">
+            <Button variant="none" className="group rounded-2xl glass px-8 py-6 font-black uppercase tracking-widest text-sm hover:bg-primary hover:text-primary-foreground transition-all border border-primary/20">
               Reading List
               <ArrowRight className="ml-3 size-4 transition-transform group-hover:translate-x-1" />
             </Button>

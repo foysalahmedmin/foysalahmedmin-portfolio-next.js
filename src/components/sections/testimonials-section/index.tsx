@@ -35,10 +35,10 @@ const TestimonialsSection: React.FC = () => {
       
       <div className="container relative z-10 px-6 mx-auto">
         <div className="mb-16 text-center">
-          <span className="text-primary mb-3 inline-block text-sm font-bold uppercase tracking-widest">
+          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold uppercase tracking-widest">
             Success Stories
           </span>
-          <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
+          <h2 className="fade-up text-3xl font-bold tracking-tight md:text-5xl delay-100">
             Testimonials
           </h2>
         </div>
@@ -48,7 +48,7 @@ const TestimonialsSection: React.FC = () => {
             <div 
               key={index} 
               className="fade-up relative rounded-2xl bg-card p-8 shadow-sm border border-border transition-all hover:shadow-md"
-              style={{ animationDelay: `${index * 0.2}s` }}
+              style={{ transitionDelay: `${index * 200}ms` } as React.CSSProperties}
             >
               <Quote className="text-primary/20 absolute top-6 right-6 size-12" />
               <p className="text-muted-foreground relative z-10 mb-8 italic leading-relaxed">
