@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 type TUsePageScrollOptions = {
   onNext: () => void;
@@ -22,75 +22,84 @@ export const usePageScroll = ({
   const touchStartY = useRef<(number | null)[]>([]);
   const lastTriggerTime = useRef(0);
 
-  const canTrigger = () => {
+  const canTrigger = useCallback(() => {
     const now = Date.now();
     if (now - lastTriggerTime.current < delay) return false;
     lastTriggerTime.current = now;
     return true;
-  };
+  }, [delay]);
 
-  const handleWheel = (e: WheelEvent, el: Element) => {
-    if (!canTrigger()) return;
+  const handleWheel = useCallback(
+    (e: WheelEvent, el: Element) => {
+      if (!canTrigger()) return;
 
-    const { scrollTop, scrollHeight, clientHeight } = el;
-    const delta = e.deltaY;
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const delta = e.deltaY;
 
-    if (
-      delta > sensitivity &&
-      scrollTop + clientHeight >= scrollHeight - buffer
-    ) {
-      onNext();
-    } else if (delta < -sensitivity && scrollTop <= buffer) {
-      onPrev();
-    }
-  };
+      if (
+        delta > sensitivity &&
+        scrollTop + clientHeight >= scrollHeight - buffer
+      ) {
+        onNext();
+      } else if (delta < -sensitivity && scrollTop <= buffer) {
+        onPrev();
+      }
+    },
+    [canTrigger, onNext, onPrev, sensitivity, buffer]
+  );
 
-  const handlePointerDown = (e: PointerEvent, index: number) => {
+  const handlePointerDown = useCallback((e: PointerEvent, index: number) => {
     startY.current[index] = e.clientY;
-  };
+  }, []);
 
-  const handlePointerUp = (e: PointerEvent, el: Element, index: number) => {
-    const start = startY.current[index];
-    if (start == null || !canTrigger()) return;
+  const handlePointerUp = useCallback(
+    (e: PointerEvent, el: Element, index: number) => {
+      const start = startY.current[index];
+      if (start == null || !canTrigger()) return;
 
-    const delta = start - e.clientY;
-    const { scrollTop, scrollHeight, clientHeight } = el;
+      const delta = start - e.clientY;
+      const { scrollTop, scrollHeight, clientHeight } = el;
 
-    if (
-      delta > sensitivity &&
-      scrollTop + clientHeight >= scrollHeight - buffer
-    ) {
-      onNext();
-    } else if (delta < -sensitivity && scrollTop <= buffer) {
-      onPrev();
-    }
+      if (
+        delta > sensitivity &&
+        scrollTop + clientHeight >= scrollHeight - buffer
+      ) {
+        onNext();
+      } else if (delta < -sensitivity && scrollTop <= buffer) {
+        onPrev();
+      }
 
-    startY.current[index] = null;
-  };
+      startY.current[index] = null;
+    },
+    [canTrigger, onNext, onPrev, sensitivity, buffer]
+  );
 
-  const handleTouchStart = (e: TouchEvent, index: number) => {
+  const handleTouchStart = useCallback((e: TouchEvent, index: number) => {
     touchStartY.current[index] = e.touches[0].clientY;
-  };
+  }, []);
 
-  const handleTouchEnd = (e: TouchEvent, el: Element, index: number) => {
-    const start = touchStartY.current[index];
-    if (start == null || !canTrigger()) return;
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent, el: Element, index: number) => {
+      const start = touchStartY.current[index];
+      if (start == null || !canTrigger()) return;
 
-    const endY = e.changedTouches[0].clientY;
-    const delta = start - endY;
-    const { scrollTop, scrollHeight, clientHeight } = el;
+      const endY = e.changedTouches[0].clientY;
+      const delta = start - endY;
+      const { scrollTop, scrollHeight, clientHeight } = el;
 
-    if (
-      delta > sensitivity &&
-      scrollTop + clientHeight >= scrollHeight - buffer
-    ) {
-      onNext();
-    } else if (delta < -sensitivity && scrollTop <= buffer) {
-      onPrev();
-    }
+      if (
+        delta > sensitivity &&
+        scrollTop + clientHeight >= scrollHeight - buffer
+      ) {
+        onNext();
+      } else if (delta < -sensitivity && scrollTop <= buffer) {
+        onPrev();
+      }
 
-    touchStartY.current[index] = null;
-  };
+      touchStartY.current[index] = null;
+    },
+    [canTrigger, onNext, onPrev, sensitivity, buffer]
+  );
 
   useEffect(() => {
     if (!enabled) return;
@@ -133,7 +142,14 @@ export const usePageScroll = ({
         el.removeEventListener("touchend", touchEnd);
       });
     };
-  }, [onNext, onPrev, delay, sensitivity, buffer, enabled]);
+  }, [
+    enabled,
+    handleWheel,
+    handlePointerDown,
+    handlePointerUp,
+    handleTouchStart,
+    handleTouchEnd,
+  ]);
 
   const setRef = (index: number) => (el: Element | null) => {
     refs.current[index] = el;

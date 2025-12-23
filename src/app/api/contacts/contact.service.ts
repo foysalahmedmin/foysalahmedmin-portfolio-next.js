@@ -102,7 +102,7 @@ export const updateContactById = async (
 
 export const updateContacts = async (
   ids: string[],
-  payload: Partial<{}>
+  payload: Record<string, unknown>
 ): Promise<{
   count: number;
   not_found_ids: string[];
