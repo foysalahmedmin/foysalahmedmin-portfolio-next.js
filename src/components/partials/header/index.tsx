@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useScrollPosition } from "@/hooks/ui/use-scroll-position";
 import { useVisibleSection } from "@/hooks/utils/use-visible-section";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { toggleTheme } from "@/redux/slices/setting-slice";
+import { Monitor, Moon, Sun, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -238,6 +240,29 @@ const ContactButton: React.FC = () => (
   </Link>
 );
 
+const ThemeToggler: React.FC = () => {
+  const { theme } = useAppSelector((state) => state.setting);
+  const dispatch = useAppDispatch();
+
+  return (
+    <Button
+      variant="ghost"
+      shape="icon"
+      onClick={() => dispatch(toggleTheme())}
+      className="text-foreground hover:bg-muted"
+      aria-label="Toggle theme"
+    >
+      {theme === "dark" ? (
+        <Sun className="size-5" />
+      ) : theme === "light" ? (
+        <Moon className="size-5" />
+      ) : (
+        <Monitor className="size-5" />
+      )}
+    </Button>
+  );
+};
+
 // Main Header Component
 const Header: React.FC<HeaderProps> = ({ className }) => {
   const pathname = usePathname();
@@ -277,7 +302,8 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
             visibleSection={visibleSection || undefined}
           />
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 lg:gap-4">
+            <ThemeToggler />
             <ContactButton />
             <MobileMenuButton
               isOpen={isMobileMenuOpen}

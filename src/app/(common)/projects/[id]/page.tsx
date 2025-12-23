@@ -1,7 +1,7 @@
+import ProjectDetailsSection from "@/components/(common)/projects-page/project-details-section";
 import { getProjectById } from "@/services/project.service";
 import { TProject } from "@/types/project.type";
 import { Metadata } from "next";
-import ProjectDetailsContent from "./project-details-content";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -31,5 +31,5 @@ export default async function ProjectDetailsPage({ params }: Props) {
   const res = await getProjectById(id);
   const project = res.data as TProject;
 
-  return <ProjectDetailsContent project={project} />;
+  return <ProjectDetailsSection project={project} />;
 }
