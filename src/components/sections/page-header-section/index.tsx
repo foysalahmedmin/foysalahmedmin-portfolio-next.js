@@ -1,5 +1,3 @@
-"use client";
-
 import { Breadcrumb, TBreadcrumbs } from "@/components/ui/breadcrumb";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -21,9 +19,6 @@ const PageHeaderSection: React.FC<PageHeaderSectionProps> = ({
   className,
   align = "center",
 }) => {
-  // Function to wrap words in a span for primary coloring
-  // This is a simple implementation, usually titles like "About Me" 
-  // want "Me" highlighted. 
   const renderTitle = (text: string) => {
     const words = text.split(" ");
     if (words.length <= 1) return text;

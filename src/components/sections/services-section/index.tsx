@@ -1,5 +1,3 @@
-"use client";
-
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import React from "react";
