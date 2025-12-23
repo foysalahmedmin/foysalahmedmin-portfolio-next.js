@@ -91,7 +91,7 @@ const Logo: React.FC = () => (
     aria-label="Home"
   >
     <Image
-      src="/logo-star.png"
+      src="/logo.png"
       alt="Logo"
       width={48}
       height={48}
