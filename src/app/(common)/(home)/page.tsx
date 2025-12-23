@@ -3,9 +3,10 @@ import ArticlesSection from "@/components/(common)/home-page/articles-section";
 import ContactCTASection from "@/components/(common)/home-page/contact-cta-section";
 import HeroSection from "@/components/(common)/home-page/hero-section";
 import ProjectsSection from "@/components/(common)/home-page/projects-section";
-import SkillsSection from "@/components/(common)/home-page/skills-section";
-import StatisticsSection from "@/components/(common)/home-page/statistics-section";
-import TestimonialsSection from "@/components/(common)/home-page/testimonials-section";
+import ServicesSection from "@/components/sections/services-section";
+import SkillsSection from "@/components/sections/skills-section";
+import StatisticsSection from "@/components/sections/statistics-section";
+import TestimonialsSection from "@/components/sections/testimonials-section";
 import React from "react";
 
 const HomePage: React.FC = () => {
@@ -15,6 +16,7 @@ const HomePage: React.FC = () => {
       <div id="about">
         <AboutSection />
       </div>
+      <ServicesSection />
       <StatisticsSection />
       <ProjectsSection />
       <SkillsSection />
