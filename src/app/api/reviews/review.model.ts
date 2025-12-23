@@ -1,5 +1,6 @@
-import { TReview, TReviewDocument, TReviewModel } from "./review.type";
-import mongoose, { Query, Schema } from "mongoose";
+import type { TReview, TReviewDocument, TReviewModel } from "./review.type";
+import type { Query} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const reviewSchema = new Schema<TReviewDocument>(
   {

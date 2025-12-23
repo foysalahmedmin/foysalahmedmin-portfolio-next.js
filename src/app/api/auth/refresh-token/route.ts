@@ -1,6 +1,6 @@
 import { errorHandler } from '@/utils/error-handler';
 import * as AuthController from '../auth.controller';
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {

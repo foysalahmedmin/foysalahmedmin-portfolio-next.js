@@ -1,7 +1,7 @@
 import ProjectDetailsSection from "@/components/(common)/projects-page/project-details-section";
 import { getProjectById } from "@/services/project.service";
-import { TProject } from "@/types/project.type";
-import { Metadata } from "next";
+import type { TProject } from "@/types/project.type";
+import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{ id: string }>;

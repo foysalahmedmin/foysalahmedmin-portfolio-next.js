@@ -2,11 +2,12 @@ import User from "@/app/api/users/user.model";
 import AppError from "@/builder/app-error";
 import { ENV } from "@/config";
 import connectDB from "@/lib/db";
-import { TJwtPayload, TRole } from "@/types/jsonwebtoken.type";
+import type { TJwtPayload, TRole } from "@/types/jsonwebtoken.type";
 import httpStatus from "http-status";
-import jwt, { JwtPayload, TokenExpiredError } from "jsonwebtoken";
+import type { JwtPayload} from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 
 export type AuthUser = JwtPayload & TJwtPayload;
 

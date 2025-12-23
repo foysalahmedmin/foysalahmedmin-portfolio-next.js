@@ -59,10 +59,7 @@ export const updateUserValidationSchema = z.object({
 export const updateUsersValidationSchema = z.object({
   body: z.object({
     ids: z
-      .array(idSchema, {
-        required_error: 'At least one user ID is required',
-        invalid_type_error: 'User IDs must be an array of strings',
-      })
+      .array(idSchema)
       .nonempty('At least one user ID is required'),
     status: z.enum(['in-progress', 'blocked']).optional(),
     role: z

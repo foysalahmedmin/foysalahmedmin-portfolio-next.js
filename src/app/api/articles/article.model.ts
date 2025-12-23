@@ -1,9 +1,10 @@
-import {
-  TArticle,
-  TArticleDocument,
-  TArticleModel,
+import type { Query} from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import type {
+    TArticle,
+    TArticleDocument,
+    TArticleModel,
 } from "./article.type";
-import mongoose, { Query, Schema } from "mongoose";
 
 const articleSchema = new Schema<TArticleDocument>(
   {
@@ -82,7 +83,7 @@ const articleSchema = new Schema<TArticleDocument>(
       type: Date,
       default: function (this: TArticleDocument) {
         if (this.status === "published") {
-          const publishedAt = this.published_at || new Date();
+          const publishedAt = new Date(this.published_at || new Date());
           return new Date(publishedAt.getTime() + 24 * 60 * 60 * 1000);
         }
         return undefined;

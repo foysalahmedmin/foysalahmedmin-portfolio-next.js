@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getProjectCategories } from "@/services/category.service";
 import { getProjects } from "@/services/project.service";
-import { TProject } from "@/types/project.type";
+import type { TProject } from "@/types/project.type";
 import { ChevronLeft, ChevronRight, LayoutGrid, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";

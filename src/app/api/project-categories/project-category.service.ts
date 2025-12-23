@@ -3,7 +3,7 @@ import ProjectCategory from './project-category.model';
 import AppError from '@/builder/app-error';
 import AppQuery from '@/builder/app-query';
 import httpStatus from 'http-status';
-import { TProjectCategoryDocument } from './project-category.type';
+import type { TProjectCategoryDocument } from './project-category.type';
 
 export const getProjectCategories = async (queryParams: Record<string, unknown>) => {
   await connectDB();

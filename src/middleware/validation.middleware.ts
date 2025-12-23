@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ZodTypeAny, ZodError } from 'zod';
 import AppError from '@/builder/app-error';
-import httpStatus from 'http-status';
-import { TErrorSources } from '@/types/response.type';
+import type { TErrorSources } from '@/types/response.type';
+import type { NextRequest, NextResponse } from 'next/server';
+import type { ZodTypeAny } from 'zod';
+import { ZodError } from 'zod';
 
 const handleZodError = (err: ZodError): { status: number; message: string; sources: TErrorSources } => {
   const sources: TErrorSources = err.issues.map((issue) => {
     return {
-      path: issue?.path[issue.path.length - 1] ?? '',
+      path: (issue?.path[issue.path.length - 1] as string | number) ?? '',
       message: issue.message,
     };
   });
@@ -32,7 +32,7 @@ export const validation = (schema: ZodTypeAny) => {
         queryParams[key] = value;
       });
 
-      const parsed = await schema.parseAsync({
+      const parsed: any = await schema.parseAsync({
         params: req.params || {},
         query: queryParams,
         body: body,

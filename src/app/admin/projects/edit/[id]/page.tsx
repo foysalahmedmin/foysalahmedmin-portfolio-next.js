@@ -3,7 +3,7 @@
 import ProjectForm from "@/components/admin/project-form";
 import { Button } from "@/components/ui/button";
 import { getProjectById, updateProject } from "@/services/project.service";
-import { TProject } from "@/types/project.type";
+import type { TProject } from "@/types/project.type";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";

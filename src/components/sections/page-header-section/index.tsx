@@ -1,4 +1,5 @@
-import { Breadcrumb, TBreadcrumbs } from "@/components/ui/breadcrumb";
+import type { TBreadcrumbs } from "@/components/ui/breadcrumb";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { cn } from "@/lib/utils";
 import React from "react";
 

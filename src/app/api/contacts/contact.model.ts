@@ -1,5 +1,6 @@
-import mongoose, { Query, Schema } from 'mongoose';
-import {
+import type { Query} from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+import type {
   TContact,
   TContactDocument,
   TContactModel,

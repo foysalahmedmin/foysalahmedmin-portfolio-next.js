@@ -1,9 +1,10 @@
-import {
+import type {
   TProject,
   TProjectDocument,
   TProjectModel,
 } from "./project.type";
-import mongoose, { Query, Schema } from "mongoose";
+import type { Query} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const projectSchema = new Schema<TProjectDocument>(
   {

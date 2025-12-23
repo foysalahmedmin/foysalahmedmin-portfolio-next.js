@@ -1,7 +1,7 @@
 import ArticleDetailsSection from "@/components/(common)/articles-page/article-details-section";
 import { getArticleById } from "@/services/article.service";
-import { TArticle } from "@/types/article.type";
-import { Metadata } from "next";
+import type { TArticle } from "@/types/article.type";
+import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{ id: string }>;

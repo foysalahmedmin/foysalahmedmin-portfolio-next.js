@@ -1,6 +1,6 @@
 import { errorHandler } from '@/utils/error-handler';
 import * as ProjectController from './project.controller';
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {

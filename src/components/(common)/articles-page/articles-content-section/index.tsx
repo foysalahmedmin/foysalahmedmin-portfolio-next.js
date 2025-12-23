@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getArticles } from "@/services/article.service";
 import { getArticleCategories } from "@/services/category.service";
-import { TArticle } from "@/types/article.type";
+import type { TArticle } from "@/types/article.type";
 import { ArrowLeft, ArrowRight, Calendar, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";

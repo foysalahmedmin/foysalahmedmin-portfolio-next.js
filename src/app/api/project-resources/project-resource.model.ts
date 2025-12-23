@@ -1,9 +1,10 @@
-import {
+import type {
   TProjectResource,
   TProjectResourceDocument,
   TProjectResourceModel,
 } from "./project-resource.type";
-import mongoose, { Query, Schema } from "mongoose";
+import type { Query} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const projectResourceSchema = new Schema<TProjectResourceDocument>(
   {

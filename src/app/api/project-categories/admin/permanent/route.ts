@@ -3,8 +3,8 @@ import { validation } from '@/middleware/validation.middleware';
 import { errorHandler } from '@/utils/error-handler';
 import * as ProjectCategoryController from '../../project-category.controller';
 import * as ProjectCategoryValidation from '../../project-category.validation';
-import { TRole } from '@/types/jsonwebtoken.type';
-import { NextRequest } from 'next/server';
+import type { TRole } from '@/types/jsonwebtoken.type';
+import type { NextRequest } from 'next/server';
 
 export async function DELETE(req: NextRequest) {
   try {

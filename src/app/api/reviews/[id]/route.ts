@@ -1,17 +1,18 @@
 import { auth } from '@/middleware/auth.middleware';
 import { validation } from '@/middleware/validation.middleware';
+import type { TRole } from '@/types/jsonwebtoken.type';
 import { errorHandler } from '@/utils/error-handler';
+import type { NextRequest } from 'next/server';
 import * as ReviewController from '../review.controller';
 import * as ReviewValidation from '../review.validation';
-import { TRole } from '@/types/jsonwebtoken.type';
-import { NextRequest } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    return await ReviewController.getReviewById(req, { params });
+    const resolvedParams = await params;
+    return await ReviewController.getReviewById(req, { params: resolvedParams });
   } catch (error) {
     return errorHandler(error, req);
   }
@@ -19,18 +20,19 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const resolvedParams = await params;
     // Users can update their own reviews
     return await auth('user' as TRole)(
       req,
       async (authedReq) => {
-        authedReq.params = params;
+        authedReq.params = resolvedParams;
         return await validation(ReviewValidation.updateReviewSchema)(
           authedReq,
           (validatedReq) =>
-            ReviewController.updateReviewById(validatedReq, { params }),
+            ReviewController.updateReviewById(validatedReq, { params: resolvedParams }),
         );
       },
     );
@@ -41,18 +43,19 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const resolvedParams = await params;
     // Users can delete their own reviews
     return await auth('user' as TRole)(
       req,
       async (authedReq) => {
-        authedReq.params = params;
+        authedReq.params = resolvedParams;
         return await validation(ReviewValidation.reviewByIdOperationValidationSchema)(
           authedReq,
           (validatedReq) =>
-            ReviewController.deleteReviewById(validatedReq, { params }),
+            ReviewController.deleteReviewById(validatedReq, { params: resolvedParams }),
         );
       },
     );

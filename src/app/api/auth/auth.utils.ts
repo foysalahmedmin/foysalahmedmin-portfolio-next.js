@@ -1,15 +1,15 @@
-import httpStatus from 'http-status';
-import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import AppError from '@/builder/app-error';
-import { ENV } from '@/config';
-import { TJwtPayload } from '@/types/jsonwebtoken.type';
+import type { TJwtPayload } from '@/types/jsonwebtoken.type';
+import httpStatus from 'http-status';
+import type { JwtPayload} from 'jsonwebtoken';
+import jwt, { TokenExpiredError } from 'jsonwebtoken';
 
 export const createToken = (
   jwtPayload: Partial<TJwtPayload>,
   secret: string,
   expiresIn: string | number,
 ) => {
-  return jwt.sign(jwtPayload, secret, { expiresIn });
+  return jwt.sign(jwtPayload, secret, { expiresIn } as jwt.SignOptions);
 };
 
 export const verifyToken = (token: string, secret: string) => {

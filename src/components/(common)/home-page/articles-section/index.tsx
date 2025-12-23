@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { getArticles } from "@/services/article.service";
-import { TArticle } from "@/types/article.type";
+import type { TArticle } from "@/types/article.type";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";

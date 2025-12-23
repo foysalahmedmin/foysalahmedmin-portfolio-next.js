@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { TArticle } from "@/types/article.type";
+import type { TArticle } from "@/types/article.type";
 import { ArrowLeft, Share2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 

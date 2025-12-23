@@ -2,9 +2,9 @@ import connectDB from '@/lib/db';
 import httpStatus from 'http-status';
 import AppError from '@/builder/app-error';
 import AppQuery from '@/builder/app-query';
-import { TJwtPayload } from '@/types/jsonwebtoken.type';
+import type { TJwtPayload } from '@/types/jsonwebtoken.type';
 import { User } from './user.model';
-import { TUser } from './user.type';
+import type { TUser } from './user.type';
 import { deleteFile } from '@/utils/file-utils';
 
 export const getUser = async (id: string): Promise<TUser> => {

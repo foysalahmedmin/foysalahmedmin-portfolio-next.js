@@ -1,6 +1,6 @@
 import { ENV } from "@/config";
-import { TArticle } from "@/types/article.type";
-import { TResponse } from "@/types/response.type";
+import type { TArticle } from "@/types/article.type";
+import type { TResponse } from "@/types/response.type";
 
 async function handleResponse<T>(res: Response): Promise<TResponse<T>> {
   if (!res.ok) {

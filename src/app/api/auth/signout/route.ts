@@ -2,7 +2,8 @@ import { errorHandler } from '@/utils/error-handler';
 import sendResponse from '@/utils/send-response';
 import httpStatus from 'http-status';
 import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const ACCESS_TOKEN_COOKIE = 'access_token';

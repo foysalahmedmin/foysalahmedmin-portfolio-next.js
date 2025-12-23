@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { TResponse } from '@/types/response.type';
+import type { TResponse } from '@/types/response.type';
 
 const sendResponse = <T>(
   payload: TResponse<T>,

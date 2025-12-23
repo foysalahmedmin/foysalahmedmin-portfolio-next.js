@@ -1,4 +1,4 @@
-import { TUser } from "./user.type";
+import type { TUser } from "./user.type";
 
 export type TAuthState = {
   token?: string;

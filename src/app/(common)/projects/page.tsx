@@ -1,6 +1,6 @@
 import ProjectsContentSection from "@/components/(common)/projects-page/projects-content-section";
 import PageHeaderSection from "@/components/sections/page-header-section";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Projects | Foysal Ahmed",

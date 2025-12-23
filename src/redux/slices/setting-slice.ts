@@ -1,5 +1,6 @@
-import { TSettingState } from "@/types/state.type";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { TSettingState } from "@/types/state.type";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 const LOCAL_STORAGE_KEY = "setting";
 

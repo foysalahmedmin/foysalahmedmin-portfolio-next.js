@@ -1,4 +1,4 @@
-import { AuthRequest } from '@/middleware/auth.middleware';
+import type { AuthRequest } from '@/middleware/auth.middleware';
 import catchAsync from '@/utils/catch-async';
 import sendResponse from '@/utils/send-response';
 import httpStatus from 'http-status';

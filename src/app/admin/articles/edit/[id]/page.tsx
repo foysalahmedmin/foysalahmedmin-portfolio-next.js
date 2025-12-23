@@ -3,7 +3,7 @@
 import ArticleForm from "@/components/admin/article-form";
 import { Button } from "@/components/ui/button";
 import { getArticleById, updateArticle } from "@/services/article.service";
-import { TArticle } from "@/types/article.type";
+import type { TArticle } from "@/types/article.type";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";

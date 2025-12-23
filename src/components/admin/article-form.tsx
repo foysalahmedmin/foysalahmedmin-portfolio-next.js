@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { TArticle } from "@/types/article.type";
+import type { TArticle } from "@/types/article.type";
 import { Save } from "lucide-react";
 import React, { useState } from "react";
 
