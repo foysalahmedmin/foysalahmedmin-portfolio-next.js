@@ -1,6 +1,6 @@
 "use client";
 
-import type { RefObject} from "react";
+import type { RefObject } from "react";
 import { useEffect, useState } from "react";
 
 type ScrollPosition = {
@@ -17,26 +17,47 @@ export const useScrollPosition = (
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("up");
 
   useEffect(() => {
+    let ticking = false;
     let prevScrollTop = 0;
 
     const handleScroll = () => {
-      const target = ref?.current ?? document.documentElement;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const target = ref?.current ?? document.documentElement;
+          // Use window.scrollY for global scroll if no ref matches cleaner behavior
+          const currentScrollTop = ref?.current
+            ? target.scrollTop
+            : window.scrollY;
+          const scrollHeight = target.scrollHeight || 0;
+          const clientHeight = target.clientHeight || 0;
+          const scrollBottom = scrollHeight - currentScrollTop - clientHeight;
 
-      const currentScrollTop = target.scrollTop || 0;
-      const scrollHeight = target.scrollHeight || 0;
-      const clientHeight = target.clientHeight || 0;
-      const scrollBottom = scrollHeight - currentScrollTop - clientHeight;
+          // Only update if values changed to prevent re-renders
+          setScrollTop((prev) =>
+            prev !== currentScrollTop ? currentScrollTop : prev
+          );
+          setScrollBottom((prev) =>
+            prev !== scrollBottom ? scrollBottom : prev
+          );
 
-      setScrollTop(currentScrollTop);
-      setScrollBottom(scrollBottom);
-      setScrollDirection(currentScrollTop > prevScrollTop ? "down" : "up");
+          if (Math.abs(currentScrollTop - prevScrollTop) > 0) {
+            setScrollDirection(
+              currentScrollTop > prevScrollTop ? "down" : "up"
+            );
+          }
 
-      prevScrollTop = currentScrollTop;
+          prevScrollTop = currentScrollTop;
+          ticking = false;
+        });
+
+        ticking = true;
+      }
     };
 
     const scrollTarget = ref?.current ?? window;
     scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
 
+    // Initial check
     handleScroll();
 
     return () => {

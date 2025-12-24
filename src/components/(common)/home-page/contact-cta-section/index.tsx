@@ -7,7 +7,7 @@ import React from "react";
 
 const ContactCTASection: React.FC = () => {
   return (
-    <section id="contact-cta" className="py-24 lg:py-32">
+    <section id="contact" className="py-24 lg:py-32">
       <div className="container mx-auto px-6">
         <div className="bg-primary text-primary-foreground relative overflow-hidden rounded-3xl px-6 py-16 md:px-16 md:py-24">
           {/* Background decoration */}
