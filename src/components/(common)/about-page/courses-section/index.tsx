@@ -2,9 +2,14 @@ import { BookOpen } from "lucide-react";
 
 const CoursesData = [
   {
-    title: "Next.js Mastery",
+    title: "Next Level Web development",
     provider: "Programming Hero",
     year: "2024",
+  },
+  {
+    title: "Web development",
+    provider: "Programming Hero",
+    year: "2023",
   },
 ];
 
@@ -14,7 +19,7 @@ const CoursesSection = () => {
       <div className="container mx-auto px-6">
         <div className="mb-16 flex items-center gap-4">
           <BookOpen className="text-primary size-8" />
-          <h2 className="text-3xl font-bold">Courses & Certifications</h2>
+          <h2 className="text-3xl font-bold">Courses</h2>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {CoursesData.map((course, i) => (
