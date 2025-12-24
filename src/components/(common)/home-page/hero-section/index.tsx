@@ -2,36 +2,34 @@
 
 import { Button } from "@/components/ui/button";
 import Magnetic from "@/components/ui/magnetic";
-import {
-  Modal,
-  ModalBackdrop,
-  ModalContent,
-  ModalTrigger,
-} from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Play, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const slides = [
   {
-    image: "/images/hero-1.jpg",
+    image:
+      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1920&auto=format&fit=crop",
     title: "Full Stack Developer",
-    subtitle: "Building scalable web applications with MERN stack.",
+    subtitle:
+      "Designing and building scalable, high-performance applications end to end.",
     highlight: "Full Stack",
   },
   {
-    image: "/images/hero-2.jpg",
+    image:
+      "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1920&auto=format&fit=crop",
     title: "AI & Automation",
     subtitle:
-      "Integrating cutting-edge AI models and automating repetitive workflows.",
+      "Designing and implementing AI-driven workflows to optimize processes.",
     highlight: "AI &",
   },
   {
-    image: "/images/hero-3.jpg",
+    image:
+      "https://images.unsplash.com/photo-1581090700227-1e37b190418e?q=80&w=1920&auto=format&fit=crop",
     title: "System Architect",
     subtitle:
-      "Designing complex infrastructures optimized for high-traffic environments.",
+      "Designing robust system architectures for scalable, high-traffic platforms.",
     highlight: "System",
   },
 ];
@@ -39,8 +37,6 @@ const slides = [
 const HeroSection: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const youtubeVideoId = "UKpICjcmWZg";
-  const youtubeVideoLink = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&loop=1&playlist=${youtubeVideoId}&controls=0&mute=1`;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -62,7 +58,7 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-background relative w-full overflow-hidden">
+    <section className="bg-background relative flex min-h-[36rem] w-full max-w-screen flex-col overflow-hidden md:min-h-[40rem] lg:min-h-[46rem]">
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="animate-pulse-slow bg-primary/10 absolute top-1/4 -left-1/4 h-[500px] w-[500px] rounded-full blur-[120px]" />
@@ -94,115 +90,88 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="relative pb-24">
-        <div className="relative z-10 container mx-auto flex h-full min-h-[40rem] flex-col justify-center px-6 py-24">
-          <div className="flex max-w-4xl flex-col">
-            <div className="fade-down active border-primary/20 bg-background/20 text-primary mb-8 inline-flex items-center gap-2 rounded-full border px-5 py-2 text-xs font-bold tracking-[0.2em] uppercase backdrop-blur-md">
-              <Sparkles className="text-foreground size-4 animate-pulse" />
-              <span>Available for new projects</span>
-            </div>
+      <div className="relative z-10 container mx-auto mb-10 flex h-full flex-1 flex-col justify-center px-6 py-24">
+        <div className="flex max-w-4xl flex-1 flex-col">
+          <div className="fade-down active border-primary/20 bg-background/20 text-primary mb-6 inline-flex w-fit items-center gap-2 rounded-full border px-5 py-2 text-xs font-bold tracking-[0.2em] uppercase backdrop-blur-md">
+            <Sparkles className="text-foreground size-4 animate-pulse" />
+            <span>Available for new projects</span>
+          </div>
 
-            <div className="overflow-hidden">
-              <h1
-                className={cn(
-                  "text-foreground text-6xl leading-[0.9] font-black tracking-tighter transition-all duration-700 ease-out md:text-8xl lg:text-9xl",
-                  isTransitioning
-                    ? "translate-y-10 skew-y-6 opacity-0"
-                    : "translate-y-0 skew-y-0 opacity-100"
-                )}
-              >
-                {slides[selectedIndex].title.split(" ").map((word, i) => (
-                  <span
-                    key={i}
-                    className={cn(
-                      word === slides[selectedIndex].highlight
-                        ? "text-primary text-glow"
-                        : "text-foreground"
-                    )}
-                  >
-                    {word}{" "}
-                  </span>
-                ))}
-              </h1>
-            </div>
-
-            <p
+          <div className="overflow-hidden">
+            <h1
               className={cn(
-                "text-muted-foreground/80 mt-10 mb-12 max-w-2xl text-xl leading-relaxed transition-all delay-100 duration-700 ease-out md:text-2xl",
+                "text-foreground text-5xl leading-[0.9] font-black tracking-tighter transition-all duration-700 ease-out md:text-7xl lg:text-9xl",
                 isTransitioning
-                  ? "translate-y-10 opacity-0"
-                  : "translate-y-0 opacity-100"
+                  ? "translate-y-10 skew-y-6 opacity-0"
+                  : "translate-y-0 skew-y-0 opacity-100"
               )}
             >
-              {slides[selectedIndex].subtitle}
-            </p>
+              {slides[selectedIndex].title.split(" ").map((word, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    word === slides[selectedIndex].highlight
+                      ? "text-primary text-glow"
+                      : "text-foreground"
+                  )}
+                >
+                  {word}{" "}
+                </span>
+              ))}
+            </h1>
+          </div>
 
-            <div className="fade-up active mt-auto flex flex-wrap items-center gap-2 delay-300 md:gap-4">
-              <Magnetic strength={0.2}>
-                <Link href="/about">
-                  <Button className="primary">
-                    <span className="relative z-10">About Me</span>
-                    <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </Link>
-              </Magnetic>
-              <Magnetic strength={0.2}>
-                <Link href="/projects">
-                  <Button variant="outline" className="primary">
-                    <span className="relative z-10">View Projects</span>
-                    <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </Link>
-              </Magnetic>
+          <p
+            className={cn(
+              "text-muted-foreground/80 mt-6 mb-8 max-w-2xl text-xl leading-relaxed transition-all delay-100 duration-700 ease-out md:text-2xl",
+              isTransitioning
+                ? "translate-y-10 opacity-0"
+                : "translate-y-0 opacity-100"
+            )}
+          >
+            {slides[selectedIndex].subtitle}
+          </p>
 
-              <Modal>
-                <Magnetic strength={0.2}>
-                  <ModalTrigger variant="none" className="glass">
-                    <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full">
-                      <Play className="fill-primary ml-1 size-5" />
-                    </div>
-                    <span>Watch Intro</span>
-                  </ModalTrigger>
-                </Magnetic>
-
-                <ModalBackdrop>
-                  <ModalContent className="max-w-[90vw] border-none bg-transparent p-0 sm:max-w-[80vw] lg:max-w-[70vw]">
-                    <div className="relative aspect-video w-full overflow-hidden rounded-[2rem] bg-black shadow-2xl">
-                      <iframe
-                        className="h-full w-full"
-                        src={youtubeVideoLink}
-                        title="YouTube video player"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                  </ModalContent>
-                </ModalBackdrop>
-              </Modal>
-            </div>
+          <div className="fade-up active flex flex-wrap items-center gap-2 delay-300 md:gap-4">
+            <Magnetic strength={0.2}>
+              <Link href="/about">
+                <Button className="primary">
+                  <span className="relative z-10">About Me</span>
+                  <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </Magnetic>
+            <Magnetic strength={0.2}>
+              <Link href="/projects">
+                <Button variant="outline" className="primary">
+                  <span className="relative z-10">View Projects</span>
+                  <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </Magnetic>
           </div>
         </div>
       </div>
 
       {/* Modern Progress Indicators */}
-      <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-row gap-6 md:bottom-12 lg:right-16 lg:bottom-16 lg:left-auto lg:translate-x-0 lg:flex-col lg:gap-4">
+      <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-row gap-6 md:bottom-12">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => handleSlideChange(i)}
-            className="group flex cursor-pointer flex-col items-center gap-1 lg:flex-row lg:gap-4"
+            className="group flex cursor-pointer flex-col items-center gap-1"
           >
             <span
               className={cn(
                 "text-[10px] font-bold transition-all duration-500",
                 selectedIndex === i
                   ? "text-primary opacity-100"
-                  : "text-muted-foreground opacity-0 lg:group-hover:opacity-100"
+                  : "text-muted-foreground opacity-0 group-hover:opacity-100"
               )}
             >
               0{i + 1}
             </span>
-            <div className="flex w-8 items-center justify-center lg:w-12 lg:justify-start">
+            <div className="flex w-8 items-center justify-center lg:w-12">
               <div
                 className={cn(
                   "h-1 rounded-full transition-all duration-500",
@@ -217,7 +186,7 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Unique Scroll indicator */}
-      <div className="absolute bottom-20 left-1/2 z-10 -translate-x-1/2 lg:bottom-16">
+      <div className="absolute bottom-24 left-1/2 z-10 -translate-x-1/2 lg:bottom-28">
         <Link href="#about" className="flex flex-col items-center gap-3">
           <div className="border-muted-foreground/20 relative h-12 w-8 rounded-full border-2 p-1">
             <div className="bg-primary animate-bounce-slow absolute top-3 right-0.5 left-0.5 h-2 w-6 rounded-full px-1" />
