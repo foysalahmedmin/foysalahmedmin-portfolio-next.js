@@ -1,5 +1,3 @@
-import { BookOpen } from "lucide-react";
-
 const CoursesData = [
   {
     title: "Next Level Web development",
@@ -17,11 +15,15 @@ const CoursesSection = () => {
   return (
     <section className="bg-card py-24 lg:py-32">
       <div className="container mx-auto px-6">
-        <div className="mb-16 flex items-center gap-4">
-          <BookOpen className="text-primary size-8" />
-          <h2 className="text-3xl font-bold">Courses</h2>
+        <div className="mb-16 text-center">
+          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase">
+            Certifications
+          </span>
+          <h2 className="fade-up text-3xl font-bold tracking-tight delay-100 md:text-5xl">
+            Courses I&apos;ve Taken
+          </h2>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {CoursesData.map((course, i) => (
             <div
               key={i}

@@ -1,6 +1,7 @@
 import AboutDetailsSection from "@/components/(common)/about-page/about-details-section";
 import CoursesSection from "@/components/(common)/about-page/courses-section";
-import ExperienceEducationSection from "@/components/(common)/about-page/experience-education-section";
+import EducationSection from "@/components/(common)/about-page/education-section";
+import ExperienceSection from "@/components/(common)/about-page/experience-section";
 import PageHeaderSection from "@/components/sections/page-header-section";
 import ServicesSection from "@/components/sections/services-section";
 import SkillsSection from "@/components/sections/skills-section";
@@ -27,21 +28,13 @@ const AboutPage = () => {
         description="Dedicated web developer with a passion for building scalable applications and solving complex problems."
         breadcrumbItems={breadcrumbItems}
       />
-
       <AboutDetailsSection />
-
       <ServicesSection />
-
       <StatisticsSection />
-
-      <div className="bg-muted/20">
-        <SkillsSection />
-      </div>
-
-      <ExperienceEducationSection />
-
+      <SkillsSection />
+      <ExperienceSection />
+      <EducationSection />
       <CoursesSection />
-
       <TestimonialsSection />
     </main>
   );
