@@ -16,17 +16,19 @@ async function handleResponse(res: Response) {
 }
 
 export async function getProjectCategories(): Promise<CategoryResponse> {
-  const res = await fetch(`${ENV.url}/api/project-categories`, {
+  const baseUrl = ENV.url && ENV.url !== "undefined" ? ENV.url : "";
+  const res = await fetch(`${baseUrl}/api/project-categories`, {
     method: "GET",
-    next: { revalidate: 3600 }
+    next: { revalidate: 3600 },
   });
   return handleResponse(res);
 }
 
 export async function getArticleCategories(): Promise<CategoryResponse> {
-  const res = await fetch(`${ENV.url}/api/article-categories`, {
+  const baseUrl = ENV.url && ENV.url !== "undefined" ? ENV.url : "";
+  const res = await fetch(`${baseUrl}/api/article-categories`, {
     method: "GET",
-    next: { revalidate: 3600 }
+    next: { revalidate: 3600 },
   });
   return handleResponse(res);
 }

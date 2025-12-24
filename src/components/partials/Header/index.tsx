@@ -218,31 +218,39 @@ const MobileNavigation: React.FC<{
       className="flex flex-col items-center gap-6"
       onClick={(e) => e.stopPropagation()}
     >
-      {[...navLinks, { href: "/contact", name: "Contact Us" }].map(
-        (link, index) => (
-          <NavItem
-            key={`mobile-${link.href}-${index}`}
-            link={link}
-            visibleSection={visibleSection}
-            onClick={onClose}
-          />
-        )
-      )}
+      {[...navLinks].map((link, index) => (
+        <NavItem
+          key={`mobile-${link.href}-${index}`}
+          link={link}
+          visibleSection={visibleSection}
+          onClick={onClose}
+        />
+      ))}
     </nav>
   </div>
-);
-
-const ContactButton: React.FC = () => (
-  <Link className="hidden lg:inline-block" href="/contact">
-    <Button className="foreground" asChild={true} variant="outline">
-      <span>CONTACT</span>
-    </Button>
-  </Link>
 );
 
 const ThemeToggler: React.FC = () => {
   const { theme } = useAppSelector((state) => state.setting);
   const dispatch = useAppDispatch();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        shape="icon"
+        className="text-foreground hover:bg-muted"
+        aria-label="Toggle theme"
+      >
+        <Monitor className="size-5" />
+      </Button>
+    );
+  }
 
   return (
     <Button
@@ -276,9 +284,9 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
 
   // Header styling based on scroll and page
   const headerClassName = cn(
-    "text-foreground top-0 right-0 left-0 z-50 h-20 bg-transparent backdrop-blur-xs transition-all duration-300 ease-in-out",
+    "text-foreground top-0 right-0 left-0 z-50 h-20 bg-background/50 backdrop-blur-xs transition-all duration-300 ease-in-out",
     {
-      "dark fixed": isHomePage,
+      fixed: isHomePage,
       "bg-card sticky": !isHomePage,
       "bg-background/95 shadow-sm": scrollTop > 80 && isHomePage,
       "bg-background/95": isMobileMenuOpen && isHomePage,
@@ -304,7 +312,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
 
           <div className="flex items-center gap-2 lg:gap-4">
             <ThemeToggler />
-            <ContactButton />
             <MobileMenuButton
               isOpen={isMobileMenuOpen}
               onClick={toggleMobileMenu}

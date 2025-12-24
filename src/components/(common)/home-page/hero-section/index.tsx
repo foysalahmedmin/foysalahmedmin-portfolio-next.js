@@ -22,13 +22,15 @@ const slides = [
   {
     image: "/images/hero-2.jpg",
     title: "AI & Automation",
-    subtitle: "Integrating cutting-edge AI models and automating repetitive workflows.",
+    subtitle:
+      "Integrating cutting-edge AI models and automating repetitive workflows.",
     highlight: "AI &",
   },
   {
     image: "/images/hero-3.jpg",
     title: "System Architect",
-    subtitle: "Designing complex infrastructures optimized for high-traffic environments.",
+    subtitle:
+      "Designing complex infrastructures optimized for high-traffic environments.",
     highlight: "System",
   },
 ];
@@ -74,7 +76,9 @@ const HeroSection: React.FC = () => {
               key={index}
               className={cn(
                 "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-                selectedIndex === index ? "opacity-100 scale-100" : "opacity-0 scale-110"
+                selectedIndex === index
+                  ? "scale-100 opacity-100"
+                  : "scale-110 opacity-0"
               )}
             >
               <img
@@ -91,16 +95,18 @@ const HeroSection: React.FC = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto flex h-full flex-col justify-center px-6">
         <div className="max-w-4xl">
-          <div className="fade-down active mb-8 inline-flex items-center gap-3 rounded-full border border-primary/20 bg-background/20 backdrop-blur-md px-5 py-2 text-[11px] font-bold tracking-[0.2em] uppercase text-primary">
+          <div className="fade-down active border-primary/20 bg-background/20 text-primary mb-8 inline-flex items-center gap-3 rounded-full border px-5 py-2 text-[11px] font-bold tracking-[0.2em] uppercase backdrop-blur-md">
             <Sparkles className="size-4 animate-pulse" />
             <span>Available for new projects</span>
           </div>
 
           <div className="overflow-hidden">
-            <h1 
+            <h1
               className={cn(
-                "text-foreground text-6xl leading-[0.9] font-black tracking-tighter md:text-8xl lg:text-9xl transition-all duration-700 ease-out",
-                isTransitioning ? "opacity-0 translate-y-10 skew-y-6" : "opacity-100 translate-y-0 skew-y-0"
+                "text-foreground text-6xl leading-[0.9] font-black tracking-tighter transition-all duration-700 ease-out md:text-8xl lg:text-9xl",
+                isTransitioning
+                  ? "translate-y-10 skew-y-6 opacity-0"
+                  : "translate-y-0 skew-y-0 opacity-100"
               )}
             >
               {slides[selectedIndex].title.split(" ").map((word, i) => (
@@ -120,14 +126,16 @@ const HeroSection: React.FC = () => {
 
           <p
             className={cn(
-              "text-muted-foreground/80 mt-10 max-w-2xl text-xl leading-relaxed md:text-2xl transition-all duration-700 delay-100 ease-out",
-              isTransitioning ? "opacity-0 translate-y-10" : "opacity-100 translate-y-0"
+              "text-muted-foreground/80 mt-10 max-w-2xl text-xl leading-relaxed transition-all delay-100 duration-700 ease-out md:text-2xl",
+              isTransitioning
+                ? "translate-y-10 opacity-0"
+                : "translate-y-0 opacity-100"
             )}
           >
             {slides[selectedIndex].subtitle}
           </p>
 
-          <div className="mt-14 flex flex-wrap items-center gap-6 fade-up active delay-300">
+          <div className="fade-up active mt-14 flex flex-wrap items-center gap-6 delay-300">
             <Magnetic strength={0.2}>
               <Link
                 href="/projects"
@@ -135,7 +143,6 @@ const HeroSection: React.FC = () => {
               >
                 <span className="relative z-10">View Portfolio</span>
                 <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
-                <div className="absolute inset-0 -translate-x-full rounded-2xl bg-white/10 transition-transform duration-300 group-hover:translate-x-0" />
               </Link>
             </Magnetic>
 
@@ -174,7 +181,7 @@ const HeroSection: React.FC = () => {
           <button
             key={i}
             onClick={() => handleSlideChange(i)}
-            className="group flex items-center gap-4"
+            className="group flex cursor-pointer items-center gap-4"
           >
             <span
               className={cn(
@@ -186,14 +193,16 @@ const HeroSection: React.FC = () => {
             >
               0{i + 1}
             </span>
-            <div
-              className={cn(
-                "h-1 rounded-full transition-all duration-500",
-                selectedIndex === i
-                  ? "bg-primary w-12"
-                  : "bg-muted-foreground/30 w-6 group-hover:w-8"
-              )}
-            />
+            <div className="flex w-12 items-center justify-start">
+              <div
+                className={cn(
+                  "h-1 rounded-full transition-all duration-500",
+                  selectedIndex === i
+                    ? "bg-primary w-12"
+                    : "bg-muted-foreground/30 w-6 group-hover:w-8"
+                )}
+              />
+            </div>
           </button>
         ))}
       </div>
@@ -201,8 +210,8 @@ const HeroSection: React.FC = () => {
       {/* Unique Scroll indicator */}
       <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2">
         <Link href="#about" className="flex flex-col items-center gap-3">
-          <div className="border-muted-foreground/20 h-12 w-7 rounded-full border-2 p-1 relative">
-            <div className="bg-primary h-2 w-full rounded-full animate-bounce-slow absolute top-1 left-0 right-0 px-1" />
+          <div className="border-muted-foreground/20 relative h-12 w-8 rounded-full border-2 p-1">
+            <div className="bg-primary animate-bounce-slow absolute top-1.5 right-0.5 left-0.5 h-2 w-6 rounded-full px-1" />
           </div>
           <span className="text-muted-foreground/50 text-[10px] font-bold tracking-[0.3em] uppercase">
             Scroll
