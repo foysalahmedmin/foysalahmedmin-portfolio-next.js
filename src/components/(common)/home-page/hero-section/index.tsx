@@ -58,12 +58,12 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-background relative flex min-h-[36rem] w-full max-w-screen flex-col overflow-hidden md:min-h-[40rem] lg:min-h-[46rem]">
+    <section className="bg-background text-foreground relative flex min-h-[40rem] w-full max-w-screen flex-col overflow-hidden py-24 md:py-32 lg:min-h-[46rem]">
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="animate-pulse-slow bg-primary/10 absolute top-1/4 -left-1/4 h-[500px] w-[500px] rounded-full blur-[120px]" />
+        <div className="animate-pulse-slow bg-background/10 absolute top-1/4 -left-1/4 h-[500px] w-[500px] rounded-full blur-[120px]" />
         <div
-          className="animate-pulse-slow bg-primary/5 absolute -right-1/4 bottom-1/4 h-[500px] w-[500px] rounded-full blur-[120px]"
+          className="animate-pulse-slow bg-background/5 absolute -right-1/4 bottom-1/4 h-[500px] w-[500px] rounded-full blur-[120px]"
           style={{ animationDelay: "2s" }}
         />
 
@@ -90,9 +90,9 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto mb-10 flex h-full flex-1 flex-col justify-center px-6 py-24">
-        <div className="flex max-w-4xl flex-1 flex-col">
-          <div className="fade-down active border-primary/20 bg-background/20 text-primary mb-6 inline-flex w-fit items-center gap-2 rounded-full border px-5 py-2 text-xs font-bold tracking-[0.2em] uppercase backdrop-blur-md">
+      <div className="relative z-10 container mx-auto mb-10 flex h-full flex-1 flex-col justify-center px-6">
+        <div className="flex max-w-4xl flex-1 flex-col justify-center">
+          <div className="fade-down active border-primary/20 bg-background/20 text-primary mb-6 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase backdrop-blur-md">
             <Sparkles className="text-foreground size-4 animate-pulse" />
             <span>Available for new projects</span>
           </div>
@@ -154,7 +154,7 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Modern Progress Indicators */}
-      <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-row gap-6 md:bottom-12">
+      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 flex-row gap-6 md:bottom-4">
         {slides.map((_, i) => (
           <button
             key={i}
@@ -186,10 +186,10 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Unique Scroll indicator */}
-      <div className="absolute bottom-24 left-1/2 z-10 -translate-x-1/2 lg:bottom-28">
+      <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2">
         <Link href="#about" className="flex flex-col items-center gap-3">
-          <div className="border-muted-foreground/20 relative h-12 w-8 rounded-full border-2 p-1">
-            <div className="bg-primary animate-bounce-slow absolute top-3 right-0.5 left-0.5 h-2 w-6 rounded-full px-1" />
+          <div className="border-muted-foreground/20 relative h-10 w-6 rounded-full border-2 p-1">
+            <div className="bg-primary animate-bounce-slow absolute top-2 right-0.5 left-0.5 h-1 w-4 rounded-full px-1" />
           </div>
           <span className="text-muted-foreground/50 text-[10px] font-bold tracking-[0.3em] uppercase">
             Scroll
