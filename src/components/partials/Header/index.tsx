@@ -110,7 +110,7 @@ const Logo: React.FC = () => (
       className="size-12 rounded-full object-contain object-left"
       priority
     />
-    <div className="pt-2 leading-4">
+    <div className="leading-4">
       <p className="dark:text-foreground text-primary">FOYSAL AHMED</p>
       <span className="text-xs font-thin">Application Developer</span>
     </div>

@@ -26,7 +26,7 @@ const slides = [
   },
   {
     image:
-      "https://images.unsplash.com/photo-1581090700227-1e37b190418e?q=80&w=1920&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1920&auto=format&fit=crop",
     title: "System Architect",
     subtitle:
       "Designing robust system architectures for scalable, high-traffic platforms.",
