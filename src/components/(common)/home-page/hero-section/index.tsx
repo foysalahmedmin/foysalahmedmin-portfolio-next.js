@@ -58,7 +58,7 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-background text-foreground relative flex min-h-[40rem] w-full max-w-screen flex-col overflow-hidden py-24 md:py-32 lg:min-h-[46rem]">
+    <section className="bg-background text-foreground relative flex min-h-[40rem] w-full max-w-screen flex-col overflow-hidden py-24 md:py-32 lg:min-h-[50rem]">
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="animate-pulse-slow bg-background/10 absolute top-1/4 -left-1/4 h-[500px] w-[500px] rounded-full blur-3xl" />
@@ -72,18 +72,21 @@ const HeroSection: React.FC = () => {
             <div
               key={index}
               className={cn(
-                "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-                selectedIndex === index
-                  ? "scale-100 opacity-100"
-                  : "scale-110 opacity-0"
+                "absolute inset-0 transition-opacity duration-[2000ms] ease-in-out will-change-[opacity,transform]",
+                selectedIndex === index ? "opacity-100" : "opacity-0"
               )}
             >
               <img
                 src={slide.image || "/images/hero-banner.png"}
                 alt=""
-                className="h-full w-full object-cover brightness-[0.2] grayscale"
+                className="h-full w-full object-cover grayscale"
               />
-              <div className="from-background/80 to-background absolute inset-0 bg-gradient-to-b via-transparent" />
+              {/* Overlay to blend image with theme background */}
+              <div className="bg-background/80 absolute inset-0 mix-blend-overlay transition-colors duration-1000" />
+              <div className="bg-background/60 absolute inset-0 transition-colors duration-1000" />
+
+              {/* Gradient for smooth transition to content */}
+              <div className="from-background/0 via-background/40 to-background absolute inset-0 bg-gradient-to-b" />
             </div>
           ))}
         </div>
