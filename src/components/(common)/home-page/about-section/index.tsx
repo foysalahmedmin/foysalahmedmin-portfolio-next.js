@@ -32,8 +32,7 @@ const AboutSection: React.FC = () => {
             <div className="bg-card border-border animate-float absolute -right-6 -bottom-10 max-w-[280px] rounded-2xl border p-6 shadow-2xl md:right-10">
               <Quote className="text-primary mb-4 size-8 opacity-20" />
               <p className="text-sm leading-relaxed font-medium italic">
-                "I believe in creating digital solutions that are not just
-                working, but excel in performance and user experience."
+                "PART OF NATURE"
               </p>
               <div className="mt-4 flex items-center gap-3">
                 <div className="bg-primary h-0.5 w-8" />
@@ -54,17 +53,24 @@ const AboutSection: React.FC = () => {
                 Brief Introduction
               </span>
               <h2 className="text-3xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-                Dedicated Full Stack{" "}
-                <span className="text-primary">Software Engineer</span>
+                Dedicated Full-Stack{" "}
+                <span className="text-primary">Software Architect</span>
               </h2>
             </div>
 
             <p className="text-muted-foreground text-lg leading-relaxed">
-              With a deep understanding of modern web ecosystems, I specialize
-              in crafting performant architectures using Node.js and building
-              immersive user interfaces with Next.js. My goal is to bridge the
-              gap between complex backend systems and intuitive frontend
-              experiences.
+              I am a{" "}
+              <span className="text-primary font-bold">
+                Full-Stack Architect
+              </span>
+              with expertise in designing and building intelligent, scalable
+              systems across web, mobile, and backend platforms. I architect
+              projects end-to-end, creating robust business logic-driven
+              solutions, implementing high-performance web and mobile
+              applications, optimizing databases (SQL & NoSQL), and integrating
+              AI and automation workflows. My focus is on delivering
+              maintainable, efficient, and future-proof systems that provide
+              exceptional experiences for users and empower businesses.
             </p>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
