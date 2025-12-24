@@ -23,7 +23,7 @@ const PageHeaderSection: React.FC<PageHeaderSectionProps> = ({
   const renderTitle = (text: string) => {
     const words = text.split(" ");
     if (words.length <= 1) return text;
-    
+
     const lastWord = words.pop();
     return (
       <>
@@ -33,10 +33,21 @@ const PageHeaderSection: React.FC<PageHeaderSectionProps> = ({
   };
 
   return (
-    <section className={cn("bg-muted/30 border-border border-b py-20 lg:py-32", className)}>
+    <section
+      className={cn(
+        "bg-muted border-border border-b py-20 lg:py-32",
+        className
+      )}
+    >
       <div className="container mx-auto px-6">
-        <div className={cn("flex flex-col gap-6", align === "center" ? "items-center text-center" : "items-start text-left")}>
-          
+        <div
+          className={cn(
+            "flex flex-col gap-6",
+            align === "center"
+              ? "items-center text-center"
+              : "items-start text-left"
+          )}
+        >
           {breadcrumbItems && (
             <div className="fade-down">
               <Breadcrumb items={breadcrumbItems} />
@@ -45,7 +56,7 @@ const PageHeaderSection: React.FC<PageHeaderSectionProps> = ({
 
           <div className="max-w-3xl">
             {subtitle && (
-              <span className="text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase fade-down">
+              <span className="text-primary fade-down mb-3 inline-block text-sm font-bold tracking-widest uppercase">
                 {subtitle}
               </span>
             )}

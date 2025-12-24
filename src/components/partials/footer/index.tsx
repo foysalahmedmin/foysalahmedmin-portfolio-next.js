@@ -54,7 +54,7 @@ const Footer = () => {
                 alt="Foysal Ahmed Logo"
                 width={48}
                 height={48}
-                className="bg-primary size-12 rounded-full object-contain p-1"
+                className="size-12 rounded-full object-contain"
               />
               <div className="leading-tight">
                 <p className="text-foreground text-lg font-bold tracking-tight">

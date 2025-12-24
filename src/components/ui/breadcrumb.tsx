@@ -29,7 +29,7 @@ const BreadcrumbItem = ({
 }: TBreadcrumbItemProps) => {
   if (path) {
     return (
-      <Link href={path} className={cn("hover:text-accent", className)}>
+      <Link href={path} className={cn("hover:underline", className)}>
         {children}
       </Link>
     );
@@ -48,10 +48,10 @@ const Breadcrumb = ({ items }: TBreadcrumbProps) => {
       <div className="flex items-center space-x-1">
         <BreadcrumbItem
           href={firstItem.href}
-          className="bg-accent/5 text-foreground border-accent relative flex items-center gap-1 rounded-e-md border-l px-2 py-0.5 font-semibold transition-colors"
+          className="bg-accent/5 text-foreground border-accent relative flex items-center gap-1 rounded-e-md px-2 py-0.5 font-semibold transition-colors"
         >
           {firstItem?.icon && (
-            <Icon name={firstItem?.icon || ""} className="text-accent size-4" />
+            <Icon name={firstItem?.icon || ""} className="size-4" />
           )}
           {firstItem.name}
         </BreadcrumbItem>
