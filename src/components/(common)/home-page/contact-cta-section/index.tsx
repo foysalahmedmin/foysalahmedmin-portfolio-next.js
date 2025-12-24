@@ -9,7 +9,7 @@ const ContactCTASection: React.FC = () => {
   return (
     <section id="contact-cta" className="py-24 lg:py-32">
       <div className="container mx-auto px-6">
-        <div className="bg-primary text-primary-foreground relative overflow-hidden rounded-3xl px-8 py-16 md:px-16 md:py-24">
+        <div className="bg-primary text-primary-foreground relative overflow-hidden rounded-3xl px-6 py-16 md:px-16 md:py-24">
           {/* Background decoration */}
           <div className="bg-background/10 absolute -top-24 -right-24 size-96 rounded-full blur-3xl" />
           <div className="bg-background/10 absolute -bottom-24 -left-24 size-96 rounded-full blur-3xl" />
@@ -18,10 +18,10 @@ const ContactCTASection: React.FC = () => {
             <span className="bg-primary/20 mb-6 inline-flex size-16 items-center justify-center rounded-2xl text-3xl shadow-inner backdrop-blur-sm">
               <Smile className="size-20" />
             </span>
-            <h2 className="mb-6 max-w-2xl text-3xl leading-tight font-bold md:text-5xl">
+            <h2 className="mb-6 max-w-3xl text-2xl leading-tight font-bold md:text-5xl">
               Have a Project in Mind? Let's Build Something Amazing.
             </h2>
-            <p className="mb-10 max-w-xl text-lg opacity-90 md:text-xl">
+            <p className="mb-10 max-w-xl opacity-90 md:text-xl">
               I'm always open to discussing new projects, creative ideas or
               opportunities to be part of your visions.
             </p>
@@ -33,7 +33,7 @@ const ContactCTASection: React.FC = () => {
                   variant="default"
                   className="font-bold tracking-wide uppercase"
                 >
-                  Start a Conversation <Send className="ml-2 size-4" />
+                  Conversation <Send className="ml-2 size-4" />
                 </Button>
               </Link>
               <Link href="mailto:foysalahmedmin@gmail.com">
@@ -42,18 +42,18 @@ const ContactCTASection: React.FC = () => {
                   variant="outline"
                   className="font-bold tracking-wide uppercase"
                 >
-                  <Mail className="mr-2 size-4" /> foysalahmedmin@gmail.com
+                  <Mail className="mr-2 size-4" /> Email Me
                 </Button>
               </Link>
             </div>
 
             <div className="mt-12 flex gap-8">
               <div className="flex items-center gap-2">
-                <MessageSquare className="size-5 opacity-70" />
+                <MessageSquare className="hidden size-5 opacity-70 md:inline-block" />
                 <span className="text-sm font-medium">Quick Reply</span>
               </div>
               <div className="flex items-center gap-2">
-                <Send className="size-5 opacity-70" />
+                <Send className="hidden size-5 opacity-70 md:inline-block" />
                 <span className="text-sm font-medium">Available for Hire</span>
               </div>
             </div>

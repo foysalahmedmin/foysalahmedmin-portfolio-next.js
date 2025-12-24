@@ -7,7 +7,16 @@ import { useVisibleSection } from "@/hooks/utils/use-visible-section";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { toggleTheme } from "@/redux/slices/setting-slice";
-import { Monitor, Moon, Sun, X } from "lucide-react";
+import {
+  Briefcase,
+  Home,
+  Mail,
+  Monitor,
+  Moon,
+  PenTool,
+  Sun,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,6 +26,7 @@ import React, { useCallback, useEffect, useState } from "react";
 type NavLink = {
   href: string;
   name: string;
+  icon?: React.ElementType;
 };
 
 type HeaderProps = {
@@ -25,19 +35,19 @@ type HeaderProps = {
 
 // Constants
 const ALL_PAGE_NAV_LINKS: NavLink[] = [
-  { href: "/", name: "Home" },
-  { href: "/about", name: "About" },
-  { href: "/projects", name: "Projects" },
-  { href: "/articles", name: "Articles" },
-  { href: "/contact", name: "Contact" },
+  { href: "/", name: "Home", icon: Home },
+  { href: "/about", name: "About", icon: User },
+  { href: "/projects", name: "Projects", icon: Briefcase },
+  { href: "/articles", name: "Articles", icon: PenTool },
+  { href: "/contact", name: "Contact", icon: Mail },
 ] as const;
 
 const HOME_PAGE_NAV_LINKS: NavLink[] = [
-  { href: "#home", name: "Home" },
-  { href: "#about", name: "About" },
-  { href: "#projects", name: "Projects" },
-  { href: "#articles", name: "Articles" },
-  { href: "#contact", name: "Contact" },
+  { href: "#home", name: "Home", icon: Home },
+  { href: "#about", name: "About", icon: User },
+  { href: "#projects", name: "Projects", icon: Briefcase },
+  { href: "#articles", name: "Articles", icon: PenTool },
+  { href: "#contact", name: "Contact", icon: Mail },
 ] as const;
 
 const VISIBLE_SECTIONS = ["home", "about", "projects", "articles", "contact"];
@@ -97,7 +107,7 @@ const Logo: React.FC = () => (
       alt="Logo"
       width={48}
       height={48}
-      className="bg-primary size-12 rounded-full object-contain object-left"
+      className="size-12 rounded-full object-contain object-left"
       priority
     />
     <div className="pt-2 leading-4">
@@ -126,6 +136,7 @@ const NavItem: React.FC<{
   if (isHashed) {
     return (
       <Link href={link.href} className={linkClassName} onClick={onClick}>
+        {link.icon && <link.icon className="mr-2 inline-block size-4" />}
         {link.name}
       </Link>
     );
@@ -138,6 +149,7 @@ const NavItem: React.FC<{
       activeClassName="active"
       onClick={onClick}
     >
+      {link.icon && <link.icon className="mr-2 inline-block size-4" />}
       {link.name}
     </ActiveLink>
   );
@@ -163,26 +175,26 @@ const MobileMenuButton: React.FC<{
   onClick: () => void;
 }> = ({ isOpen, onClick }) => (
   <button
-    className="flex flex-col space-y-1.5 focus:outline-none lg:hidden"
+    className="group z-50 flex h-10 w-10 flex-col items-center justify-center gap-1.5 focus:outline-none lg:hidden"
     onClick={onClick}
     aria-label={isOpen ? "Close menu" : "Open menu"}
     aria-expanded={isOpen}
   >
     <span
       className={cn(
-        "bg-foreground h-0.5 w-6 transition-all duration-300 ease-in-out",
+        "bg-foreground h-0.5 w-6 rounded-full transition-all duration-300 ease-out",
         isOpen && "translate-y-2 rotate-45"
       )}
     />
     <span
       className={cn(
-        "bg-foreground h-0.5 w-6 transition-all duration-300 ease-in-out",
-        isOpen && "opacity-0"
+        "bg-foreground h-0.5 w-6 rounded-full transition-all duration-300 ease-out",
+        isOpen && "w-0 opacity-0"
       )}
     />
     <span
       className={cn(
-        "bg-foreground h-0.5 w-6 transition-all duration-300 ease-in-out",
+        "bg-foreground h-0.5 w-6 rounded-full transition-all duration-300 ease-out",
         isOpen && "-translate-y-2 -rotate-45"
       )}
     />
@@ -194,41 +206,74 @@ const MobileNavigation: React.FC<{
   visibleSection?: string;
   isOpen: boolean;
   onClose: () => void;
-}> = ({ navLinks, visibleSection, isOpen, onClose }) => (
-  <div
-    className={cn(
-      "bg-card fixed inset-0 z-40 flex h-20 flex-col items-center justify-center transition-all duration-500",
-      isOpen
-        ? "visible translate-x-0 opacity-100"
-        : "invisible translate-x-full opacity-0"
-    )}
-    onClick={onClose}
-  >
-    <div className="container flex items-center justify-between py-4">
-      <Logo />
-      <button
-        onClick={onClose}
-        className="hover:bg-muted rounded-md p-2 transition-colors focus:outline-none"
-        aria-label="Close menu"
-      >
-        <X className="size-8" />
-      </button>
-    </div>
-    <nav
-      className="flex flex-col items-center gap-6"
-      onClick={(e) => e.stopPropagation()}
+}> = ({ navLinks, visibleSection, isOpen, onClose }) => {
+  // Prevent scrolling when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  return (
+    <div
+      className={cn(
+        "fixed inset-0 z-40 flex flex-col items-center justify-center backdrop-blur-xl transition-all duration-500",
+        isOpen
+          ? "bg-background/90 visible opacity-100"
+          : "bg-background/0 pointer-events-none invisible opacity-0"
+      )}
     >
-      {[...navLinks].map((link, index) => (
-        <NavItem
-          key={`mobile-${link.href}-${index}`}
-          link={link}
-          visibleSection={visibleSection}
-          onClick={onClose}
-        />
-      ))}
-    </nav>
-  </div>
-);
+      {/* Decorative background blobs */}
+      <div className="bg-primary/20 absolute top-1/4 -left-20 size-96 rounded-full blur-[100px]" />
+      <div className="bg-secondary/20 absolute -right-20 bottom-1/4 size-96 rounded-full blur-[100px]" />
+
+      <nav
+        className="relative z-10 flex flex-col items-center gap-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {[...navLinks].map((link, index) => {
+          const isActive = visibleSection === link.href.replace("#", "");
+          return (
+            <Link
+              key={`mobile-${link.href}-${index}`}
+              href={link.href}
+              onClick={onClose}
+              className={cn(
+                "hover:text-primary text-4xl font-black tracking-tight transition-all duration-500",
+                isOpen
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0",
+                isActive ? "text-primary" : "text-muted-foreground"
+              )}
+              style={{ transitionDelay: `${index * 100}ms` }}
+            >
+              <span className="flex items-center gap-4">
+                {link.icon && <link.icon className="size-8 stroke-[2.5]" />}
+                {link.name}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div
+        className={cn(
+          "absolute bottom-20 transition-all delay-300 duration-700",
+          isOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+        )}
+      >
+        <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+          Build . Design . Innovate
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const ThemeToggler: React.FC = () => {
   const { theme } = useAppSelector((state) => state.setting);
