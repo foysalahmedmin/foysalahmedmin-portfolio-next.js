@@ -1,23 +1,29 @@
 import APIIcon from "@/components/icons/api-icon";
 import ExpressIcon from "@/components/icons/express-icon";
+import LangChainIcon from "@/components/icons/langchain-icon";
+import LangGraphIcon from "@/components/icons/langgraph-icon";
 import MongoDBIcon from "@/components/icons/mongodb-icon";
 import NextIcon from "@/components/icons/next-icon";
 import NodeIcon from "@/components/icons/node-icon";
 import ReactIcon from "@/components/icons/react-icon";
 import ReduxIcon from "@/components/icons/redux-icon";
+import SQLIcon from "@/components/icons/sql-icon";
 import TailwindIcon from "@/components/icons/tailwind-icon";
 import TSIcon from "@/components/icons/ts-icon";
 import React from "react";
 
 const skills = [
-  { name: "Node.js", icon: <NodeIcon className="size-12 text-[#339933]" />, level: 90 },
-  { name: "React", icon: <ReactIcon className="size-12 text-[#61dafb]" />, level: 95 },
-  { name: "Next.js", icon: <NextIcon className="size-12 text-[#000000]" />, level: 92 },
   { name: "TypeScript", icon: <TSIcon className="size-12 text-[#3178c6]" />, level: 85 },
-  { name: "MongoDB", icon: <MongoDBIcon className="size-12 text-[#47A248]" />, level: 80 },
   { name: "Tailwind CSS", icon: <TailwindIcon className="size-12 text-[#06B6D4]" />, level: 98 },
   { name: "Redux", icon: <ReduxIcon className="size-12 text-[#764ABC]" />, level: 88 },
+  { name: "React", icon: <ReactIcon className="size-12 text-[#61dafb]" />, level: 95 },
+  { name: "Next.js", icon: <NextIcon className="size-12 text-[#000000]" />, level: 92 },
+  { name: "Node.js", icon: <NodeIcon className="size-12 text-[#339933]" />, level: 90 },
   { name: "Express.js", icon: <ExpressIcon className="size-12 text-[#000000]" />, level: 90 },
+  { name: "LangChain", icon: <LangChainIcon className="size-12 text-[#1C3C3C]" />, level: 80 },
+  { name: "LangGraph", icon: <LangGraphIcon className="size-12 text-[#1C3C3C]" />, level: 75 },
+  { name: "SQL", icon: <SQLIcon className="size-12 text-[#4479A1]" />, level: 85 },
+  { name: "MongoDB", icon: <MongoDBIcon className="size-12 text-[#47A248]" />, level: 80 },
   { name: "REST API", icon: <APIIcon className="size-12 text-[#000000]" />, level: 92 },
 ];
 
@@ -34,7 +40,7 @@ const SkillsSection: React.FC = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-8">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6 lg:gap-8">
           {skills.map((skill, index) => (
             <div 
               key={index} 
