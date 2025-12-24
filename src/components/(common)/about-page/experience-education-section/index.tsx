@@ -3,26 +3,48 @@ import { Briefcase, GraduationCap } from "lucide-react";
 const ExperienceData = [
   {
     role: "Full Stack Developer",
-    company: "Freelance",
-    period: "2023 - Present",
+    company: "Shothik AI",
+    period: "Oct 2025 - Present",
     description:
-      "Developing custom web applications using Next.js, Node.js, and MongoDB for various clients.",
+      "Designing and implementing scalable, high-performance web applications and AI-driven solutions. Collaborate with cross-functional teams to deliver robust backend services and intuitive frontend interfaces.",
   },
   {
-    role: "Web Development Learner",
-    company: "Self-Employed",
-    period: "2022 - 2023",
+    role: "Junior Full Stack Engineer",
+    company: "FIFOTech",
+    period: "Mar 2025 - Oct 2025",
     description:
-      "Deep-dived into JavaScript ecosystem, mastering React and backend development concepts.",
+      "Assisted in developing full-stack web applications, optimizing backend APIs, and creating responsive UI components using React and Next.js. Contributed to code reviews and implemented best practices.",
+  },
+  {
+    role: "Frontend Engineer",
+    company: "FIFOTech",
+    period: "Aug 2023 - Mar 2025",
+    description:
+      "Developed responsive, user-friendly web interfaces using React, Next.js, and Tailwind CSS. Focused on performance optimization, accessibility, and improving user experience across web platforms.",
+  },
+  {
+    role: "Executive (Territory Sales Offices)",
+    company: "Carnival Internet",
+    period: "Feb 2022 - May 2023",
+    description:
+      "Managed territory sales operations, built strong client relationships, and drove business growth by identifying opportunities and delivering tailored solutions. Ensured customer satisfaction and supported team objectives.",
   },
 ];
 
 const EducationData = [
   {
-    degree: "Diploma in Engineering",
-    institution: "Your Polytechnic Institute",
+    degree: "Bachelor of Arts (BA)",
+    institution: "Demra University College",
     period: "2019 - 2023",
-    description: "Focused on Computer Science and Technology foundations.",
+    description:
+      "Focused on Humanities and Humanistic Studies, developing critical thinking, communication, and analytical skills. Explored literature, philosophy, and social sciences to understand human behavior and society.",
+  },
+  {
+    degree: "Higher Secondary School Certificate (HSC)",
+    institution: "City International School & College",
+    period: "2016 - 2018",
+    description:
+      "Completed Higher Secondary education with a concentration in Humanities. Studied history, sociology, and literature, laying the foundation for strong analytical and research skills.",
   },
 ];
 
