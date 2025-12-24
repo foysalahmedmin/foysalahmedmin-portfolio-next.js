@@ -125,19 +125,34 @@ const NavItem: React.FC<{
   const url = new URL(link.href, "http://localhost");
   const isHashed = !!url.hash;
   const isActive = visibleSection === url.hash.replace("#", "");
+  const pathname = usePathname();
+
+  // For non-hashed links, check exact path match
+  const isPathActive = !isHashed && pathname === link.href;
+  const isLinkActive = isHashed ? isActive : isPathActive;
 
   const linkClassName = cn(
-    "underline-effect foreground text-sm whitespace-nowrap uppercase transition-colors duration-200",
-    {
-      active: isActive,
-    }
+    "relative flex items-center gap-2 text-sm font-medium uppercase tracking-widest transition-all duration-300",
+    isLinkActive
+      ? "text-foreground opacity-100"
+      : "text-muted-foreground hover:text-foreground opacity-60 hover:opacity-100"
+  );
+
+  const activeIndicator = (
+    <span
+      className={cn(
+        "bg-foreground absolute -bottom-1.5 left-0 h-0.5 transition-all duration-300",
+        isLinkActive ? "w-full" : "w-0"
+      )}
+    />
   );
 
   if (isHashed) {
     return (
       <Link href={link.href} className={linkClassName} onClick={onClick}>
-        {link.icon && <link.icon className="mr-2 inline-block size-4" />}
+        {link.icon && <link.icon className="size-4" />}
         {link.name}
+        {activeIndicator}
       </Link>
     );
   }
@@ -146,11 +161,18 @@ const NavItem: React.FC<{
     <ActiveLink
       href={link.href}
       className={linkClassName}
-      activeClassName="active"
+      activeClassName="!opacity-100 !text-foreground"
       onClick={onClick}
     >
-      {link.icon && <link.icon className="mr-2 inline-block size-4" />}
+      {link.icon && <link.icon className="size-4" />}
       {link.name}
+      {/* Active dot for non-hashed pages */}
+      <span
+        className={cn(
+          "bg-foreground absolute -bottom-1.5 left-0 h-0.5 transition-all duration-300",
+          pathname === link.href ? "w-full" : "w-0"
+        )}
+      />
     </ActiveLink>
   );
 };
