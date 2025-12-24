@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Mail, MessageSquare, Send } from "lucide-react";
+import { Mail, MessageSquare, Send, Smile } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -16,7 +16,7 @@ const ContactCTASection: React.FC = () => {
 
           <div className="relative z-10 flex flex-col items-center text-center">
             <span className="bg-primary/20 mb-6 inline-flex size-16 items-center justify-center rounded-2xl text-3xl shadow-inner backdrop-blur-sm">
-              👋
+              <Smile className="size-20" />
             </span>
             <h2 className="mb-6 max-w-2xl text-3xl leading-tight font-bold md:text-5xl">
               Have a Project in Mind? Let's Build Something Amazing.

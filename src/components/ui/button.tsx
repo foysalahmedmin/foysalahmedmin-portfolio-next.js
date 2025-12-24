@@ -27,7 +27,7 @@ const buttonVariants = cva(
         gradient:
           "bg-gradient-to-r from-primary to-secondary text-white border-transparent",
         outline:
-          "border hover:border-accent hover:text-accent hover:bg-transparent bg-accent text-accent-foreground",
+          "border border-accent bg-transparent text-accent hover:bg-accent hover:text-accent-foreground",
         ghost:
           "bg-transparent text-accent hover:bg-accent/10 hover:text-accent-foreground",
         link: "text-blue-500 hover:text-blue-700 underline",
@@ -51,7 +51,7 @@ const buttonVariants = cva(
       size: "default",
       shape: "default",
     },
-  },
+  }
 );
 
 type ButtonProps = BaseProps<"button"> &
@@ -113,5 +113,10 @@ const ButtonText: React.FC<ComponentProps<"span">> = ({
   </span>
 );
 
-export { ButtonRoot as Button, ButtonIcon, ButtonText };
-export { buttonVariants, type ButtonProps };
+export {
+  ButtonRoot as Button,
+  ButtonIcon,
+  ButtonText,
+  buttonVariants,
+  type ButtonProps,
+};

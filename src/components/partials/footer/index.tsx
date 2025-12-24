@@ -15,14 +15,13 @@ const Footer = () => {
     { href: "/about", name: "About" },
     { href: "/projects", name: "Projects" },
     { href: "/articles", name: "Articles" },
-    { href: "/contact", name: "Contact" },
   ];
 
   return (
     <footer className="bg-card border-border border-t pt-24 pb-12">
       <div className="container mx-auto px-6">
         {/* Top Section: CTA */}
-        <div className="mb-20 flex flex-col items-center justify-between gap-8 border-b border-border/50 pb-20 md:flex-row">
+        <div className="border-border/50 mb-20 flex flex-col items-center justify-between gap-8 border-b pb-20 md:flex-row">
           <div className="max-w-xl text-center md:text-left">
             <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
               Ready to <span className="text-primary">collaborate?</span>
@@ -58,10 +57,10 @@ const Footer = () => {
                 className="bg-primary size-12 rounded-full object-contain p-1"
               />
               <div className="leading-tight">
-                <p className="text-lg font-bold tracking-tight text-foreground">
+                <p className="text-foreground text-lg font-bold tracking-tight">
                   FOYSAL AHMED
                 </p>
-                <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
+                <p className="text-muted-foreground text-[10px] font-medium tracking-widest uppercase">
                   Application Developer
                 </p>
               </div>
@@ -74,7 +73,7 @@ const Footer = () => {
 
           {/* Column 2: Navigation */}
           <div>
-            <h3 className="mb-8 text-xs font-bold tracking-widest uppercase text-foreground">
+            <h3 className="text-foreground mb-8 text-xs font-bold tracking-widest uppercase">
               Navigation
             </h3>
             <ul className="space-y-4">
@@ -93,7 +92,7 @@ const Footer = () => {
 
           {/* Column 3: Contact */}
           <div>
-            <h3 className="mb-8 text-xs font-bold tracking-widest uppercase text-foreground">
+            <h3 className="text-foreground mb-8 text-xs font-bold tracking-widest uppercase">
               Contact
             </h3>
             <ul className="space-y-6">
@@ -102,14 +101,14 @@ const Footer = () => {
                   href="mailto:foysalahmedmin@gmail.com"
                   className="group flex items-start gap-4"
                 >
-                  <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-xl transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground flex size-10 items-center justify-center rounded-xl transition-colors">
                     <Mail className="size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-tighter uppercase text-muted-foreground">
+                    <p className="text-muted-foreground text-[10px] font-bold tracking-tighter uppercase">
                       Email Me
                     </p>
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-foreground text-sm font-medium">
                       foysalahmedmin@gmail.com
                     </p>
                   </div>
@@ -121,10 +120,10 @@ const Footer = () => {
                     <MapPin className="size-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-tighter uppercase text-muted-foreground">
+                    <p className="text-muted-foreground text-[10px] font-bold tracking-tighter uppercase">
                       Location
                     </p>
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-foreground text-sm font-medium">
                       Dhaka, Bangladesh
                     </p>
                   </div>
@@ -135,7 +134,7 @@ const Footer = () => {
 
           {/* Column 4: Socials */}
           <div>
-            <h3 className="mb-8 text-xs font-bold tracking-widest uppercase text-foreground">
+            <h3 className="text-foreground mb-8 text-xs font-bold tracking-widest uppercase">
               Follow Me
             </h3>
             <div className="flex flex-wrap gap-4">
@@ -154,7 +153,7 @@ const Footer = () => {
               ))}
             </div>
             <div className="mt-8">
-              <p className="text-xs leading-relaxed text-muted-foreground">
+              <p className="text-muted-foreground text-xs leading-relaxed">
                 Available for worldwide <br /> remote opportunities.
               </p>
             </div>
@@ -162,7 +161,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section: Copyright */}
-        <div className="mt-24 flex flex-col items-center justify-between gap-6 border-t border-border/50 pt-12 md:flex-row">
+        <div className="border-border/50 mt-24 flex flex-col items-center justify-between gap-6 border-t pt-12 md:flex-row">
           <p className="text-muted-foreground text-xs">
             © {currentYear} Foysal Ahmed. Crafted with passion by yours truly.
           </p>

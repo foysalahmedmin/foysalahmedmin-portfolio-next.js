@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import Magnetic from "@/components/ui/magnetic";
 import {
   Modal,
@@ -61,7 +62,7 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-background relative h-screen min-h-[800px] w-full overflow-hidden">
+    <section className="bg-background relative w-full overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="animate-pulse-slow bg-primary/10 absolute top-1/4 -left-1/4 h-[500px] w-[500px] rounded-full blur-[120px]" />
@@ -93,7 +94,7 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto flex h-full flex-col justify-center px-6">
+      <div className="relative z-10 container mx-auto flex h-full min-h-[50rem] flex-col justify-center px-6">
         <div className="max-w-4xl">
           <div className="fade-down active border-primary/20 bg-background/20 text-primary mb-8 inline-flex items-center gap-3 rounded-full border px-5 py-2 text-[11px] font-bold tracking-[0.2em] uppercase backdrop-blur-md">
             <Sparkles className="size-4 animate-pulse" />
@@ -135,27 +136,33 @@ const HeroSection: React.FC = () => {
             {slides[selectedIndex].subtitle}
           </p>
 
-          <div className="fade-up active mt-14 flex flex-wrap items-center gap-6 delay-300">
+          <div className="fade-up active mt-14 flex flex-wrap items-center gap-2 delay-300 md:gap-4">
             <Magnetic strength={0.2}>
-              <Link
-                href="/projects"
-                className="group bg-primary text-primary-foreground relative flex items-center gap-3 rounded-2xl px-10 py-5 font-bold transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(var(--primary),0.3)]"
-              >
-                <span className="relative z-10">View Portfolio</span>
-                <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+              <Link href="/about">
+                <Button className="primary">
+                  <span className="relative z-10">About Me</span>
+                  <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </Magnetic>
+            <Magnetic strength={0.2}>
+              <Link href="/projects">
+                <Button variant="outline" className="primary">
+                  <span className="relative z-10">View Projects</span>
+                  <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+                </Button>
               </Link>
             </Magnetic>
 
             <Modal>
-              <ModalTrigger
-                variant="none"
-                className="glass hover:bg-muted/50 flex items-center gap-4 rounded-2xl px-10 py-5 font-bold transition-all"
-              >
-                <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full">
-                  <Play className="fill-primary ml-1 size-5" />
-                </div>
-                <span>Watch Intro</span>
-              </ModalTrigger>
+              <Magnetic strength={0.2}>
+                <ModalTrigger variant="none" className="glass">
+                  <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full">
+                    <Play className="fill-primary ml-1 size-5" />
+                  </div>
+                  <span>Watch Intro</span>
+                </ModalTrigger>
+              </Magnetic>
 
               <ModalBackdrop>
                 <ModalContent className="max-w-[90vw] border-none bg-transparent p-0 sm:max-w-[80vw] lg:max-w-[70vw]">
@@ -176,30 +183,30 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Modern Progress Indicators */}
-      <div className="absolute right-16 bottom-16 z-10 flex flex-col gap-4">
+      <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-row gap-6 md:bottom-12 lg:right-16 lg:bottom-16 lg:left-auto lg:translate-x-0 lg:flex-col lg:gap-4">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => handleSlideChange(i)}
-            className="group flex cursor-pointer items-center gap-4"
+            className="group flex cursor-pointer flex-col items-center gap-1 lg:flex-row lg:gap-4"
           >
             <span
               className={cn(
                 "text-[10px] font-bold transition-all duration-500",
                 selectedIndex === i
                   ? "text-primary opacity-100"
-                  : "text-muted-foreground opacity-0 group-hover:opacity-100"
+                  : "text-muted-foreground opacity-0 lg:group-hover:opacity-100"
               )}
             >
               0{i + 1}
             </span>
-            <div className="flex w-12 items-center justify-start">
+            <div className="flex w-8 items-center justify-center lg:w-12 lg:justify-start">
               <div
                 className={cn(
                   "h-1 rounded-full transition-all duration-500",
                   selectedIndex === i
-                    ? "bg-primary w-12"
-                    : "bg-muted-foreground/30 w-6 group-hover:w-8"
+                    ? "bg-primary w-8 lg:w-12"
+                    : "bg-muted-foreground/30 w-4 group-hover:w-6 lg:w-6 lg:group-hover:w-8"
                 )}
               />
             </div>
@@ -208,10 +215,10 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Unique Scroll indicator */}
-      <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2">
+      <div className="absolute bottom-20 left-1/2 z-10 -translate-x-1/2 lg:bottom-16">
         <Link href="#about" className="flex flex-col items-center gap-3">
           <div className="border-muted-foreground/20 relative h-12 w-8 rounded-full border-2 p-1">
-            <div className="bg-primary animate-bounce-slow absolute top-1.5 right-0.5 left-0.5 h-2 w-6 rounded-full px-1" />
+            <div className="bg-primary animate-bounce-slow absolute top-2 right-0.5 left-0.5 h-2 w-6 rounded-full px-1" />
           </div>
           <span className="text-muted-foreground/50 text-[10px] font-bold tracking-[0.3em] uppercase">
             Scroll
