@@ -147,9 +147,26 @@ const NavItem: React.FC<{
     />
   );
 
+  const handleHashClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isHashed) {
+      e.preventDefault();
+      const targetId = url.hash.replace("#", "");
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        window.history.pushState(null, "", link.href);
+      }
+      if (onClick) onClick();
+    }
+  };
+
   if (isHashed) {
     return (
-      <Link href={link.href} className={linkClassName} onClick={onClick}>
+      <Link
+        href={link.href}
+        className={linkClassName}
+        onClick={handleHashClick}
+      >
         {link.icon && <link.icon className="size-4" />}
         {link.name}
         {activeIndicator}
@@ -260,11 +277,27 @@ const MobileNavigation: React.FC<{
       >
         {[...navLinks].map((link, index) => {
           const isActive = visibleSection === link.href.replace("#", "");
+
+          const handleMobileClick = (
+            e: React.MouseEvent<HTMLAnchorElement>
+          ) => {
+            if (link.href.startsWith("#")) {
+              e.preventDefault();
+              const targetId = link.href.replace("#", "");
+              const element = document.getElementById(targetId);
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+                window.history.pushState(null, "", link.href);
+              }
+            }
+            onClose();
+          };
+
           return (
             <Link
               key={`mobile-${link.href}-${index}`}
               href={link.href}
-              onClick={onClose}
+              onClick={handleMobileClick}
               className={cn(
                 "hover:text-primary text-4xl font-black tracking-tight transition-all duration-500",
                 isOpen
