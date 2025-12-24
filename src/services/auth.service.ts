@@ -8,6 +8,8 @@ import type {
   SignUpPayload,
 } from "@/types/auth.type";
 
+const getBaseUrl = () => (ENV.url && ENV.url !== "undefined" ? ENV.url : "");
+
 // Helper function to handle fetch responses
 async function handleResponse(res: Response) {
   if (!res.ok) {
@@ -19,7 +21,7 @@ async function handleResponse(res: Response) {
 
 // POST - Sign In
 export async function signIn(payload: SignInPayload): Promise<AuthResponse> {
-  const res = await fetch(`${ENV.url}/api/auth/signin`, {
+  const res = await fetch(`${getBaseUrl()}/api/auth/signin`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -46,7 +48,7 @@ export async function signUp(payload: SignUpPayload): Promise<AuthResponse> {
 
 // POST - Refresh Token
 export async function refreshToken(): Promise<AuthResponse> {
-  const res = await fetch(`${ENV.url}/api/auth/refresh-token`, {
+  const res = await fetch(`${getBaseUrl()}/api/auth/refresh-token`, {
     method: "POST",
     credentials: "include",
   });
@@ -57,7 +59,7 @@ export async function refreshToken(): Promise<AuthResponse> {
 export async function changePassword(
   payload: ChangePasswordPayload
 ): Promise<AuthResponse> {
-  const res = await fetch(`${ENV.url}/api/auth/change-password`, {
+  const res = await fetch(`${getBaseUrl()}/api/auth/change-password`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -69,7 +71,7 @@ export async function changePassword(
 export async function forgetPassword(
   payload: ForgetPasswordPayload
 ): Promise<AuthResponse> {
-  const res = await fetch(`${ENV.url}/api/auth/forget-password`, {
+  const res = await fetch(`${getBaseUrl()}/api/auth/forget-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -81,7 +83,7 @@ export async function forgetPassword(
 export async function resetPassword(
   payload: ResetPasswordPayload
 ): Promise<AuthResponse> {
-  const res = await fetch(`${ENV.url}/api/auth/reset-password`, {
+  const res = await fetch(`${getBaseUrl()}/api/auth/reset-password`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -91,16 +93,19 @@ export async function resetPassword(
 
 // POST - Email Verification Source
 export async function emailVerificationSource(): Promise<AuthResponse> {
-  const res = await fetch(`${ENV.url}/api/auth/email-verification-source`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
+  const res = await fetch(
+    `${getBaseUrl()}/api/auth/email-verification-source`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
   return handleResponse(res);
 }
 
 // POST - Email Verification
 export async function emailVerification(): Promise<AuthResponse> {
-  const res = await fetch(`${ENV.url}/api/auth/email-verification`, {
+  const res = await fetch(`${getBaseUrl()}/api/auth/email-verification`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
   });

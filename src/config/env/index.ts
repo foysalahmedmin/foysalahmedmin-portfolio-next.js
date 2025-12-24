@@ -6,11 +6,15 @@ export const ENV = {
   environment: process.env.NODE_ENV as "development" | "production",
 
   // URLs
-  url: process.env.NEXT_PUBLIC_URL || "",
+  url:
+    process.env.NEXT_PUBLIC_URL && process.env.NEXT_PUBLIC_URL !== "undefined"
+      ? process.env.NEXT_PUBLIC_URL
+      : "",
 
   // UI Redirect Links
   reset_password_ui_link: process.env.NEXT_PUBLIC_RESET_PASSWORD_UI_LINK!,
-  email_verification_ui_link: process.env.NEXT_PUBLIC_EMAIL_VERIFICATION_UI_LINK!,
+  email_verification_ui_link:
+    process.env.NEXT_PUBLIC_EMAIL_VERIFICATION_UI_LINK!,
 
   // Database
   database_url: process.env.DATABASE_URL!,

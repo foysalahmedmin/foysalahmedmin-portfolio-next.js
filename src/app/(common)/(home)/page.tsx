@@ -20,9 +20,7 @@ const HomePage: React.FC = () => {
   return (
     <main>
       <HeroSection />
-      <div id="about">
-        <AboutSection />
-      </div>
+      <AboutSection />
       <ServicesSection />
       <StatisticsSection />
       <ProjectsSection />
