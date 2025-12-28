@@ -1,6 +1,6 @@
+import { getProjects } from "@/app/api/projects/project.service";
 import { Button } from "@/components/ui/button";
 import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
-import { getProjects } from "@/services/project.service";
 import type { TProject } from "@/types/project.type";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
@@ -63,7 +63,7 @@ const ProjectCard: React.FC<{ project: TProject; index: number }> = ({
 };
 
 const ProjectsSection = async () => {
-  const { data: projects } = await getProjects({ limit: "3" });
+  const { data: projects } = await getProjects({ limit: 3 });
 
   return (
     <section id="projects" className="relative overflow-hidden py-24 lg:py-48">
@@ -97,8 +97,12 @@ const ProjectsSection = async () => {
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
           {Array.isArray(projects) &&
-            projects.map((project, index) => (
-              <ProjectCard key={project._id} project={project} index={index} />
+            projects.map((project: any, index: number) => (
+              <ProjectCard
+                key={project._id}
+                project={project as TProject}
+                index={index}
+              />
             ))}
         </div>
       </div>

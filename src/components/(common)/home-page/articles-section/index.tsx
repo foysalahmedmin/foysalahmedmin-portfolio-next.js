@@ -1,6 +1,6 @@
+import { getArticles } from "@/app/api/articles/article.service";
 import { Button } from "@/components/ui/button";
 import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
-import { getArticles } from "@/services/article.service";
 import type { TArticle } from "@/types/article.type";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import Link from "next/link";
@@ -73,7 +73,7 @@ const ArticleCard: React.FC<{ article: TArticle; index: number }> = ({
 
 const ArticlesSection = async () => {
   const { data: articles } = await getArticles({
-    limit: "3",
+    limit: 3,
     status: "published",
   });
 
@@ -107,8 +107,12 @@ const ArticlesSection = async () => {
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
           {Array.isArray(articles) &&
-            articles.map((article, index) => (
-              <ArticleCard key={article._id} article={article} index={index} />
+            articles.map((article: any, index: number) => (
+              <ArticleCard
+                key={article._id}
+                article={article as TArticle}
+                index={index}
+              />
             ))}
         </div>
       </div>
