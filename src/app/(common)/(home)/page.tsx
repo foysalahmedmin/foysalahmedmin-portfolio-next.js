@@ -8,7 +8,7 @@ import SkillsSection from "@/components/sections/skills-section";
 import StatisticsSection from "@/components/sections/statistics-section";
 import TestimonialsSection from "@/components/sections/testimonials-section";
 import type { Metadata } from "next";
-import React from "react";
+import React, { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Home | Foysal Ahmed",
@@ -28,10 +28,14 @@ const HomePage: React.FC = () => {
       <ServicesSection />
       <WorkProcessSection />
       <StatisticsSection />
-      <ProjectsSection />
+      <Suspense fallback={null}>
+        <ProjectsSection />
+      </Suspense>
       <SkillsSection />
       <GithubActivitySection />
-      <ArticlesSection />
+      <Suspense fallback={null}>
+        <ArticlesSection />
+      </Suspense>
       <TestimonialsSection />
       <FaqSection />
       <ContactCTASection />

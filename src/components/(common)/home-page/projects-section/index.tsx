@@ -1,11 +1,10 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
+import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 import { getProjects } from "@/services/project.service";
 import type { TProject } from "@/types/project.type";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 const ProjectCard: React.FC<{ project: TProject; index: number }> = ({
   project,
@@ -63,45 +62,8 @@ const ProjectCard: React.FC<{ project: TProject; index: number }> = ({
   );
 };
 
-const ProjectsSection: React.FC = () => {
-  const [projects, setProjects] = useState<TProject[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await getProjects({ limit: "3" });
-        if (response.success && Array.isArray(response.data)) {
-          setProjects(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
-
-  if (loading)
-    return (
-      <section className="py-24">
-        <div className="container mx-auto px-6">
-          <div className="mb-12 flex items-end justify-between">
-            <div className="bg-muted h-10 w-48 animate-pulse rounded" />
-            <div className="bg-muted h-10 w-24 animate-pulse rounded" />
-          </div>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-muted aspect-[4/5] animate-pulse rounded-3xl"
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+const ProjectsSection = async () => {
+  const { data: projects } = await getProjects({ limit: "3" });
 
   return (
     <section id="projects" className="relative overflow-hidden py-24 lg:py-48">
@@ -134,9 +96,10 @@ const ProjectsSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project, index) => (
-            <ProjectCard key={project._id} project={project} index={index} />
-          ))}
+          {Array.isArray(projects) &&
+            projects.map((project, index) => (
+              <ProjectCard key={project._id} project={project} index={index} />
+            ))}
         </div>
       </div>
     </section>
