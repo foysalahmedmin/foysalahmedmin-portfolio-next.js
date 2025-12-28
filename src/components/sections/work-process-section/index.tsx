@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/ui/icon";
+import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 
 const steps = [
   {
@@ -40,14 +41,10 @@ const WorkProcessSection = () => {
   return (
     <section className="py-24 lg:py-32">
       <div className="container mx-auto px-6">
-        <div className="mb-16 text-center">
-          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase">
-            Workflow
-          </span>
-          <h2 className="fade-up text-3xl font-bold tracking-tight delay-100 md:text-5xl">
-            My Work Process
-          </h2>
-        </div>
+        <SectionTitle>
+          <Subtitle>Workflow</Subtitle>
+          <Title>My Work Process</Title>
+        </SectionTitle>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {steps.map((step, i) => (

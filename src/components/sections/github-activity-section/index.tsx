@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 import { useIsDark } from "@/hooks/ui/use-is-dark";
 import Link from "next/link";
 import React from "react";
@@ -13,14 +14,10 @@ const GithubActivitySection = () => {
   return (
     <section className="py-24 lg:py-32">
       <div className="container mx-auto px-6">
-        <div className="mb-16 text-center">
-          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase">
-            Open Source
-          </span>
-          <h2 className="fade-up text-3xl font-bold tracking-tight delay-100 md:text-5xl">
-            GitHub Contributions
-          </h2>
-        </div>
+        <SectionTitle>
+          <Subtitle>Open Source</Subtitle>
+          <Title>GitHub Contributions</Title>
+        </SectionTitle>
 
         <div className="fade-up border-border bg-card/50 hover:border-primary/50 mx-auto flex max-w-5xl justify-center rounded-2xl border p-8 shadow-sm transition-all delay-200 duration-300 hover:shadow-md">
           <GitHubCalendar
