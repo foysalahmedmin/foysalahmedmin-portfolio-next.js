@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { toggleTheme } from "@/redux/slices/setting-slice";
 import {
   Briefcase,
+  Download,
   Home,
   Mail,
   Monitor,
@@ -314,6 +315,21 @@ const MobileNavigation: React.FC<{
             </Link>
           );
         })}
+        <Link
+          href="https://drive.google.com/file/d/1BUDGgWeCHh-p7gSUPGDGzGRMUrfWpHAe/view?usp=sharing"
+          target="_blank"
+          className={cn(
+            "hover:text-primary text-4xl font-black tracking-tight transition-all duration-500",
+            isOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+          )}
+          style={{ transitionDelay: `${navLinks.length * 100}ms` }}
+          onClick={onClose}
+        >
+          <span className="flex items-center gap-4">
+            <Download className="size-8 stroke-[2.5]" />
+            Resume
+          </span>
+        </Link>
       </nav>
 
       <div
@@ -411,6 +427,15 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           />
 
           <div className="flex items-center gap-2 lg:gap-4">
+            <Link
+              href="https://drive.google.com/file/d/1BUDGgWeCHh-p7gSUPGDGzGRMUrfWpHAe/view?usp=sharing"
+              target="_blank"
+              className="hidden sm:inline-flex"
+            >
+              <Button asChild={true}>
+                Resume <Download className="size-4" />
+              </Button>
+            </Link>
             <ThemeToggler />
             <MobileMenuButton
               isOpen={isMobileMenuOpen}

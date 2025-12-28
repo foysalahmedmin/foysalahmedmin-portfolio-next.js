@@ -2,13 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Github,
-    Linkedin,
-    Mail,
-    MapPin,
-    Phone,
-    Send,
-    Twitter,
+  Facebook,
+  Github,
+  Linkedin,
+  Mail,
+  MapPin,
+  Phone,
+  Send,
+  Twitter,
 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -22,8 +23,8 @@ const contactInfo = [
   {
     icon: <Phone className="size-6" />,
     label: "Phone",
-    value: "+880 1XXXXXXXXX",
-    href: "tel:+8801XXXXXXXXX",
+    value: "+880 1950601811",
+    href: "tel:+8801950601811",
   },
   {
     icon: <MapPin className="size-6" />,
@@ -35,14 +36,21 @@ const contactInfo = [
 
 const socials = [
   {
+    icon: <Github className="size-5" />,
+    href: "https://github.com/foysalahmedmin",
+  },
+  {
     icon: <Linkedin className="size-5" />,
     href: "https://www.linkedin.com/in/foysalahmedmin/",
   },
   {
-    icon: <Github className="size-5" />,
-    href: "https://github.com/foysalahmedmin",
+    icon: <Twitter className="size-5" />,
+    href: "https://twitter.com/foysalahmedmin",
   },
-  { icon: <Twitter className="size-5" />, href: "#" },
+  {
+    icon: <Facebook className="size-5" />,
+    href: "https://facebook.com/foysalahmedmin",
+  },
 ];
 
 const ContactContentSection = () => {
