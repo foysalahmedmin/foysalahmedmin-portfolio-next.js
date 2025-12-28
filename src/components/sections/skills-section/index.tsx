@@ -13,39 +13,89 @@ import TSIcon from "@/components/icons/ts-icon";
 import React from "react";
 
 const skills = [
-  { name: "TypeScript", icon: <TSIcon className="size-12 text-[#3178c6]" />, level: 85 },
-  { name: "Tailwind CSS", icon: <TailwindIcon className="size-12 text-[#06B6D4]" />, level: 98 },
-  { name: "Redux", icon: <ReduxIcon className="size-12 text-[#764ABC]" />, level: 88 },
-  { name: "React", icon: <ReactIcon className="size-12 text-[#61dafb]" />, level: 95 },
-  { name: "Next.js", icon: <NextIcon className="size-12 text-[#000000]" />, level: 92 },
-  { name: "Node.js", icon: <NodeIcon className="size-12 text-[#339933]" />, level: 90 },
-  { name: "Express.js", icon: <ExpressIcon className="size-12 text-[#000000]" />, level: 90 },
-  { name: "LangChain", icon: <LangChainIcon className="size-12 text-[#1C3C3C]" />, level: 80 },
-  { name: "LangGraph", icon: <LangGraphIcon className="size-12 text-[#1C3C3C]" />, level: 75 },
-  { name: "SQL", icon: <SQLIcon className="size-12 text-[#4479A1]" />, level: 85 },
-  { name: "MongoDB", icon: <MongoDBIcon className="size-12 text-[#47A248]" />, level: 80 },
-  { name: "REST API", icon: <APIIcon className="size-12 text-[#000000]" />, level: 92 },
+  {
+    name: "TypeScript",
+    icon: <TSIcon className="size-12 text-[#3178c6]" />,
+    level: 85,
+  },
+  {
+    name: "Tailwind CSS",
+    icon: <TailwindIcon className="size-12 text-[#06B6D4]" />,
+    level: 98,
+  },
+  {
+    name: "Redux",
+    icon: <ReduxIcon className="size-12 text-[#764ABC]" />,
+    level: 88,
+  },
+  {
+    name: "React",
+    icon: <ReactIcon className="size-12 text-[#61dafb]" />,
+    level: 95,
+  },
+  {
+    name: "Next.js",
+    icon: <NextIcon className="size-12 text-[#000000]" />,
+    level: 92,
+  },
+  {
+    name: "Node.js",
+    icon: <NodeIcon className="size-12 text-[#339933]" />,
+    level: 90,
+  },
+  {
+    name: "Express.js",
+    icon: <ExpressIcon className="size-12 text-[#000000]" />,
+    level: 90,
+  },
+  {
+    name: "LangChain",
+    icon: <LangChainIcon className="size-12 text-[#1C3C3C]" />,
+    level: 80,
+  },
+  {
+    name: "LangGraph",
+    icon: <LangGraphIcon className="size-12 text-[#1C3C3C]" />,
+    level: 75,
+  },
+  {
+    name: "SQL",
+    icon: <SQLIcon className="size-12 text-[#4479A1]" />,
+    level: 85,
+  },
+  {
+    name: "MongoDB",
+    icon: <MongoDBIcon className="size-12 text-[#47A248]" />,
+    level: 80,
+  },
+  {
+    name: "REST API",
+    icon: <APIIcon className="size-12 text-[#000000]" />,
+    level: 92,
+  },
 ];
 
 const SkillsSection: React.FC = () => {
   return (
-    <section id="skills" className="py-24 lg:py-32 overflow-hidden">
-      <div className="container px-6 mx-auto">
+    <section id="skills" className="overflow-hidden py-24 lg:py-32">
+      <div className="container mx-auto px-6">
         <div className="mb-16 text-center">
-          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold uppercase tracking-widest">
+          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase">
             Expertise
           </span>
-          <h2 className="fade-up text-3xl font-bold tracking-tight md:text-5xl delay-100">
+          <h2 className="fade-up text-3xl font-bold tracking-tight delay-100 md:text-5xl">
             My Skills & Tools
           </h2>
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6 lg:gap-8">
           {skills.map((skill, index) => (
-            <div 
-              key={index} 
-              className="fade-up group relative flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:border-primary/50 hover:shadow-lg"
-              style={{ transitionDelay: `${index * 100}ms` } as React.CSSProperties}
+            <div
+              key={index}
+              className="fade-up group border-border bg-card hover:border-primary/50 relative flex flex-col items-center justify-center rounded-2xl border p-8 transition-all duration-300 hover:shadow-lg"
+              style={
+                { transitionDelay: `${index * 100}ms` } as React.CSSProperties
+              }
             >
               <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
                 {skill.icon}
@@ -53,23 +103,47 @@ const SkillsSection: React.FC = () => {
               <h3 className="text-center text-sm font-bold tracking-tight uppercase lg:text-base">
                 {skill.name}
               </h3>
-              
+
               {/* Progress bar on hover */}
-              <div className="absolute inset-x-0 bottom-0 h-1 w-0 bg-primary transition-all duration-500 group-hover:w-full" />
+              <div className="bg-primary absolute inset-x-0 bottom-0 h-1 w-0 transition-all duration-500 group-hover:w-full" />
             </div>
           ))}
         </div>
 
         {/* Marquee effect for tools */}
         <div className="mt-20">
-            <p className="text-muted-foreground mb-8 text-center text-sm font-medium uppercase tracking-widest fade-up delay-300">
-                Others tools I use
-            </p>
-            <div className="flex flex-wrap justify-center gap-6 opacity-60 transition-all hover:opacity-100 fade-up delay-400">
-                {["VS Code", "Postman", "Git / GitHub", "Vercel", "Docker", "Figma"].map((tool) => (
-                    <span key={tool} className="text-sm md:text-base font-bold px-4 py-2 rounded-lg bg-muted/50 border border-border/50">{tool}</span>
-                ))}
+          <p className="text-muted-foreground fade-up mb-8 text-center text-sm font-medium tracking-widest uppercase delay-300">
+            Others tools I use
+          </p>
+          <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]">
+            <div className="flex w-max gap-8">
+              {[0, 1].map((i) => (
+                <div key={i} className="animate-marquee flex shrink-0 gap-8">
+                  {[
+                    "VS Code",
+                    "Postman",
+                    "Git / GitHub",
+                    "Vercel",
+                    "Docker",
+                    "Figma",
+                    "Notion",
+                    "Slack",
+                    "Trello",
+                    "Jira",
+                  ].map((tool, idx) => (
+                    <div
+                      key={idx}
+                      className="border-border/50 bg-muted/30 hover:bg-muted hover:border-primary/20 flex items-center gap-2 rounded-lg border px-6 py-3 transition-colors"
+                    >
+                      <span className="text-base font-bold whitespace-nowrap">
+                        {tool}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
+          </div>
         </div>
       </div>
     </section>

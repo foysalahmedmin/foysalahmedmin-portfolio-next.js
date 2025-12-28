@@ -16,17 +16,24 @@ export const metadata: Metadata = {
     "Welcome to the official portfolio of Foysal Ahmed, a passionate Full-stack Developer based in Bangladesh.",
 };
 
+import FaqSection from "@/components/sections/faq-section";
+import GithubActivitySection from "@/components/sections/github-activity-section";
+import WorkProcessSection from "@/components/sections/work-process-section";
+
 const HomePage: React.FC = () => {
   return (
     <main>
       <HeroSection />
       <AboutSection />
       <ServicesSection />
+      <WorkProcessSection />
       <StatisticsSection />
       <ProjectsSection />
       <SkillsSection />
+      <GithubActivitySection />
       <ArticlesSection />
       <TestimonialsSection />
+      <FaqSection />
       <ContactCTASection />
     </main>
   );
