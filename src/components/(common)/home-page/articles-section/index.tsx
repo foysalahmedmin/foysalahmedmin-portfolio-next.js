@@ -1,11 +1,10 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
+import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 import { getArticles } from "@/services/article.service";
 import type { TArticle } from "@/types/article.type";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 const ArticleCard: React.FC<{ article: TArticle; index: number }> = ({
   article,
@@ -72,27 +71,11 @@ const ArticleCard: React.FC<{ article: TArticle; index: number }> = ({
   );
 };
 
-const ArticlesSection: React.FC = () => {
-  const [articles, setArticles] = useState<TArticle[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const response = await getArticles({ limit: "3", status: "published" });
-        if (response.success && Array.isArray(response.data)) {
-          setArticles(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching articles:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchArticles();
-  }, []);
-
-  if (loading) return null;
+const ArticlesSection = async () => {
+  const { data: articles } = await getArticles({
+    limit: "3",
+    status: "published",
+  });
 
   return (
     <section id="articles" className="relative overflow-hidden py-24 lg:py-48">
@@ -123,9 +106,10 @@ const ArticlesSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article, index) => (
-            <ArticleCard key={article._id} article={article} index={index} />
-          ))}
+          {Array.isArray(articles) &&
+            articles.map((article, index) => (
+              <ArticleCard key={article._id} article={article} index={index} />
+            ))}
         </div>
       </div>
     </section>
