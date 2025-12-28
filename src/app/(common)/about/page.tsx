@@ -2,6 +2,7 @@ import AboutDetailsSection from "@/components/(common)/about-page/about-details-
 import CoursesSection from "@/components/(common)/about-page/courses-section";
 import EducationSection from "@/components/(common)/about-page/education-section";
 import ExperienceSection from "@/components/(common)/about-page/experience-section";
+import ContactCTASection from "@/components/sections/contact-cta-section";
 import PageHeaderSection from "@/components/sections/page-header-section";
 import ServicesSection from "@/components/sections/services-section";
 import SkillsSection from "@/components/sections/skills-section";
@@ -36,6 +37,7 @@ const AboutPage = () => {
       <EducationSection />
       <CoursesSection />
       <TestimonialsSection />
+      <ContactCTASection />
     </main>
   );
 };
