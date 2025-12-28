@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 import { ArrowRight, CheckCircle2, Quote } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -48,15 +49,13 @@ const AboutSection: React.FC = () => {
 
           {/* Right: Text Content */}
           <div className="fade-right space-y-8">
-            <div>
-              <span className="text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase">
-                Brief Introduction
-              </span>
-              <h2 className="text-3xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+            <SectionTitle variant="start" className="mb-0">
+              <Subtitle>Brief Introduction</Subtitle>
+              <Title className="lg:text-6xl">
                 Dedicated Full-Stack{" "}
                 <span className="text-primary">Software Architect</span>
-              </h2>
-            </div>
+              </Title>
+            </SectionTitle>
 
             <p className="text-muted-foreground text-lg leading-relaxed">
               I am a{" "}

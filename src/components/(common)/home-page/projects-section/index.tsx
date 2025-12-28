@@ -109,14 +109,17 @@ const ProjectsSection: React.FC = () => {
 
       <div className="container mx-auto px-6">
         <div className="mb-20 flex flex-col items-center justify-between gap-8 md:flex-row md:items-end">
-          <div className="max-w-xl text-center md:text-left">
-            <span className="fade-left text-primary mb-4 inline-block text-[11px] font-black tracking-[0.3em] uppercase">
+          <SectionTitle
+            variant="none"
+            className="mb-0 max-w-xl text-center md:text-left"
+          >
+            <Subtitle className="mb-4 text-[11px] font-black tracking-[0.3em]">
               Curated Works
-            </span>
-            <h2 className="fade-up text-3xl leading-tight font-black tracking-tighter delay-100 md:text-5xl">
+            </Subtitle>
+            <Title className="leading-tight font-black tracking-tighter">
               Selected Projects
-            </h2>
-          </div>
+            </Title>
+          </SectionTitle>
           <div className="scale-in delay-200">
             <Link href="/projects">
               <Button

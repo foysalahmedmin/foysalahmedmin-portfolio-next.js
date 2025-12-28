@@ -10,6 +10,7 @@ import ReduxIcon from "@/components/icons/redux-icon";
 import SQLIcon from "@/components/icons/sql-icon";
 import TailwindIcon from "@/components/icons/tailwind-icon";
 import TSIcon from "@/components/icons/ts-icon";
+import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 import React from "react";
 
 const skills = [
@@ -79,14 +80,10 @@ const SkillsSection: React.FC = () => {
   return (
     <section id="skills" className="overflow-hidden py-24 lg:py-32">
       <div className="container mx-auto px-6">
-        <div className="mb-16 text-center">
-          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase">
-            Expertise
-          </span>
-          <h2 className="fade-up text-3xl font-bold tracking-tight delay-100 md:text-5xl">
-            My Skills & Tools
-          </h2>
-        </div>
+        <SectionTitle>
+          <Subtitle>Expertise</Subtitle>
+          <Title>My Skills & Tools</Title>
+        </SectionTitle>
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6 lg:gap-8">
           {skills.map((skill, index) => (

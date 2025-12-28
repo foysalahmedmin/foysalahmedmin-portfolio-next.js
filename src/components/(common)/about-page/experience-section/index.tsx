@@ -1,4 +1,5 @@
 import { Icon } from "@/components/ui/icon";
+import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 
 const ExperienceData = [
   {
@@ -35,14 +36,10 @@ const ExperienceSection = () => {
   return (
     <section className="py-24 lg:py-32">
       <div className="container mx-auto px-6">
-        <div className="mb-16 text-center">
-          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase">
-            Timeline
-          </span>
-          <h2 className="fade-up text-3xl font-bold tracking-tight delay-100 md:text-5xl">
-            Professional Experience
-          </h2>
-        </div>
+        <SectionTitle>
+          <Subtitle>Timeline</Subtitle>
+          <Title>Professional Experience</Title>
+        </SectionTitle>
         <div className="border-primary/20 relative ml-4 space-y-12 border-l-2 pl-8 md:ml-0">
           {ExperienceData.map((exp, i) => (
             <div

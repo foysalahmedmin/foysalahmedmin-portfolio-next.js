@@ -41,8 +41,8 @@ const drawerBackdropVariants = cva(
       },
       side: {
         center: "origin-center",
-        left: "origin-left",
-        right: "origin-right",
+        start: "origin-start",
+        end: "origin-end",
       },
     },
     defaultVariants: {
@@ -71,14 +71,14 @@ const drawerContentVariants = cva(
       },
       side: {
         center: "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg",
-        left: "left-0 top-0 -translate-x-full",
-        right: "right-0 top-0 translate-x-full",
+        start: "start-0 top-0 -translate-x-full",
+        end: "end-0 top-0 translate-x-full",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
-      side: "left",
+      side: "start",
     },
   }
 );

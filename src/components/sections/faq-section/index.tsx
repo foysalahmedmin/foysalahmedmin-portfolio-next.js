@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/ui/icon";
+import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -92,14 +93,10 @@ const FaqSection = () => {
   return (
     <section className="py-24 lg:py-32">
       <div className="container mx-auto max-w-4xl px-6">
-        <div className="mb-16 text-center">
-          <span className="fade-left text-primary mb-3 inline-block text-sm font-bold tracking-widest uppercase">
-            Common Questions
-          </span>
-          <h2 className="fade-up text-3xl font-bold tracking-tight delay-100 md:text-5xl">
-            Frequently Asked Questions
-          </h2>
-        </div>
+        <SectionTitle>
+          <Subtitle>Common Questions</Subtitle>
+          <Title>Frequently Asked Questions</Title>
+        </SectionTitle>
 
         <div className="space-y-4">
           {faqs.map((faq, i) => (

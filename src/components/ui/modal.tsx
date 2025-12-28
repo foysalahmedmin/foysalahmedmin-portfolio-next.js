@@ -66,8 +66,8 @@ const modalContentVariants = cva(
       },
       side: {
         center: "mx-auto my-auto origin-center",
-        left: "ml-auto my-auto origin-left",
-        right: "mr-auto my-auto origin-right",
+        start: "ms-auto my-auto origin-start",
+        end: "me-auto my-auto origin-end",
       },
     },
     defaultVariants: {
@@ -307,6 +307,5 @@ export {
   useModal,
   type ModalBackdropProps,
   type ModalContentProps,
-  type ModalProps
+  type ModalProps,
 };
-
