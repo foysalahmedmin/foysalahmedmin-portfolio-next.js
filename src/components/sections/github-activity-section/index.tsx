@@ -22,29 +22,28 @@ const GithubActivitySection = () => {
         <div className="fade-up border-border bg-card/50 hover:border-primary/50 mx-auto flex max-w-5xl justify-center rounded-2xl border p-8 shadow-sm transition-all delay-200 duration-300 hover:shadow-md">
           <GitHubCalendar
             username="foysalahmedmin"
-            colorScheme={theme === "dark" ? "dark" : "light"}
+            colorScheme={theme}
             fontSize={14}
             blockSize={14}
             blockMargin={4}
-            renderBlock={(block, activity) => (
-              <Tooltip
-                id="github-tooltip"
-                content={`${activity.count} activities on ${activity.date}`}
-                place="top"
-                style={{
-                  backgroundColor: "var(--primary)",
-                  color: "var(--primary-foreground)",
-                  borderRadius: "8px",
-                  padding: "8px 12px",
-                  fontSize: "12px",
-                  zIndex: 9999,
-                }}
-              >
-                {React.cloneElement(block, {
-                  "data-tooltip-id": "github-tooltip",
-                })}
-              </Tooltip>
-            )}
+            year="last"
+            renderBlock={(block, activity) =>
+              React.cloneElement(block, {
+                "data-tooltip-id": "github-tooltip",
+                "data-tooltip-content": `${activity.count} activities on ${activity.date}`,
+              })
+            }
+          />
+          <Tooltip
+            id="github-tooltip"
+            style={{
+              backgroundColor: "var(--foreground)",
+              color: "var(--background)",
+              borderRadius: "8px",
+              padding: "8px 12px",
+              fontSize: "12px",
+              zIndex: 9999,
+            }}
           />
         </div>
 

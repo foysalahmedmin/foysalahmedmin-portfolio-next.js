@@ -37,20 +37,17 @@ const FaqItem = ({
   item,
   isOpen,
   onClick,
-  index,
 }: {
   item: { question: string; answer: string };
   isOpen: boolean;
   onClick: () => void;
-  index: number;
 }) => {
   return (
     <div
       className={cn(
-        "fade-up bg-card border-border/50 overflow-hidden rounded-2xl border transition-all duration-300",
+        "bg-card border-border/50 overflow-hidden rounded-2xl border transition-all duration-300",
         isOpen ? "border-primary/50 shadow-md" : "hover:border-primary/20"
       )}
-      style={{ transitionDelay: `${index * 100}ms` }}
     >
       <button
         onClick={onClick}
@@ -100,13 +97,17 @@ const FaqSection = () => {
 
         <div className="space-y-4">
           {faqs.map((faq, i) => (
-            <FaqItem
+            <div
               key={i}
-              index={i}
-              item={faq}
-              isOpen={openIndex === i}
-              onClick={() => handleToggle(i)}
-            />
+              className="fade-up"
+              style={{ transitionDelay: `${i * 100}ms` }}
+            >
+              <FaqItem
+                item={faq}
+                isOpen={openIndex === i}
+                onClick={() => handleToggle(i)}
+              />
+            </div>
           ))}
         </div>
       </div>

@@ -20,7 +20,7 @@ const AboutSection: React.FC = () => {
         <div className="grid grid-cols-1 gap-20 lg:grid-cols-2 lg:items-center">
           {/* Left: Interactive Card / Image */}
           <div className="fade-left relative">
-            <div className="group relative aspect-square max-w-[500px] overflow-hidden rounded-3xl">
+            <div className="group relative mx-auto aspect-square max-w-[500px] overflow-hidden rounded-3xl">
               <img
                 src="/images/profile.png"
                 alt="Foysal Ahmed"
@@ -30,7 +30,7 @@ const AboutSection: React.FC = () => {
             </div>
 
             {/* Float Card */}
-            <div className="bg-card border-border animate-float absolute -right-6 -bottom-10 max-w-[280px] rounded-2xl border p-6 shadow-2xl md:right-10">
+            <div className="bg-card border-border animate-float absolute right-4 -bottom-10 left-4 mx-auto max-w-[280px] rounded-2xl border p-6 shadow-2xl lg:right-10 lg:left-auto">
               <Quote className="text-primary mb-4 size-8 opacity-20" />
               <p className="text-sm leading-relaxed font-medium italic">
                 "PART OF NATURE"
@@ -48,20 +48,17 @@ const AboutSection: React.FC = () => {
           </div>
 
           {/* Right: Text Content */}
-          <div className="fade-right space-y-8">
-            <SectionTitle variant="start" className="mb-0">
+          <div className="fade-right flex flex-col items-center space-y-8 text-center lg:items-start lg:text-left">
+            <SectionTitle variant="none" className="mb-8">
               <Subtitle>Brief Introduction</Subtitle>
-              <Title className="lg:text-6xl">
-                Dedicated Full-Stack{" "}
-                <span className="text-primary">Software Architect</span>
-              </Title>
+              <Title>Dedicated Full-Stack Developer</Title>
             </SectionTitle>
 
             <p className="text-muted-foreground text-lg leading-relaxed">
               I am a{" "}
               <span className="text-primary font-bold">
-                Full-Stack Architect
-              </span>
+                Full-Stack Developer & System Architect
+              </span>{" "}
               with expertise in designing and building intelligent, scalable
               systems across web, mobile, and backend platforms. I architect
               projects end-to-end, creating robust business logic-driven
@@ -83,7 +80,7 @@ const AboutSection: React.FC = () => {
               ))}
             </div>
 
-            <div className="flex flex-wrap items-center gap-6 pt-8">
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-8 lg:justify-start">
               <Link href="/about">
                 <Button
                   size="lg"
@@ -93,7 +90,7 @@ const AboutSection: React.FC = () => {
                   <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <div className="flex -space-x-3">
+              <Link href="/projects" className="flex -space-x-3">
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
@@ -102,12 +99,12 @@ const AboutSection: React.FC = () => {
                     {i === 3 ? "20+" : "🚀"}
                   </div>
                 ))}
-                <div className="flex flex-col justify-center pl-6">
+                <div className="flex flex-col justify-center pl-6 text-left">
                   <span className="text-xs font-bold tracking-tight uppercase">
                     20+ Projects Completed
                   </span>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
