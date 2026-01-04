@@ -89,20 +89,43 @@ const SkillsSection: React.FC = () => {
           {skills.map((skill, index) => (
             <div
               key={index}
-              className="fade-up group border-border bg-card hover:border-primary/50 relative flex flex-col items-center justify-center rounded-2xl border p-8 transition-all duration-300 hover:shadow-lg"
+              className="fade-up group perspective-1000 relative aspect-square w-full"
               style={
                 { transitionDelay: `${index * 100}ms` } as React.CSSProperties
               }
+              tabIndex={0}
             >
-              <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
-                {skill.icon}
-              </div>
-              <h3 className="text-center text-sm font-bold tracking-tight uppercase lg:text-base">
-                {skill.name}
-              </h3>
+              <div className="relative h-full w-full transition-all duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus:[transform:rotateY(180deg)]">
+                {/* Front Side */}
+                <div className="border-border bg-card absolute inset-0 flex flex-col items-center justify-center rounded-2xl border p-6 shadow-sm [backface-visibility:hidden]">
+                  <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
+                    {skill.icon}
+                  </div>
+                  <h3 className="text-center text-sm font-bold tracking-tight uppercase lg:text-base">
+                    {skill.name}
+                  </h3>
+                </div>
 
-              {/* Progress bar on hover */}
-              <div className="bg-primary absolute inset-x-0 bottom-0 h-1 w-0 transition-all duration-500 group-hover:w-full" />
+                {/* Back Side */}
+                <div className="border-primary/50 bg-card absolute inset-0 flex [transform:rotateY(180deg)] flex-col items-center justify-center rounded-2xl border p-6 shadow-sm [backface-visibility:hidden]">
+                  <div className="text-primary mb-2 text-3xl font-bold">
+                    {skill.level}%
+                  </div>
+                  <h3 className="text-muted-foreground mb-3 text-center text-xs font-semibold tracking-tight uppercase lg:text-sm">
+                    {skill.name}
+                  </h3>
+                  <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                    <div
+                      className="bg-primary h-full w-0 rounded-full transition-all duration-1000 ease-out group-hover:w-[var(--skill-level)] group-focus:w-[var(--skill-level)]"
+                      style={
+                        {
+                          "--skill-level": `${skill.level}%`,
+                        } as React.CSSProperties
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>

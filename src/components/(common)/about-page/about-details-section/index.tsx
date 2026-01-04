@@ -16,12 +16,13 @@ const AboutDetailsSection = () => {
           </div>
           <div className="fade-right space-y-8">
             <h2 className="text-3xl font-bold md:text-4xl">
-              I Design and Build Intelligent Systems as a Full-Stack Architect
+              I Design and Build Intelligent Systems as a Full-Stack Developer &
+              System Architect
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
               I am a{" "}
               <span className="text-primary font-bold">
-                Full-Stack Architect
+                Full-Stack Developer & System Architect
               </span>{" "}
               with expertise in designing, developing, and scaling complex
               systems across web, mobile, and backend platforms. I specialize in

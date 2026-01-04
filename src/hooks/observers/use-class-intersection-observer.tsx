@@ -28,6 +28,9 @@ export const useClassIntersectionObserver = ({
   callback,
 }: UseClassIntersectionObserver) => {
   useEffect(() => {
+    // Track observed elements to avoid duplicate observations without modifying DOM
+    const observedElements = new WeakSet<Element>();
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         const { target, isIntersecting } = entry;
@@ -46,14 +49,12 @@ export const useClassIntersectionObserver = ({
     }, options);
 
     const observeElements = () => {
-      const safeAttr = selector.replace(/[^a-z0-9_-]/gi, "") || "default";
-
-      const elements = document.querySelectorAll(
-        `${selector}:not([data-observed-${safeAttr}])`
-      );
+      const elements = document.querySelectorAll(selector);
       elements.forEach((el) => {
-        el.setAttribute(`data-observed-${safeAttr}`, "true");
-        observer.observe(el);
+        if (!observedElements.has(el)) {
+          observedElements.add(el);
+          observer.observe(el);
+        }
       });
     };
 
