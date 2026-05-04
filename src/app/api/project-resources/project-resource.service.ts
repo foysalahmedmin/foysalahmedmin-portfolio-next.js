@@ -1,48 +1,19 @@
-import connectDB from '@/lib/db';
-import ProjectResource from './project-resource.model';
 import AppError from '@/builder/app-error';
-import AppQuery from '@/builder/app-query';
+import connectDB from '@/lib/db';
 import httpStatus from 'http-status';
-import type { TProjectResourceDocument } from './project-resource.type';
+import * as ProjectResourceRepository from './project-resource.repository';
 
-export const getProjectResources = async (queryParams: Record<string, unknown>) => {
+export const getProjectResources = async (
+  queryParams: Record<string, unknown>,
+) => {
   await connectDB();
-
-  const query = new AppQuery<TProjectResourceDocument>(
-    ProjectResource.find(),
-    queryParams,
-  );
-
-  const result = await query
-    .search(['title', 'url', 'description'])
-    .filter(['project', 'type', 'is_private'])
-    .sort(['sequence', 'title'])
-    .paginate()
-    .fields()
-    .execute();
-
-  // Populate relations
-  const populatedData = await Promise.all(
-    result.data.map(async (resource: any) => {
-      return await ProjectResource.findById(resource._id)
-        .populate([{ path: 'project', select: '_id name' }])
-        .lean();
-    }),
-  );
-
-  return {
-    data: populatedData,
-    meta: result.meta,
-  };
+  return await ProjectResourceRepository.findPaginated(queryParams);
 };
 
 export const getProjectResourceById = async (id: string) => {
   await connectDB();
 
-  const resource = await ProjectResource.findById(id)
-    .populate([{ path: 'project', select: '_id name' }])
-    .lean();
-
+  const resource = await ProjectResourceRepository.findByIdPopulated(id);
   if (!resource) {
     throw new AppError(httpStatus.NOT_FOUND, 'Project resource not found');
   }
@@ -61,13 +32,11 @@ export const createProjectResource = async (payload: {
 }) => {
   await connectDB();
 
-  const resource = await ProjectResource.create({
+  return await ProjectResourceRepository.create({
     ...payload,
     type: payload.type || 'other',
     is_private: payload.is_private || false,
-  });
-
-  return await resource.populate([{ path: 'project', select: '_id name' }]);
+  } as never);
 };
 
 export const updateProjectResourceById = async (
@@ -83,8 +52,7 @@ export const updateProjectResourceById = async (
 ) => {
   await connectDB();
 
-  const resource = await ProjectResource.findById(id);
-
+  const resource = await ProjectResourceRepository.findById(id);
   if (!resource) {
     throw new AppError(httpStatus.NOT_FOUND, 'Project resource not found');
   }
@@ -101,18 +69,16 @@ export const updateProjectResources = async (
     type: 'repository' | 'design' | 'documentation' | 'other';
     is_private: boolean;
   }>,
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const resources = await ProjectResource.find({ _id: { $in: ids } }).lean();
+
+  const resources = await ProjectResourceRepository.findManyByIds(ids);
   const foundIds = resources.map((resource) => resource._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  const result = await ProjectResource.updateMany(
-    { _id: { $in: foundIds } },
-    { ...payload },
+  const result = await ProjectResourceRepository.updateMany(
+    foundIds,
+    payload as never,
   );
 
   return {
@@ -124,42 +90,38 @@ export const updateProjectResources = async (
 export const deleteProjectResourceById = async (id: string) => {
   await connectDB();
 
-  const resource = await ProjectResource.findById(id);
-
+  const resource = await ProjectResourceRepository.findById(id);
   if (!resource) {
     throw new AppError(httpStatus.NOT_FOUND, 'Project resource not found');
   }
 
   await resource.softDelete();
-
   return null;
 };
 
-export const deleteProjectResourcePermanent = async (id: string): Promise<void> => {
+export const deleteProjectResourcePermanent = async (
+  id: string,
+): Promise<void> => {
   await connectDB();
-  const resource = await ProjectResource.findById(id).setOptions({ bypassDeleted: true });
+
+  const resource = await ProjectResourceRepository.findByIdWithDeleted(id);
   if (!resource) {
     throw new AppError(httpStatus.NOT_FOUND, 'Project resource not found');
   }
 
-  await ProjectResource.findByIdAndDelete(id);
+  await ProjectResourceRepository.hardDeleteById(id);
 };
 
 export const deleteProjectResources = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const resources = await ProjectResource.find({ _id: { $in: ids } }).lean();
+
+  const resources = await ProjectResourceRepository.findManyByIds(ids);
   const foundIds = resources.map((resource) => resource._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await ProjectResource.updateMany(
-    { _id: { $in: foundIds } },
-    { is_deleted: true },
-  );
+  await ProjectResourceRepository.softDeleteMany(foundIds);
 
   return {
     count: foundIds.length,
@@ -169,18 +131,14 @@ export const deleteProjectResources = async (
 
 export const deleteProjectResourcesPermanent = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const resources = await ProjectResource.find({ _id: { $in: ids } }).lean();
+
+  const resources = await ProjectResourceRepository.findManyByIds(ids);
   const foundIds = resources.map((resource) => resource._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await ProjectResource.deleteMany({ _id: { $in: foundIds } }).setOptions({
-    bypassDeleted: true,
-  });
+  await ProjectResourceRepository.hardDeleteMany(foundIds);
 
   return {
     count: foundIds.length,
@@ -190,14 +148,13 @@ export const deleteProjectResourcesPermanent = async (
 
 export const restoreProjectResource = async (id: string) => {
   await connectDB();
-  const resource = await ProjectResource.findOneAndUpdate(
-    { _id: id, is_deleted: true },
-    { is_deleted: false },
-    { new: true },
-  );
 
+  const resource = await ProjectResourceRepository.restoreById(id);
   if (!resource) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project resource not found or not deleted');
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'Project resource not found or not deleted',
+    );
   }
 
   return resource;
@@ -205,18 +162,13 @@ export const restoreProjectResource = async (id: string) => {
 
 export const restoreProjectResources = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const result = await ProjectResource.updateMany(
-    { _id: { $in: ids }, is_deleted: true },
-    { is_deleted: false },
-  );
 
-  const restoredResources = await ProjectResource.find({ _id: { $in: ids } }).lean();
-  const restoredIds = restoredResources.map((resource) => resource._id.toString());
+  const result = await ProjectResourceRepository.restoreMany(ids);
+
+  const restored = await ProjectResourceRepository.findManyByIds(ids);
+  const restoredIds = restored.map((resource) => resource._id.toString());
   const notFoundIds = ids.filter((id) => !restoredIds.includes(id));
 
   return {

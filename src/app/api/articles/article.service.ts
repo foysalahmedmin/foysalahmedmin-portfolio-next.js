@@ -1,57 +1,18 @@
-import connectDB from '@/lib/db';
-import Article from './article.model';
 import AppError from '@/builder/app-error';
-import AppQuery from '@/builder/app-query';
-import httpStatus from 'http-status';
-import type { TArticleDocument } from './article.type';
+import connectDB from '@/lib/db';
 import { deleteFile, deleteFiles } from '@/utils/file-utils';
+import httpStatus from 'http-status';
+import * as ArticleRepository from './article.repository';
 
 export const getArticles = async (queryParams: Record<string, unknown>) => {
   await connectDB();
-
-  const query = new AppQuery<TArticleDocument>(
-    Article.find(),
-    queryParams,
-  );
-
-  const result = await query
-    .search(['name', 'description'])
-    .filter(['status', 'category', 'author', 'is_featured'])
-    .sort(['name', 'status', 'published_at'])
-    .paginate()
-    .fields()
-    .execute();
-
-  // Populate relations
-  const populatedData = await Promise.all(
-    result.data.map(async (article: any) => {
-      return await Article.findById(article._id)
-        .populate([
-          { path: 'author', select: '_id name email image' },
-          { path: 'category', select: '_id name' },
-          { path: 'collaborators', select: '_id name email' }
-        ])
-        .lean();
-    }),
-  );
-
-  return {
-    data: populatedData,
-    meta: result.meta,
-  };
+  return await ArticleRepository.findPaginated(queryParams);
 };
 
 export const getArticleById = async (id: string) => {
   await connectDB();
 
-  const article = await Article.findById(id)
-    .populate([
-      { path: 'author', select: '_id name email image' },
-      { path: 'category', select: '_id name' },
-      { path: 'collaborators', select: '_id name email' }
-    ])
-    .lean();
-
+  const article = await ArticleRepository.findByIdPopulated(id);
   if (!article) {
     throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
   }
@@ -80,15 +41,13 @@ export const createArticle = async (payload: {
 
   const status = payload.status || 'draft';
   const published_at =
-    status === 'published'
-      ? payload.published_at || new Date()
-      : undefined;
+    status === 'published' ? payload.published_at || new Date() : undefined;
   const expired_at =
     payload.expired_at && status === 'published'
       ? new Date(payload.expired_at)
       : undefined;
 
-  const article = await Article.create({
+  return await ArticleRepository.create({
     ...payload,
     status,
     published_at,
@@ -96,13 +55,7 @@ export const createArticle = async (payload: {
     is_featured: payload.is_featured || false,
     is_premium: payload.is_premium || false,
     layout: payload.layout || 'default',
-  });
-
-  return await article.populate([
-    { path: 'author', select: '_id name email' },
-    { path: 'category', select: '_id name' },
-    { path: 'collaborators', select: '_id name email' }
-  ]);
+  } as never);
 };
 
 export const updateArticleById = async (
@@ -127,44 +80,36 @@ export const updateArticleById = async (
 ) => {
   await connectDB();
 
-  const article = await Article.findById(id);
-
+  const article = await ArticleRepository.findById(id);
   if (!article) {
     throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
   }
 
-  // Get current article data if not provided
   const current = currentArticle || article.toObject();
 
-  // Handle file deletion/replacement
-  // Delete old thumbnail if it's being replaced or removed
   if (payload.thumbnail !== undefined) {
     if (current.thumbnail && current.thumbnail !== payload.thumbnail) {
-      // Old thumbnail exists and is being changed
       deleteFile(current.thumbnail);
     }
   }
 
-  // Handle images array - delete removed images
   if (payload.images !== undefined && Array.isArray(payload.images)) {
     const currentImages = current.images || [];
-    const newImages = payload.images.filter((img) => img !== 'DELETE' && typeof img === 'string');
-    
-    // Find images that were removed
+    const newImages = payload.images.filter(
+      (img) => img !== 'DELETE' && typeof img === 'string',
+    );
+
     const removedImages = currentImages.filter(
       (oldImg: string) => !newImages.includes(oldImg),
     );
-    
-    // Delete removed images
+
     if (removedImages.length > 0) {
       deleteFiles(removedImages);
     }
-    
-    // Update payload with cleaned images array
+
     payload.images = newImages;
   }
 
-  // Handle date conversions
   const updateData: any = { ...payload };
   if (payload.published_at) {
     updateData.published_at = new Date(payload.published_at);
@@ -173,18 +118,17 @@ export const updateArticleById = async (
     updateData.expired_at = new Date(payload.expired_at);
   }
 
-  // Ensure published_at present if status set to published
   if (payload.status === 'published' && !updateData.published_at) {
     updateData.published_at = new Date();
   }
 
   Object.assign(article, updateData);
-  const savedArticle = await article.save();
+  await article.save();
 
   return await article.populate([
     { path: 'author', select: '_id name email' },
     { path: 'category', select: '_id name' },
-    { path: 'collaborators', select: '_id name email' }
+    { path: 'collaborators', select: '_id name email' },
   ]);
 };
 
@@ -195,19 +139,13 @@ export const updateArticles = async (
     is_featured: boolean;
     category: string;
   }>,
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const articles = await Article.find({ _id: { $in: ids } }).lean();
+  const articles = await ArticleRepository.findManyByIds(ids);
   const foundIds = articles.map((article) => article._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  const result = await Article.updateMany(
-    { _id: { $in: foundIds } },
-    { ...payload },
-  );
+  const result = await ArticleRepository.updateMany(foundIds, payload as never);
 
   return {
     count: result.modifiedCount,
@@ -218,25 +156,23 @@ export const updateArticles = async (
 export const deleteArticleById = async (id: string) => {
   await connectDB();
 
-  const article = await Article.findById(id);
-
+  const article = await ArticleRepository.findById(id);
   if (!article) {
     throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
   }
 
   await article.softDelete();
-
   return null;
 };
 
 export const deleteArticlePermanentById = async (id: string): Promise<void> => {
   await connectDB();
-  const article = await Article.findById(id).setOptions({ bypassDeleted: true });
+
+  const article = await ArticleRepository.findByIdWithDeleted(id);
   if (!article) {
     throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
   }
 
-  // Delete associated files
   if (article.thumbnail) {
     deleteFile(article.thumbnail);
   }
@@ -244,24 +180,18 @@ export const deleteArticlePermanentById = async (id: string): Promise<void> => {
     deleteFiles(article.images);
   }
 
-  await Article.findByIdAndDelete(id);
+  await ArticleRepository.hardDeleteById(id);
 };
 
 export const deleteArticles = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const articles = await Article.find({ _id: { $in: ids } }).lean();
+  const articles = await ArticleRepository.findManyByIds(ids);
   const foundIds = articles.map((article) => article._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await Article.updateMany(
-    { _id: { $in: foundIds } },
-    { is_deleted: true },
-  );
+  await ArticleRepository.softDeleteMany(foundIds);
 
   return {
     count: foundIds.length,
@@ -271,16 +201,12 @@ export const deleteArticles = async (
 
 export const deleteArticlesPermanent = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const articles = await Article.find({ _id: { $in: ids } }).lean();
+  const articles = await ArticleRepository.findManyByIds(ids);
   const foundIds = articles.map((article) => article._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  // Delete all associated files
   for (const article of articles) {
     if (article.thumbnail) {
       deleteFile(article.thumbnail);
@@ -290,9 +216,7 @@ export const deleteArticlesPermanent = async (
     }
   }
 
-  await Article.deleteMany({ _id: { $in: foundIds } }).setOptions({
-    bypassDeleted: true,
-  });
+  await ArticleRepository.hardDeleteMany(foundIds);
 
   return {
     count: foundIds.length,
@@ -302,14 +226,13 @@ export const deleteArticlesPermanent = async (
 
 export const restoreArticleById = async (id: string) => {
   await connectDB();
-  const article = await Article.findByIdAndUpdate(
-    id,
-    { is_deleted: false },
-    { new: true },
-  );
 
+  const article = await ArticleRepository.restoreById(id);
   if (!article) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Article not found or not deleted');
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'Article not found or not deleted',
+    );
   }
 
   return article;
@@ -317,18 +240,13 @@ export const restoreArticleById = async (id: string) => {
 
 export const restoreArticles = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const result = await Article.updateMany(
-    { _id: { $in: ids }, is_deleted: true },
-    { is_deleted: false },
-  );
 
-  const restoredArticles = await Article.find({ _id: { $in: ids } }).lean();
-  const restoredIds = restoredArticles.map((article) => article._id.toString());
+  const result = await ArticleRepository.restoreMany(ids);
+
+  const restored = await ArticleRepository.findManyByIds(ids);
+  const restoredIds = restored.map((article) => article._id.toString());
   const notFoundIds = ids.filter((id) => !restoredIds.includes(id));
 
   return {
