@@ -74,6 +74,34 @@ const fileSchema = new Schema<TFileDocument>(
       extension: String,
       file_type: String,
     },
+    references: {
+      type: [
+        {
+          model: {
+            type: String,
+            enum: [
+              'Article',
+              'Project',
+              'User',
+              'ArticleCategory',
+              'ProjectCategory',
+              'Review',
+              'Contact',
+              'ProjectResource',
+            ],
+            required: true,
+          },
+          entity: {
+            type: Schema.Types.ObjectId,
+            required: true,
+            refPath: 'references.model',
+          },
+          field: { type: String, required: true, trim: true },
+          attached_at: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: {
@@ -91,6 +119,7 @@ fileSchema.index({ category: 1 });
 fileSchema.index({ provider: 1 });
 fileSchema.index({ status: 1 });
 fileSchema.index({ created_at: -1 });
+fileSchema.index({ 'references.model': 1, 'references.entity': 1 });
 
 fileSchema.methods.toJSON = function () {
   const file = this.toObject();

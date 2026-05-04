@@ -2,11 +2,19 @@ import AppQuery from '@/builder/app-query';
 import Project from './project.model';
 import type { TProject, TProjectDocument } from './project.type';
 
+const FILE_SELECT = '_id url filename mimetype size provider metadata';
+
 const POPULATE_FIELDS = [
-  { path: 'author', select: '_id name email image' },
-  { path: 'category', select: '_id name' },
+  {
+    path: 'author',
+    select: '_id name email image',
+    populate: { path: 'image', select: FILE_SELECT },
+  },
+  { path: 'category', select: '_id name slug' },
   { path: 'client', select: '_id name email image' },
   { path: 'collaborators', select: '_id name email' },
+  { path: 'thumbnail', select: FILE_SELECT },
+  { path: 'images', select: FILE_SELECT },
 ];
 
 export const create = async (

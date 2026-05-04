@@ -4,6 +4,23 @@ export type TFileProvider = 'local' | 'gcs';
 export type TFileStatus = 'active' | 'inactive' | 'archived';
 export type TFileType = 'image' | 'video' | 'audio' | 'document' | 'other';
 
+export type TFileReferenceModel =
+  | 'Article'
+  | 'Project'
+  | 'User'
+  | 'ArticleCategory'
+  | 'ProjectCategory'
+  | 'Review'
+  | 'Contact'
+  | 'ProjectResource';
+
+export type TFileReference = {
+  model: TFileReferenceModel;
+  entity: Types.ObjectId;
+  field: string;
+  attached_at?: Date;
+};
+
 export type TFileMetadata = {
   path?: string;
   bucket?: string;
@@ -27,6 +44,7 @@ export type TFile = {
   status: TFileStatus;
   is_deleted?: boolean;
   metadata?: TFileMetadata;
+  references?: TFileReference[];
   created_at?: Date | string;
   updated_at?: Date | string;
 };

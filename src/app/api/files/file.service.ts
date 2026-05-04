@@ -6,7 +6,7 @@ import { deleteFile as deleteFileFromDisk } from '@/utils/file-utils';
 import httpStatus from 'http-status';
 import { Types } from 'mongoose';
 import * as FileRepository from './file.repository';
-import { TFile, TFileInput } from './file.type';
+import { TFile, TFileInput, TFileReferenceModel } from './file.type';
 import { getExtensionFromFilename, getFileTypeFromMime } from './file.util';
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -339,4 +339,110 @@ export const restoreFiles = async (
     count: result.modifiedCount,
     not_found_ids: notFoundIds,
   };
+};
+
+// ─── Entity Attachment Helpers ───────────────────────────────────────────────
+
+const normalizeIds = (input?: string | string[] | null): string[] => {
+  if (!input) return [];
+  return Array.isArray(input) ? input.filter(Boolean) : [input];
+};
+
+export const validateFileIds = async (ids: string[]): Promise<void> => {
+  await connectDB();
+
+  if (!ids.length) return;
+
+  const found = await FileRepository.findManyByIds(ids);
+  const foundIds = new Set(found.map((f) => f._id!.toString()));
+  const missing = ids.filter((id) => !foundIds.has(id));
+
+  if (missing.length) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `File ID(s) not found: ${missing.join(', ')}`,
+    );
+  }
+};
+
+export const attachToEntity = async (params: {
+  fileIds: string | string[] | null | undefined;
+  model: TFileReferenceModel;
+  entity: string;
+  field: string;
+}): Promise<void> => {
+  await connectDB();
+
+  const ids = normalizeIds(params.fileIds);
+  if (!ids.length) return;
+
+  await FileRepository.attachReferences(ids, {
+    model: params.model,
+    entity: params.entity,
+    field: params.field,
+  });
+};
+
+export const detachFromEntity = async (params: {
+  fileIds: string | string[] | null | undefined;
+  model: TFileReferenceModel;
+  entity: string;
+  field?: string;
+}): Promise<void> => {
+  await connectDB();
+
+  const ids = normalizeIds(params.fileIds);
+  if (!ids.length) return;
+
+  await FileRepository.detachReferences(ids, {
+    model: params.model,
+    entity: params.entity,
+    field: params.field,
+  });
+};
+
+export const reconcileEntityRefs = async (params: {
+  model: TFileReferenceModel;
+  entity: string;
+  field: string;
+  previous: string | string[] | null | undefined;
+  next: string | string[] | null | undefined;
+}): Promise<void> => {
+  await connectDB();
+
+  const previousSet = new Set(normalizeIds(params.previous));
+  const nextSet = new Set(normalizeIds(params.next));
+
+  const toAttach: string[] = [];
+  const toDetach: string[] = [];
+
+  for (const id of nextSet) {
+    if (!previousSet.has(id)) toAttach.push(id);
+  }
+  for (const id of previousSet) {
+    if (!nextSet.has(id)) toDetach.push(id);
+  }
+
+  if (toAttach.length) {
+    await FileRepository.attachReferences(toAttach, {
+      model: params.model,
+      entity: params.entity,
+      field: params.field,
+    });
+  }
+  if (toDetach.length) {
+    await FileRepository.detachReferences(toDetach, {
+      model: params.model,
+      entity: params.entity,
+      field: params.field,
+    });
+  }
+};
+
+export const detachAllForEntity = async (params: {
+  model: TFileReferenceModel;
+  entity: string;
+}): Promise<void> => {
+  await connectDB();
+  await FileRepository.detachAllForEntity(params);
 };
