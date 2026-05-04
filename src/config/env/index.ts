@@ -43,4 +43,9 @@ export const ENV = {
   // Email Auth
   auth_user_email: process.env.AUTH_USER_EMAIL!,
   auth_user_email_password: process.env.AUTH_USER_EMAIL_PASSWORD!,
+
+  // Google Cloud Storage
+  gcp_project_id: process.env.GCP_PROJECT_ID,
+  gcp_credentials_path: process.env.GCP_CREDENTIALS_PATH,
+  gcp_bucket_name: process.env.GCP_BUCKET_NAME,
 };

@@ -1,39 +1,23 @@
-import connectDB from '@/lib/db';
-import httpStatus from 'http-status';
 import AppError from '@/builder/app-error';
-import AppQuery from '@/builder/app-query';
+import connectDB from '@/lib/db';
 import type { TJwtPayload } from '@/types/jsonwebtoken.type';
-import { User } from './user.model';
-import type { TUser } from './user.type';
 import { deleteFile } from '@/utils/file-utils';
+import httpStatus from 'http-status';
+import * as UserRepository from './user.repository';
+import type { TUser } from './user.type';
 
 export const getUser = async (id: string): Promise<TUser> => {
   await connectDB();
-  const result = await User.findById(id).lean();
+  const result = await UserRepository.findByIdLean(id);
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
   return result;
 };
 
-export const getUsers = async (
-  query: Record<string, unknown>,
-): Promise<{
-  data: TUser[];
-  meta: { total: number; page: number; limit: number };
-}> => {
+export const getUsers = async (query: Record<string, unknown>) => {
   await connectDB();
-  const userQuery = new AppQuery<TUser>(User.find(), query)
-    .search(['name', 'email', 'image'])
-    .filter()
-    .sort()
-    .paginate()
-    .fields()
-    .tap((q) => q.lean());
-
-  const result = await userQuery.execute();
-
-  return result;
+  return await UserRepository.findPaginated(query);
 };
 
 export const updateSelf = async (
@@ -41,25 +25,23 @@ export const updateSelf = async (
   payload: Partial<Pick<TUser, 'name' | 'email' | 'image'>>,
 ): Promise<TUser> => {
   await connectDB();
-  const data = await User.findById(user._id);
+
+  const data = await UserRepository.findById(user._id);
   if (!data) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
   if (payload.email && data.email !== payload.email) {
-    const emailExists = await User.findOne({ email: payload.email }).lean();
+    const emailExists = await UserRepository.findByEmail(payload.email);
     if (emailExists) {
       throw new AppError(httpStatus.CONFLICT, 'Email already exists');
     }
   }
 
-  // Handle file deletion/replacement
-  // Delete old image if it's being replaced or removed
   if (payload.image !== undefined) {
     if (data.image && data.image !== payload.image) {
       deleteFile(data.image);
     }
-    // If image is explicitly set to empty/null, delete old one
     if (payload.image === '' || payload.image === null) {
       if (data.image) {
         deleteFile(data.image);
@@ -67,11 +49,7 @@ export const updateSelf = async (
     }
   }
 
-  const result = await User.findByIdAndUpdate(user._id, payload, {
-    new: true,
-    runValidators: true,
-  });
-
+  const result = await UserRepository.updateById(user._id, payload);
   return result!;
 };
 
@@ -82,18 +60,16 @@ export const updateUser = async (
   >,
 ): Promise<TUser> => {
   await connectDB();
-  const data = await User.findById(id);
+
+  const data = await UserRepository.findById(id);
   if (!data) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  // Handle file deletion/replacement
-  // Delete old image if it's being replaced or removed
   if (payload.image !== undefined) {
     if (data.image && data.image !== payload.image) {
       deleteFile(data.image);
     }
-    // If image is explicitly set to empty/null, delete old one
     if (payload.image === '' || payload.image === null) {
       if (data.image) {
         deleteFile(data.image);
@@ -101,30 +77,20 @@ export const updateUser = async (
     }
   }
 
-  const updatedUser = await User.findByIdAndUpdate(id, payload, {
-    new: true,
-    runValidators: true,
-  });
-
-  return updatedUser!;
+  const updated = await UserRepository.updateById(id, payload);
+  return updated!;
 };
 
 export const updateUsers = async (
   ids: string[],
   payload: Partial<Pick<TUser, 'role' | 'status' | 'is_verified'>>,
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const users = await User.find({ _id: { $in: ids } }).lean();
+  const users = await UserRepository.findManyByIds(ids);
   const foundIds = users.map((user) => user._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  const result = await User.updateMany(
-    { _id: { $in: foundIds } },
-    { ...payload },
-  );
+  const result = await UserRepository.updateMany(foundIds, payload);
 
   return {
     count: result.modifiedCount,
@@ -134,7 +100,7 @@ export const updateUsers = async (
 
 export const deleteUser = async (id: string): Promise<void> => {
   await connectDB();
-  const user = await User.findById(id);
+  const user = await UserRepository.findById(id);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
@@ -144,31 +110,27 @@ export const deleteUser = async (id: string): Promise<void> => {
 
 export const deleteUserPermanent = async (id: string): Promise<void> => {
   await connectDB();
-  const user = await User.findById(id).setOptions({ bypassDeleted: true });
+  const user = await UserRepository.findByIdWithDeleted(id);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  // Delete associated files
   if (user.image) {
     deleteFile(user.image);
   }
 
-  await User.findByIdAndDelete(id);
+  await UserRepository.hardDeleteById(id);
 };
 
 export const deleteUsers = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const users = await User.find({ _id: { $in: ids } }).lean();
+  const users = await UserRepository.findManyByIds(ids);
   const foundIds = users.map((user) => user._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await User.updateMany({ _id: { $in: foundIds } }, { is_deleted: true });
+  await UserRepository.softDeleteMany(foundIds);
 
   return {
     count: foundIds.length,
@@ -178,25 +140,19 @@ export const deleteUsers = async (
 
 export const deleteUsersPermanent = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const users = await User.find({ _id: { $in: ids } }).lean();
+  const users = await UserRepository.findManyByIds(ids);
   const foundIds = users.map((user) => user._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  // Delete all associated files
   for (const user of users) {
     if (user.image) {
       deleteFile(user.image);
     }
   }
 
-  await User.deleteMany({ _id: { $in: foundIds } }).setOptions({
-    bypassDeleted: true,
-  });
+  await UserRepository.hardDeleteMany(foundIds);
 
   return {
     count: foundIds.length,
@@ -206,12 +162,8 @@ export const deleteUsersPermanent = async (
 
 export const restoreUser = async (id: string): Promise<TUser> => {
   await connectDB();
-  const user = await User.findOneAndUpdate(
-    { _id: id, is_deleted: true },
-    { is_deleted: false },
-    { new: true },
-  );
 
+  const user = await UserRepository.restoreById(id);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found or not deleted');
   }
@@ -221,18 +173,12 @@ export const restoreUser = async (id: string): Promise<TUser> => {
 
 export const restoreUsers = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const result = await User.updateMany(
-    { _id: { $in: ids }, is_deleted: true },
-    { is_deleted: false },
-  );
+  const result = await UserRepository.restoreMany(ids);
 
-  const restoredUsers = await User.find({ _id: { $in: ids } }).lean();
-  const restoredIds = restoredUsers.map((user) => user._id.toString());
+  const restored = await UserRepository.findManyByIds(ids);
+  const restoredIds = restored.map((user) => user._id.toString());
   const notFoundIds = ids.filter((id) => !restoredIds.includes(id));
 
   return {
@@ -240,4 +186,3 @@ export const restoreUsers = async (
     not_found_ids: notFoundIds,
   };
 };
-

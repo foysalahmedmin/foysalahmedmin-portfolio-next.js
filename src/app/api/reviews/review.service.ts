@@ -1,54 +1,17 @@
-import connectDB from '@/lib/db';
 import AppError from '@/builder/app-error';
-import AppQuery from '@/builder/app-query';
+import connectDB from '@/lib/db';
 import httpStatus from 'http-status';
-import type { TReviewDocument } from './review.type';
-import { Review } from './review.model';
+import * as ReviewRepository from './review.repository';
 
 export const getReviews = async (queryParams: Record<string, unknown>) => {
   await connectDB();
-
-  const query = new AppQuery<TReviewDocument>(
-    Review.find(),
-    queryParams,
-  );
-
-  const result = await query
-    .search(['review'])
-    .filter(['status', 'target', 'target_model', 'rating', 'author'])
-    .sort(['created_at', 'rating'])
-    .paginate()
-    .fields()
-    .execute();
-
-  // Populate relations
-  const populatedData = await Promise.all(
-    result.data.map(async (review: any) => {
-      return await Review.findById(review._id)
-        .populate([
-          { path: 'author', select: '_id name email image' },
-          { path: 'target', select: '_id name' },
-        ])
-        .lean();
-    }),
-  );
-
-  return {
-    data: populatedData,
-    meta: result.meta,
-  };
+  return await ReviewRepository.findPaginated(queryParams);
 };
 
 export const getReviewById = async (id: string) => {
   await connectDB();
 
-  const review = await Review.findById(id)
-    .populate([
-      { path: 'author', select: '_id name email image' },
-      { path: 'target', select: '_id name' },
-    ])
-    .lean();
-
+  const review = await ReviewRepository.findByIdPopulated(id);
   if (!review) {
     throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
   }
@@ -66,12 +29,11 @@ export const createReview = async (payload: {
 }) => {
   await connectDB();
 
-  // Check if user already reviewed this target
-  const existingReview = await Review.findOne({
-    author: payload.author,
-    target: payload.target,
-    target_model: payload.target_model,
-  });
+  const existingReview = await ReviewRepository.findExisting(
+    payload.author,
+    payload.target,
+    payload.target_model,
+  );
 
   if (existingReview) {
     throw new AppError(
@@ -80,34 +42,24 @@ export const createReview = async (payload: {
     );
   }
 
-  const review = await Review.create({
+  return await ReviewRepository.create({
     ...payload,
     status: payload.status || 'pending',
-  });
-
-  return await review.populate([
-    { path: 'author', select: '_id name email image' },
-    { path: 'target', select: '_id name' },
-  ]);
+  } as never);
 };
 
 export const updateReviewById = async (
   id: string,
-  payload: Partial<{
-    rating: number;
-    review: string;
-  }>,
+  payload: Partial<{ rating: number; review: string }>,
   authorId: string,
 ) => {
   await connectDB();
 
-  const review = await Review.findById(id);
-
+  const review = await ReviewRepository.findById(id);
   if (!review) {
     throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
   }
 
-  // Check if user is the author or admin
   if (review.author?.toString() !== authorId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
@@ -115,7 +67,6 @@ export const updateReviewById = async (
     );
   }
 
-  // Mark as edited
   Object.assign(review, {
     ...payload,
     is_edited: true,
@@ -132,22 +83,15 @@ export const updateReviewById = async (
 
 export const updateReviews = async (
   ids: string[],
-  payload: Partial<{
-    status: 'pending' | 'approved' | 'rejected';
-  }>,
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+  payload: Partial<{ status: 'pending' | 'approved' | 'rejected' }>,
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const reviews = await Review.find({ _id: { $in: ids } }).lean();
+
+  const reviews = await ReviewRepository.findManyByIds(ids);
   const foundIds = reviews.map((review) => review._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  const result = await Review.updateMany(
-    { _id: { $in: foundIds } },
-    { ...payload },
-  );
+  const result = await ReviewRepository.updateMany(foundIds, payload as never);
 
   return {
     count: result.modifiedCount,
@@ -158,13 +102,11 @@ export const updateReviews = async (
 export const deleteReviewById = async (id: string, authorId: string) => {
   await connectDB();
 
-  const review = await Review.findById(id);
-
+  const review = await ReviewRepository.findById(id);
   if (!review) {
     throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
   }
 
-  // Check if user is the author or admin
   if (review.author?.toString() !== authorId) {
     throw new AppError(
       httpStatus.FORBIDDEN,
@@ -173,35 +115,30 @@ export const deleteReviewById = async (id: string, authorId: string) => {
   }
 
   await review.softDelete();
-
   return null;
 };
 
 export const deleteReviewPermanentById = async (id: string): Promise<void> => {
   await connectDB();
-  const review = await Review.findById(id).setOptions({ bypassDeleted: true });
+
+  const review = await ReviewRepository.findByIdWithDeleted(id);
   if (!review) {
     throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
   }
 
-  await Review.findByIdAndDelete(id);
+  await ReviewRepository.hardDeleteById(id);
 };
 
 export const deleteReviews = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const reviews = await Review.find({ _id: { $in: ids } }).lean();
+
+  const reviews = await ReviewRepository.findManyByIds(ids);
   const foundIds = reviews.map((review) => review._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await Review.updateMany(
-    { _id: { $in: foundIds } },
-    { is_deleted: true },
-  );
+  await ReviewRepository.softDeleteMany(foundIds);
 
   return {
     count: foundIds.length,
@@ -211,18 +148,14 @@ export const deleteReviews = async (
 
 export const deleteReviewsPermanent = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const reviews = await Review.find({ _id: { $in: ids } }).lean();
+
+  const reviews = await ReviewRepository.findManyByIds(ids);
   const foundIds = reviews.map((review) => review._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await Review.deleteMany({ _id: { $in: foundIds } }).setOptions({
-    bypassDeleted: true,
-  });
+  await ReviewRepository.hardDeleteMany(foundIds);
 
   return {
     count: foundIds.length,
@@ -232,12 +165,8 @@ export const deleteReviewsPermanent = async (
 
 export const restoreReviewById = async (id: string) => {
   await connectDB();
-  const review = await Review.findByIdAndUpdate(
-    id,
-    { is_deleted: false },
-    { new: true },
-  );
 
+  const review = await ReviewRepository.restoreById(id);
   if (!review) {
     throw new AppError(httpStatus.NOT_FOUND, 'Review not found or not deleted');
   }
@@ -247,18 +176,13 @@ export const restoreReviewById = async (id: string) => {
 
 export const restoreReviews = async (
   ids: string[],
-): Promise<{
-  count: number;
-  not_found_ids: string[];
-}> => {
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
-  const result = await Review.updateMany(
-    { _id: { $in: ids }, is_deleted: true },
-    { is_deleted: false },
-  );
 
-  const restoredReviews = await Review.find({ _id: { $in: ids } }).lean();
-  const restoredIds = restoredReviews.map((review) => review._id.toString());
+  const result = await ReviewRepository.restoreMany(ids);
+
+  const restored = await ReviewRepository.findManyByIds(ids);
+  const restoredIds = restored.map((review) => review._id.toString());
   const notFoundIds = ids.filter((id) => !restoredIds.includes(id));
 
   return {
@@ -273,12 +197,7 @@ export const updateReviewStatusById = async (
 ) => {
   await connectDB();
 
-  const review = await Review.findByIdAndUpdate(
-    id,
-    { status },
-    { new: true },
-  );
-
+  const review = await ReviewRepository.updateById(id, { status });
   if (!review) {
     throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
   }
@@ -288,4 +207,3 @@ export const updateReviewStatusById = async (
     { path: 'target', select: '_id name' },
   ]);
 };
-
