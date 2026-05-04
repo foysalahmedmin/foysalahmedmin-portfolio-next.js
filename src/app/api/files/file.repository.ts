@@ -1,6 +1,6 @@
 import AppQuery from '@/builder/app-query';
 import File from './file.model';
-import type { TFile, TFileDocument } from './file.type';
+import type { TFile, TFileDocument, TFileReferenceModel } from './file.type';
 
 export const create = async (data: Partial<TFile>): Promise<TFile> => {
   const result = await File.create(data);
@@ -119,4 +119,95 @@ export const hardDeleteManyByIds = async (ids: string[]): Promise<void> => {
     _id: { $in: ids },
     is_deleted: true,
   }).setOptions({ bypassDeleted: true });
+};
+
+export const attachReference = async (
+  fileId: string,
+  ref: { model: TFileReferenceModel; entity: string; field: string },
+): Promise<void> => {
+  await File.updateOne(
+    {
+      _id: fileId,
+      references: {
+        $not: {
+          $elemMatch: {
+            model: ref.model,
+            entity: ref.entity,
+            field: ref.field,
+          },
+        },
+      },
+    },
+    {
+      $push: {
+        references: {
+          model: ref.model,
+          entity: ref.entity,
+          field: ref.field,
+          attached_at: new Date(),
+        },
+      },
+    },
+  );
+};
+
+export const attachReferences = async (
+  fileIds: string[],
+  ref: { model: TFileReferenceModel; entity: string; field: string },
+): Promise<void> => {
+  if (!fileIds.length) return;
+  await Promise.all(fileIds.map((id) => attachReference(id, ref)));
+};
+
+export const detachReference = async (
+  fileId: string,
+  ref: { model: TFileReferenceModel; entity: string; field?: string },
+): Promise<void> => {
+  await File.updateOne(
+    { _id: fileId },
+    {
+      $pull: {
+        references: {
+          model: ref.model,
+          entity: ref.entity,
+          ...(ref.field && { field: ref.field }),
+        },
+      },
+    },
+  );
+};
+
+export const detachReferences = async (
+  fileIds: string[],
+  ref: { model: TFileReferenceModel; entity: string; field?: string },
+): Promise<void> => {
+  if (!fileIds.length) return;
+  await Promise.all(fileIds.map((id) => detachReference(id, ref)));
+};
+
+export const detachAllForEntity = async (
+  ref: { model: TFileReferenceModel; entity: string },
+): Promise<void> => {
+  await File.updateMany(
+    { 'references.entity': ref.entity, 'references.model': ref.model },
+    { $pull: { references: { model: ref.model, entity: ref.entity } } },
+  );
+};
+
+export const findIdsForEntity = async (
+  ref: { model: TFileReferenceModel; entity: string; field?: string },
+): Promise<string[]> => {
+  const docs = await File.find({
+    references: {
+      $elemMatch: {
+        model: ref.model,
+        entity: ref.entity,
+        ...(ref.field && { field: ref.field }),
+      },
+    },
+  })
+    .select('_id')
+    .lean();
+
+  return docs.map((d) => (d._id as { toString(): string }).toString());
 };

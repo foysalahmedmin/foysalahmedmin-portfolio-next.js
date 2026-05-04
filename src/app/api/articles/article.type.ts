@@ -6,8 +6,8 @@ export type TArticle = {
   name: string;
   description?: string;
   content: string;
-  thumbnail?: string;
-  images?: string[];
+  thumbnail?: Types.ObjectId | null;
+  images?: Types.ObjectId[];
   tags?: string[];
   category: Types.ObjectId;
   author: Types.ObjectId;

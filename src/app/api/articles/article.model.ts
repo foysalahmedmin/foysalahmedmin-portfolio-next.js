@@ -1,10 +1,6 @@
-import type { Query} from "mongoose";
+import type { Query } from "mongoose";
 import mongoose, { Schema } from "mongoose";
-import type {
-    TArticle,
-    TArticleDocument,
-    TArticleModel,
-} from "./article.type";
+import type { TArticle, TArticleDocument, TArticleModel } from "./article.type";
 
 const articleSchema = new Schema<TArticleDocument>(
   {
@@ -23,10 +19,13 @@ const articleSchema = new Schema<TArticleDocument>(
       required: true,
     },
     thumbnail: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "File",
+      default: null,
     },
     images: {
-      type: [String],
+      type: [Schema.Types.ObjectId],
+      ref: "File",
       default: [],
     },
     tags: {
@@ -139,27 +138,21 @@ articleSchema.methods.toJSON = function () {
   return article;
 };
 
-articleSchema.pre(
-  /^find/,
-  function (this: Query<TArticle, TArticle>, next) {
-    this.setQuery({
-      ...this.getQuery(),
-      is_deleted: { $ne: true },
-    });
-    next();
-  }
-);
+articleSchema.pre(/^find/, function (this: Query<TArticle, TArticle>, next) {
+  this.setQuery({
+    ...this.getQuery(),
+    is_deleted: { $ne: true },
+  });
+  next();
+});
 
-articleSchema.pre(
-  /^update/,
-  function (this: Query<TArticle, TArticle>, next) {
-    this.setQuery({
-      ...this.getQuery(),
-      is_deleted: { $ne: true },
-    });
-    next();
-  }
-);
+articleSchema.pre(/^update/, function (this: Query<TArticle, TArticle>, next) {
+  this.setQuery({
+    ...this.getQuery(),
+    is_deleted: { $ne: true },
+  });
+  next();
+});
 
 articleSchema.pre("aggregate", function (next) {
   this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
@@ -180,4 +173,3 @@ export const Article =
   mongoose.model<TArticleDocument, TArticleModel>("Article", articleSchema);
 
 export default Article;
-

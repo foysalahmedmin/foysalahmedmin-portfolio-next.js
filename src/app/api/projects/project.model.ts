@@ -25,11 +25,14 @@ const projectSchema = new Schema<TProjectDocument>(
     },
 
     thumbnail: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'File',
+      default: null,
     },
 
     images: {
-      type: [String],
+      type: [Schema.Types.ObjectId],
+      ref: 'File',
       default: [],
     },
 
