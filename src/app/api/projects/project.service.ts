@@ -1,8 +1,28 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
-import { deleteFile, deleteFiles } from '@/utils/file-utils';
 import httpStatus from 'http-status';
+import * as FileService from '../files/file.service';
 import * as ProjectRepository from './project.repository';
+
+const MODEL = 'Project' as const;
+
+const toIdString = (value: unknown): string | null => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && value !== null) {
+    const obj = value as { _id?: { toString(): string }; toString?(): string };
+    if (obj._id) return obj._id.toString();
+    if (obj.toString) return obj.toString();
+  }
+  return null;
+};
+
+const toIdArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((v) => toIdString(v))
+    .filter((v): v is string => Boolean(v));
+};
 
 export const getProjects = async (queryParams: Record<string, unknown>) => {
   await connectDB();
@@ -26,7 +46,7 @@ export const createProject = async (payload: {
   category: string;
   author: string;
   description?: string;
-  thumbnail?: string;
+  thumbnail?: string | null;
   images?: string[];
   tags?: string[];
   client?: string;
@@ -40,7 +60,13 @@ export const createProject = async (payload: {
 }) => {
   await connectDB();
 
-  return await ProjectRepository.create({
+  const fileIds = [
+    ...(payload.thumbnail ? [payload.thumbnail] : []),
+    ...(payload.images ?? []),
+  ];
+  await FileService.validateFileIds(fileIds);
+
+  const created = await ProjectRepository.create({
     ...payload,
     status: payload.status || 'planned',
     is_featured: payload.is_featured || false,
@@ -49,6 +75,29 @@ export const createProject = async (payload: {
     ended_at: payload.ended_at ? new Date(payload.ended_at) : undefined,
     layout: payload.layout || 'default',
   } as never);
+
+  const entityId = (created._id as { toString(): string }).toString();
+
+  await Promise.all([
+    payload.thumbnail
+      ? FileService.attachToEntity({
+          fileIds: payload.thumbnail,
+          model: MODEL,
+          entity: entityId,
+          field: 'thumbnail',
+        })
+      : Promise.resolve(),
+    payload.images?.length
+      ? FileService.attachToEntity({
+          fileIds: payload.images,
+          model: MODEL,
+          entity: entityId,
+          field: 'images',
+        })
+      : Promise.resolve(),
+  ]);
+
+  return created;
 };
 
 export const updateProjectById = async (
@@ -57,7 +106,7 @@ export const updateProjectById = async (
     name: string;
     description: string;
     content: string;
-    thumbnail: string;
+    thumbnail: string | null;
     images: string[];
     tags: string[];
     category: string;
@@ -70,7 +119,6 @@ export const updateProjectById = async (
     ended_at: Date | string;
     layout: string;
   }>,
-  currentProject?: any,
 ) => {
   await connectDB();
 
@@ -79,32 +127,16 @@ export const updateProjectById = async (
     throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
   }
 
-  const current = currentProject || project.toObject();
+  const newFileIds = [
+    ...(payload.thumbnail ? [payload.thumbnail] : []),
+    ...(payload.images ?? []),
+  ];
+  await FileService.validateFileIds(newFileIds);
 
-  if (payload.thumbnail !== undefined) {
-    if (current.thumbnail && current.thumbnail !== payload.thumbnail) {
-      deleteFile(current.thumbnail);
-    }
-  }
+  const previousThumbnail = toIdString(project.thumbnail);
+  const previousImages = toIdArray(project.images);
 
-  if (payload.images !== undefined && Array.isArray(payload.images)) {
-    const currentImages = current.images || [];
-    const newImages = payload.images.filter(
-      (img) => img !== 'DELETE' && typeof img === 'string',
-    );
-
-    const removedImages = currentImages.filter(
-      (oldImg: string) => !newImages.includes(oldImg),
-    );
-
-    if (removedImages.length > 0) {
-      deleteFiles(removedImages);
-    }
-
-    payload.images = newImages;
-  }
-
-  const updateData: any = { ...payload };
+  const updateData: Record<string, unknown> = { ...payload };
   if (payload.started_at) {
     updateData.started_at = new Date(payload.started_at);
   }
@@ -113,14 +145,37 @@ export const updateProjectById = async (
   }
 
   Object.assign(project, updateData);
-  const saved = await project.save();
+  await project.save();
 
-  return await saved.populate([
-    { path: 'author', select: '_id name email' },
-    { path: 'category', select: '_id name' },
-    { path: 'client', select: '_id name email' },
-    { path: 'collaborators', select: '_id name email' },
-  ]);
+  const reconcileTasks: Promise<void>[] = [];
+
+  if (payload.thumbnail !== undefined) {
+    reconcileTasks.push(
+      FileService.reconcileEntityRefs({
+        model: MODEL,
+        entity: id,
+        field: 'thumbnail',
+        previous: previousThumbnail,
+        next: payload.thumbnail,
+      }),
+    );
+  }
+
+  if (payload.images !== undefined) {
+    reconcileTasks.push(
+      FileService.reconcileEntityRefs({
+        model: MODEL,
+        entity: id,
+        field: 'images',
+        previous: previousImages,
+        next: payload.images,
+      }),
+    );
+  }
+
+  await Promise.all(reconcileTasks);
+
+  return await ProjectRepository.findByIdPopulated(id);
 };
 
 export const updateProjects = async (
@@ -164,13 +219,7 @@ export const deleteProjectPermanentById = async (id: string): Promise<void> => {
     throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
   }
 
-  if (project.thumbnail) {
-    deleteFile(project.thumbnail);
-  }
-  if (project.images && project.images.length > 0) {
-    deleteFiles(project.images);
-  }
-
+  await FileService.detachAllForEntity({ model: MODEL, entity: id });
   await ProjectRepository.hardDeleteById(id);
 };
 
@@ -198,14 +247,11 @@ export const deleteProjectsPermanent = async (
   const foundIds = projects.map((project) => project._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  for (const project of projects) {
-    if (project.thumbnail) {
-      deleteFile(project.thumbnail);
-    }
-    if (project.images && project.images.length > 0) {
-      deleteFiles(project.images);
-    }
-  }
+  await Promise.all(
+    foundIds.map((entityId) =>
+      FileService.detachAllForEntity({ model: MODEL, entity: entityId }),
+    ),
+  );
 
   await ProjectRepository.hardDeleteMany(foundIds);
 
