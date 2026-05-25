@@ -1,12 +1,25 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
 import type { TJwtPayload } from '@/types/jsonwebtoken.type';
-import { deleteFile } from '@/utils/file-utils';
 import httpStatus from 'http-status';
+import * as FileService from '../files/file.service';
 import * as UserRepository from './user.repository';
 import type { TUser } from './user.type';
 
-export const getUser = async (id: string): Promise<TUser> => {
+const MODEL = 'User' as const;
+
+const toIdString = (value: unknown): string | null => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && value !== null) {
+    const obj = value as { _id?: { toString(): string }; toString?(): string };
+    if (obj._id) return obj._id.toString();
+    if (obj.toString) return obj.toString();
+  }
+  return null;
+};
+
+export const getUser = async (id: string) => {
   await connectDB();
   const result = await UserRepository.findByIdLean(id);
   if (!result) {
@@ -23,7 +36,7 @@ export const getUsers = async (query: Record<string, unknown>) => {
 export const updateSelf = async (
   user: TJwtPayload,
   payload: Partial<Pick<TUser, 'name' | 'email' | 'image'>>,
-): Promise<TUser> => {
+) => {
   await connectDB();
 
   const data = await UserRepository.findById(user._id);
@@ -39,26 +52,26 @@ export const updateSelf = async (
   }
 
   if (payload.image !== undefined) {
-    if (data.image && data.image !== payload.image) {
-      deleteFile(data.image);
+    const newImageId = payload.image ? String(payload.image) : null;
+    if (newImageId) {
+      await FileService.validateFileIds([newImageId]);
     }
-    if (payload.image === '' || payload.image === null) {
-      if (data.image) {
-        deleteFile(data.image);
-      }
-    }
+    await FileService.reconcileEntityRefs({
+      model: MODEL,
+      entity: user._id,
+      field: 'image',
+      previous: toIdString(data.image),
+      next: newImageId,
+    });
   }
 
-  const result = await UserRepository.updateById(user._id, payload);
-  return result!;
+  return await UserRepository.updateById(user._id, payload);
 };
 
 export const updateUser = async (
   id: string,
-  payload: Partial<
-    Pick<TUser, 'name' | 'email' | 'image' | 'role' | 'status' | 'is_verified'>
-  >,
-): Promise<TUser> => {
+  payload: Partial<Pick<TUser, 'name' | 'email' | 'image' | 'role' | 'status' | 'is_verified'>>,
+) => {
   await connectDB();
 
   const data = await UserRepository.findById(id);
@@ -67,18 +80,20 @@ export const updateUser = async (
   }
 
   if (payload.image !== undefined) {
-    if (data.image && data.image !== payload.image) {
-      deleteFile(data.image);
+    const newImageId = payload.image ? String(payload.image) : null;
+    if (newImageId) {
+      await FileService.validateFileIds([newImageId]);
     }
-    if (payload.image === '' || payload.image === null) {
-      if (data.image) {
-        deleteFile(data.image);
-      }
-    }
+    await FileService.reconcileEntityRefs({
+      model: MODEL,
+      entity: id,
+      field: 'image',
+      previous: toIdString(data.image),
+      next: newImageId,
+    });
   }
 
-  const updated = await UserRepository.updateById(id, payload);
-  return updated!;
+  return await UserRepository.updateById(id, payload);
 };
 
 export const updateUsers = async (
@@ -115,10 +130,7 @@ export const deleteUserPermanent = async (id: string): Promise<void> => {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
-  if (user.image) {
-    deleteFile(user.image);
-  }
-
+  await FileService.detachAllForEntity({ model: MODEL, entity: id });
   await UserRepository.hardDeleteById(id);
 };
 
@@ -146,11 +158,11 @@ export const deleteUsersPermanent = async (
   const foundIds = users.map((user) => user._id.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  for (const user of users) {
-    if (user.image) {
-      deleteFile(user.image);
-    }
-  }
+  await Promise.all(
+    foundIds.map((entityId) =>
+      FileService.detachAllForEntity({ model: MODEL, entity: entityId }),
+    ),
+  );
 
   await UserRepository.hardDeleteMany(foundIds);
 
@@ -160,7 +172,7 @@ export const deleteUsersPermanent = async (
   };
 };
 
-export const restoreUser = async (id: string): Promise<TUser> => {
+export const restoreUser = async (id: string) => {
   await connectDB();
 
   const user = await UserRepository.restoreById(id);

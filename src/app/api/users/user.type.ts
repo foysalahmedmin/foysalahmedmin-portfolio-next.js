@@ -4,7 +4,7 @@ import type { TRole } from '@/types/jsonwebtoken.type';
 export type TStatus = 'in-progress' | 'blocked';
 
 export type TUser = {
-  image?: string;
+  image?: Types.ObjectId | null;
   name: string;
   email: string;
   password: string;
