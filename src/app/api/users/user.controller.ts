@@ -52,28 +52,10 @@ export const getUsers = catchAsync(async (req: AuthRequest | Request) => {
 });
 
 export const updateSelf = catchAsync(
-  async (req: AuthRequest & { parsedBody?: any; savedFiles?: Record<string, string[]> }) => {
+  async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
-    const savedFiles = req.savedFiles as Record<string, string[]> | undefined;
 
-    // Handle file updates
-    let image = body.image;
-
-    // If new image uploaded, use it (old one will be deleted in service)
-    if (savedFiles?.image?.[0]) {
-      image = savedFiles.image[0];
-    }
-    // If image is explicitly set to empty/null, delete old one
-    if (body.image === '' || body.image === null) {
-      image = '';
-    }
-
-    const payload = {
-      ...body,
-      image,
-    };
-
-    const result = await UserService.updateSelf(req.user!, payload);
+    const result = await UserService.updateSelf(req.user!, body);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
@@ -85,31 +67,13 @@ export const updateSelf = catchAsync(
 
 export const updateUser = catchAsync(
   async (
-    req: AuthRequest & { parsedBody?: any; savedFiles?: Record<string, string[]> },
+    req: AuthRequest & { parsedBody?: Record<string, unknown> },
     { params }: { params: { id: string } },
   ) => {
     const { id } = params;
     const body = req.parsedBody || (await req.json());
-    const savedFiles = req.savedFiles as Record<string, string[]> | undefined;
 
-    // Handle file updates
-    let image = body.image;
-
-    // If new image uploaded, use it (old one will be deleted in service)
-    if (savedFiles?.image?.[0]) {
-      image = savedFiles.image[0];
-    }
-    // If image is explicitly set to empty/null, delete old one
-    if (body.image === '' || body.image === null) {
-      image = '';
-    }
-
-    const payload = {
-      ...body,
-      image,
-    };
-
-    const result = await UserService.updateUser(id, payload);
+    const result = await UserService.updateUser(id, body);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
@@ -120,7 +84,7 @@ export const updateUser = catchAsync(
 );
 
 export const updateUsers = catchAsync(
-  async (req: AuthRequest & { parsedBody?: any }) => {
+  async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
     const { ids, ...payload } = body;
     const result = await UserService.updateUsers(ids, payload);
@@ -160,7 +124,7 @@ export const deleteUserPermanent = catchAsync(
 );
 
 export const deleteUsers = catchAsync(
-  async (req: AuthRequest & { parsedBody?: any }) => {
+  async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
     const { ids } = body;
     const result = await UserService.deleteUsers(ids);
@@ -176,7 +140,7 @@ export const deleteUsers = catchAsync(
 );
 
 export const deleteUsersPermanent = catchAsync(
-  async (req: AuthRequest & { parsedBody?: any }) => {
+  async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
     const { ids } = body;
     const result = await UserService.deleteUsersPermanent(ids);
@@ -205,7 +169,7 @@ export const restoreUser = catchAsync(
 );
 
 export const restoreUsers = catchAsync(
-  async (req: AuthRequest & { parsedBody?: any }) => {
+  async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
     const { ids } = body;
     const result = await UserService.restoreUsers(ids);

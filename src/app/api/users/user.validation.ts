@@ -4,6 +4,13 @@ const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
   message: 'Invalid ID format',
 });
 
+const optionalIdSchema = z
+  .string()
+  .refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
+    message: 'Invalid ID format',
+  })
+  .nullish();
+
 export const createUserValidationSchema = z.object({
   body: z.object({
     name: z
@@ -26,7 +33,7 @@ export const updateSelfValidationSchema = z.object({
       .max(50, 'Name cannot exceed 50 characters')
       .optional(),
     email: z.string().email('Invalid email format').optional(),
-    image: z.string().optional(),
+    image: optionalIdSchema,
   }),
 });
 
@@ -52,7 +59,7 @@ export const updateUserValidationSchema = z.object({
         return val;
       }, z.boolean())
       .optional(),
-    image: z.string().optional(),
+    image: optionalIdSchema,
   }),
 });
 

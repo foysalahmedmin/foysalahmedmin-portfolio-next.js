@@ -7,7 +7,9 @@ import type { TUser, TUserDocument, TUserModel } from './user.type';
 const userSchema = new Schema<TUserDocument>(
   {
     image: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'File',
+      default: null,
     },
     name: {
       type: String,
