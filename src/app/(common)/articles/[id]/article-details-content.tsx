@@ -80,7 +80,7 @@ const ArticleDetailsContent: React.FC<ArticleDetailsContentProps> = ({
       <div className="container mx-auto -mt-16 px-6 md:-mt-24 lg:-mt-32">
         <div className="border-border relative aspect-[21/9] w-full overflow-hidden rounded-3xl border shadow-2xl">
           <img
-            src={article.thumbnail || "/images/placeholder-article.png"}
+            src={article.thumbnail?.url || "/images/placeholder-article.png"}
             alt={article.name}
             className="h-full w-full object-cover"
           />

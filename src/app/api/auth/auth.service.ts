@@ -84,7 +84,7 @@ export const signup = async (payload: TSignup) => {
   const user = await AuthRepository.create({
     ...payload,
     role: 'user',
-  });
+  } as never);
 
   if (!user) {
     throw new AppError(

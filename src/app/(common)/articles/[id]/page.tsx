@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${article.name} | Blog | Foysal Ahmed`,
       description: article.description,
       openGraph: {
-        images: article.thumbnail ? [article.thumbnail] : [],
+        images: article.thumbnail?.url ? [article.thumbnail.url] : [],
       },
     };
   } catch (e) {

@@ -44,7 +44,7 @@ export const findPaginated = async (queryParams: Record<string, unknown>) => {
 
   const populated = await Promise.all(
     result.data.map(async (user) => {
-      return await User.findById((user as { _id: unknown })._id)
+      return await User.findById((user as unknown as { _id: unknown })._id)
         .populate({ path: 'image', select: FILE_SELECT })
         .lean();
     }),

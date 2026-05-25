@@ -149,7 +149,7 @@ const ArticlesContentSection = () => {
                     >
                       <img
                         src={
-                          article.thumbnail || "/images/placeholder-article.png"
+                          article.thumbnail?.url || "/images/placeholder-article.png"
                         }
                         alt={article.name}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
