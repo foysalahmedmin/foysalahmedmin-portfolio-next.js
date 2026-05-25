@@ -25,7 +25,7 @@ const ArticleCard: React.FC<{ article: TArticle; index: number }> = ({
     >
       <div className="relative aspect-[16/10] overflow-hidden">
         <img
-          src={article.thumbnail || "/images/placeholder-article.png"}
+          src={article.thumbnail?.url || "/images/placeholder-article.png"}
           alt={article.name}
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />

@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${project.name} | Portfolio | Foysal Ahmed`,
       description: project.description,
       openGraph: {
-        images: project.thumbnail ? [project.thumbnail] : [],
+        images: project.thumbnail?.url ? [project.thumbnail.url] : [],
       },
     };
   } catch (e) {

@@ -69,7 +69,7 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
             <div className="lg:col-span-8 space-y-20">
                 <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] bg-card shadow-2xl border border-border/50 fade-up">
                     <img 
-                        src={project.thumbnail || "/images/placeholder.png"} 
+                        src={project.thumbnail?.url || "/images/placeholder.png"} 
                         alt={project.name} 
                         className="h-full w-full object-cover" 
                     />
@@ -97,7 +97,7 @@ const ProjectDetailsContent: React.FC<ProjectDetailsContentProps> = ({ project }
                                     style={{ transitionDelay: `${i * 100}ms` } as React.CSSProperties}
                                 >
                                     <img 
-                                        src={img} 
+                                        src={img.url} 
                                         alt={`${project.name} screenshot ${i+1}`} 
                                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 
                                     />

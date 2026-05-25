@@ -17,7 +17,7 @@ const ProjectCard: React.FC<{ project: TProject; index: number }> = ({
     >
       <div className="aspect-[4/3] w-full overflow-hidden">
         <img
-          src={project.thumbnail || "/images/placeholder.png"}
+          src={project.thumbnail?.url || "/images/placeholder.png"}
           alt={project.name}
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />

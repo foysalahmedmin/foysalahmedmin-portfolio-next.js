@@ -95,7 +95,7 @@ const AdminProjectsPage = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             <div className="size-12 rounded-lg bg-muted overflow-hidden">
-                                                <img src={project.thumbnail || "/images/placeholder.png"} alt="" className="h-full w-full object-cover" />
+                                                <img src={project.thumbnail?.url || "/images/placeholder.png"} alt="" className="h-full w-full object-cover" />
                                             </div>
                                             <div>
                                                 <p className="font-bold text-sm">{project.name}</p>
