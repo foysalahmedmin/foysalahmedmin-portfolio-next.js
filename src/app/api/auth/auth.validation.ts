@@ -7,11 +7,19 @@ export const signinValidationSchema = z.object({
   }),
 });
 
+const optionalIdSchema = z
+  .string()
+  .refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
+    message: 'Invalid ID format',
+  })
+  .nullish();
+
 export const signupValidationSchema = z.object({
   body: z.object({
     name: z.string().min(2).max(50),
     email: z.string().email(),
     password: z.string().min(6).max(12),
+    image: optionalIdSchema,
   }),
 });
 

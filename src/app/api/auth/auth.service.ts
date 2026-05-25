@@ -5,9 +5,12 @@ import type { TJwtPayload } from '@/types/jsonwebtoken.type';
 import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
 import type { JwtPayload } from 'jsonwebtoken';
+import * as FileService from '../files/file.service';
 import * as AuthRepository from './auth.repository';
 import type { TChangePassword, TSignin, TSignup } from './auth.type';
 import { createToken, verifyToken } from './auth.utils';
+
+const MODEL = 'User' as const;
 
 const buildJwtPayload = (user: {
   _id: { toString(): string };
@@ -15,14 +18,13 @@ const buildJwtPayload = (user: {
   email: string;
   role?: string;
   is_verified?: boolean;
-  image?: string;
+  image?: unknown;
 }): TJwtPayload => ({
   _id: user._id.toString(),
   name: user.name,
   email: user.email,
   role: (user.role as TJwtPayload['role']) || 'user',
   is_verified: user.is_verified || false,
-  ...(user.image && { image: user.image }),
 });
 
 export const signin = async (payload: TSignin) => {
@@ -75,6 +77,10 @@ export const signup = async (payload: TSignup) => {
     throw new AppError(httpStatus.CONFLICT, 'User already exists!');
   }
 
+  if (payload.image) {
+    await FileService.validateFileIds([payload.image]);
+  }
+
   const user = await AuthRepository.create({
     ...payload,
     role: 'user',
@@ -85,6 +91,17 @@ export const signup = async (payload: TSignup) => {
       httpStatus.INTERNAL_SERVER_ERROR,
       'Failed to create user!',
     );
+  }
+
+  const entityId = user._id.toString();
+
+  if (payload.image) {
+    await FileService.attachToEntity({
+      fileIds: payload.image,
+      model: MODEL,
+      entity: entityId,
+      field: 'image',
+    });
   }
 
   const jwtPayload = buildJwtPayload(user);
