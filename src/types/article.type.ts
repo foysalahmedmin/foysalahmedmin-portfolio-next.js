@@ -1,4 +1,4 @@
-// Frontend types with populated data (for API responses)
+import type { TFilePopulated } from './file.type';
 
 export type TArticleStatus = 'draft' | 'pending' | 'published' | 'archived';
 
@@ -6,7 +6,7 @@ export type TUserPopulated = {
   _id: string;
   name: string;
   email: string;
-  image?: string;
+  image?: TFilePopulated | null;
 };
 
 export type TArticleCategoryPopulated = {
@@ -21,8 +21,8 @@ export type TArticle = {
   slug: string;
   description?: string;
   content: string;
-  thumbnail?: string;
-  images?: string[];
+  thumbnail?: TFilePopulated | null;
+  images?: TFilePopulated[];
   tags?: string[];
   category: TArticleCategoryPopulated;
   author: TUserPopulated;

@@ -1,3 +1,4 @@
+import type { TFilePopulated } from './file.type';
 import type { TRole } from "./jsonwebtoken.type";
 import type { TResponse } from "./response.type";
 
@@ -5,7 +6,7 @@ export type TStatus = "in-progress" | "blocked";
 
 export type TUser = {
   _id: string;
-  image?: string;
+  image?: TFilePopulated | null;
   name: string;
   email: string;
   password_changed_at?: Date;

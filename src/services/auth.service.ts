@@ -32,16 +32,11 @@ export async function signIn(payload: SignInPayload): Promise<AuthResponse> {
 
 // POST - Sign Up
 export async function signUp(payload: SignUpPayload): Promise<AuthResponse> {
-  const formData = new FormData();
-  formData.append("name", payload.name);
-  formData.append("email", payload.email);
-  formData.append("password", payload.password);
-  if (payload.image) formData.append("image", payload.image);
-
-  const res = await fetch(`${ENV.url}/api/auth/signup`, {
+  const res = await fetch(`${getBaseUrl()}/api/auth/signup`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: formData,
+    body: JSON.stringify(payload),
   });
   return handleResponse(res);
 }
