@@ -46,19 +46,11 @@ export const signin = catchAsync(async (req: Request & { parsedBody?: any }) => 
 });
 
 export const signup = catchAsync(
-  async (req: Request & { parsedBody?: any; savedFiles?: Record<string, string[]> }) => {
+  async (req: Request & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
-    const savedFiles = req.savedFiles as Record<string, string[]>;
-    const image = savedFiles?.image?.[0] || '';
-
-    const payload = {
-      ...body,
-      role: 'user',
-      image,
-    };
 
     const { refresh_token, access_token, info } = await AuthService.signup(
-      payload,
+      body as Parameters<typeof AuthService.signup>[0],
     );
 
     const cookieStore = await cookies();
