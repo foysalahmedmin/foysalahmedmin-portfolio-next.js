@@ -7,7 +7,7 @@ export type SignInPayload = {
 };
 
 export type SignUpPayload = {
-  image?: File | null;
+  image?: string | null;
   name: string;
   email: string;
   password: string;

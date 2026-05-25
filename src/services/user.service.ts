@@ -42,20 +42,16 @@ export async function fetchUser(id: string): Promise<TUserResponse> {
 // PATCH Self
 export async function updateSelf(
   payload: Partial<{
-    image?: File | string | null;
+    image?: string | null;
     name: string;
     email: string;
   }>
 ): Promise<TUserResponse> {
-  const formData = new FormData();
-  if (payload.name) formData.append("name", payload.name);
-  if (payload.email) formData.append("email", payload.email);
-  if (payload.image) formData.append("image", payload.image as any);
-
-  const res = await fetch(`${ENV.url}/api/user/self`, {
+  const res = await fetch(`${ENV.url}/api/users/self`, {
     method: "PATCH",
-    body: formData,
+    headers: { "Content-Type": "application/json" },
     credentials: "include",
+    body: JSON.stringify(payload),
   });
   return handleResponse(res);
 }
@@ -80,7 +76,7 @@ export async function updateUsers(payload: {
 export async function updateUser(
   id: string,
   payload: {
-    image?: File | string | null;
+    image?: string | null;
     name?: string;
     email?: string;
     status?: "in-progress" | "blocked";
@@ -88,19 +84,11 @@ export async function updateUser(
     is_verified?: boolean;
   }
 ): Promise<TUserResponse> {
-  const formData = new FormData();
-  if (payload.name) formData.append("name", payload.name);
-  if (payload.email) formData.append("email", payload.email);
-  if (payload.image) formData.append("image", payload.image as any);
-  if (payload.status) formData.append("status", payload.status);
-  if (payload.role) formData.append("role", payload.role);
-  if (typeof payload.is_verified === "boolean")
-    formData.append("is_verified", payload.is_verified.toString());
-
-  const res = await fetch(`${ENV.url}/api/user/${id}`, {
+  const res = await fetch(`${ENV.url}/api/users/${id}/admin`, {
     method: "PATCH",
-    body: formData,
+    headers: { "Content-Type": "application/json" },
     credentials: "include",
+    body: JSON.stringify(payload),
   });
   return handleResponse(res);
 }
