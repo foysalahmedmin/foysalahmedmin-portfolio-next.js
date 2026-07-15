@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:foysalahmedmin:schemas:content-truth:1",
+  "title": "Redacted portfolio content truth manifest",
+  "description": "Schema for the source-audited, redacted content truth inventory. It records publication gates, not private evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_version",
+    "audit",
+    "status_contract",
+    "publication_contract",
+    "claims",
+    "dynamic_record_contracts",
+    "five_pillar_matrix",
+    "blockers"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "manifest_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$"
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audited_at", "repository_revision", "scope", "limitations"],
+      "properties": {
+        "audited_at": {
+          "type": "string",
+          "format": "date"
+        },
+        "repository_revision": {
+          "type": "string",
+          "minLength": 7
+        },
+        "scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verified-by-code",
+        "needs-owner-verification",
+        "remove",
+        "dynamic-derived"
+      ],
+      "properties": {
+        "verified-by-code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "needs-owner-verification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "remove": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dynamic-derived": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "publication_contract": {
+      "$ref": "#/$defs/publicationContract"
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/claim"
+      }
+    },
+    "dynamic_record_contracts": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/dynamicRecordContract"
+      }
+    },
+    "five_pillar_matrix": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/pillar"
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/blocker"
+      }
+    }
+  },
+  "$defs": {
+    "truthStatus": {
+      "type": "string",
+      "enum": [
+        "verified-by-code",
+        "needs-owner-verification",
+        "remove",
+        "dynamic-derived"
+      ]
+    },
+    "publishGate": {
+      "type": "string",
+      "enum": ["allow", "block", "derive-only"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "symbol_or_context": {
+          "type": "string"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "claim",
+        "current_public_value",
+        "status",
+        "production_publish",
+        "sources",
+        "reason",
+        "required_action"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "identity",
+            "biography",
+            "availability",
+            "response-time",
+            "contact",
+            "tagline",
+            "capability",
+            "stat",
+            "testimonial",
+            "experience",
+            "education",
+            "credential",
+            "project",
+            "article",
+            "social",
+            "resume",
+            "media",
+            "legal"
+          ]
+        },
+        "claim": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_public_value": {
+          "type": ["string", "number", "boolean", "null"]
+        },
+        "status": {
+          "$ref": "#/$defs/truthStatus"
+        },
+        "production_publish": {
+          "$ref": "#/$defs/publishGate"
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "derivation_rule": {
+          "type": "string"
+        },
+        "duplicate_of": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "dynamic-derived"
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["derivation_rule"],
+            "properties": {
+              "production_publish": {
+                "const": "derive-only"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": ["needs-owner-verification", "remove"]
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "production_publish": {
+                "const": "block"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "publicationContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default_policy", "production", "demo", "private_evidence"],
+      "properties": {
+        "default_policy": {
+          "type": "string"
+        },
+        "production": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "demo": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "private_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dynamicRecordContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_type",
+        "current_repository_state",
+        "required_truth_fields",
+        "publication_rules",
+        "inventory_result"
+      ],
+      "properties": {
+        "record_type": {
+          "type": "string",
+          "enum": ["project", "article"]
+        },
+        "current_repository_state": {
+          "type": "string"
+        },
+        "required_truth_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "publication_rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "inventory_result": {
+          "type": "string"
+        }
+      }
+    },
+    "pillar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "key",
+        "canonical_label",
+        "legacy_labels_found",
+        "current_surfaces",
+        "code_evidence",
+        "truth_gap",
+        "publication_rule"
+      ],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "key": {
+          "type": "string",
+          "enum": [
+            "frontend",
+            "backend",
+            "ai_automation",
+            "system_design",
+            "full_stack"
+          ]
+        },
+        "canonical_label": {
+          "type": "string"
+        },
+        "legacy_labels_found": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "current_surfaces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "code_evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "truth_gap": {
+          "type": "string"
+        },
+        "publication_rule": {
+          "type": "string"
+        }
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "severity", "summary", "unblocker"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "unblocker": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
