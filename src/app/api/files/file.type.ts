@@ -1,6 +1,6 @@
 import type { Document, Model, Types } from 'mongoose';
 
-export type TFileProvider = 'local' | 'gcs';
+export type TFileProvider = 'local' | 'gcs' | 'cloudinary';
 export type TFileStatus = 'active' | 'inactive' | 'archived';
 export type TFileType = 'image' | 'video' | 'audio' | 'document' | 'other';
 
@@ -24,6 +24,19 @@ export type TFileReference = {
 export type TFileMetadata = {
   path?: string;
   bucket?: string;
+  storage_key?: string;
+  public_id?: string;
+  asset_id?: string;
+  cloud_name?: string;
+  folder?: string;
+  resource_type?: 'image' | 'video' | 'raw';
+  delivery_type?: string;
+  format?: string;
+  version?: number;
+  etag?: string;
+  width?: number;
+  height?: number;
+  duration?: number;
   extension?: string;
   file_type?: TFileType;
 };

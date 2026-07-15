@@ -44,6 +44,16 @@ export const ENV = {
   auth_user_email: process.env.AUTH_USER_EMAIL!,
   auth_user_email_password: process.env.AUTH_USER_EMAIL_PASSWORD!,
 
+  // Cloud Storage
+  storage_provider: (process.env.STORAGE_PROVIDER?.trim().toLowerCase() ||
+    "cloudinary") as "cloudinary" | "gcp",
+
+  // Cloudinary
+  cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
+  cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloudinary_folder: process.env.CLOUDINARY_FOLDER?.trim() || "min",
+
   // Google Cloud Storage
   gcp_project_id: process.env.GCP_PROJECT_ID,
   gcp_credentials_path: process.env.GCP_CREDENTIALS_PATH,

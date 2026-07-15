@@ -1,7 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { TFilePopulated } from "@/types/file.type";
+import type {
+  TFilePopulated,
+  TFileUploadResponse,
+} from "@/types/file.type";
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 
@@ -53,8 +56,10 @@ export function FileUploader({
           throw new Error(data?.message || "Upload failed");
         }
 
-        const data = await res.json();
-        onChange(data.data as TFilePopulated);
+        const data = (await res.json()) as TFileUploadResponse;
+        const uploaded = Array.isArray(data.data) ? data.data[0] : null;
+        if (!uploaded) throw new Error("Upload returned no file");
+        onChange(uploaded);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Upload failed");
       } finally {

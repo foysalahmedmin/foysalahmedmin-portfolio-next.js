@@ -1,5 +1,5 @@
+import type { TStorageResult } from '@/lib/storage';
 import type { AuthRequest } from '@/middleware/auth.middleware';
-import type { TStorageResult } from '@/middleware/storage.middleware';
 import catchAsync from '@/utils/catch-async';
 import sendResponse from '@/utils/send-response';
 import httpStatus from 'http-status';
@@ -11,6 +11,7 @@ type SavedFilesRequest = AuthRequest & {
   files?: Record<string, File[]>;
   savedFiles?: Record<string, string[]>;
   storages?: TStorageResult[];
+  storageUploadsCommitted?: boolean;
 };
 
 const buildBaseUrl = (req: AuthRequest | Request): string => {
@@ -60,6 +61,7 @@ export const createCloudFiles = catchAsync(async (req: SavedFilesRequest) => {
   const storages = req.storages ?? [];
 
   const result = await FileService.createCloudFiles(req.user!, storages, body);
+  req.storageUploadsCommitted = true;
 
   return sendResponse({
     status: httpStatus.CREATED,

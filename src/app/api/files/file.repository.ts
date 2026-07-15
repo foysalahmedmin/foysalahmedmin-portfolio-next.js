@@ -73,6 +73,7 @@ export const findPaginated = async (
       { key: 'archived', filter: { status: 'archived' } },
       { key: 'local', filter: { provider: 'local' } },
       { key: 'gcs', filter: { provider: 'gcs' } },
+      { key: 'cloudinary', filter: { provider: 'cloudinary' } },
     ]);
 };
 

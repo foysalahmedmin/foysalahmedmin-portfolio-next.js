@@ -41,7 +41,7 @@ const fileSchema = new Schema<TFileDocument>(
     },
     provider: {
       type: String,
-      enum: ['local', 'gcs'],
+      enum: ['local', 'gcs', 'cloudinary'],
       required: [true, 'Provider is required'],
     },
     category: {
@@ -71,6 +71,22 @@ const fileSchema = new Schema<TFileDocument>(
     metadata: {
       path: String,
       bucket: String,
+      storage_key: String,
+      public_id: String,
+      asset_id: String,
+      cloud_name: String,
+      folder: String,
+      resource_type: {
+        type: String,
+        enum: ['image', 'video', 'raw'],
+      },
+      delivery_type: String,
+      format: String,
+      version: Number,
+      etag: String,
+      width: Number,
+      height: Number,
+      duration: Number,
       extension: String,
       file_type: String,
     },

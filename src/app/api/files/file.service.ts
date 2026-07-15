@@ -1,6 +1,10 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
-import type { TStorageResult } from '@/middleware/storage.middleware';
+import {
+  deleteCloudStorageObject,
+  type TCloudinaryResourceType,
+  type TStorageResult,
+} from '@/lib/storage';
 import type { TJwtPayload } from '@/types/jsonwebtoken.type';
 import { unlink } from 'node:fs/promises';
 import path from 'node:path';
@@ -29,20 +33,6 @@ export type TLocalFileInput = {
   path: string;
   mimetype: string;
   size: number;
-};
-
-const lazyGcsClient = async () => {
-  const { Storage } = await import('@google-cloud/storage');
-  const { ENV } = await import('@/config');
-
-  return new Storage({
-    ...(ENV.gcp_credentials_path && {
-      keyFilename: ENV.gcp_credentials_path,
-    }),
-    ...(ENV.gcp_project_id && {
-      projectId: ENV.gcp_project_id,
-    }),
-  });
 };
 
 export const createLocalFile = async (
@@ -116,18 +106,20 @@ export const createCloudFiles = async (
   }
 
   const data: Partial<TFile>[] = results.map((result) => {
-    const extension = getExtensionFromFilename(result.filename);
+    const extension = getExtensionFromFilename(
+      result.filename || result.original_name,
+    );
     const fileType = getFileTypeFromMime(result.mimetype, extension);
 
     return {
       name: payload.name || result.original_name,
       originalname: result.original_name,
       filename: result.filename,
-      url: result.public_url || '',
+      url: result.public_url,
       mimetype: result.mimetype,
       size: result.size,
       author: user._id as unknown as Types.ObjectId,
-      provider: 'gcs',
+      provider: result.provider === 'gcp' ? 'gcs' : result.provider,
       category: payload.category,
       description: payload.description,
       caption: payload.caption,
@@ -135,6 +127,19 @@ export const createCloudFiles = async (
       is_deleted: false,
       metadata: {
         bucket: result.bucket,
+        storage_key: result.storage_key,
+        public_id: result.public_id,
+        asset_id: result.asset_id,
+        cloud_name: result.cloud_name,
+        folder: result.folder,
+        resource_type: result.resource_type,
+        delivery_type: result.delivery_type,
+        format: result.format,
+        version: result.version,
+        etag: result.etag,
+        width: result.width,
+        height: result.height,
+        duration: result.duration,
         extension,
         file_type: fileType,
       },
@@ -292,29 +297,36 @@ const removePhysicalFile = async (file: TFile): Promise<void> => {
     return;
   }
 
-  if (file.provider === 'gcs') {
-    if (!file.metadata?.bucket) {
+  if (file.provider === 'gcs' || file.provider === 'cloudinary') {
+    const storageKey =
+      file.metadata?.storage_key || file.metadata?.public_id || file.filename;
+    if (!storageKey) {
       throw new AppError(
         httpStatus.INTERNAL_SERVER_ERROR,
-        `Missing GCS bucket for file ${file.filename}`,
+        `Missing storage key for file ${file.filename}`,
       );
     }
 
-    try {
-      const client = await lazyGcsClient();
-      const bucket = client.bucket(file.metadata.bucket);
-      const cloudFile = bucket.file(file.filename);
-      await cloudFile.delete();
-    } catch (error: unknown) {
-      const code = (error as { code?: number })?.code;
-      if (code !== 404) {
-        throw new AppError(
-          httpStatus.BAD_GATEWAY,
-          `Failed to delete cloud file ${file.filename}: ${(error as Error)?.message || 'unknown error'}`,
-        );
-      }
-    }
+    await deleteCloudStorageObject({
+      provider: file.provider === 'gcs' ? 'gcp' : file.provider,
+      storage_key: storageKey,
+      bucket: file.metadata?.bucket,
+      resource_type:
+        file.metadata?.resource_type ||
+        (getCloudinaryResourceType(file.mimetype) as TCloudinaryResourceType),
+      delivery_type: file.metadata?.delivery_type,
+    });
   }
+};
+
+const getCloudinaryResourceType = (
+  mimetype: string,
+): TCloudinaryResourceType => {
+  if (mimetype.startsWith('image/')) return 'image';
+  if (mimetype.startsWith('video/') || mimetype.startsWith('audio/')) {
+    return 'video';
+  }
+  return 'raw';
 };
 
 export const deleteFilePermanent = async (id: string): Promise<void> => {

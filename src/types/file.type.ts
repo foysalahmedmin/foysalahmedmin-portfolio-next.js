@@ -17,9 +17,9 @@ export type TFilePopulated = {
   metadata?: TFileMetadata;
 };
 
-export type TFileResponse = {
+export type TFileUploadResponse = {
   success: boolean;
   status: number;
   message?: string;
-  data: TFilePopulated;
+  data: TFilePopulated[];
 };
