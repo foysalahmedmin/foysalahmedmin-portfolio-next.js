@@ -50,6 +50,15 @@ export async function refreshToken(): Promise<AuthResponse> {
   return handleResponse(res);
 }
 
+// POST - Sign Out
+export async function signOut(): Promise<AuthResponse> {
+  const res = await fetch(`${getBaseUrl()}/api/auth/signout`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return handleResponse(res);
+}
+
 // PATCH - Change Password
 export async function changePassword(
   payload: ChangePasswordPayload
