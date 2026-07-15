@@ -1,7 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { TFilePopulated } from "@/types/file.type";
+import type {
+  TFilePopulated,
+  TFileUploadResponse,
+} from "@/types/file.type";
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 
@@ -28,15 +31,10 @@ export function FileGalleryUploader({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const uploadFile = useCallback(
-    async (file: File): Promise<TFilePopulated | null> => {
-      if (file.size > maxSize) {
-        setError(`"${file.name}" too large. Max ${Math.round(maxSize / 1_000_000)}MB.`);
-        return null;
-      }
-
+  const uploadFiles = useCallback(
+    async (files: File[]): Promise<TFilePopulated[]> => {
       const formData = new FormData();
-      formData.append("file", file);
+      files.forEach((file) => formData.append("file", file));
 
       const res = await fetch("/api/files/cloud", {
         method: "POST",
@@ -46,13 +44,16 @@ export function FileGalleryUploader({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.message || `Failed to upload "${file.name}"`);
+        throw new Error(data?.message || "Failed to upload files");
       }
 
-      const data = await res.json();
-      return data.data as TFilePopulated;
+      const data = (await res.json()) as TFileUploadResponse;
+      if (!Array.isArray(data.data)) {
+        throw new Error("Upload returned an invalid response");
+      }
+      return data.data;
     },
-    [maxSize],
+    [],
   );
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,12 +69,18 @@ export function FileGalleryUploader({
     }
 
     const toUpload = files.slice(0, remaining);
+    const oversized = toUpload.find((file) => file.size > maxSize);
+    if (oversized) {
+      setError(
+        `"${oversized.name}" too large. Max ${Math.round(maxSize / 1_000_000)}MB.`,
+      );
+      return;
+    }
     setError(null);
     setUploading(true);
 
     try {
-      const results = await Promise.all(toUpload.map(uploadFile));
-      const uploaded = results.filter((f): f is TFilePopulated => f !== null);
+      const uploaded = await uploadFiles(toUpload);
       if (uploaded.length > 0) {
         onChange([...value, ...uploaded]);
       }
