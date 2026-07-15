@@ -27,6 +27,5 @@ export type ResetPasswordPayload = {
 };
 
 export type AuthResponse = TResponse<{
-  token?: string;
   info?: TUser;
 }>;

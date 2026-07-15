@@ -19,9 +19,21 @@ export const file = (...files: TFile[]) => {
     req: NextRequest,
     handler: (req: NextRequest & { files?: Record<string, File[]> }) => Promise<NextResponse>,
   ): Promise<NextResponse> => {
+    const writtenFiles: string[] = [];
     try {
       const formData = await req.formData();
       const uploadedFiles: Record<string, File[]> = {};
+      const parsedBody: Record<string, string | string[]> = {};
+
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) continue;
+        const current = parsedBody[key];
+        parsedBody[key] = current
+          ? Array.isArray(current)
+            ? [...current, value]
+            : [current, value]
+          : value;
+      }
 
       // Process each configured file field
       for (const fileConfig of files) {
@@ -100,6 +112,7 @@ export const file = (...files: TFile[]) => {
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
           fs.writeFileSync(filePath, buffer);
+          writtenFiles.push(filePath);
 
           savedPaths.push(`/uploads/${folder}/${filename}`);
         }
@@ -107,17 +120,25 @@ export const file = (...files: TFile[]) => {
       }
 
       // Attach saved file paths to request
-      const modifiedReq = {
-        ...req,
+      const modifiedReq = Object.assign(req, {
         files: uploadedFiles,
         savedFiles,
-      } as NextRequest & {
+        parsedBody,
+      }) as NextRequest & {
         files?: Record<string, File[]>;
         savedFiles?: Record<string, string[]>;
+        parsedBody?: Record<string, string | string[]>;
       };
 
       return await handler(modifiedReq);
     } catch (error) {
+      for (const filePath of writtenFiles) {
+        try {
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } catch {
+          // Preserve the original upload/handler error.
+        }
+      }
       if (error instanceof AppError) {
         throw error;
       }

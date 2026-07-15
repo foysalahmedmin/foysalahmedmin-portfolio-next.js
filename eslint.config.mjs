@@ -1,22 +1,14 @@
-import { FlatCompat } from "@eslint/eslintrc";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 import prettierConfig from "eslint-config-prettier";
-import globals from "globals";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
 
 export default [
-  ...compat.config({
-    extends: ["next/core-web-vitals", "next/typescript"],
+  ...nextVitals,
+  ...nextTypescript,
+  {
     rules: {
       /* Base Rules */
-      "no-undef": "error",
+      "no-undef": "off",
       "no-unused-vars": "off",
       "no-console": "off",
 
@@ -30,42 +22,23 @@ export default [
 
       /* React Rules */
       "react/no-unescaped-entities": "off",
-    },
-  }),
-  {
-    // Language options for ESLint
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: "module",
-      globals: {
-        React: "writable",
-        JSX: "writable",
-        ...globals.browser,
-        ...globals.node,
-        ...globals.es2021,
-      },
-      parserOptions: {
-        project: "./tsconfig.json",
-        tsconfigRootDir: __dirname,
-        ecmaFeatures: { jsx: true },
-      },
+      "react-hooks/set-state-in-effect": "off",
     },
   },
   {
     // Files and directories to ignore during linting
     ignores: [
-      "node_modules",
-      ".next/",
-      "out/",
-      "public/",
-      "dist",
-      "build",
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "public/**",
+      "dist/**",
+      "build/**",
       "**/*.config.js",
       "**/*.config.mjs",
       "**/*.config.cjs",
     ],
   },
 
-  // Prettier configuration
   prettierConfig,
 ];

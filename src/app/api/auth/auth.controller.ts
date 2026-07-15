@@ -39,7 +39,6 @@ export const signin = catchAsync(async (req: Request & { parsedBody?: any }) => 
     success: true,
     message: 'User is signed in successfully!',
     data: {
-      token: access_token, // Keep for backward compatibility (localStorage)
       info: info,
     },
   });
@@ -78,7 +77,6 @@ export const signup = catchAsync(
       success: true,
       message: 'User is signed up successfully!',
       data: {
-        token: access_token, // Keep for backward compatibility (localStorage)
         info: info,
       },
     });
@@ -109,7 +107,6 @@ export const refreshToken = catchAsync(async (req: Request) => {
     success: true,
     message: 'Access token is retrieved successfully!',
     data: {
-      token: access_token, // Keep for backward compatibility (localStorage)
       info: info,
     },
   });
@@ -128,4 +125,3 @@ export const changePassword = catchAsync(
     });
   },
 );
-

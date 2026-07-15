@@ -55,7 +55,6 @@ export const createContact = async (payload: {
       html: emailHtml,
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Failed to send contact notification email:', error);
   }
 

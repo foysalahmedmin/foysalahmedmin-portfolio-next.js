@@ -1,6 +1,6 @@
 "use client";
 
-import Loading from "@/components/partials/loading";
+import Loading from "@/components/partials/Loading";
 import type { RootState } from "@/redux/store";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode} from "react";

@@ -1,35 +1,27 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
-import { TStorageResult } from '@/middleware/storage.middleware';
+import type { TStorageResult } from '@/middleware/storage.middleware';
 import type { TJwtPayload } from '@/types/jsonwebtoken.type';
-import { deleteFile as deleteFileFromDisk } from '@/utils/file-utils';
+import { unlink } from 'node:fs/promises';
+import path from 'node:path';
 import httpStatus from 'http-status';
-import { Types } from 'mongoose';
+import type { Types } from 'mongoose';
+import { ALLOWED_FILE_MIME_TYPES } from './file.constants';
 import * as FileRepository from './file.repository';
-import { TFile, TFileInput, TFileReferenceModel } from './file.type';
+import type { TFile, TFileInput, TFileReferenceModel } from './file.type';
 import { getExtensionFromFilename, getFileTypeFromMime } from './file.util';
 
-const ALLOWED_MIME_TYPES = new Set([
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/svg+xml',
-  'video/mp4',
-  'video/webm',
-  'video/ogg',
-  'audio/mpeg',
-  'audio/ogg',
-  'audio/wav',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'text/plain',
-  'text/csv',
-]);
+const ALLOWED_MIME_TYPES = new Set<string>(ALLOWED_FILE_MIME_TYPES);
+
+const assertFilesAreUnreferenced = (files: TFile[]): void => {
+  const referenced = files.filter((file) => file.references?.length);
+  if (!referenced.length) return;
+
+  throw new AppError(
+    httpStatus.CONFLICT,
+    `Cannot delete referenced file(s): ${referenced.map((file) => file._id?.toString()).join(', ')}`,
+  );
+};
 
 export type TLocalFileInput = {
   filename: string;
@@ -235,7 +227,14 @@ export const deleteFile = async (id: string): Promise<void> => {
     throw new AppError(httpStatus.NOT_FOUND, 'File not found');
   }
 
-  await file.softDelete();
+  assertFilesAreUnreferenced([file]);
+  const deleted = await FileRepository.softDeleteByIdIfUnreferenced(id);
+  if (!deleted) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      'File was referenced while deletion was in progress',
+    );
+  }
 };
 
 export const deleteFiles = async (
@@ -247,7 +246,14 @@ export const deleteFiles = async (
   const foundIds = files.map((file) => file._id!.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
-  await FileRepository.softDeleteManyByIds(foundIds);
+  assertFilesAreUnreferenced(files);
+  const result = await FileRepository.softDeleteManyByIds(foundIds);
+  if (result.modifiedCount !== foundIds.length) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      'One or more files were referenced while deletion was in progress',
+    );
+  }
 
   return {
     count: foundIds.length,
@@ -256,12 +262,44 @@ export const deleteFiles = async (
 };
 
 const removePhysicalFile = async (file: TFile): Promise<void> => {
-  if (file.provider === 'local' && file.metadata?.path) {
-    deleteFileFromDisk(file.metadata.path);
+  if (file.provider === 'local') {
+    if (!file.metadata?.path || !file.metadata.path.startsWith('/uploads/')) {
+      throw new AppError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        `Invalid local storage path for file ${file.filename}`,
+      );
+    }
+
+    const relativePath = file.metadata.path.replace(/^\/+/, '');
+    const uploadsRoot = path.resolve(process.cwd(), 'public', 'uploads');
+    const fullPath = path.resolve(process.cwd(), 'public', relativePath);
+    if (!fullPath.startsWith(`${uploadsRoot}${path.sep}`)) {
+      throw new AppError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        `Unsafe local storage path for file ${file.filename}`,
+      );
+    }
+    try {
+      await unlink(fullPath);
+    } catch (error: unknown) {
+      if ((error as { code?: string }).code !== 'ENOENT') {
+        throw new AppError(
+          httpStatus.BAD_GATEWAY,
+          `Failed to delete local file ${file.filename}`,
+        );
+      }
+    }
     return;
   }
 
-  if (file.provider === 'gcs' && file.metadata?.bucket) {
+  if (file.provider === 'gcs') {
+    if (!file.metadata?.bucket) {
+      throw new AppError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        `Missing GCS bucket for file ${file.filename}`,
+      );
+    }
+
     try {
       const client = await lazyGcsClient();
       const bucket = client.bucket(file.metadata.bucket);
@@ -270,10 +308,9 @@ const removePhysicalFile = async (file: TFile): Promise<void> => {
     } catch (error: unknown) {
       const code = (error as { code?: number })?.code;
       if (code !== 404) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `GCS delete error (${file.filename}):`,
-          (error as Error)?.message,
+        throw new AppError(
+          httpStatus.BAD_GATEWAY,
+          `Failed to delete cloud file ${file.filename}: ${(error as Error)?.message || 'unknown error'}`,
         );
       }
     }
@@ -283,11 +320,15 @@ const removePhysicalFile = async (file: TFile): Promise<void> => {
 export const deleteFilePermanent = async (id: string): Promise<void> => {
   await connectDB();
 
-  const file = await FileRepository.findByIdWithDeleted(id);
+  const file = await FileRepository.findDeletedById(id);
   if (!file) {
-    throw new AppError(httpStatus.NOT_FOUND, 'File not found');
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'Soft-deleted file not found; soft delete it before permanent deletion',
+    );
   }
 
+  assertFilesAreUnreferenced([file]);
   await removePhysicalFile(file);
   await FileRepository.hardDeleteById(id);
 };
@@ -301,11 +342,11 @@ export const deleteFilesPermanent = async (
   const foundIds = files.map((file) => file._id!.toString());
   const notFoundIds = ids.filter((id) => !foundIds.includes(id));
 
+  assertFilesAreUnreferenced(files);
   for (const file of files) {
     await removePhysicalFile(file);
+    await FileRepository.hardDeleteById(file._id!.toString());
   }
-
-  await FileRepository.hardDeleteManyByIds(foundIds);
 
   return {
     count: foundIds.length,
@@ -376,11 +417,17 @@ export const attachToEntity = async (params: {
   const ids = normalizeIds(params.fileIds);
   if (!ids.length) return;
 
-  await FileRepository.attachReferences(ids, {
+  const failedIds = await FileRepository.attachReferences(ids, {
     model: params.model,
     entity: params.entity,
     field: params.field,
   });
+  if (failedIds.length) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      `Cannot attach missing or deleted file(s): ${failedIds.join(', ')}`,
+    );
+  }
 };
 
 export const detachFromEntity = async (params: {
@@ -424,11 +471,17 @@ export const reconcileEntityRefs = async (params: {
   }
 
   if (toAttach.length) {
-    await FileRepository.attachReferences(toAttach, {
+    const failedIds = await FileRepository.attachReferences(toAttach, {
       model: params.model,
       entity: params.entity,
       field: params.field,
     });
+    if (failedIds.length) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        `Cannot attach missing or deleted file(s): ${failedIds.join(', ')}`,
+      );
+    }
   }
   if (toDetach.length) {
     await FileRepository.detachReferences(toDetach, {

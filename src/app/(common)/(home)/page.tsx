@@ -10,6 +10,9 @@ import TestimonialsSection from "@/components/sections/testimonials-section";
 import type { Metadata } from "next";
 import React, { Suspense } from "react";
 
+// Projects and articles are loaded from MongoDB at request time.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Home | Foysal Ahmed",
   description:

@@ -35,10 +35,10 @@ export const findManyByIds = async (ids: string[]) => {
 export const findPaginated = async (queryParams: Record<string, unknown>) => {
   const userQuery = new AppQuery<TUser>(User.find(), queryParams)
     .search(['name', 'email'])
-    .filter()
-    .sort()
+    .filter(['role', 'status', 'is_verified'])
+    .sort(['name', 'email', 'role', 'status', 'created_at'])
     .paginate()
-    .fields();
+    .fields(['image', 'name', 'email', 'role', 'status', 'is_verified', 'created_at', 'updated_at']);
 
   const result = await userQuery.execute();
 

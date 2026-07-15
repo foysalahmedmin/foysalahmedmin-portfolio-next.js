@@ -33,10 +33,10 @@ export const findPaginated = async (queryParams: Record<string, unknown>) => {
 
   return await query
     .search(['name', 'email', 'subject', 'message'])
-    .filter()
+    .filter(['email'])
     .sort(['created_at', 'name', 'email'])
     .paginate()
-    .fields()
+    .fields(['name', 'email', 'subject', 'message', 'created_at', 'updated_at'])
     .execute();
 };
 
