@@ -8,9 +8,10 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
-    return await ProjectController.getProjectById(req, { params: resolvedParams });
+    return await ProjectController.getPublicProjectById(req, {
+      params: resolvedParams,
+    });
   } catch (error) {
     return errorHandler(error, req);
   }
 }
-

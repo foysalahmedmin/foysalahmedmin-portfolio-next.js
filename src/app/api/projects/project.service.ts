@@ -29,10 +29,28 @@ export const getProjects = async (queryParams: Record<string, unknown>) => {
   return await ProjectRepository.findPaginated(queryParams);
 };
 
+export const getPublicProjects = async (
+  queryParams: Record<string, unknown>,
+) => {
+  await connectDB();
+  return await ProjectRepository.findPublicPaginated(queryParams);
+};
+
 export const getProjectById = async (id: string) => {
   await connectDB();
 
   const project = await ProjectRepository.findByIdPopulated(id);
+  if (!project) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
+  }
+
+  return project;
+};
+
+export const getPublicProjectById = async (id: string) => {
+  await connectDB();
+
+  const project = await ProjectRepository.findPublicByIdPopulated(id);
   if (!project) {
     throw new AppError(httpStatus.NOT_FOUND, 'Project not found');
   }

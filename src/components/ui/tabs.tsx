@@ -265,7 +265,5 @@ const TabsItem = ({
   );
 };
 
-// Export components separately (shadcn style)
 export { TabsRoot as Tabs, TabsList, TabsTrigger, TabsContent, TabsItem };
 export { useTabs, type TabsContentProps, type TabsContextValue, type TabsItemProps, type TabsListProps, type TabsRootProps, type TabsTriggerProps, type TabValue };
-

@@ -1,145 +1,370 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { getArticles } from "@/services/article.service";
-import type { TArticle } from "@/types/article.type";
+import { Button, buttonVariants } from "@/components/ui/button";
+import DataTable, {
+  type TColumn,
+  type TDataTableFilter,
+  type TDataTableState,
+  type TDataTableStatus,
+} from "@/components/ui/data-table";
+import { EntityThumbnail } from "@/components/ui/entity-thumbnail";
 import {
-    Calendar,
-    Edit,
-    Filter,
-    Plus,
-    Search,
-    Trash2
-} from "lucide-react";
+  StatusBadge,
+  type TStatusBadgeTone,
+} from "@/components/ui/status-badge";
+import {
+  deleteArticle,
+  deleteArticles,
+  getAdminArticles,
+} from "@/services/article.service";
+import type { TArticle, TArticleStatus } from "@/types/article.type";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+const articleStatusTone: Record<TArticleStatus, TStatusBadgeTone> = {
+  draft: "neutral",
+  pending: "warning",
+  published: "success",
+  archived: "info",
+};
+
+const articleFilters: readonly TDataTableFilter<TArticle>[] = [
+  {
+    id: "status",
+    label: "Status",
+    allLabel: "All statuses",
+    options: [
+      { label: "Draft", value: "draft" },
+      { label: "Pending", value: "pending" },
+      { label: "Published", value: "published" },
+      { label: "Archived", value: "archived" },
+    ],
+  },
+  {
+    id: "is_featured",
+    label: "Featured",
+    allLabel: "All articles",
+    options: [
+      { label: "Featured", value: "true" },
+      { label: "Not featured", value: "false" },
+    ],
+  },
+];
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
+const formatDate = (value?: string) => {
+  if (!value) return "Not published";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Invalid date"
+    : dateFormatter.format(date);
+};
+
+const getErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error && error.message ? error.message : fallback;
 
 const AdminArticlesPage = () => {
-    const [articles, setArticles] = useState<TArticle[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
+  const [articles, setArticles] = useState<TArticle[]>([]);
+  const [tableStatus, setTableStatus] = useState<TDataTableStatus>("loading");
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("-published_at");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deletingIds, setDeletingIds] = useState<string[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-    useEffect(() => {
-        const fetchArticles = async () => {
-            try {
-                const res = await getArticles();
-                if (res.success && Array.isArray(res.data)) {
-                    setArticles(res.data);
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchArticles();
-    }, []);
+  const refresh = useCallback(() => setRefreshKey((value) => value + 1), []);
 
-    const filteredArticles = articles.filter(a => 
-        a.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  useEffect(() => {
+    const controller = new AbortController();
 
-    return (
-        <div className="space-y-8">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Articles Management</h1>
-                    <p className="text-muted-foreground mt-1">Write and publish technical articles and tutorials.</p>
-                </div>
-                <Link href="/admin/articles/new">
-                    <Button className="font-bold uppercase tracking-widest text-[10px] md:text-sm">
-                        <Plus className="mr-2 size-4" /> Create New Article
-                    </Button>
-                </Link>
+    const loadArticles = async () => {
+      setTableStatus("loading");
+      setError(null);
+
+      try {
+        const response = await getAdminArticles(
+          {
+            page,
+            limit,
+            search: search.trim() || undefined,
+            sort: sort || undefined,
+            status: filters.status || undefined,
+            is_featured: filters.is_featured || undefined,
+          },
+          { signal: controller.signal }
+        );
+
+        if (!response.success || !Array.isArray(response.data)) {
+          throw new Error(response.message || "Failed to load articles");
+        }
+
+        setArticles(response.data);
+        setTotal(response.meta?.total ?? response.data.length);
+        setTableStatus("success");
+      } catch (requestError) {
+        if (controller.signal.aborted) return;
+        setError(getErrorMessage(requestError, "Failed to load articles"));
+        setTableStatus("error");
+      }
+    };
+
+    void loadArticles();
+    return () => controller.abort();
+  }, [
+    filters.is_featured,
+    filters.status,
+    limit,
+    page,
+    refreshKey,
+    search,
+    sort,
+  ]);
+
+  const isDeleting = deletingIds.length > 0;
+  const isTableBusy = tableStatus === "loading" || isDeleting;
+
+  const handleDelete = useCallback(
+    async (ids: readonly string[]) => {
+      const uniqueIds = Array.from(new Set(ids)).filter(Boolean);
+      if (!uniqueIds.length || isDeleting) return;
+
+      const message =
+        uniqueIds.length === 1
+          ? "Delete this article? It will be moved to the deleted records."
+          : `Delete ${uniqueIds.length} selected articles? They will be moved to the deleted records.`;
+
+      if (!window.confirm(message)) return;
+
+      setDeletingIds(uniqueIds);
+      setError(null);
+
+      try {
+        if (uniqueIds.length === 1) await deleteArticle(uniqueIds[0]);
+        else await deleteArticles(uniqueIds);
+
+        const deletedIdSet = new Set(uniqueIds);
+        setSelectedIds((current) =>
+          current.filter((id) => !deletedIdSet.has(id))
+        );
+        refresh();
+      } catch (deleteError) {
+        setError(getErrorMessage(deleteError, "Failed to delete articles"));
+      } finally {
+        setDeletingIds([]);
+      }
+    },
+    [isDeleting, refresh]
+  );
+
+  const columns = useMemo<readonly TColumn<TArticle>[]>(
+    () => [
+      {
+        id: "article",
+        name: "Article",
+        accessor: (article) => article.name,
+        sortKey: "name",
+        isSortable: true,
+        isSearchable: true,
+        canHide: false,
+        minWidth: "280px",
+        cell: ({ row: article }) => (
+          <div className="flex items-center gap-4">
+            <EntityThumbnail src={article.thumbnail?.url} alt={article.name} />
+            <div className="min-w-0">
+              <p className="max-w-72 truncate text-sm font-bold">
+                {article.name}
+              </p>
+              <p className="text-muted-foreground max-w-72 truncate text-xs">
+                {article.slug}
+              </p>
             </div>
+          </div>
+        ),
+      },
+      {
+        id: "category",
+        name: "Category",
+        accessor: (article) => article.category?.name,
+        minWidth: "150px",
+        cell: ({ row: article }) => (
+          <span className="text-xs font-medium">
+            {article.category?.name || "Uncategorized"}
+          </span>
+        ),
+      },
+      {
+        field: "status",
+        name: "Status",
+        isSortable: true,
+        minWidth: "120px",
+        cell: ({ row: article }) => (
+          <StatusBadge tone={articleStatusTone[article.status]}>
+            {article.status}
+          </StatusBadge>
+        ),
+      },
+      {
+        field: "published_at",
+        name: "Published",
+        isSortable: true,
+        minWidth: "145px",
+        cell: ({ row: article }) => (
+          <span className="text-muted-foreground text-sm">
+            {formatDate(article.published_at)}
+          </span>
+        ),
+      },
+      {
+        field: "is_featured",
+        name: "Featured",
+        defaultVisible: false,
+        minWidth: "105px",
+        cell: ({ row: article }) => (
+          <StatusBadge tone={article.is_featured ? "primary" : "neutral"}>
+            {article.is_featured ? "Yes" : "No"}
+          </StatusBadge>
+        ),
+      },
+      {
+        id: "actions",
+        name: "Actions",
+        canHide: false,
+        align: "end",
+        minWidth: "112px",
+        cell: ({ row: article }) => (
+          <div className="flex justify-end gap-1">
+            <Link
+              href={`/admin/articles/edit/${article._id}`}
+              aria-label={`Edit ${article.name}`}
+              title={`Edit ${article.name}`}
+              className={buttonVariants({
+                variant: "ghost",
+                size: "sm",
+                shape: "icon",
+              })}
+            >
+              <Edit aria-hidden="true" className="size-4" />
+            </Link>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              shape="icon"
+              disabled={isTableBusy}
+              isLoading={deletingIds.includes(article._id)}
+              aria-label={`Delete ${article.name}`}
+              title={`Delete ${article.name}`}
+              onClick={() => void handleDelete([article._id])}
+              className="text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 aria-hidden="true" className="size-4" />
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [deletingIds, handleDelete, isTableBusy]
+  );
 
-            <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-border flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                        <input 
-                            type="text" 
-                            placeholder="Search by title..." 
-                            className="w-full rounded-xl border border-border bg-background py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <Button variant="outline" className="gap-2">
-                        <Filter className="size-4" /> Status
-                    </Button>
-                </div>
+  const tableState = useMemo<TDataTableState>(
+    () => ({
+      search,
+      sort,
+      page,
+      limit,
+      total,
+      filters,
+      setSearch,
+      setSort,
+      setPage,
+      setLimit,
+      setFilters,
+    }),
+    [filters, limit, page, search, sort, total]
+  );
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-muted/50 text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-b border-border">
-                                <th className="px-6 py-4">Article</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Published Date</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {loading ? (
-                                [1, 2, 3].map(i => (
-                                    <tr key={i} className="animate-pulse">
-                                        <td colSpan={4} className="px-6 py-6 h-20 bg-muted/10"></td>
-                                    </tr>
-                                ))
-                            ) : filteredArticles.map((article) => (
-                                <tr key={article._id} className="hover:bg-muted/20 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="size-12 rounded-lg bg-muted overflow-hidden">
-                                                <img src={article.thumbnail?.url || "/images/placeholder-article.png"} alt="" className="h-full w-full object-cover" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-sm line-clamp-1">{article.name}</p>
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                                                    <Calendar className="size-3" /> {article.published_at ? new Date(article.published_at).toLocaleDateString() : 'N/A'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={cn(
-                                            "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                                            article.status === 'published' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                                        )}>
-                                            {article.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                                        {article.published_at ? new Date(article.published_at).toDateString() : '-'}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Link href={`/admin/articles/edit/${article._id}`}>
-                                                <Button variant="ghost" shape="icon" className="h-8 w-8">
-                                                    <Edit className="size-4" />
-                                                </Button>
-                                            </Link>
-                                            <Button variant="ghost" shape="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10">
-                                                <Trash2 className="size-4" />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {!loading && filteredArticles.length === 0 && (
-                    <div className="py-20 text-center">
-                        <p className="text-muted-foreground">No articles found.</p>
-                    </div>
-                )}
-            </div>
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Articles Management
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Write and publish technical articles and tutorials.
+          </p>
         </div>
-    );
+        <Link
+          href="/admin/articles/new"
+          className={buttonVariants({
+            className:
+              "text-[10px] font-bold tracking-widest uppercase md:text-sm",
+          })}
+        >
+          <Plus aria-hidden="true" className="size-4" />
+          Create New Article
+        </Link>
+      </div>
+
+      <DataTable
+        data={articles}
+        columns={columns}
+        filters={articleFilters}
+        getRowId={(article) => article._id}
+        state={tableState}
+        status={tableStatus}
+        error={error}
+        onRetry={refresh}
+        config={{
+          isSearchProcessed: true,
+          isSortProcessed: true,
+          isFilterProcessed: true,
+          isPaginationProcessed: true,
+          isMultiSort: true,
+          pageSizeOptions: [10, 20, 50],
+        }}
+        selection={{
+          mode: "multiple",
+          selectedIds,
+          onChange: ({ selectedIds: nextSelectedIds }) =>
+            setSelectedIds(nextSelectedIds),
+          isRowSelectable: () => !isTableBusy,
+          preserveAcrossPages: true,
+          preserveAcrossQueries: false,
+          getRowLabel: (article) => article.name,
+        }}
+        bulkActions={({ selectedIds: ids }) => (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isTableBusy}
+            isLoading={isDeleting}
+            onClick={() => void handleDelete(ids)}
+            className="border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          >
+            <Trash2 aria-hidden="true" className="size-4" />
+            Delete selected
+          </Button>
+        )}
+        caption="Articles management table"
+        searchPlaceholder="Search articles by name or description…"
+        emptyTitle="No articles found"
+        emptyDescription="Create an article or adjust the current search and filters."
+      />
+    </div>
+  );
 };
 
 export default AdminArticlesPage;

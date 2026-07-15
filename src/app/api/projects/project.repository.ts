@@ -17,6 +17,19 @@ const POPULATE_FIELDS = [
   { path: 'images', select: FILE_SELECT },
 ];
 
+const PUBLIC_POPULATE_FIELDS = [
+  {
+    path: 'author',
+    select: '_id name image',
+    populate: { path: 'image', select: FILE_SELECT },
+  },
+  { path: 'category', select: '_id name slug' },
+  { path: 'client', select: '_id name image' },
+  { path: 'collaborators', select: '_id name' },
+  { path: 'thumbnail', select: FILE_SELECT },
+  { path: 'images', select: FILE_SELECT },
+];
+
 export const create = async (
   data: Partial<TProject>,
 ): Promise<TProjectDocument> => {
@@ -34,6 +47,12 @@ export const findByIdPopulated = async (id: string) => {
   return await Project.findById(id).populate(POPULATE_FIELDS).lean();
 };
 
+export const findPublicByIdPopulated = async (id: string) => {
+  return await Project.findOne({ _id: id, status: 'completed' })
+    .populate(PUBLIC_POPULATE_FIELDS)
+    .lean();
+};
+
 export const findByIdWithDeleted = async (
   id: string,
 ): Promise<TProjectDocument | null> => {
@@ -47,26 +66,37 @@ export const findManyByIds = async (ids: string[]) => {
 export const findPaginated = async (queryParams: Record<string, unknown>) => {
   const query = new AppQuery<TProjectDocument>(Project.find(), queryParams);
 
-  const result = await query
+  return await query
     .search(['name', 'description'])
     .filter(['status', 'category', 'author', 'is_featured'])
     .sort(['name', 'status', 'started_at'])
     .paginate()
     .fields()
+    .tap((projectQuery) => projectQuery.populate(POPULATE_FIELDS).lean())
     .execute();
+};
 
-  const populated = await Promise.all(
-    result.data.map(async (project) => {
-      return await Project.findById((project as { _id: unknown })._id)
-        .populate(POPULATE_FIELDS)
-        .lean();
-    }),
+export const findPublicPaginated = async (
+  queryParams: Record<string, unknown>,
+) => {
+  const query = new AppQuery<TProjectDocument>(
+    Project.find({ status: 'completed' }),
+    {
+      ...queryParams,
+      status: 'completed',
+    },
   );
 
-  return {
-    data: populated,
-    meta: result.meta,
-  };
+  return await query
+    .search(['name', 'description'])
+    .filter(['status', 'category', 'author', 'is_featured'])
+    .sort(['name', 'status', 'started_at'])
+    .paginate()
+    .fields()
+    .tap((projectQuery) =>
+      projectQuery.populate(PUBLIC_POPULATE_FIELDS).lean(),
+    )
+    .execute();
 };
 
 export const updateMany = async (

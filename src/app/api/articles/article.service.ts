@@ -29,10 +29,28 @@ export const getArticles = async (queryParams: Record<string, unknown>) => {
   return await ArticleRepository.findPaginated(queryParams);
 };
 
+export const getPublicArticles = async (
+  queryParams: Record<string, unknown>,
+) => {
+  await connectDB();
+  return await ArticleRepository.findPublicPaginated(queryParams);
+};
+
 export const getArticleById = async (id: string) => {
   await connectDB();
 
   const article = await ArticleRepository.findByIdPopulated(id);
+  if (!article) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
+  }
+
+  return article;
+};
+
+export const getPublicArticleById = async (id: string) => {
+  await connectDB();
+
+  const article = await ArticleRepository.findPublicByIdPopulated(id);
   if (!article) {
     throw new AppError(httpStatus.NOT_FOUND, 'Article not found');
   }
