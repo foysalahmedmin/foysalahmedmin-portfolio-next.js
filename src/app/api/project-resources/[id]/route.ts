@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
-    return await ProjectResourceController.getProjectResourceById(req, {
+    return await ProjectResourceController.getPublicProjectResourceById(req, {
       params: resolvedParams,
     });
   } catch (error) {

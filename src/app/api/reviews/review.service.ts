@@ -1,5 +1,6 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
+import { withPublicPagination } from '@/utils/public-query';
 import httpStatus from 'http-status';
 import * as ReviewRepository from './review.repository';
 
@@ -8,10 +9,30 @@ export const getReviews = async (queryParams: Record<string, unknown>) => {
   return await ReviewRepository.findPaginated(queryParams);
 };
 
+export const getPublicReviews = async (
+  queryParams: Record<string, unknown>,
+) => {
+  await connectDB();
+  return await ReviewRepository.findPublicPaginated(
+    withPublicPagination(queryParams),
+  );
+};
+
 export const getReviewById = async (id: string) => {
   await connectDB();
 
   const review = await ReviewRepository.findByIdPopulated(id);
+  if (!review) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
+  }
+
+  return review;
+};
+
+export const getPublicReviewById = async (id: string) => {
+  await connectDB();
+
+  const review = await ReviewRepository.findPublicByIdPopulated(id);
   if (!review) {
     throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
   }

@@ -1,5 +1,6 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
+import { withPublicPagination } from '@/utils/public-query';
 import httpStatus from 'http-status';
 import * as ProjectResourceRepository from './project-resource.repository';
 
@@ -10,11 +11,32 @@ export const getProjectResources = async (
   return await ProjectResourceRepository.findPaginated(queryParams);
 };
 
+export const getPublicProjectResources = async (
+  queryParams: Record<string, unknown>,
+) => {
+  await connectDB();
+  return await ProjectResourceRepository.findPublicPaginated(
+    withPublicPagination(queryParams),
+  );
+};
+
 export const getProjectResourceById = async (id: string) => {
   await connectDB();
 
   const resource = await ProjectResourceRepository.findByIdPopulated(id);
   if (!resource) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project resource not found');
+  }
+
+  return resource;
+};
+
+export const getPublicProjectResourceById = async (id: string) => {
+  await connectDB();
+
+  const resource =
+    await ProjectResourceRepository.findPublicByIdPopulated(id);
+  if (!resource || !resource.project) {
     throw new AppError(httpStatus.NOT_FOUND, 'Project resource not found');
   }
 

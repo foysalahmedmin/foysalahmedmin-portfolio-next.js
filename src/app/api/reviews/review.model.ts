@@ -39,7 +39,7 @@ const reviewSchema = new Schema<TReviewDocument>(
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
-      default: "approved",
+      default: "pending",
     },
 
     is_edited: {

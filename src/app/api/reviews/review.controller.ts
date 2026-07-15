@@ -22,9 +22,40 @@ export const getReviews = catchAsync(async (req: AuthRequest | Request) => {
   });
 });
 
+export const getPublicReviews = catchAsync(async (req: Request) => {
+  const url = new URL(req.url);
+  const queryParams: Record<string, unknown> = {};
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  const result = await ReviewService.getPublicReviews(queryParams);
+
+  return sendResponse({
+    status: httpStatus.OK,
+    success: true,
+    message: 'Reviews retrieved successfully',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 export const getReviewById = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
     const review = await ReviewService.getReviewById(params.id);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Review retrieved successfully',
+      data: review,
+    });
+  },
+);
+
+export const getPublicReviewById = catchAsync(
+  async (req: Request, { params }: { params: { id: string } }) => {
+    const review = await ReviewService.getPublicReviewById(params.id);
 
     return sendResponse({
       status: httpStatus.OK,
@@ -209,4 +240,3 @@ export const updateReviewStatusById = catchAsync(
     });
   },
 );
-

@@ -1,4 +1,4 @@
-import { getArticles } from "@/app/api/articles/article.service";
+import { getPublicArticles } from "@/app/api/articles/article.service";
 import { Button } from "@/components/ui/button";
 import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 import type { TArticle } from "@/types/article.type";
@@ -72,9 +72,9 @@ const ArticleCard: React.FC<{ article: TArticle; index: number }> = ({
 };
 
 const ArticlesSection = async () => {
-  const { data: articles } = await getArticles({
+  const { data: articles } = await getPublicArticles({
     limit: 3,
-    status: "published",
+    sort: "-published_at",
   });
 
   return (

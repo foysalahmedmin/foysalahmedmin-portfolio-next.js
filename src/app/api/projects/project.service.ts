@@ -1,5 +1,6 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
+import { withPublicPagination } from '@/utils/public-query';
 import httpStatus from 'http-status';
 import * as FileService from '../files/file.service';
 import * as ProjectRepository from './project.repository';
@@ -33,7 +34,9 @@ export const getPublicProjects = async (
   queryParams: Record<string, unknown>,
 ) => {
   await connectDB();
-  return await ProjectRepository.findPublicPaginated(queryParams);
+  return await ProjectRepository.findPublicPaginated(
+    withPublicPagination(queryParams),
+  );
 };
 
 export const getProjectById = async (id: string) => {

@@ -1,5 +1,6 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
+import { withPublicPagination } from '@/utils/public-query';
 import httpStatus from 'http-status';
 import * as ProjectCategoryRepository from './project-category.repository';
 
@@ -8,6 +9,15 @@ export const getProjectCategories = async (
 ) => {
   await connectDB();
   return await ProjectCategoryRepository.findPaginated(queryParams);
+};
+
+export const getPublicProjectCategories = async (
+  queryParams: Record<string, unknown>,
+) => {
+  await connectDB();
+  return await ProjectCategoryRepository.findPublicPaginated(
+    withPublicPagination(queryParams, { defaultLimit: 50 }),
+  );
 };
 
 export const getProjectCategoryBySlug = async (slug: string) => {
@@ -21,10 +31,33 @@ export const getProjectCategoryBySlug = async (slug: string) => {
   return category;
 };
 
+export const getPublicProjectCategoryBySlug = async (slug: string) => {
+  await connectDB();
+
+  const category =
+    await ProjectCategoryRepository.findPublicBySlugPopulated(slug);
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+  }
+
+  return category;
+};
+
 export const getProjectCategoryById = async (id: string) => {
   await connectDB();
 
   const category = await ProjectCategoryRepository.findByIdPopulated(id);
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+  }
+
+  return category;
+};
+
+export const getPublicProjectCategoryById = async (id: string) => {
+  await connectDB();
+
+  const category = await ProjectCategoryRepository.findPublicByIdPopulated(id);
   if (!category) {
     throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
   }

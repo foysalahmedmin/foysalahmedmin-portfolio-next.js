@@ -1,4 +1,5 @@
 import AppQuery from '@/builder/app-query';
+import { getPublicCategoryFilter } from '../public-visibility';
 import ProjectCategory from './project-category.model';
 import type {
   TProjectCategory,
@@ -6,6 +7,23 @@ import type {
 } from './project-category.type';
 
 const POPULATE_PARENT = { path: 'parent', select: '_id name' };
+const PUBLIC_POPULATE_PARENT = {
+  path: 'parent',
+  match: { status: 'active' },
+  select: '_id name slug',
+};
+const PUBLIC_FIELDS: Array<keyof TProjectCategory> = [
+  'sequence',
+  'icon',
+  'name',
+  'slug',
+  'description',
+  'tags',
+  'parent',
+  'layout',
+  'created_at',
+  'updated_at',
+];
 
 export const create = async (
   data: Partial<TProjectCategory>,
@@ -23,6 +41,16 @@ export const findByIdPopulated = async (id: string) => {
   return await ProjectCategory.findById(id).populate(POPULATE_PARENT).lean();
 };
 
+export const findPublicByIdPopulated = async (id: string) => {
+  return await ProjectCategory.findOne({
+    _id: id,
+    ...getPublicCategoryFilter(),
+  })
+    .select(PUBLIC_FIELDS.join(' '))
+    .populate(PUBLIC_POPULATE_PARENT)
+    .lean();
+};
+
 export const findByIdWithDeleted = async (
   id: string,
 ): Promise<TProjectCategoryDocument | null> => {
@@ -38,6 +66,16 @@ export const findBySlug = async (
 export const findBySlugPopulated = async (slug: string) => {
   return await ProjectCategory.findOne({ slug })
     .populate(POPULATE_PARENT)
+    .lean();
+};
+
+export const findPublicBySlugPopulated = async (slug: string) => {
+  return await ProjectCategory.findOne({
+    slug,
+    ...getPublicCategoryFilter(),
+  })
+    .select(PUBLIC_FIELDS.join(' '))
+    .populate(PUBLIC_POPULATE_PARENT)
     .lean();
 };
 
@@ -65,6 +103,26 @@ export const findPaginated = async (queryParams: Record<string, unknown>) => {
     .sort(['sequence', 'name'])
     .paginate()
     .fields()
+    .execute();
+};
+
+export const findPublicPaginated = async (
+  queryParams: Record<string, unknown>,
+) => {
+  const query = new AppQuery<TProjectCategoryDocument>(
+    ProjectCategory.find(getPublicCategoryFilter()),
+    { ...queryParams, status: 'active' },
+  );
+
+  return await query
+    .search(['name', 'slug', 'description'])
+    .filter(['status', 'parent'])
+    .sort(['sequence', 'name'])
+    .paginate()
+    .fields(PUBLIC_FIELDS)
+    .tap((categoryQuery) =>
+      categoryQuery.populate(PUBLIC_POPULATE_PARENT).lean(),
+    )
     .execute();
 };
 

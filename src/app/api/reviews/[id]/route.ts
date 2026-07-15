@@ -12,7 +12,9 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
-    return await ReviewController.getReviewById(req, { params: resolvedParams });
+    return await ReviewController.getPublicReviewById(req, {
+      params: resolvedParams,
+    });
   } catch (error) {
     return errorHandler(error, req);
   }
@@ -63,4 +65,3 @@ export async function DELETE(
     return errorHandler(error, req);
   }
 }
-

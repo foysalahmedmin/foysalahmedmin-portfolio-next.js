@@ -8,7 +8,7 @@ import type { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    return await ReviewController.getReviews(req);
+    return await ReviewController.getPublicReviews(req);
   } catch (error) {
     return errorHandler(error, req);
   }
@@ -30,4 +30,3 @@ export async function POST(req: NextRequest) {
     return errorHandler(error, req);
   }
 }
-

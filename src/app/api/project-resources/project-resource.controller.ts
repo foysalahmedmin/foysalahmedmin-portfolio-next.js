@@ -22,9 +22,42 @@ export const getProjectResources = catchAsync(async (req: AuthRequest | Request)
   });
 });
 
+export const getPublicProjectResources = catchAsync(async (req: Request) => {
+  const url = new URL(req.url);
+  const queryParams: Record<string, unknown> = {};
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  const result =
+    await ProjectResourceService.getPublicProjectResources(queryParams);
+
+  return sendResponse({
+    status: httpStatus.OK,
+    success: true,
+    message: 'Project resources retrieved successfully',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 export const getProjectResourceById = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
     const resource = await ProjectResourceService.getProjectResourceById(params.id);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project resource retrieved successfully',
+      data: resource,
+    });
+  },
+);
+
+export const getPublicProjectResourceById = catchAsync(
+  async (req: Request, { params }: { params: { id: string } }) => {
+    const resource =
+      await ProjectResourceService.getPublicProjectResourceById(params.id);
 
     return sendResponse({
       status: httpStatus.OK,
