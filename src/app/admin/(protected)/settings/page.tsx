@@ -71,7 +71,7 @@ export default function SettingsPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
             Profile Image
           </label>
           <FileUploader
@@ -85,7 +85,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
             Name
           </label>
           <input
@@ -93,12 +93,12 @@ export default function SettingsPage() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full rounded-xl border border-border bg-background p-3 focus:border-primary focus:outline-none"
+            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
             Email
           </label>
           <input
@@ -107,12 +107,12 @@ export default function SettingsPage() {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full rounded-xl border border-border bg-background p-3 focus:border-primary focus:outline-none"
+            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
           />
         </div>
 
         {error && (
-          <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <p className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border px-4 py-3 text-sm">
             {error}
           </p>
         )}
