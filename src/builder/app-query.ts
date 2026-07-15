@@ -32,9 +32,12 @@ class AppQuery<T = any> {
   search(applicableFields: (keyof T)[]): this {
     const searchValue = this.query_params.search;
     if (searchValue) {
+      const escapedSearch = searchValue
+        .slice(0, 100)
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const searchConditions: FilterQuery<DocumentType<T>> = {
         $or: applicableFields.map((field) => ({
-          [field]: { $regex: searchValue, $options: 'i' },
+          [field]: { $regex: escapedSearch, $options: 'i' },
         })) as FilterQuery<DocumentType<T>>[],
       };
       this.query_filter = { ...this.query_filter, ...searchConditions };
@@ -43,7 +46,7 @@ class AppQuery<T = any> {
     return this;
   }
 
-  filter(applicableFields?: (keyof T)[]): this {
+  filter(applicableFields?: Array<keyof T | string>): this {
     const queryObj = { ...this.query_params };
     const excludedFields = [
       'search',
@@ -58,7 +61,7 @@ class AppQuery<T = any> {
     // Normal filter
     if (applicableFields?.length) {
       Object.keys(queryObj).forEach((key) => {
-        if (!applicableFields.includes(key as keyof T)) {
+        if (!applicableFields.includes(key)) {
           delete queryObj[key];
         }
       });
@@ -66,28 +69,16 @@ class AppQuery<T = any> {
 
     const mongoFilter: Record<string, any> = {};
 
-    // Handle OR
-    if (queryObj.or) {
-      try {
-        mongoFilter.$or = Object.values(queryObj.or).map((cond: any) => cond);
-      } catch (e) {
-        console.error('Invalid OR format:', e);
+    for (const [key, value] of Object.entries(queryObj)) {
+      if (
+        key.startsWith('$') ||
+        (key.includes('.') && !applicableFields?.includes(key)) ||
+        typeof value === 'object'
+      ) {
+        continue;
       }
-      delete queryObj.or;
+      mongoFilter[key] = value;
     }
-
-    // Handle AND
-    if (queryObj.and) {
-      try {
-        mongoFilter.$and = Object.values(queryObj.and).map((cond: any) => cond);
-      } catch (e) {
-        console.error('Invalid AND format:', e);
-      }
-      delete queryObj.and;
-    }
-
-    // Merge remaining normal filters
-    Object.assign(mongoFilter, queryObj);
 
     // Apply to query
     this.query_filter = { ...this.query_filter, ...mongoFilter };
@@ -107,7 +98,7 @@ class AppQuery<T = any> {
       });
     }
 
-    const sortOrder = fields.length > 0 ? fields.join(' ') : '-createdAt';
+    const sortOrder = fields.length > 0 ? fields.join(' ') : '-created_at';
     this.query = this.query.sort(sortOrder);
     return this;
   }
@@ -115,9 +106,9 @@ class AppQuery<T = any> {
   paginate(): this {
     const { page, limit } = this.query_params;
 
-    if (limit && page) {
-      this.page = Number(page) || 1;
-      this.limit = Number(limit) || 10;
+    if (limit || page) {
+      this.page = Math.max(1, Number(page) || 1);
+      this.limit = Math.min(100, Math.max(1, Number(limit) || 10));
       const skip = (this.page - 1) * this.limit;
       this.query = this.query.skip(skip).limit(this.limit);
     }

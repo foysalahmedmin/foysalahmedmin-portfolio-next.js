@@ -6,6 +6,7 @@ import { errorHandler } from '@/utils/error-handler';
 import type { NextRequest } from 'next/server';
 import * as FileController from '../file.controller';
 import * as FileValidation from '../file.validation';
+import { ALLOWED_FILE_MIME_TYPES } from '../file.constants';
 
 export async function GET(req: NextRequest) {
   try {
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
         folder: 'files',
         max_size: 50_000_000,
         max_count: 1,
+        allowed_types: [...ALLOWED_FILE_MIME_TYPES],
       })(authedReq, async (fileReq) => {
         return await validation(FileValidation.createFileValidationSchema)(
           fileReq,

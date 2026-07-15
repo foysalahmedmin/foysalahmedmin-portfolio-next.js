@@ -28,7 +28,6 @@ const AdminSigninPage = () => {
           setAuth({
             is_authenticated: true,
             info: res.data.info,
-            token: res.data.token,
           })
         );
         router.push("/admin");

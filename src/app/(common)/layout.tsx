@@ -1,5 +1,5 @@
 import Footer from "@/components/partials/footer";
-import Header from "@/components/partials/header";
+import Header from "@/components/partials/Header";
 import ScrollToTop from "@/components/ui/scroll-to-top";
 
 const CommonLayout = ({ children }) => {

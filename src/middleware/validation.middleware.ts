@@ -21,11 +21,11 @@ const handleZodError = (err: ZodError): { status: number; message: string; sourc
 
 export const validation = (schema: ZodTypeAny) => {
   return async (
-    req: NextRequest & { params?: Record<string, string> },
+    req: NextRequest & { params?: Record<string, string>; parsedBody?: unknown },
     handler: (req: NextRequest & { parsedBody?: unknown; parsedQuery?: unknown; parsedParams?: unknown }) => Promise<NextResponse>,
   ): Promise<NextResponse> => {
     try {
-      const body = await req.json().catch(() => ({}));
+      const body = req.parsedBody ?? (await req.json().catch(() => ({})));
       const url = new URL(req.url);
       const queryParams: Record<string, string> = {};
       url.searchParams.forEach((value, key) => {
@@ -38,13 +38,11 @@ export const validation = (schema: ZodTypeAny) => {
         body: body,
       });
 
-      // Create a new request-like object with parsed data
-      const modifiedReq = {
-        ...req,
+      const modifiedReq = Object.assign(req, {
         parsedBody: parsed.body,
         parsedQuery: parsed.query,
         parsedParams: parsed.params,
-      } as NextRequest & {
+      }) as NextRequest & {
         parsedBody?: unknown;
         parsedQuery?: unknown;
         parsedParams?: unknown;
@@ -61,4 +59,3 @@ export const validation = (schema: ZodTypeAny) => {
     }
   };
 };
-

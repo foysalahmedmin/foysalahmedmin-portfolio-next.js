@@ -29,7 +29,11 @@ const userSchema = new Schema<TUserDocument>(
       type: String,
       required: true,
       minlength: [6, 'the password should minimum 6 character'],
-      maxlength: [12, 'the password should maximum 12 character'],
+      maxlength: [72, 'Password cannot exceed 72 characters'],
+      validate: {
+        validator: (value: string) => Buffer.byteLength(value, 'utf8') <= 72,
+        message: 'Password cannot exceed 72 UTF-8 bytes',
+      },
       select: false,
     },
     password_changed_at: { type: Date, default: Date.now, select: false },
@@ -153,4 +157,3 @@ export const User = mongoose.model<TUserDocument, TUserModel>(
 );
 
 export default User;
-

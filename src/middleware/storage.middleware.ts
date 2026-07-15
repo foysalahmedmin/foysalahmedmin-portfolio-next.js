@@ -46,9 +46,21 @@ export const storage = (...files: TStorageFile[]) => {
       req: NextRequest & { storages?: TStorageResult[] },
     ) => Promise<NextResponse>,
   ): Promise<NextResponse> => {
+    const uploadedObjects: Array<{ bucket: string; filename: string }> = [];
     try {
       const formData = await req.formData();
       const collected: Record<string, File[]> = {};
+      const parsedBody: Record<string, string | string[]> = {};
+
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) continue;
+        const current = parsedBody[key];
+        parsedBody[key] = current
+          ? Array.isArray(current)
+            ? [...current, value]
+            : [current, value]
+          : value;
+      }
 
       for (const config of files) {
         const fieldFiles: File[] = [];
@@ -141,6 +153,7 @@ export const storage = (...files: TStorageFile[]) => {
               },
             },
           });
+          uploadedObjects.push({ bucket: bucketName, filename });
 
           if (makePublic) {
             try {
@@ -172,10 +185,23 @@ export const storage = (...files: TStorageFile[]) => {
 
       const modifiedReq = Object.assign(req, {
         storages: results,
+        parsedBody,
       }) as NextRequest & { storages?: TStorageResult[] };
 
       return await handler(modifiedReq);
     } catch (error) {
+      if (uploadedObjects.length) {
+        try {
+          const client = await lazyGcsClient();
+          await Promise.allSettled(
+            uploadedObjects.map(({ bucket, filename }) =>
+              client.bucket(bucket).file(filename).delete(),
+            ),
+          );
+        } catch {
+          // Preserve the original upload/handler error.
+        }
+      }
       if (error instanceof AppError) {
         throw error;
       }

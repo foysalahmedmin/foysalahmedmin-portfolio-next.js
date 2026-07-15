@@ -55,8 +55,9 @@ export async function changePassword(
   payload: ChangePasswordPayload
 ): Promise<AuthResponse> {
   const res = await fetch(`${getBaseUrl()}/api/auth/change-password`, {
-    method: "PATCH",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
   return handleResponse(res);

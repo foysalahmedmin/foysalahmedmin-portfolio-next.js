@@ -1,9 +1,16 @@
 import { z } from 'zod';
 
+const newPasswordSchema = z
+  .string()
+  .min(8)
+  .refine((value) => Buffer.byteLength(value, 'utf8') <= 72, {
+    message: 'Password cannot exceed 72 UTF-8 bytes',
+  });
+
 export const signinValidationSchema = z.object({
   body: z.object({
     email: z.string().email(),
-    password: z.string().min(6).max(12),
+    password: z.string().min(1).max(72),
   }),
 });
 
@@ -18,7 +25,7 @@ export const signupValidationSchema = z.object({
   body: z.object({
     name: z.string().min(2).max(50),
     email: z.string().email(),
-    password: z.string().min(6).max(12),
+    password: newPasswordSchema,
     image: optionalIdSchema,
   }),
 });
@@ -32,11 +39,10 @@ export const refreshTokenValidationSchema = z.object({
 export const changePasswordValidationSchema = z.object({
   body: z
     .object({
-      current_password: z.string().min(6).max(12),
-      new_password: z.string().min(6).max(12),
+      current_password: z.string().min(1).max(72),
+      new_password: newPasswordSchema,
     })
     .refine((value) => value.current_password !== value.new_password, {
       message: 'New password must be unique',
     }),
 });
-

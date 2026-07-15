@@ -26,7 +26,7 @@ export const authSlice = createSlice({
   reducers: {
     setAuth: (state, action: PayloadAction<TAuthState>) => {
       const auth = action.payload;
-      if (auth?.token) {
+      if (auth?.is_authenticated && auth.info) {
         if (typeof window !== "undefined") {
           localStorage.setItem(
             LOCAL_STORAGE_KEY,
