@@ -24,6 +24,25 @@ export const getProjectCategories = catchAsync(
   },
 );
 
+export const getPublicProjectCategories = catchAsync(async (req: Request) => {
+  const url = new URL(req.url);
+  const queryParams: Record<string, unknown> = {};
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  const result =
+    await ProjectCategoryService.getPublicProjectCategories(queryParams);
+
+  return sendResponse({
+    status: httpStatus.OK,
+    success: true,
+    message: 'Project categories retrieved successfully',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 export const getProjectCategoryBySlug = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { slug: string } }) => {
     const category = await ProjectCategoryService.getProjectCategoryBySlug(
@@ -39,11 +58,39 @@ export const getProjectCategoryBySlug = catchAsync(
   },
 );
 
+export const getPublicProjectCategoryBySlug = catchAsync(
+  async (req: Request, { params }: { params: { slug: string } }) => {
+    const category =
+      await ProjectCategoryService.getPublicProjectCategoryBySlug(params.slug);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project category retrieved successfully',
+      data: category,
+    });
+  },
+);
+
 export const getProjectCategoryById = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
     const category = await ProjectCategoryService.getProjectCategoryById(
       params.id,
     );
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project category retrieved successfully',
+      data: category,
+    });
+  },
+);
+
+export const getPublicProjectCategoryById = catchAsync(
+  async (req: Request, { params }: { params: { id: string } }) => {
+    const category =
+      await ProjectCategoryService.getPublicProjectCategoryById(params.id);
 
     return sendResponse({
       status: httpStatus.OK,

@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    return await ArticleCategoryController.getArticleCategories(req);
+    return await ArticleCategoryController.getPublicArticleCategories(req);
   } catch (error) {
     return errorHandler(error, req);
   }

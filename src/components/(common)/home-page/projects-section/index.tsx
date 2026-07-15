@@ -1,4 +1,4 @@
-import { getProjects } from "@/app/api/projects/project.service";
+import { getPublicProjects } from "@/app/api/projects/project.service";
 import { Button } from "@/components/ui/button";
 import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
 import type { TProject } from "@/types/project.type";
@@ -63,7 +63,7 @@ const ProjectCard: React.FC<{ project: TProject; index: number }> = ({
 };
 
 const ProjectsSection = async () => {
-  const { data: projects } = await getProjects({ limit: 3 });
+  const { data: projects } = await getPublicProjects({ limit: 3 });
 
   return (
     <section id="projects" className="relative overflow-hidden py-24 lg:py-48">

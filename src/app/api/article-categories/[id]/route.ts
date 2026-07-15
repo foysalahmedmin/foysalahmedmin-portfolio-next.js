@@ -8,9 +8,10 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
-    return await ArticleCategoryController.getArticleCategoryById(req, { params: resolvedParams });
+    return await ArticleCategoryController.getPublicArticleCategoryById(req, {
+      params: resolvedParams,
+    });
   } catch (error) {
     return errorHandler(error, req);
   }
 }
-

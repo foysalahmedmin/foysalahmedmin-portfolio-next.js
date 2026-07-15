@@ -24,6 +24,25 @@ export const getArticleCategories = catchAsync(
   },
 );
 
+export const getPublicArticleCategories = catchAsync(async (req: Request) => {
+  const url = new URL(req.url);
+  const queryParams: Record<string, unknown> = {};
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  const result =
+    await ArticleCategoryService.getPublicArticleCategories(queryParams);
+
+  return sendResponse({
+    status: httpStatus.OK,
+    success: true,
+    message: 'Article categories retrieved successfully',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 export const getArticleCategoryBySlug = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { slug: string } }) => {
     const category = await ArticleCategoryService.getArticleCategoryBySlug(
@@ -39,11 +58,39 @@ export const getArticleCategoryBySlug = catchAsync(
   },
 );
 
+export const getPublicArticleCategoryBySlug = catchAsync(
+  async (req: Request, { params }: { params: { slug: string } }) => {
+    const category =
+      await ArticleCategoryService.getPublicArticleCategoryBySlug(params.slug);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Article category retrieved successfully',
+      data: category,
+    });
+  },
+);
+
 export const getArticleCategoryById = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
     const category = await ArticleCategoryService.getArticleCategoryById(
       params.id,
     );
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Article category retrieved successfully',
+      data: category,
+    });
+  },
+);
+
+export const getPublicArticleCategoryById = catchAsync(
+  async (req: Request, { params }: { params: { id: string } }) => {
+    const category =
+      await ArticleCategoryService.getPublicArticleCategoryById(params.id);
 
     return sendResponse({
       status: httpStatus.OK,

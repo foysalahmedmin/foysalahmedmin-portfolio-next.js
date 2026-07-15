@@ -80,13 +80,7 @@ const articleSchema = new Schema<TArticleDocument>(
     },
     expired_at: {
       type: Date,
-      default: function (this: TArticleDocument) {
-        if (this.status === "published") {
-          const publishedAt = new Date(this.published_at || new Date());
-          return new Date(publishedAt.getTime() + 24 * 60 * 60 * 1000);
-        }
-        return undefined;
-      },
+      default: undefined,
       validate: {
         validator: function (value: Date) {
           if (this.published_at && value) {

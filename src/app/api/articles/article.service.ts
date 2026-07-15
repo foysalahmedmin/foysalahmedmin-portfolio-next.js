@@ -1,5 +1,6 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
+import { withPublicPagination } from '@/utils/public-query';
 import httpStatus from 'http-status';
 import * as FileService from '../files/file.service';
 import * as ArticleRepository from './article.repository';
@@ -33,7 +34,9 @@ export const getPublicArticles = async (
   queryParams: Record<string, unknown>,
 ) => {
   await connectDB();
-  return await ArticleRepository.findPublicPaginated(queryParams);
+  return await ArticleRepository.findPublicPaginated(
+    withPublicPagination(queryParams),
+  );
 };
 
 export const getArticleById = async (id: string) => {

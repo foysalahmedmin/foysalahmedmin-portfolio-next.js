@@ -1,5 +1,6 @@
 import AppError from '@/builder/app-error';
 import connectDB from '@/lib/db';
+import { withPublicPagination } from '@/utils/public-query';
 import httpStatus from 'http-status';
 import * as ArticleCategoryRepository from './article-category.repository';
 
@@ -8,6 +9,15 @@ export const getArticleCategories = async (
 ) => {
   await connectDB();
   return await ArticleCategoryRepository.findPaginated(queryParams);
+};
+
+export const getPublicArticleCategories = async (
+  queryParams: Record<string, unknown>,
+) => {
+  await connectDB();
+  return await ArticleCategoryRepository.findPublicPaginated(
+    withPublicPagination(queryParams, { defaultLimit: 50 }),
+  );
 };
 
 export const getArticleCategoryBySlug = async (slug: string) => {
@@ -21,10 +31,33 @@ export const getArticleCategoryBySlug = async (slug: string) => {
   return category;
 };
 
+export const getPublicArticleCategoryBySlug = async (slug: string) => {
+  await connectDB();
+
+  const category =
+    await ArticleCategoryRepository.findPublicBySlugPopulated(slug);
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article category not found');
+  }
+
+  return category;
+};
+
 export const getArticleCategoryById = async (id: string) => {
   await connectDB();
 
   const category = await ArticleCategoryRepository.findByIdPopulated(id);
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Article category not found');
+  }
+
+  return category;
+};
+
+export const getPublicArticleCategoryById = async (id: string) => {
+  await connectDB();
+
+  const category = await ArticleCategoryRepository.findPublicByIdPopulated(id);
   if (!category) {
     throw new AppError(httpStatus.NOT_FOUND, 'Article category not found');
   }
