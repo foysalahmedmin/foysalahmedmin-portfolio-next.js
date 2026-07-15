@@ -1,0 +1,1843 @@
+{
+  "$schema": "./content-truth.schema.json",
+  "schema_version": "1.0.0",
+  "manifest_version": "1.0.0",
+  "audit": {
+    "audited_at": "2026-07-15",
+    "repository_revision": "91dddac18ee2",
+    "scope": [
+      "Hardcoded identity, biography, availability, response-time, contact, positioning, capability, metric, testimonial, experience, education, course, social, resume, and legal claims rendered by public routes",
+      "Repository-defined Project and Article records, public fallbacks, metadata, and publication assumptions",
+      "Current five-pillar coverage in public source code"
+    ],
+    "limitations": [
+      "This is a source-code audit, not proof of a person's identity, employment, education, client relationship, account ownership, or consent.",
+      "No production database export, private worksheet, resume contents, certificates, contracts, analytics, or testimonial consent records were available or inspected.",
+      "Publicly rendered contact values are redacted here to avoid duplicating personal data; their source locations remain listed.",
+      "A repeated value in source code is not treated as independent real-world verification."
+    ]
+  },
+  "status_contract": {
+    "verified-by-code": "The statement is limited to deterministic behavior or configuration visible in this repository. It does not verify an external personal or commercial fact.",
+    "needs-owner-verification": "The source currently asserts a real-world fact. Production publication is blocked until the owner confirms it and records an evidence/consent reference outside Git.",
+    "remove": "The current value is contradictory, generic, unsafe as a factual fallback, unsupported social proof, simulated behavior, stale, or outside the approved positioning; it must not be published as truth.",
+    "dynamic-derived": "The value must be calculated from production-visible, truth-approved records using the stated derivation rule and must never be typed as a marketing number."
+  },
+  "publication_contract": {
+    "default_policy": "Deny publication unless a field is explicitly approved and its content_tier, verification_state, status, and visibility all pass the production gate.",
+    "production": [
+      "Use content_tier=production only; exclude demo and fixture records in repository/service queries, not only in the UI.",
+      "Require verification_state=approved for every personal, employment, education, credential, client, testimonial, project-outcome, account-ownership, availability, response-time, and resume claim.",
+      "Require status=published, is_deleted=false, and visibility=public; scheduled records must also be inside their publish window.",
+      "Allow dynamic metrics only from the same production-visible, approved record set and return no metric when the source set is incomplete.",
+      "A missing fact must omit the component or use neutral UI copy; it must never fall back to a person, role, date, category, outcome, or number.",
+      "Testimonials require approved wording, identity/relationship, source reference, and publication consent as separate gates."
+    ],
+    "demo": [
+      "Use content_tier=demo with deterministic demo IDs and an explicit synthetic=true marker.",
+      "Demo mode must be enabled only outside production, carry a visible Demo label, and set noindex/nofollow.",
+      "Synthetic names, companies, testimonials, clients, outcomes, employment, and education must never be copied into production seeds.",
+      "Production APIs must reject attempts to publish demo or synthetic records."
+    ],
+    "private_evidence": [
+      "Store evidence references, consent files, private contact details, client confidentiality notes, contracts, certificates, and resume source files outside Git with access control.",
+      "The committed manifest may store only an opaque evidence reference state such as pending or approved; it must not store evidence URLs, document IDs, phone numbers, addresses, or confidential client details.",
+      "Verification changes require verifier identity, timestamp, reason, and an audit event; revocation immediately removes the affected public claim."
+    ]
+  },
+  "claims": [
+    {
+      "id": "identity.full-name",
+      "category": "identity",
+      "claim": "The portfolio owner and displayed author is Foysal Ahmed.",
+      "current_public_value": "Foysal Ahmed",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/config/project/index.ts",
+          "symbol_or_context": "PROJECT.name"
+        },
+        {
+          "path": "src/app/layout.tsx",
+          "symbol_or_context": "root metadata.title"
+        },
+        {
+          "path": "src/components/partials/Header/index.tsx",
+          "symbol_or_context": "Logo"
+        },
+        {
+          "path": "src/components/partials/footer/index.tsx",
+          "symbol_or_context": "brand and copyright"
+        }
+      ],
+      "reason": "The value is internally consistent across source files, but source repetition is not independent identity proof.",
+      "required_action": "Owner confirms the preferred public name and records a private verification reference; Site becomes the only public source."
+    },
+    {
+      "id": "identity.canonical-url",
+      "category": "identity",
+      "claim": "The canonical portfolio URL is foysalahmedmin.com.",
+      "current_public_value": "https://foysalahmedmin.com",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/config/project/index.ts",
+          "symbol_or_context": "PROJECT.website"
+        }
+      ],
+      "reason": "The repository declares the URL but contains no domain-ownership or deployment evidence.",
+      "required_action": "Confirm domain ownership and the canonical protocol/host before publishing metadata or structured data."
+    },
+    {
+      "id": "identity.official-portfolio",
+      "category": "identity",
+      "claim": "This application is the official portfolio of Foysal Ahmed.",
+      "current_public_value": "Welcome to the official portfolio of Foysal Ahmed",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/app/(common)/(home)/page.tsx",
+          "symbol_or_context": "metadata.description"
+        }
+      ],
+      "reason": "Repository naming does not prove owner control of the deployment or approval of the word official.",
+      "required_action": "Owner confirms the site identity and canonical deployment before official language is published."
+    },
+    {
+      "id": "identity.default-locale",
+      "category": "identity",
+      "claim": "The application's current default document language is English.",
+      "current_public_value": "en",
+      "status": "verified-by-code",
+      "production_publish": "allow",
+      "sources": [
+        {
+          "path": "src/app/layout.tsx",
+          "symbol_or_context": "html lang and bootstrap fallback"
+        },
+        {
+          "path": "src/config/settings/index.ts",
+          "symbol_or_context": "SETTINGS.language"
+        }
+      ],
+      "reason": "This statement is only about deterministic application configuration.",
+      "required_action": "Keep as an implementation default; do not reinterpret it as a personal fluency claim."
+    },
+    {
+      "id": "identity.default-timezone",
+      "category": "identity",
+      "claim": "The application's configured default timezone is Asia/Dhaka.",
+      "current_public_value": "Asia/Dhaka",
+      "status": "verified-by-code",
+      "production_publish": "allow",
+      "sources": [
+        {
+          "path": "src/config/settings/index.ts",
+          "symbol_or_context": "SETTINGS.timezone"
+        }
+      ],
+      "reason": "This statement is limited to code configuration and does not prove physical residence.",
+      "required_action": "Keep as a technical default or manage it in Site settings."
+    },
+    {
+      "id": "media.legacy-portrait",
+      "category": "media",
+      "claim": "The file /images/profile.png is an approved genuine portrait of the owner.",
+      "current_public_value": "/images/profile.png",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/about-section/index.tsx",
+          "symbol_or_context": "about image"
+        },
+        {
+          "path": "src/components/(common)/about-page/about-details-section/index.tsx",
+          "symbol_or_context": "profile image"
+        }
+      ],
+      "reason": "No provenance or owner approval is recorded, and the approved product direction prefers a non-human abstract identity visual.",
+      "required_action": "Remove the portrait from public surfaces and replace it through the managed File pipeline with an approved non-human identity visual."
+    },
+    {
+      "id": "contact.primary-email",
+      "category": "contact",
+      "claim": "The repeated Gmail address is the owner's approved public contact address.",
+      "current_public_value": "[redacted: Gmail address currently hardcoded in public source]",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/partials/footer/index.tsx",
+          "symbol_or_context": "Contact"
+        },
+        {
+          "path": "src/components/(common)/about-page/about-details-section/index.tsx",
+          "symbol_or_context": "Email"
+        },
+        {
+          "path": "src/components/(common)/contact-page/contact-content-section/index.tsx",
+          "symbol_or_context": "contactInfo"
+        },
+        {
+          "path": "src/app/(common)/privacy/page.tsx",
+          "symbol_or_context": "policy contact"
+        },
+        {
+          "path": "src/app/(common)/terms/page.tsx",
+          "symbol_or_context": "legal contact"
+        }
+      ],
+      "reason": "The address is public in code but account ownership and the desired exposure policy are unverified.",
+      "required_action": "Confirm ownership and public-use consent; store once in Site and omit it if direct email exposure is not approved."
+    },
+    {
+      "id": "contact.phone",
+      "category": "contact",
+      "claim": "The Bangladesh phone number is an approved public business contact number.",
+      "current_public_value": "[redacted: +880 number ending 1811]",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/contact-page/contact-content-section/index.tsx",
+          "symbol_or_context": "contactInfo Phone"
+        }
+      ],
+      "reason": "Public display consent, ownership, and business-use policy are not recorded.",
+      "required_action": "Owner explicitly approves public phone exposure or the field remains absent."
+    },
+    {
+      "id": "contact.location",
+      "category": "contact",
+      "claim": "The owner is based in Dhaka, Bangladesh.",
+      "current_public_value": "Dhaka, Bangladesh",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/partials/footer/index.tsx",
+          "symbol_or_context": "Location"
+        },
+        {
+          "path": "src/components/(common)/about-page/about-details-section/index.tsx",
+          "symbol_or_context": "Location"
+        },
+        {
+          "path": "src/components/(common)/contact-page/contact-content-section/index.tsx",
+          "symbol_or_context": "contactInfo Location"
+        },
+        {
+          "path": "src/app/(common)/(home)/page.tsx",
+          "symbol_or_context": "metadata description says based in Bangladesh"
+        }
+      ],
+      "reason": "The code repeats a real-world location claim but provides no owner approval or desired precision policy.",
+      "required_action": "Confirm whether country, city, timezone, or no location should be public; publish only the approved granularity."
+    },
+    {
+      "id": "contact.legacy-support-email",
+      "category": "contact",
+      "claim": "support@binduui.com is a valid portfolio support address.",
+      "current_public_value": "support@binduui.com",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/config/settings/index.ts",
+          "symbol_or_context": "SETTINGS.email"
+        }
+      ],
+      "reason": "It conflicts with every public portfolio contact surface and appears to belong to another product identity.",
+      "required_action": "Delete the legacy value; no fallback address is permitted."
+    },
+    {
+      "id": "contact.map-location",
+      "category": "contact",
+      "claim": "A Google map centered on Dhaka is an approved location disclosure and useful contact surface.",
+      "current_public_value": "Dhaka map embed",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/contact-page/google-map-section/index.tsx",
+          "symbol_or_context": "iframe src"
+        }
+      ],
+      "reason": "The location and third-party embed/privacy policy have not been approved.",
+      "required_action": "Confirm the public location and explicit map policy; otherwise omit the map."
+    },
+    {
+      "id": "contact.form-delivery-success",
+      "category": "contact",
+      "claim": "Submitting the public contact form sends and stores the visitor's message.",
+      "current_public_value": "Simulated success after a 1.5 second timeout",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/contact-page/contact-content-section/index.tsx",
+          "symbol_or_context": "handleSubmit"
+        }
+      ],
+      "reason": "The form displays a success claim without calling the existing Contact API.",
+      "required_action": "Remove simulated success and show success only after a verified API acknowledgement with delivery/persistence semantics."
+    },
+    {
+      "id": "availability.new-projects",
+      "category": "availability",
+      "claim": "The owner is available for new projects.",
+      "current_public_value": "Available for new projects",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/hero-section/index.tsx",
+          "symbol_or_context": "availability badge"
+        },
+        {
+          "path": "src/components/(common)/projects-page/project-details-section/index.tsx",
+          "symbol_or_context": "accepting new projects and collaborations"
+        }
+      ],
+      "reason": "Availability is time-sensitive and cannot remain a static promise.",
+      "required_action": "Owner sets an explicit availability state and optional expiry/review date in Site."
+    },
+    {
+      "id": "availability.freelance",
+      "category": "availability",
+      "claim": "The owner is available for freelance work.",
+      "current_public_value": "Freelance: Available",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/about-details-section/index.tsx",
+          "symbol_or_context": "Freelance"
+        }
+      ],
+      "reason": "The claim is time-sensitive and its relationship to employment/engagement preferences is unknown.",
+      "required_action": "Consolidate into the single Site availability state after owner approval."
+    },
+    {
+      "id": "availability.remote-worldwide",
+      "category": "availability",
+      "claim": "The owner is available for worldwide remote opportunities.",
+      "current_public_value": "Available for worldwide remote opportunities",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/partials/footer/index.tsx",
+          "symbol_or_context": "availability copy"
+        }
+      ],
+      "reason": "Geographic, employment, timezone, and contract preferences require explicit approval.",
+      "required_action": "Owner defines engagement modes, regions/time overlap, and expiry/review date."
+    },
+    {
+      "id": "availability.for-hire",
+      "category": "availability",
+      "claim": "The owner is currently available for hire.",
+      "current_public_value": "Available for Hire",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/contact-cta-section/index.tsx",
+          "symbol_or_context": "CTA trust label"
+        }
+      ],
+      "reason": "This duplicates other unverified availability claims with different wording.",
+      "required_action": "Render only the approved Site availability state; do not maintain a second flag."
+    },
+    {
+      "id": "availability.always-open",
+      "category": "availability",
+      "claim": "The owner is always open to opportunities, collaborations, projects, creative ideas, and informal conversations.",
+      "current_public_value": "Always open to opportunities/collaborations/project discussions",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/app/(common)/contact/page.tsx",
+          "symbol_or_context": "PageHeaderSection description"
+        },
+        {
+          "path": "src/components/sections/contact-cta-section/index.tsx",
+          "symbol_or_context": "CTA description"
+        }
+      ],
+      "reason": "Always is an unbounded, time-sensitive engagement promise and conflicts with the need for one explicit Site availability state.",
+      "required_action": "Replace with approved, current engagement copy derived from Site availability."
+    },
+    {
+      "id": "response-time.within-24-hours",
+      "category": "response-time",
+      "claim": "Every contact message will receive a response within 24 hours.",
+      "current_public_value": "I'll get back to you within 24 hours.",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/contact-page/contact-content-section/index.tsx",
+          "symbol_or_context": "contact form introduction"
+        }
+      ],
+      "reason": "This is a service-level promise with no owner-approved operating window or measurement rule.",
+      "required_action": "Confirm a realistic response promise, working-day semantics, and review date or use neutral copy."
+    },
+    {
+      "id": "response-time.quick-reply",
+      "category": "response-time",
+      "claim": "The owner consistently provides a quick reply.",
+      "current_public_value": "Quick Reply",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/contact-cta-section/index.tsx",
+          "symbol_or_context": "CTA trust label"
+        }
+      ],
+      "reason": "It is undefined, unmeasurable, and duplicates the unverified 24-hour promise.",
+      "required_action": "Remove; display only an approved, measurable response promise if one exists."
+    },
+    {
+      "id": "tagline.application-developer",
+      "category": "tagline",
+      "claim": "Application Developer is the canonical professional positioning.",
+      "current_public_value": "Application Developer",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/partials/Header/index.tsx",
+          "symbol_or_context": "Logo subtitle"
+        },
+        {
+          "path": "src/components/partials/footer/index.tsx",
+          "symbol_or_context": "brand subtitle"
+        }
+      ],
+      "reason": "It conflicts with the approved five-pillar positioning and is less specific than the portfolio's intended capability story.",
+      "required_action": "Replace with an approved compact five-pillar positioning variant."
+    },
+    {
+      "id": "tagline.generic-full-stack",
+      "category": "tagline",
+      "claim": "A full-stack developer is the complete canonical positioning.",
+      "current_public_value": "A full-stack developer",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/config/project/index.ts",
+          "symbol_or_context": "PROJECT.description"
+        },
+        {
+          "path": "src/config/seo/index.ts",
+          "symbol_or_context": "SEO.description"
+        },
+        {
+          "path": "src/app/layout.tsx",
+          "symbol_or_context": "metadata.description"
+        }
+      ],
+      "reason": "The copy omits four of the five required capability pillars and varies in capitalization elsewhere.",
+      "required_action": "Replace with the approved canonical or compact five-pillar line after the underlying capabilities are owner-verified."
+    },
+    {
+      "id": "tagline.legacy-seo-keywords",
+      "category": "tagline",
+      "claim": "react, ui, library, frontend, backend, full-stack, and structure accurately describe the portfolio's search positioning.",
+      "current_public_value": "react, ui, library, frontend, backend, full-stack, structure",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/config/seo/index.ts",
+          "symbol_or_context": "SEO.keywords"
+        }
+      ],
+      "reason": "The list is generic, includes an unexplained library claim, omits AI Automation and System Design, and is disconnected from approved content evidence.",
+      "required_action": "Generate page-specific metadata from approved Site pillars and public record topics instead of preserving this list."
+    },
+    {
+      "id": "tagline.hero-full-stack",
+      "category": "tagline",
+      "claim": "Full-Stack Development is one of the owner's professional pillars.",
+      "current_public_value": "Full Stack Developer",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/hero-section/index.tsx",
+          "symbol_or_context": "slide 1"
+        },
+        {
+          "path": "src/components/(common)/home-page/about-section/index.tsx",
+          "symbol_or_context": "about title and biography"
+        }
+      ],
+      "reason": "The owner has selected the pillar taxonomy, but the portfolio still needs approved evidence links and consistent naming.",
+      "required_action": "Confirm the capability wording and connect it to approved projects/articles before publishing proof claims."
+    },
+    {
+      "id": "tagline.hero-ai-automation",
+      "category": "tagline",
+      "claim": "AI Automation is one of the owner's professional pillars.",
+      "current_public_value": "AI & Automation",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/hero-section/index.tsx",
+          "symbol_or_context": "slide 2"
+        },
+        {
+          "path": "src/components/sections/services-section/index.tsx",
+          "symbol_or_context": "AI & Automation service"
+        }
+      ],
+      "reason": "The taxonomy is approved, but the current implementation makes broad model-integration and workflow claims without record-level proof.",
+      "required_action": "Use the canonical label AI Automation and attach approved project/article evidence."
+    },
+    {
+      "id": "tagline.hero-system-architect",
+      "category": "tagline",
+      "claim": "System Architect is the canonical title for the System Design pillar.",
+      "current_public_value": "System Architect",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/hero-section/index.tsx",
+          "symbol_or_context": "slide 3"
+        },
+        {
+          "path": "src/components/(common)/about-page/about-details-section/index.tsx",
+          "symbol_or_context": "headline and biography"
+        }
+      ],
+      "reason": "It is an unverified role title and conflicts with the approved canonical pillar label System Design.",
+      "required_action": "Use System Design as the taxonomy label; publish role/seniority titles only after owner verification."
+    },
+    {
+      "id": "tagline.build-design-innovate",
+      "category": "tagline",
+      "claim": "Build . Design . Innovate is approved brand positioning.",
+      "current_public_value": "Build . Design . Innovate",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/partials/Header/index.tsx",
+          "symbol_or_context": "mobile menu footer"
+        }
+      ],
+      "reason": "It is generic, unconnected to the five-pillar contract, and not used consistently.",
+      "required_action": "Remove or replace with an approved compact five-pillar line."
+    },
+    {
+      "id": "tagline.part-of-nature",
+      "category": "tagline",
+      "claim": "PART OF NATURE is an authentic owner quote and relevant brand statement.",
+      "current_public_value": "PART OF NATURE",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/about-section/index.tsx",
+          "symbol_or_context": "attributed quote"
+        }
+      ],
+      "reason": "No provenance or connection to the professional narrative is recorded.",
+      "required_action": "Remove; an owner-authored statement may be added later with approval and context."
+    },
+    {
+      "id": "tagline.crafted-with-passion",
+      "category": "tagline",
+      "claim": "Crafted with passion by yours truly is approved, meaningful portfolio positioning.",
+      "current_public_value": "Crafted with passion by yours truly",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/partials/footer/index.tsx",
+          "symbol_or_context": "copyright copy"
+        }
+      ],
+      "reason": "It is generic, unverified authorship copy and does not support the five-pillar narrative.",
+      "required_action": "Use a neutral copyright statement and approved site identity."
+    },
+    {
+      "id": "biography.end-to-end-systems",
+      "category": "biography",
+      "claim": "The owner architects and delivers intelligent, scalable, maintainable systems end to end across web, mobile, backend, SQL/NoSQL, AI automation, performance, and user experience.",
+      "current_public_value": "Compound capability biography rendered on Home and About",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/about-section/index.tsx",
+          "symbol_or_context": "introductory biography and highlights"
+        },
+        {
+          "path": "src/components/(common)/about-page/about-details-section/index.tsx",
+          "symbol_or_context": "headline and biography"
+        }
+      ],
+      "reason": "The copy contains many real-world expertise and outcome claims without approved proof mappings.",
+      "required_action": "Split into atomic owner-approved claims and link each to at least one approved project, article, or experience record."
+    },
+    {
+      "id": "biography.dedicated-web-developer",
+      "category": "biography",
+      "claim": "The owner is a dedicated web developer passionate about scalable applications and solving complex problems.",
+      "current_public_value": "About page metadata and header description",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/app/(common)/about/page.tsx",
+          "symbol_or_context": "metadata and PageHeaderSection description"
+        }
+      ],
+      "reason": "The sentence is generic self-assessment and does not map its scalability/problem-solving claim to approved work.",
+      "required_action": "Replace with concise approved positioning and evidence-led biography copy."
+    },
+    {
+      "id": "biography.performance-accessibility-aesthetics",
+      "category": "biography",
+      "claim": "The owner specializes in digital experiences focused on performance, accessibility, and modern aesthetics.",
+      "current_public_value": "Footer specialization statement",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/partials/footer/index.tsx",
+          "symbol_or_context": "brand description"
+        }
+      ],
+      "reason": "This is a professional capability claim with no linked evidence.",
+      "required_action": "Approve, edit, and link to measurable project evidence or remove."
+    },
+    {
+      "id": "biography.software-engineer-title",
+      "category": "biography",
+      "claim": "Software Engineer is the owner's approved public professional title.",
+      "current_public_value": "Software Engineer",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/articles-page/article-details-section/index.tsx",
+          "symbol_or_context": "article author role"
+        }
+      ],
+      "reason": "The title appears only as a hardcoded author fallback and differs from other titles.",
+      "required_action": "Owner approves one public title or the UI omits role text."
+    },
+    {
+      "id": "capability.frontend",
+      "category": "capability",
+      "claim": "The owner delivers responsive, accessible, high-performance frontend systems with React, Next.js, Tailwind CSS, Redux, and TypeScript.",
+      "current_public_value": "Scattered frontend claims and self-rated skill cards",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/experience-section/index.tsx",
+          "symbol_or_context": "Frontend Engineer description"
+        },
+        {
+          "path": "src/components/sections/skills-section/index.tsx",
+          "symbol_or_context": "frontend skill cards"
+        }
+      ],
+      "reason": "Tool presence in this repository supports implementation familiarity but does not verify employment scope, mastery, or all advertised outcomes.",
+      "required_action": "Replace percentage ratings with evidence-led capability records mapped to approved work."
+    },
+    {
+      "id": "capability.backend",
+      "category": "capability",
+      "claim": "The owner designs modular, scalable backend services, APIs, databases, and business logic with Node.js, Express, SQL, and MongoDB.",
+      "current_public_value": "Scattered backend biography, service, and skill claims",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/about-section/index.tsx",
+          "symbol_or_context": "highlights and biography"
+        },
+        {
+          "path": "src/components/sections/skills-section/index.tsx",
+          "symbol_or_context": "backend skill cards"
+        },
+        {
+          "path": "src/components/sections/services-section/index.tsx",
+          "symbol_or_context": "Full-Stack Development service"
+        }
+      ],
+      "reason": "The repository demonstrates backend code, but mastery, commercial delivery, scale, and outcomes still need approved record-level evidence.",
+      "required_action": "Map the pillar to approved project architecture and security decisions; remove self-rated percentages."
+    },
+    {
+      "id": "capability.ai-automation",
+      "category": "capability",
+      "claim": "The owner integrates AI models and builds AI-driven automated workflows using LangChain and LangGraph.",
+      "current_public_value": "AI integration, optimization, and workflow claims plus LangChain/LangGraph ratings",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/hero-section/index.tsx",
+          "symbol_or_context": "AI slide"
+        },
+        {
+          "path": "src/components/sections/services-section/index.tsx",
+          "symbol_or_context": "AI & Automation service"
+        },
+        {
+          "path": "src/components/sections/skills-section/index.tsx",
+          "symbol_or_context": "LangChain and LangGraph cards"
+        }
+      ],
+      "reason": "No approved AI project, architecture, evaluation, safety, or outcome record is versioned in the repository.",
+      "required_action": "Approve concrete, bounded claims and connect them to demonstrable AI automation work."
+    },
+    {
+      "id": "capability.system-design",
+      "category": "capability",
+      "claim": "The owner designs secure, scalable, high-traffic cloud system architectures.",
+      "current_public_value": "System architecture, high-traffic, cloud, robustness, and optimization claims",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/hero-section/index.tsx",
+          "symbol_or_context": "System Architect slide"
+        },
+        {
+          "path": "src/components/sections/services-section/index.tsx",
+          "symbol_or_context": "System Architecture service"
+        },
+        {
+          "path": "src/components/(common)/home-page/about-section/index.tsx",
+          "symbol_or_context": "System Architecture Optimization highlight"
+        }
+      ],
+      "reason": "No approved scale, topology, security decision, diagram, or measurable constraint is linked.",
+      "required_action": "Use specific evidence-led system design language and avoid unbounded high-traffic/scalable claims."
+    },
+    {
+      "id": "capability.mobile-app-development",
+      "category": "capability",
+      "claim": "The owner delivers native-like cross-platform iOS and Android applications.",
+      "current_public_value": "App Development service",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/services-section/index.tsx",
+          "symbol_or_context": "App Development service"
+        }
+      ],
+      "reason": "It is outside the canonical five-pillar presentation and no mobile project or tool evidence is versioned.",
+      "required_action": "Remove from production unless the owner supplies approved evidence and maps it under Full-Stack Development."
+    },
+    {
+      "id": "capability.delivery-process",
+      "category": "capability",
+      "claim": "The owner consistently delivers projects through discovery, planning, design, development, cross-device testing, launch, and post-launch support.",
+      "current_public_value": "Six-step My Work Process sequence",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/work-process-section/index.tsx",
+          "symbol_or_context": "steps"
+        }
+      ],
+      "reason": "The process is presented as established practice, including bug-free performance and support, without approved scope or evidence.",
+      "required_action": "Owner approves a realistic delivery process and removes absolute outcome language such as bug-free."
+    },
+    {
+      "id": "availability.international-clients",
+      "category": "availability",
+      "claim": "The owner has worked with clients worldwide, is comfortable communicating in English, and can adjust meeting times across time zones.",
+      "current_public_value": "FAQ international-client answer",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/faq-section/index.tsx",
+          "symbol_or_context": "faqs[0]"
+        }
+      ],
+      "reason": "Client history, language comfort, and timezone availability are separate real-world claims with no approved evidence or operating limits.",
+      "required_action": "Verify each atomic claim and publish only the approved engagement policy."
+    },
+    {
+      "id": "availability.payment-terms",
+      "category": "availability",
+      "claim": "The owner's standard terms are a 50% fixed-price deposit, 50% on completion, weekly or bi-weekly hourly invoicing, and payment by bank transfer, Payoneer, or Wise.",
+      "current_public_value": "FAQ payment-terms answer",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/faq-section/index.tsx",
+          "symbol_or_context": "faqs[1]"
+        }
+      ],
+      "reason": "These are contractual and payment-processing statements requiring owner, regional, currency, and policy approval.",
+      "required_action": "Owner/legal review the terms and payment methods; otherwise replace with project-specific neutral language."
+    },
+    {
+      "id": "availability.fixed-price-policy",
+      "category": "availability",
+      "claim": "The owner prefers fixed-price contracts for defined scopes and hourly arrangements for ongoing or undefined work.",
+      "current_public_value": "FAQ fixed-price answer",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/faq-section/index.tsx",
+          "symbol_or_context": "faqs[2]"
+        }
+      ],
+      "reason": "The engagement policy has not been owner-approved and may vary by project or jurisdiction.",
+      "required_action": "Confirm a current engagement policy or remove detailed commercial terms from the generic FAQ."
+    },
+    {
+      "id": "availability.post-launch-support",
+      "category": "availability",
+      "claim": "Every project receives one month of free post-launch support for bugs and minor tweaks, with separate paid terms for larger changes.",
+      "current_public_value": "FAQ post-project changes answer",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/faq-section/index.tsx",
+          "symbol_or_context": "faqs[3]"
+        }
+      ],
+      "reason": "This is a material service promise with undefined scope, start date, response expectations, exclusions, and contract precedence.",
+      "required_action": "Owner/legal approve bounded support terms or replace with contract-specific language."
+    },
+    {
+      "id": "capability.uiux-figma",
+      "category": "capability",
+      "claim": "The owner has a strong UI/UX design background and can deliver high-fidelity Figma mockups before development.",
+      "current_public_value": "FAQ design-service answer",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/faq-section/index.tsx",
+          "symbol_or_context": "faqs[4]"
+        },
+        {
+          "path": "src/components/sections/skills-section/index.tsx",
+          "symbol_or_context": "Figma in other tools marquee"
+        }
+      ],
+      "reason": "Tool listing does not establish a strong design background or a deliverable service.",
+      "required_action": "Verify the service and attach approved design artifacts/case-study evidence or remove the claim."
+    },
+    {
+      "id": "stat.legacy-years-5-plus",
+      "category": "stat",
+      "claim": "The owner has more than five years of professional experience.",
+      "current_public_value": "5+ Years Experience",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/statistics-section/index.tsx",
+          "symbol_or_context": "stats[0]"
+        }
+      ],
+      "reason": "It is manually typed and cannot be reconciled safely until the experience timeline is verified and overlap rules are defined.",
+      "required_action": "Remove the hardcoded number; use the derived metric only if every included experience record is approved."
+    },
+    {
+      "id": "stat.legacy-projects-50-plus",
+      "category": "stat",
+      "claim": "The owner has completed more than fifty projects.",
+      "current_public_value": "50+ Projects Completed",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/statistics-section/index.tsx",
+          "symbol_or_context": "stats[1]"
+        }
+      ],
+      "reason": "It is manually typed, unsupported, and contradicts the separate 20+ project claim.",
+      "required_action": "Remove; project totals must be derived from approved completed production records."
+    },
+    {
+      "id": "stat.legacy-projects-20-plus",
+      "category": "stat",
+      "claim": "The owner has completed more than twenty projects.",
+      "current_public_value": "20+ Projects Completed",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/about-section/index.tsx",
+          "symbol_or_context": "project avatars and label"
+        }
+      ],
+      "reason": "It is unsupported and contradicts the 50+ project claim rendered elsewhere.",
+      "required_action": "Remove the decorative numeric avatars and use an exact derived count only when eligible."
+    },
+    {
+      "id": "stat.legacy-clients-20-plus",
+      "category": "stat",
+      "claim": "The owner has more than twenty happy clients.",
+      "current_public_value": "20+ Happy Clients",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/statistics-section/index.tsx",
+          "symbol_or_context": "stats[2]"
+        }
+      ],
+      "reason": "Neither the count nor subjective happiness is backed by approved client/project records.",
+      "required_action": "Remove the subjective metric; an exact approved client-engagement count may be derived separately."
+    },
+    {
+      "id": "stat.legacy-technologies-15",
+      "category": "stat",
+      "claim": "The owner has mastered fifteen technologies.",
+      "current_public_value": "15 Technologies Mastered",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/statistics-section/index.tsx",
+          "symbol_or_context": "stats[3]"
+        }
+      ],
+      "reason": "Mastery is undefined and the displayed skills list contains twelve rated technologies plus a separate tool marquee.",
+      "required_action": "Remove mastery language; show evidence-backed tools grouped by pillar without an arbitrary count."
+    },
+    {
+      "id": "stat.legacy-skill-percentages",
+      "category": "stat",
+      "claim": "The owner's proficiency is TypeScript 85%, Tailwind CSS 98%, Redux 88%, React 95%, Next.js 92%, Node.js 90%, Express.js 90%, LangChain 80%, LangGraph 75%, SQL 85%, MongoDB 80%, and REST API 92%.",
+      "current_public_value": "Twelve hardcoded percentage ratings",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/skills-section/index.tsx",
+          "symbol_or_context": "skills"
+        }
+      ],
+      "reason": "The scale, assessor, date, criteria, and evidence are undefined, so the precise percentages imply unsupported measurement.",
+      "required_action": "Remove percentages and present evidence-backed capability, recency, and project usage instead."
+    },
+    {
+      "id": "stat.derived-completed-projects",
+      "category": "stat",
+      "claim": "Exact public completed-project count.",
+      "current_public_value": null,
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/app/api/projects/project.model.ts",
+          "symbol_or_context": "status and deletion fields"
+        }
+      ],
+      "reason": "The database model can support an exact count once truth and content-tier gates exist.",
+      "required_action": "Implement the filter and omit the stat when record verification is incomplete.",
+      "derivation_rule": "Count distinct Project records where content_tier=production, verification_state=approved, visibility=public, status=completed, and is_deleted=false."
+    },
+    {
+      "id": "stat.derived-experience-years",
+      "category": "stat",
+      "claim": "Professional experience duration.",
+      "current_public_value": null,
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/experience-section/index.tsx",
+          "symbol_or_context": "legacy timeline provides no derivation"
+        }
+      ],
+      "reason": "Only approved, non-overlapping professional intervals can support a duration metric.",
+      "required_action": "Create structured dates and metric eligibility on verified timeline records.",
+      "derivation_rule": "Union approved professional employment intervals marked include_in_experience_metric=true; do not double-count overlaps; calculate through today only for an approved ongoing record."
+    },
+    {
+      "id": "stat.derived-client-engagements",
+      "category": "stat",
+      "claim": "Exact approved client-engagement count.",
+      "current_public_value": null,
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/app/api/projects/project.model.ts",
+          "symbol_or_context": "optional client relation"
+        }
+      ],
+      "reason": "A distinct count is possible only after client classification, confidentiality, and publication consent are modeled.",
+      "required_action": "Add project kind and approved public client identity/count eligibility before deriving.",
+      "derivation_rule": "Count distinct approved client-engagement keys referenced by production, public, completed Project records; never infer satisfaction and never expose confidential client identities."
+    },
+    {
+      "id": "stat.github-contributions",
+      "category": "stat",
+      "claim": "Recent GitHub contribution activity for the approved owner account.",
+      "current_public_value": "Live last-year calendar",
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/components/sections/github-activity-section/index.tsx",
+          "symbol_or_context": "GitHubCalendar"
+        }
+      ],
+      "reason": "The calendar is remotely derived but is trustworthy only after the GitHub handle is owner-approved and error states remain neutral.",
+      "required_action": "Bind the calendar to the verified Site social account and omit it when the provider is unavailable.",
+      "derivation_rule": "Render provider-returned activity for the approved GitHub handle without converting it into an employment, productivity, or quality claim."
+    },
+    {
+      "id": "testimonial.legacy-01",
+      "category": "testimonial",
+      "claim": "A named legacy testimonial attributes backend architecture quality to the portfolio owner.",
+      "current_public_value": "Backend performance and attention-to-detail endorsement",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/testimonials-section/index.tsx",
+          "symbol_or_context": "testimonials[0]"
+        }
+      ],
+      "reason": "No identity, relationship, source, exact wording approval, or publication consent is recorded.",
+      "required_action": "Remove immediately; re-create only through the verified testimonial workflow."
+    },
+    {
+      "id": "testimonial.legacy-02",
+      "category": "testimonial",
+      "claim": "A named legacy testimonial attributes on-time full-stack delivery to the portfolio owner.",
+      "current_public_value": "Professionalism, deadline, and full-stack recommendation",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/testimonials-section/index.tsx",
+          "symbol_or_context": "testimonials[1]"
+        }
+      ],
+      "reason": "No identity, relationship, source, exact wording approval, or publication consent is recorded.",
+      "required_action": "Remove immediately; re-create only through the verified testimonial workflow."
+    },
+    {
+      "id": "testimonial.legacy-03",
+      "category": "testimonial",
+      "claim": "A named legacy testimonial attributes clean code and professionalism to the portfolio owner.",
+      "current_public_value": "Clean-code, naming, and professionalism endorsement",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/testimonials-section/index.tsx",
+          "symbol_or_context": "testimonials[2]"
+        }
+      ],
+      "reason": "No identity, relationship, source, exact wording approval, or publication consent is recorded.",
+      "required_action": "Remove immediately; re-create only through the verified testimonial workflow."
+    },
+    {
+      "id": "testimonial.legacy-04",
+      "category": "testimonial",
+      "claim": "A named legacy testimonial attributes a significant conversion-rate improvement to the portfolio owner's redesign.",
+      "current_public_value": "Conversion and UI/UX outcome endorsement",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/testimonials-section/index.tsx",
+          "symbol_or_context": "testimonials[3]"
+        }
+      ],
+      "reason": "This includes an unmeasured business outcome and has no identity, source, relationship, or publication consent evidence.",
+      "required_action": "Remove immediately; a future outcome needs measurement scope and testimonial consent."
+    },
+    {
+      "id": "testimonial.legacy-05",
+      "category": "testimonial",
+      "claim": "A named legacy testimonial attributes scalability, communication, and problem solving to the portfolio owner.",
+      "current_public_value": "Engineering and communication endorsement",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/testimonials-section/index.tsx",
+          "symbol_or_context": "testimonials[4]"
+        }
+      ],
+      "reason": "No identity, relationship, source, exact wording approval, or publication consent is recorded.",
+      "required_action": "Remove immediately; re-create only through the verified testimonial workflow."
+    },
+    {
+      "id": "experience.shothik-ai-full-stack",
+      "category": "experience",
+      "claim": "Full Stack Developer at Shothik AI from October 2025 to present, delivering scalable web and AI systems across backend and frontend collaboration.",
+      "current_public_value": "Full Stack Developer — Shothik AI — Oct 2025 - Present",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/experience-section/index.tsx",
+          "symbol_or_context": "ExperienceData[0]"
+        }
+      ],
+      "reason": "Employer, title, start date, ongoing status, responsibilities, and publication permission are unverified.",
+      "required_action": "Owner verifies every field privately, confirms allowed public granularity, and supplies structured dates."
+    },
+    {
+      "id": "experience.fifotech-junior-full-stack",
+      "category": "experience",
+      "claim": "Junior Full Stack Engineer at FIFOTech from March 2025 to October 2025, working on APIs, responsive React/Next.js UI, reviews, and best practices.",
+      "current_public_value": "Junior Full Stack Engineer — FIFOTech — Mar 2025 - Oct 2025",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/experience-section/index.tsx",
+          "symbol_or_context": "ExperienceData[1]"
+        }
+      ],
+      "reason": "Employer, title, dates, responsibilities, and publication permission are unverified.",
+      "required_action": "Owner verifies every field privately and confirms allowed public wording."
+    },
+    {
+      "id": "experience.fifotech-frontend",
+      "category": "experience",
+      "claim": "Frontend Engineer at FIFOTech from August 2023 to March 2025, focused on React/Next.js/Tailwind UI, performance, accessibility, and UX.",
+      "current_public_value": "Frontend Engineer — FIFOTech — Aug 2023 - Mar 2025",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/experience-section/index.tsx",
+          "symbol_or_context": "ExperienceData[2]"
+        }
+      ],
+      "reason": "Employer, title, dates, responsibilities, outcomes, and publication permission are unverified.",
+      "required_action": "Owner verifies every field privately and maps approved responsibilities to the Frontend pillar."
+    },
+    {
+      "id": "experience.carnival-internet-sales",
+      "category": "experience",
+      "claim": "Executive (Territory Sales Offices) at Carnival Internet from February 2022 to May 2023, managing sales, relationships, growth, solutions, and satisfaction.",
+      "current_public_value": "Executive (Territory Sales Offices) — Carnival Internet — Feb 2022 - May 2023",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/experience-section/index.tsx",
+          "symbol_or_context": "ExperienceData[3]"
+        }
+      ],
+      "reason": "Employer, exact title, dates, responsibilities, outcomes, and publication permission are unverified.",
+      "required_action": "Owner verifies the record and decides whether/how it supports the professional narrative."
+    },
+    {
+      "id": "education.ba-demra",
+      "category": "education",
+      "claim": "Bachelor of Arts at Demra University College from 2019 to 2023, focused on Humanities and Humanistic Studies.",
+      "current_public_value": "Bachelor of Arts (BA) — Demra University College — 2019 - 2023",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/education-section/index.tsx",
+          "symbol_or_context": "EducationData[0]"
+        }
+      ],
+      "reason": "Degree, institution naming, attendance/completion dates, focus, and public wording are unverified.",
+      "required_action": "Owner confirms each field and whether completion/award language is permitted."
+    },
+    {
+      "id": "education.hsc-city-international",
+      "category": "education",
+      "claim": "Higher Secondary School Certificate at City International School & College from 2016 to 2018, with a Humanities concentration.",
+      "current_public_value": "HSC — City International School & College — 2016 - 2018",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/education-section/index.tsx",
+          "symbol_or_context": "EducationData[1]"
+        }
+      ],
+      "reason": "Credential, institution naming, dates, concentration, and public wording are unverified.",
+      "required_action": "Owner confirms each field and whether completion language is permitted."
+    },
+    {
+      "id": "credential.programming-hero-next-level-2024",
+      "category": "credential",
+      "claim": "The owner took Next Level Web Development from Programming Hero in 2024.",
+      "current_public_value": "Next Level Web development — Programming Hero — 2024",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/courses-section/index.tsx",
+          "symbol_or_context": "CoursesData[0]"
+        }
+      ],
+      "reason": "Enrollment/completion, official course name, date, credential type, and certificate availability are unverified; the UI labels courses as certifications.",
+      "required_action": "Owner confirms course versus certification, completion status, official title, date, and allowed credential link."
+    },
+    {
+      "id": "credential.programming-hero-web-development-2023",
+      "category": "credential",
+      "claim": "The owner took Web Development from Programming Hero in 2023.",
+      "current_public_value": "Web development — Programming Hero — 2023",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/about-page/courses-section/index.tsx",
+          "symbol_or_context": "CoursesData[1]"
+        }
+      ],
+      "reason": "Enrollment/completion, official course name, date, credential type, and certificate availability are unverified; the UI labels courses as certifications.",
+      "required_action": "Owner confirms course versus certification, completion status, official title, date, and allowed credential link."
+    },
+    {
+      "id": "project.versioned-record-inventory",
+      "category": "project",
+      "claim": "The repository contains versioned project seed records that can be audited for truth.",
+      "current_public_value": "No versioned project seed or approved project manifest found",
+      "status": "verified-by-code",
+      "production_publish": "allow",
+      "sources": [
+        {
+          "path": "src/app/api/projects/project.model.ts",
+          "symbol_or_context": "schema exists; records are external"
+        },
+        {
+          "path": "src/components/(common)/home-page/projects-section/index.tsx",
+          "symbol_or_context": "records loaded from MongoDB"
+        }
+      ],
+      "reason": "Repository inspection verifies the absence of auditable project content records at this revision; it says nothing about an external database.",
+      "required_action": "Owner inventories each project through the dynamic project truth contract before publication."
+    },
+    {
+      "id": "project.portfolio-scope",
+      "category": "project",
+      "claim": "The portfolio includes recent work across web development, system engineering, and design.",
+      "current_public_value": "Projects page metadata and header description",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/app/(common)/projects/page.tsx",
+          "symbol_or_context": "metadata and PageHeaderSection description"
+        }
+      ],
+      "reason": "No repository-versioned project inventory proves recency or coverage of those disciplines.",
+      "required_action": "Derive page scope from approved public project pillar assignments or use neutral copy."
+    },
+    {
+      "id": "project.curated-selected",
+      "category": "project",
+      "claim": "The three home-page projects are deliberately curated selected work.",
+      "current_public_value": "Curated Works / Selected Projects",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/projects-section/index.tsx",
+          "symbol_or_context": "section heading and getProjects({ limit: 3 })"
+        }
+      ],
+      "reason": "The query limits results to three but does not express an approved featured/curation rule.",
+      "required_action": "Use an explicit approved featured order or rename the section without claiming curation."
+    },
+    {
+      "id": "project.case-study-label",
+      "category": "project",
+      "claim": "Every listed Project record is a complete, evidence-backed case study.",
+      "current_public_value": "Case Study card action",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/projects-section/index.tsx",
+          "symbol_or_context": "ProjectCard action label"
+        }
+      ],
+      "reason": "No repository-versioned record can be reviewed for problem, role, decisions, constraints, outcome, or evidence completeness.",
+      "required_action": "Show Case Study only when the approved Project record meets the case-study completeness contract."
+    },
+    {
+      "id": "project.fallback-category",
+      "category": "project",
+      "claim": "A project with no category is a Web Development project.",
+      "current_public_value": "Web Development",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/projects-page/project-details-section/index.tsx",
+          "symbol_or_context": "category fallback"
+        }
+      ],
+      "reason": "The fallback invents a classification when a required relation is missing.",
+      "required_action": "Block publication of a project without an approved category/pillar or omit the field in a defensive error state."
+    },
+    {
+      "id": "project.fallback-release-date",
+      "category": "project",
+      "claim": "A project without a start/release date was released recently.",
+      "current_public_value": "Recently",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/projects-page/project-details-section/index.tsx",
+          "symbol_or_context": "started_at fallback"
+        }
+      ],
+      "reason": "The fallback invents recency and labels started_at as Release Date.",
+      "required_action": "Model distinct dates correctly and omit an unavailable date."
+    },
+    {
+      "id": "project.fallback-lead",
+      "category": "project",
+      "claim": "Foysal Ahmed led any project whose populated author is missing.",
+      "current_public_value": "Foysal Ahmed",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/projects-page/project-details-section/index.tsx",
+          "symbol_or_context": "project author fallback rendered as Project Lead"
+        }
+      ],
+      "reason": "Missing author data cannot establish project leadership, and author is not necessarily lead.",
+      "required_action": "Require an approved role/lead field or omit the row; never default to a person."
+    },
+    {
+      "id": "project.live-and-source-links",
+      "category": "project",
+      "claim": "Every project has a public live preview and source-code destination.",
+      "current_public_value": "Live Preview and Source Code buttons without destinations",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/projects-page/project-details-section/index.tsx",
+          "symbol_or_context": "sidebar action buttons"
+        }
+      ],
+      "reason": "The actions are inert and ignore confidentiality/visibility requirements.",
+      "required_action": "Render each action only from an approved ProjectResource with explicit public visibility."
+    },
+    {
+      "id": "article.versioned-record-inventory",
+      "category": "article",
+      "claim": "The repository contains versioned article seed records that can be audited for authorship and truth.",
+      "current_public_value": "No versioned article seed or approved article manifest found",
+      "status": "verified-by-code",
+      "production_publish": "allow",
+      "sources": [
+        {
+          "path": "src/app/api/articles/article.model.ts",
+          "symbol_or_context": "schema exists; records are external"
+        },
+        {
+          "path": "src/components/(common)/home-page/articles-section/index.tsx",
+          "symbol_or_context": "records loaded from MongoDB"
+        }
+      ],
+      "reason": "Repository inspection verifies the absence of auditable article content records at this revision; it says nothing about an external database.",
+      "required_action": "Owner inventories each article through the dynamic article truth contract before publication."
+    },
+    {
+      "id": "article.page-scope",
+      "category": "article",
+      "claim": "The owner publishes thoughts, tutorials, and insights about web development and technology.",
+      "current_public_value": "Articles page metadata and header description",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/app/(common)/articles/page.tsx",
+          "symbol_or_context": "metadata and PageHeaderSection description"
+        }
+      ],
+      "reason": "No versioned approved article inventory proves authorship or subject coverage.",
+      "required_action": "Derive scope from approved published article pillars/topics or use neutral copy."
+    },
+    {
+      "id": "article.fallback-author",
+      "category": "article",
+      "claim": "Foysal Ahmed authored any article whose populated author is missing.",
+      "current_public_value": "Foysal Ahmed / Written by Foysal Ahmed",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/articles-section/index.tsx",
+          "symbol_or_context": "hardcoded card author"
+        },
+        {
+          "path": "src/components/(common)/articles-page/article-details-section/index.tsx",
+          "symbol_or_context": "author fallback and author card"
+        }
+      ],
+      "reason": "A missing relation cannot establish authorship, and the UI overrides even a different populated author in some places.",
+      "required_action": "Require an approved populated author for publication and render that author consistently."
+    },
+    {
+      "id": "article.fallback-category",
+      "category": "article",
+      "claim": "An article with no category is a Tutorial or an Insight.",
+      "current_public_value": "Tutorial on detail; Insights on home cards",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/articles-page/article-details-section/index.tsx",
+          "symbol_or_context": "Tutorial fallback"
+        },
+        {
+          "path": "src/components/(common)/home-page/articles-section/index.tsx",
+          "symbol_or_context": "hardcoded Insights badge"
+        }
+      ],
+      "reason": "These labels invent or override editorial classification.",
+      "required_action": "Require an approved category and primary pillar, or omit the label in an error state."
+    },
+    {
+      "id": "article.fallback-date",
+      "category": "article",
+      "claim": "An article with no publication timestamp was published recently.",
+      "current_public_value": "Recently / Recently Published",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/home-page/articles-section/index.tsx",
+          "symbol_or_context": "published_at fallback"
+        },
+        {
+          "path": "src/components/(common)/articles-page/article-details-section/index.tsx",
+          "symbol_or_context": "published_at fallback"
+        }
+      ],
+      "reason": "The fallback invents recency; a published record should have an explicit publication time.",
+      "required_action": "Enforce published_at for published content and omit invalid records from public queries."
+    },
+    {
+      "id": "article.author-bio",
+      "category": "article",
+      "claim": "The author is a full-stack engineer who builds scalable web applications and shares experience in system engineering and performance optimization.",
+      "current_public_value": "Hardcoded article author biography",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/articles-page/article-details-section/index.tsx",
+          "symbol_or_context": "author card biography"
+        }
+      ],
+      "reason": "It is a compound capability and authorship claim disconnected from the actual article author record.",
+      "required_action": "Use an approved author profile tied to the article; omit the bio when unavailable."
+    },
+    {
+      "id": "social.github",
+      "category": "social",
+      "claim": "The GitHub profile using the foysalahmedmin handle belongs to and is approved by the owner.",
+      "current_public_value": "github.com/foysalahmedmin",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/config/constants/index.ts",
+          "symbol_or_context": "SOCIALS Github"
+        },
+        {
+          "path": "src/components/sections/github-activity-section/index.tsx",
+          "symbol_or_context": "calendar username and profile link"
+        }
+      ],
+      "reason": "The handle is consistent in code but account control and public-link approval are unverified.",
+      "required_action": "Owner confirms control and preferred profile URL; Site becomes the only source."
+    },
+    {
+      "id": "social.github-open-source",
+      "category": "social",
+      "claim": "The displayed GitHub contribution calendar demonstrates the owner's open-source work.",
+      "current_public_value": "Open Source / GitHub Contributions",
+      "status": "remove",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/sections/github-activity-section/index.tsx",
+          "symbol_or_context": "section subtitle and calendar"
+        }
+      ],
+      "reason": "A contribution calendar does not distinguish open-source, private, generated, employment, or repository-owner activity.",
+      "required_action": "Use neutral GitHub Activity wording or derive open-source proof from approved public repositories and explicit contributions."
+    },
+    {
+      "id": "social.linkedin",
+      "category": "social",
+      "claim": "The LinkedIn profile using the foysalahmedmin handle belongs to and is approved by the owner.",
+      "current_public_value": "linkedin.com/in/foysalahmedmin",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/config/constants/index.ts",
+          "symbol_or_context": "SOCIALS Linkedin"
+        },
+        {
+          "path": "src/components/(common)/contact-page/contact-content-section/index.tsx",
+          "symbol_or_context": "socials LinkedIn"
+        }
+      ],
+      "reason": "The handle is consistent despite URL-format duplication, but account control and approval are unverified.",
+      "required_action": "Owner confirms control and preferred canonical URL; deduplicate through Site."
+    },
+    {
+      "id": "social.facebook",
+      "category": "social",
+      "claim": "The Facebook profile using the foysalahmedmin handle belongs to and is approved by the owner.",
+      "current_public_value": "facebook.com/foysalahmedmin",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/config/constants/index.ts",
+          "symbol_or_context": "SOCIALS Facebook"
+        },
+        {
+          "path": "src/components/(common)/contact-page/contact-content-section/index.tsx",
+          "symbol_or_context": "socials Facebook"
+        }
+      ],
+      "reason": "Account control, professional relevance, and public-link approval are unverified.",
+      "required_action": "Owner confirms the account and whether it belongs in the professional social set."
+    },
+    {
+      "id": "social.twitter",
+      "category": "social",
+      "claim": "The Twitter/X profile using the foysalahmedmin handle belongs to and is approved by the owner.",
+      "current_public_value": "twitter.com/foysalahmedmin",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/(common)/contact-page/contact-content-section/index.tsx",
+          "symbol_or_context": "socials Twitter"
+        }
+      ],
+      "reason": "It is absent from the shared SOCIALS configuration and account control/approval are unverified.",
+      "required_action": "Owner confirms the account and canonical X/Twitter URL or the link is removed."
+    },
+    {
+      "id": "resume.google-drive-document",
+      "category": "resume",
+      "claim": "The legacy Google Drive document is the owner's current, accurate, publicly shareable resume.",
+      "current_public_value": "[redacted: legacy Google Drive file reference]",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/components/partials/Header/index.tsx",
+          "symbol_or_context": "desktop and mobile Resume links"
+        },
+        {
+          "path": "src/components/(common)/about-page/about-details-section/index.tsx",
+          "symbol_or_context": "Download CV link"
+        }
+      ],
+      "reason": "Ownership, content accuracy, revision date, privacy, public sharing, and the claim of a downloadable file are unverified.",
+      "required_action": "Owner approves a redacted current resume, revision date, label, and visibility; ingest it through the File/storage pipeline and retire the hardcoded URL."
+    },
+    {
+      "id": "legal.bangladesh-jurisdiction",
+      "category": "legal",
+      "claim": "Bangladesh law and exclusive local court jurisdiction govern the site's terms.",
+      "current_public_value": "Governed by the laws of Bangladesh",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/app/(common)/terms/page.tsx",
+          "symbol_or_context": "Governing Law"
+        }
+      ],
+      "reason": "This is legal boilerplate whose applicability and wording have not been owner/legal reviewed.",
+      "required_action": "Obtain an owner-approved legal policy and jurisdiction review before publication."
+    },
+    {
+      "id": "legal.privacy-behavior",
+      "category": "legal",
+      "claim": "The site collects identity, contact, IP, browser, timezone, and location data; uses cookies; and applies the stated security/access controls.",
+      "current_public_value": "Generic privacy-policy assertions",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/app/(common)/privacy/page.tsx",
+          "symbol_or_context": "Data I Collect, Cookies, Data Security"
+        }
+      ],
+      "reason": "The policy is not mapped to an actual data-flow/vendor/retention inventory and may overstate or omit processing.",
+      "required_action": "Generate the policy from an approved data inventory, retention plan, processors, lawful basis, and rights workflow."
+    }
+  ],
+  "dynamic_record_contracts": [
+    {
+      "record_type": "project",
+      "current_repository_state": "A MongoDB Project model and UI exist, but there are no versioned production project records or seeds to audit. The current model lacks content_tier, verification_state, public visibility, project kind, primary pillar, evidence references, explicit owner role, outcome provenance, and per-resource confidentiality controls.",
+      "required_truth_fields": [
+        "stable public slug and owner-approved title/summary/content",
+        "kind: client-work | internal-product | open-source | engineering-lab",
+        "primary pillar plus optional secondary pillars",
+        "owner role, team context, structured start/end/release dates, and ongoing state",
+        "stack plus architecture, security, performance, accessibility, AI, and system-design decisions that are actually evidenced",
+        "outcomes with metric value, unit, baseline, measurement window, method, and evidence approval; otherwise qualitative only",
+        "client/collaborator identity visibility and confidentiality policy",
+        "live/source/resource URL visibility with ownership and disclosure approval",
+        "media provenance, alt text, and public File references",
+        "content_tier, verification_state, status, visibility, verifier audit metadata, and published revision"
+      ],
+      "publication_rules": [
+        "Only completed, non-deleted, production, approved, public records may appear publicly.",
+        "Client work defaults to anonymized identity and hidden source/live links until each disclosure is approved.",
+        "Every public statement about role, scale, security, architecture, users, traffic, revenue, conversion, time saved, or performance requires an approved evidence reference; unsupported metrics are omitted.",
+        "The author relation is not equivalent to project lead; publish an explicit approved role.",
+        "Missing category, dates, author/role, or resources must never produce Web Development, Recently, Foysal Ahmed, live-link, or source-link fallbacks.",
+        "Exact project metrics are derived only from the production-approved public set."
+      ],
+      "inventory_result": "Blocked: no individual project can be approved or classified from repository evidence. Owner must supply a private worksheet for every intended public project."
+    },
+    {
+      "record_type": "article",
+      "current_repository_state": "A MongoDB Article model and UI exist, but there are no versioned production article records or seeds to audit. The model lacks content_tier, verification_state, public visibility, primary pillar, editorial provenance, and revision/audit metadata; published articles also default to expiry after 24 hours.",
+      "required_truth_fields": [
+        "stable public slug and owner-approved title/description/content",
+        "verified author relation and author-profile visibility",
+        "primary pillar, category, tags, and article type",
+        "source/citation and disclosure policy for factual, copied, sponsored, AI-assisted, or confidential material",
+        "thumbnail/media provenance, alt text, and public File references",
+        "explicit publication and optional expiry dates",
+        "content_tier, verification_state, editorial status, visibility, verifier audit metadata, and published revision"
+      ],
+      "publication_rules": [
+        "Only non-deleted, production, approved, public, published records inside their explicit publication window may appear publicly.",
+        "Authorship must come from the approved author relation; never fall back to Foysal Ahmed or a static author card.",
+        "Category and primary pillar are required; never fall back to Tutorial or override the category with Insights.",
+        "published_at is required and exact; never substitute Recently or Recently Published.",
+        "The public content pipeline must sanitize rich content and preserve approved citations/disclosures.",
+        "Article topic summaries and counts are derived only from the approved public set."
+      ],
+      "inventory_result": "Blocked: no individual authored article or topic can be approved from repository evidence. Owner must supply a private worksheet or approved records; the 24-hour default expiry policy also requires correction before seeding."
+    }
+  ],
+  "five_pillar_matrix": [
+    {
+      "sequence": 1,
+      "key": "frontend",
+      "canonical_label": "Frontend Engineering",
+      "legacy_labels_found": [
+        "Frontend Engineer",
+        "Interactive Frontend with Next.js",
+        "responsive UI",
+        "UI/UX design"
+      ],
+      "current_surfaces": [
+        "About highlights and biography",
+        "Experience timeline",
+        "Skills cards",
+        "Services/process copy"
+      ],
+      "code_evidence": [
+        "The repository uses Next.js, React, TypeScript, Tailwind CSS, Redux, custom UI components, responsive classes, and animation utilities."
+      ],
+      "truth_gap": "No dedicated hero slide, approved frontend case study, measured accessibility/performance result, or record-level proof mapping exists; current percentage ratings are unsupported.",
+      "publication_rule": "The taxonomy label may be used in the five-pillar UI, but claims about seniority, mastery, accessibility, performance, delivery, or outcomes remain blocked until mapped to approved work."
+    },
+    {
+      "sequence": 2,
+      "key": "backend",
+      "canonical_label": "Backend Engineering",
+      "legacy_labels_found": [
+        "Modular & Scalable Backend",
+        "backend services",
+        "backend APIs",
+        "complex backend logic"
+      ],
+      "current_surfaces": [
+        "About biography and highlights",
+        "Experience timeline",
+        "Skills cards",
+        "Services copy",
+        "Testimonials"
+      ],
+      "code_evidence": [
+        "The repository contains Next.js route handlers, MongoDB/Mongoose models, repositories, services, controllers, validation, authentication, contacts, files, projects, and articles."
+      ],
+      "truth_gap": "No dedicated hero slide, approved backend case study, scale profile, threat model, availability target, or measured API/database outcome is linked.",
+      "publication_rule": "Repository implementation may support factual case-study discussion after review; broad scalable, secure, robust, and high-performance claims require bounded approved evidence."
+    },
+    {
+      "sequence": 3,
+      "key": "ai_automation",
+      "canonical_label": "AI Automation",
+      "legacy_labels_found": [
+        "AI & Automation",
+        "AI-driven workflows",
+        "AI-driven solutions",
+        "AI models"
+      ],
+      "current_surfaces": [
+        "Hero slide",
+        "About biography",
+        "Services card",
+        "Skills cards",
+        "Experience description"
+      ],
+      "code_evidence": [
+        "The public skills UI names LangChain and LangGraph, but no AI workflow implementation or approved AI content record is present in this repository."
+      ],
+      "truth_gap": "No approved AI project, workflow diagram, evaluation, model/provider disclosure, safety control, latency/cost profile, or measured automation result exists.",
+      "publication_rule": "Use the canonical label only as approved positioning until at least one owner-verified engineering-lab, project, or article demonstrates the capability with bounded claims."
+    },
+    {
+      "sequence": 4,
+      "key": "system_design",
+      "canonical_label": "System Design",
+      "legacy_labels_found": [
+        "System Architect",
+        "System Architecture",
+        "System Architecture Optimization",
+        "system engineering"
+      ],
+      "current_surfaces": [
+        "Hero slide",
+        "About headline and biography",
+        "Services card",
+        "Project-page metadata",
+        "Article author biography"
+      ],
+      "code_evidence": [
+        "The codebase has layered route/controller/service/repository modules and provider-based storage abstractions, but no approved architecture case study or operating evidence."
+      ],
+      "truth_gap": "The current System Architect title is unverified; high-traffic, cloud-scale, robustness, security, and optimization claims have no constraints, diagrams, or measured proof.",
+      "publication_rule": "Use System Design as the canonical pillar. Publish architecture claims only with a reviewed diagram/decision record and explicit scale/security constraints; do not infer an architect job title."
+    },
+    {
+      "sequence": 5,
+      "key": "full_stack",
+      "canonical_label": "Full-Stack Development",
+      "legacy_labels_found": [
+        "Full Stack Developer",
+        "Full-Stack Developer",
+        "Full Stack Engineer",
+        "Full-Stack Development",
+        "Application Developer"
+      ],
+      "current_surfaces": [
+        "Root and page metadata",
+        "Hero slide",
+        "Home/About biography",
+        "Experience timeline",
+        "Services card",
+        "Testimonials and article author copy"
+      ],
+      "code_evidence": [
+        "This repository contains both custom frontend UI and backend/API/data/storage/authentication code."
+      ],
+      "truth_gap": "The label dominates current copy while Frontend and Backend lack their own hero slides; no approved end-to-end case study proves business context, role, release, and operational result.",
+      "publication_rule": "Use as the fifth, integrative pillar rather than a substitute for the other four. Evidence must show an approved end-to-end contribution and must not default missing authorship or leadership to the owner."
+    }
+  ],
+  "blockers": [
+    {
+      "id": "content.owner-private-worksheet",
+      "severity": "critical",
+      "summary": "No owner-approved private truth worksheet or evidence register exists for identity, biography, contacts, availability, employment, education, credentials, projects, articles, social accounts, or resume.",
+      "unblocker": "Owner completes the private worksheet derived from this schema; store only approval state and opaque evidence reference in application data."
+    },
+    {
+      "id": "content.unverified-social-proof",
+      "severity": "critical",
+      "summary": "Five named testimonials and a conversion-outcome claim are public with no source, relationship, or consent evidence.",
+      "unblocker": "Remove all five from production; add endorsements only through the verified consent workflow."
+    },
+    {
+      "id": "content.contradictory-metrics",
+      "severity": "critical",
+      "summary": "The site simultaneously claims 20+ and 50+ completed projects and also claims unsupported experience, client, and mastery totals.",
+      "unblocker": "Remove every manual marketing number and implement deny-by-default derived metrics over approved production records."
+    },
+    {
+      "id": "content.no-record-inventory",
+      "severity": "critical",
+      "summary": "No auditable project or article records/seeds are versioned, so individual work, authorship, dates, links, outcomes, and pillar coverage cannot be approved.",
+      "unblocker": "Complete owner project/article inventories and seed only approved production content; keep synthetic demonstration data mechanically separate."
+    },
+    {
+      "id": "content.simulated-contact-success",
+      "severity": "critical",
+      "summary": "The public contact form claims success without sending the message.",
+      "unblocker": "Connect to the Contact API and report success only from a verified server acknowledgement."
+    },
+    {
+      "id": "content.five-pillar-proof",
+      "severity": "high",
+      "summary": "The intended five pillars are not represented consistently: the hero has only three slides, Frontend and Backend are missing as dedicated pillars, and several labels conflict.",
+      "unblocker": "Approve atomic capability claims and evidence links, then publish exactly the canonical five-pillar sequence from Site."
+    },
+    {
+      "id": "content.unsafe-fallbacks",
+      "severity": "high",
+      "summary": "Project/article UIs invent author, project lead, category, recency, and content classification when data is missing.",
+      "unblocker": "Replace factual fallbacks with publication validation, omission, neutral unavailable states, or not-found behavior."
+    },
+    {
+      "id": "content.resume-and-contact-exposure",
+      "severity": "high",
+      "summary": "Personal email, phone, broad location, map, social links, and a third-party resume URL are duplicated without a central exposure/approval policy.",
+      "unblocker": "Owner approves each public channel and its granularity; manage approved values once in Site and use the File pipeline for the resume."
+    },
+    {
+      "id": "content.legal-accuracy",
+      "severity": "high",
+      "summary": "Privacy and terms pages contain generic factual/legal assertions not mapped to actual data processing, retention, vendors, security, or reviewed jurisdiction.",
+      "unblocker": "Complete a data-flow/legal inventory and publish reviewed policies with revision/effective dates."
+    },
+    {
+      "id": "content.article-expiry",
+      "severity": "high",
+      "summary": "Published Article records default to expiring after 24 hours, which can silently remove seeded public articles and distort the content inventory.",
+      "unblocker": "Make expiry explicit/optional and migrate existing records before approving article seeds."
+    }
+  ]
+}
