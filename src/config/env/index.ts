@@ -3,7 +3,7 @@ export const ENV = {
   port: process.env.PORT!,
 
   // App Environment
-  environment: process.env.NODE_ENV as "development" | "production",
+  environment: process.env.NODE_ENV as "development" | "production" | "test",
 
   // URLs
   url:
