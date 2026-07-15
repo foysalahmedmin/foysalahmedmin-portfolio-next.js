@@ -297,7 +297,6 @@ const DrawerCloseTrigger: React.FC<ButtonProps> = ({
   );
 };
 
-// Export components separately (shadcn style)
 export {
   DrawerRoot as Drawer,
   DrawerBackdrop,

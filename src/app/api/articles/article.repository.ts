@@ -16,6 +16,31 @@ const POPULATE_FIELDS = [
   { path: 'images', select: FILE_SELECT },
 ];
 
+const PUBLIC_POPULATE_FIELDS = [
+  {
+    path: 'author',
+    select: '_id name image',
+    populate: { path: 'image', select: FILE_SELECT },
+  },
+  { path: 'category', select: '_id name slug' },
+  { path: 'collaborators', select: '_id name' },
+  { path: 'thumbnail', select: FILE_SELECT },
+  { path: 'images', select: FILE_SELECT },
+];
+
+const getPublicArticleFilter = () => {
+  const now = new Date();
+  return {
+    status: 'published' as const,
+    published_at: { $lte: now },
+    $or: [
+      { expired_at: { $exists: false } },
+      { expired_at: null },
+      { expired_at: { $gt: now } },
+    ],
+  };
+};
+
 export const create = async (
   data: Partial<TArticle>,
 ): Promise<TArticleDocument> => {
@@ -33,6 +58,12 @@ export const findByIdPopulated = async (id: string) => {
   return await Article.findById(id).populate(POPULATE_FIELDS).lean();
 };
 
+export const findPublicByIdPopulated = async (id: string) => {
+  return await Article.findOne({ _id: id, ...getPublicArticleFilter() })
+    .populate(PUBLIC_POPULATE_FIELDS)
+    .lean();
+};
+
 export const findByIdWithDeleted = async (
   id: string,
 ): Promise<TArticleDocument | null> => {
@@ -46,26 +77,37 @@ export const findManyByIds = async (ids: string[]) => {
 export const findPaginated = async (queryParams: Record<string, unknown>) => {
   const query = new AppQuery<TArticleDocument>(Article.find(), queryParams);
 
-  const result = await query
+  return await query
     .search(['name', 'description'])
     .filter(['status', 'category', 'author', 'is_featured'])
     .sort(['name', 'status', 'published_at'])
     .paginate()
     .fields()
+    .tap((articleQuery) => articleQuery.populate(POPULATE_FIELDS).lean())
     .execute();
+};
 
-  const populated = await Promise.all(
-    result.data.map(async (article) => {
-      return await Article.findById((article as { _id: unknown })._id)
-        .populate(POPULATE_FIELDS)
-        .lean();
-    }),
+export const findPublicPaginated = async (
+  queryParams: Record<string, unknown>,
+) => {
+  const query = new AppQuery<TArticleDocument>(
+    Article.find(getPublicArticleFilter()),
+    {
+      ...queryParams,
+      status: 'published',
+    },
   );
 
-  return {
-    data: populated,
-    meta: result.meta,
-  };
+  return await query
+    .search(['name', 'description'])
+    .filter(['status', 'category', 'author', 'is_featured'])
+    .sort(['name', 'status', 'published_at'])
+    .paginate()
+    .fields()
+    .tap((articleQuery) =>
+      articleQuery.populate(PUBLIC_POPULATE_FIELDS).lean(),
+    )
+    .execute();
 };
 
 export const updateMany = async (

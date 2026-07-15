@@ -252,7 +252,5 @@ const MaxInput = ({ className, ...props }: MaxInputProps) => {
   );
 };
 
-// Export components separately (shadcn style)
 export { RangeSliderRoot as RangeSlider, RangeSliderInput, MinInput as RangeSliderMinInput, MaxInput as RangeSliderMaxInput };
 export { type MaxInputProps, type MinInputProps, type RangeSliderContextValue, type RangeSliderInputProps, type RangeSliderProps };
-

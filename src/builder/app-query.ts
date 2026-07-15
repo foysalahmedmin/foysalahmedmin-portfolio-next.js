@@ -26,7 +26,9 @@ class AppQuery<T = any> {
   ) {
     this.query = query;
     this.query_params = query_params;
-    this.query_filter = {};
+    this.query_filter = { ...query.getFilter() } as FilterQuery<
+      DocumentType<T>
+    >;
   }
 
   search(applicableFields: (keyof T)[]): this {

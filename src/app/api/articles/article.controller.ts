@@ -22,9 +22,40 @@ export const getArticles = catchAsync(async (req: AuthRequest | Request) => {
   });
 });
 
+export const getPublicArticles = catchAsync(async (req: Request) => {
+  const url = new URL(req.url);
+  const queryParams: Record<string, unknown> = {};
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  const result = await ArticleService.getPublicArticles(queryParams);
+
+  return sendResponse({
+    status: httpStatus.OK,
+    success: true,
+    message: 'Articles retrieved successfully',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 export const getArticleById = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
     const article = await ArticleService.getArticleById(params.id);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Article retrieved successfully',
+      data: article,
+    });
+  },
+);
+
+export const getPublicArticleById = catchAsync(
+  async (req: Request, { params }: { params: { id: string } }) => {
+    const article = await ArticleService.getPublicArticleById(params.id);
 
     return sendResponse({
       status: httpStatus.OK,

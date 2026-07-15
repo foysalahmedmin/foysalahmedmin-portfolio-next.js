@@ -1,12 +1,15 @@
 "use client";
 
 import { useClickOutside } from "@/hooks/ui/use-click-outside";
-import { useOverlayState, type OverlayState } from "@/hooks/ui/use-overlay-state";
+import {
+  useOverlayState,
+  type OverlayState,
+} from "@/hooks/ui/use-overlay-state";
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import type { ComponentProps } from "react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useId, useRef } from "react";
 import type { ButtonProps } from "./button";
 import { Button } from "./button";
 
@@ -43,7 +46,9 @@ const dropdownContentVariants = cva("absolute z-30 shadow-lg", {
 
 type DropdownContextType = OverlayState &
   VariantProps<typeof dropdownVariants> &
-  VariantProps<typeof dropdownContentVariants>;
+  VariantProps<typeof dropdownContentVariants> & {
+    contentId: string;
+  };
 type DropdownProps = ComponentProps<"div"> &
   VariantProps<typeof dropdownVariants> &
   VariantProps<typeof dropdownContentVariants> & {
@@ -76,18 +81,47 @@ const DropdownRoot: React.FC<DropdownProps> = ({
   side,
   isOpen: isOpenProp,
   setIsOpen: setIsOpenProp,
+  onBlur,
+  onKeyDown,
   children,
   ...props
 }) => {
   const overlayState = useOverlayState(isOpenProp, setIsOpenProp);
+  const contentId = useId();
+  const rootRef = useClickOutside<HTMLDivElement>(() => {
+    if (overlayState.isOpen) overlayState.onClose();
+  });
 
   return (
-    <DropdownContext.Provider value={{ ...overlayState, variant, side }}>
+    <DropdownContext.Provider
+      value={{ ...overlayState, variant, side, contentId }}
+    >
       <div
+        {...props}
+        ref={rootRef}
         className={cn(dropdownVariants({ variant, className }), {
           [cn("open", activeClassName)]: overlayState.isOpen,
         })}
-        {...props}
+        onBlur={(event) => {
+          if (
+            overlayState.isOpen &&
+            !event.currentTarget.contains(event.relatedTarget)
+          ) {
+            overlayState.onClose();
+          }
+          onBlur?.(event);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && overlayState.isOpen) {
+            event.preventDefault();
+            overlayState.onClose();
+            const trigger = event.currentTarget.querySelector<HTMLElement>(
+              "[data-dropdown-trigger]"
+            );
+            requestAnimationFrame(() => trigger?.focus());
+          }
+          onKeyDown?.(event);
+        }}
       >
         {children}
       </div>
@@ -101,6 +135,8 @@ const DropdownContent: React.FC<DropdownContentProps> = ({
   activeClassName,
   variant,
   side,
+  id,
+  role,
   children,
   ...props
 }) => {
@@ -108,15 +144,31 @@ const DropdownContent: React.FC<DropdownContentProps> = ({
     isOpen,
     variant: contextVariant,
     side: contextSide,
-    onClose,
+    contentId,
   } = useDropdown();
+  const ref = useRef<HTMLDivElement>(null);
 
-  const ref = useClickOutside<HTMLDivElement>(() => {
-    if (isOpen) onClose();
-  });
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const frame = requestAnimationFrame(() => {
+      ref.current
+        ?.querySelector<HTMLElement>(
+          "button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])"
+        )
+        ?.focus();
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [isOpen, ref]);
+
   return (
     <div
+      {...props}
       ref={ref}
+      id={id || contentId}
+      role={role}
+      aria-hidden={!isOpen}
       className={cn(
         dropdownContentVariants({
           variant: variant ?? contextVariant,
@@ -126,9 +178,8 @@ const DropdownContent: React.FC<DropdownContentProps> = ({
         {
           [cn("visible scale-100 opacity-100", activeClassName)]: isOpen,
           "invisible scale-95 opacity-0": !isOpen,
-        },
+        }
       )}
-      {...props}
     >
       {children}
     </div>
@@ -139,6 +190,7 @@ const DropdownContent: React.FC<DropdownContentProps> = ({
 const DropdownItem: React.FC<ComponentProps<"button">> = ({
   className,
   disabled = false,
+  type = "button",
   children,
   onClick,
   ...props
@@ -147,9 +199,10 @@ const DropdownItem: React.FC<ComponentProps<"button">> = ({
 
   return (
     <button
+      type={type}
       className={cn(
         "w-full rounded-md px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-        className,
+        className
       )}
       disabled={disabled}
       onClick={(e) => {
@@ -178,7 +231,7 @@ const DropdownLabel: React.FC<ComponentProps<"div">> = ({
   <div
     className={cn(
       "text-muted-foreground px-4 py-2 text-xs font-medium tracking-wider uppercase",
-      className,
+      className
     )}
     {...props}
   >
@@ -187,18 +240,38 @@ const DropdownLabel: React.FC<ComponentProps<"div">> = ({
 );
 
 // Dropdown Trigger Component
-const DropdownTrigger: React.FC<ButtonProps> = ({ onClick, ...props }) => {
-  const { onToggle } = useDropdown();
+const DropdownTrigger: React.FC<ButtonProps> = ({
+  onClick,
+  "aria-haspopup": ariaHasPopup,
+  ...props
+}) => {
+  const { contentId, isOpen, onToggle } = useDropdown();
 
   return (
     <Button
+      {...props}
+      data-dropdown-trigger=""
+      aria-controls={contentId}
+      aria-expanded={isOpen}
+      aria-haspopup={ariaHasPopup}
       onClick={(e) => {
         onToggle();
         onClick?.(e);
       }}
-      {...props}
     />
   );
 };
 
-export { DropdownRoot as Dropdown, DropdownContent, dropdownContentVariants, DropdownItem, DropdownLabel, DropdownSeparator, DropdownTrigger, dropdownVariants, useDropdown, type DropdownContentProps, type DropdownProps };
+export {
+  DropdownRoot as Dropdown,
+  DropdownContent,
+  dropdownContentVariants,
+  DropdownItem,
+  DropdownLabel,
+  DropdownSeparator,
+  DropdownTrigger,
+  dropdownVariants,
+  useDropdown,
+  type DropdownContentProps,
+  type DropdownProps,
+};

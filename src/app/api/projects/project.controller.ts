@@ -22,9 +22,40 @@ export const getProjects = catchAsync(async (req: AuthRequest | Request) => {
   });
 });
 
+export const getPublicProjects = catchAsync(async (req: Request) => {
+  const url = new URL(req.url);
+  const queryParams: Record<string, unknown> = {};
+  url.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  const result = await ProjectService.getPublicProjects(queryParams);
+
+  return sendResponse({
+    status: httpStatus.OK,
+    success: true,
+    message: 'Projects retrieved successfully',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 export const getProjectById = catchAsync(
   async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
     const project = await ProjectService.getProjectById(params.id);
+
+    return sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: 'Project retrieved successfully',
+      data: project,
+    });
+  },
+);
+
+export const getPublicProjectById = catchAsync(
+  async (req: Request, { params }: { params: { id: string } }) => {
+    const project = await ProjectService.getPublicProjectById(params.id);
 
     return sendResponse({
       status: httpStatus.OK,

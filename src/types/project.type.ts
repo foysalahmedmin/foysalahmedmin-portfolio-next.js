@@ -10,7 +10,7 @@ export type TProjectStatus =
 export type TUserPopulated = {
   _id: string;
   name: string;
-  email: string;
+  email?: string;
   image?: TFilePopulated | null;
 };
 
