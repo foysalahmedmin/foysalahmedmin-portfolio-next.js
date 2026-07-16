@@ -239,13 +239,14 @@ license decision, managed File ID, or approval result.
 
 The current generated candidate evidence is recorded in
 `docs/content/generated-media-evidence/system-design-pilot.v1.json`. The source
-and derivative image bytes are local ignored files under `seed-assets/`; only
-checksums, dimensions, and gate status are committed. Candidate evidence is not
-approval and does not permit public attachment by itself.
+and derivative image bytes are tracked under `seed-assets/` for repeatable
+managed-media ingestion, with public preview copies under `public/images/heroes/`.
+Candidate evidence is not approval and does not permit public attachment by
+itself.
 
 The full five-hero candidate set is recorded in
 `docs/content/generated-media-evidence/hero-candidates.v1.json` with the same
-binary policy and pending approval/ingestion gates.
+tracked-asset policy and pending approval/ingestion gates.
 
 The pilot must pass every gate before any batch generation:
 
@@ -362,9 +363,10 @@ not part of this provider-neutral manifest.
 - `source: generated`, complete provenance, and a reviewed license/rights value
   are required before a generated File is metadata-complete. Never infer rights
   merely from successful generation.
-- The repository manifest contains stable IDs, prompts, decisions, checksums,
-  and opaque File IDs only. It contains no binary, credential, private evidence,
-  provider secret, mutable delivery URL, or signed URL.
+- The repository evidence contains stable IDs, prompts, decisions, checksums,
+  tracked seed/public image assets, and opaque File IDs only. It must never
+  contain credentials, private evidence, provider secrets, mutable delivery
+  URLs, or signed URLs.
 - Production publication remains blocked until required Files are ready,
   correctly attached, accessibility-reviewed, truth-compatible, and validated
   by the Site publish graph. A documentation checkbox never lifts that gate.
