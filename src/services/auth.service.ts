@@ -13,8 +13,10 @@ const getBaseUrl = () => (ENV.url && ENV.url !== "undefined" ? ENV.url : "");
 // Helper function to handle fetch responses
 async function handleResponse(res: Response) {
   if (!res.ok) {
-    const error = await res.text();
-    throw new Error(error || "Fetch request failed");
+    const payload = (await res.json().catch(() => null)) as {
+      message?: string;
+    } | null;
+    throw new Error(payload?.message || "The request could not be completed.");
   }
   return res.json() as Promise<AuthResponse>;
 }
@@ -42,12 +44,22 @@ export async function signUp(payload: SignUpPayload): Promise<AuthResponse> {
 }
 
 // POST - Refresh Token
-export async function refreshToken(): Promise<AuthResponse> {
+async function performRefreshToken(): Promise<AuthResponse> {
   const res = await fetch(`${getBaseUrl()}/api/auth/refresh-token`, {
     method: "POST",
     credentials: "include",
   });
   return handleResponse(res);
+}
+
+export async function refreshToken(): Promise<AuthResponse> {
+  if (typeof navigator !== "undefined" && navigator.locks) {
+    return await navigator.locks.request(
+      "portfolio-auth-refresh",
+      performRefreshToken
+    );
+  }
+  return await performRefreshToken();
 }
 
 // POST - Sign Out
@@ -56,7 +68,22 @@ export async function signOut(): Promise<AuthResponse> {
     method: "POST",
     credentials: "include",
   });
-  return handleResponse(res);
+  const response = await handleResponse(res);
+  if (typeof window !== "undefined") {
+    for (const key of ["auth", "user", "accessToken", "refreshToken"]) {
+      window.localStorage.removeItem(key);
+      window.sessionStorage.removeItem(key);
+    }
+    window.dispatchEvent(new Event("auth:signout"));
+    try {
+      const channel = new BroadcastChannel("portfolio-auth");
+      channel.postMessage({ type: "signout" });
+      channel.close();
+    } catch {
+      // BroadcastChannel is an enhancement; server revocation is authoritative.
+    }
+  }
+  return response;
 }
 
 // PATCH - Change Password

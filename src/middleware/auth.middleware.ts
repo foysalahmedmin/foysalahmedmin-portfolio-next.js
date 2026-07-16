@@ -1,29 +1,47 @@
-import User from "@/app/api/users/user.model";
 import AppError from "@/builder/app-error";
-import { ENV } from "@/config";
-import connectDB from "@/lib/db";
+import { getAdminApiAuthority, hasCapability } from "@/lib/auth/capabilities";
+import { verifyAccessSessionToken } from "@/lib/auth/session-manager";
 import type { TJwtPayload, TRole } from "@/types/jsonwebtoken.type";
 import httpStatus from "http-status";
-import type { JwtPayload} from "jsonwebtoken";
-import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import type { NextRequest, NextResponse } from "next/server";
+import { assertTrustedAuthRequest } from "@/lib/auth/auth-request-security";
 
-export type AuthUser = JwtPayload & TJwtPayload;
+export type AuthUser = TJwtPayload & {
+  id: string;
+  role: TRole;
+  session_id: string;
+};
 
 export interface AuthRequest extends NextRequest {
   user?: AuthUser;
   params?: Record<string, string>;
 }
 
-const getUser = async (_id: string) => {
-  await connectDB();
-  const user = await User.findById(_id)
-    .select("+password_changed_at +is_deleted")
-    .lean();
+type RequestToken = Readonly<{
+  value: string;
+  source: "cookie" | "bearer";
+}>;
 
-  return user;
+const getRequestToken = async (
+  request: Request
+): Promise<RequestToken | null> => {
+  const cookieStore = await cookies();
+  const cookieToken = cookieStore.get("access_token")?.value;
+  if (cookieToken) return { value: cookieToken, source: "cookie" };
+
+  const authorization = request.headers.get("authorization")?.trim();
+  if (!authorization?.startsWith("Bearer ")) return null;
+  const bearerToken = authorization.slice(7).trim();
+  return bearerToken ? { value: bearerToken, source: "bearer" } : null;
 };
+
+export const shouldEnforceCookieMutationOrigin = (
+  method: string,
+  tokenSource: RequestToken["source"]
+): boolean =>
+  tokenSource === "cookie" &&
+  !["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());
 
 export const auth = (...roles: (TRole | "guest")[]) => {
   return async (
@@ -31,91 +49,51 @@ export const auth = (...roles: (TRole | "guest")[]) => {
     handler: (req: AuthRequest) => Promise<NextResponse>
   ): Promise<NextResponse> => {
     const authReq = req as AuthRequest;
+    const token = await getRequestToken(req);
 
-    const cookieStore = await cookies();
-    let token = cookieStore.get("access_token")?.value;
-
+    if (roles.includes("guest") && !token) return await handler(authReq);
     if (!token) {
-      const authorization = authReq.headers.get("authorization");
-      token = authorization?.split(" ")?.[1];
+      throw new AppError(httpStatus.UNAUTHORIZED, "Authentication required.");
     }
 
-    if (roles.includes("guest") && !token) {
-      return await handler(authReq);
+    if (shouldEnforceCookieMutationOrigin(req.method, token.source)) {
+      assertTrustedAuthRequest(req);
     }
 
-    if (!token) {
-      throw new AppError(httpStatus.UNAUTHORIZED, "No token provided.");
+    const principal = await verifyAccessSessionToken(token.value);
+    const url = new URL(req.url);
+    const adminAuthority = getAdminApiAuthority(url.pathname, req.method);
+
+    if (adminAuthority.kind === "unmapped-admin-api") {
+      throw new AppError(httpStatus.FORBIDDEN, "Access denied.");
     }
-
-    let decoded: JwtPayload;
-    try {
-      decoded = jwt.verify(token, ENV.jwt_access_secret) as JwtPayload;
-    } catch (err) {
-      if (err instanceof TokenExpiredError) {
-        throw new AppError(httpStatus.UNAUTHORIZED, "Token expired");
-      }
-      throw new AppError(httpStatus.UNAUTHORIZED, "Invalid token");
-    }
-
-    const {
-      _id,
-      role = "user",
-      iat,
-    } = decoded as TJwtPayload & { iat?: number };
-
-    if (!_id || !role || typeof iat !== "number") {
-      throw new AppError(httpStatus.UNAUTHORIZED, "Invalid token.");
-    }
-
-    const user = await getUser(_id);
-
-    if (!user) {
-      throw new AppError(httpStatus.UNAUTHORIZED, "User not found");
-    }
-
-    if (user.is_deleted) {
-      throw new AppError(httpStatus.FORBIDDEN, "User is deleted");
-    }
-
-    if (user?.status === "blocked") {
-      throw new AppError(httpStatus.FORBIDDEN, "User is blocked");
-    }
-
-    if (user?.password_changed_at) {
-      const passwordChangedAt = new Date(user.password_changed_at).getTime();
-      const tokenIssuedAt = iat * 1000; // convert seconds → ms
-
-      if (passwordChangedAt > tokenIssuedAt) {
-        throw new AppError(
-          httpStatus.FORBIDDEN,
-          "Password recently changed. Please signin again."
-        );
-      }
-    }
-
     if (
-      !roles.includes(role as TRole) ||
-      !roles.includes(user?.role as TRole)
+      adminAuthority.kind === "capability" &&
+      !hasCapability(principal.role, adminAuthority.capability)
     ) {
-      throw new AppError(httpStatus.FORBIDDEN, "Access denied");
+      throw new AppError(httpStatus.FORBIDDEN, "Access denied.");
+    }
+    if (
+      adminAuthority.kind === "not-admin-api" &&
+      !roles.includes(principal.role)
+    ) {
+      throw new AppError(httpStatus.FORBIDDEN, "Access denied.");
     }
 
     authReq.user = {
-      ...decoded,
-      _id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      image: user.image,
-      role: user.role as TRole,
-      is_verified: user.is_verified,
-    } as AuthUser;
-
+      id: principal._id,
+      _id: principal._id,
+      name: principal.name,
+      email: principal.email,
+      image: principal.image,
+      role: principal.role,
+      is_verified: principal.is_verified,
+      session_id: principal.session_id,
+    };
     return await handler(authReq);
   };
 };
 
-// Legacy wrapper for backward compatibility
 export async function withAuth(
   req: AuthRequest,
   handler: (req: AuthRequest) => Promise<NextResponse>

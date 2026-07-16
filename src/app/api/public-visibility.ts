@@ -9,7 +9,13 @@ export const getPublicArticleFilter = (now = new Date()) => ({
 });
 
 export const getPublicProjectFilter = () => ({
-  status: "completed" as const,
+  $or: [
+    { publication_status: "published" as const },
+    {
+      publication_status: { $exists: false },
+      status: "completed" as const,
+    },
+  ],
 });
 
 export const getPublicCategoryFilter = () => ({

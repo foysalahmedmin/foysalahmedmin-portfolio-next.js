@@ -22,8 +22,11 @@ export type TErrorSources = {
 export type TErrorResponse = {
   success: false;
   status: number;
+  code?: string;
   message: string;
   sources?: TErrorSources;
+  current_version?: number;
+  correlation_id?: string;
   error?: {
     status: number;
     name: string;

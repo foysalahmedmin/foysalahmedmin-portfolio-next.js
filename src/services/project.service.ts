@@ -1,6 +1,11 @@
 import { ENV } from "@/config";
-import type { TProject } from "@/types/project.type";
+import type {
+  TProject,
+  TProjectInput,
+  TProjectListItem,
+} from "@/types/project.type";
 import type { TResponse } from "@/types/response.type";
+import { readApiResponse } from "./api-response";
 
 type TQueryParams = Record<
   string,
@@ -30,46 +35,32 @@ function getQueryString(params?: TQueryParams) {
   return query ? `?${query}` : "";
 }
 
-async function handleResponse<T>(res: Response): Promise<TResponse<T>> {
-  if (!res.ok) {
-    const errorData = await res.text();
-    let message = "Request failed";
-
-    try {
-      const parsed = JSON.parse(errorData) as { message?: unknown };
-      if (typeof parsed.message === "string") {
-        message = parsed.message;
-      }
-    } catch {
-      message = errorData || message;
-    }
-
-    throw new Error(message);
-  }
-
-  return res.json() as Promise<TResponse<T>>;
-}
-
 // Public reads intentionally retain their public endpoints and cache behavior.
-export async function getProjects(params?: TQueryParams) {
+export async function getProjects(
+  params?: TQueryParams,
+  options: TRequestOptions = {}
+) {
   const res = await fetch(
     `${getBaseUrl()}/api/projects${getQueryString(params)}`,
     {
       method: "GET",
       next: { revalidate: 3600 },
+      signal: options.signal,
     }
   );
 
-  return handleResponse<TProject[]>(res);
+  return readApiResponse<TProjectListItem[]>(res);
 }
 
-export async function getProjectById(id: string) {
-  const res = await fetch(`${getBaseUrl()}/api/projects/${id}`, {
+export async function getProjectByIdentifier(identifier: string) {
+  const res = await fetch(`${getBaseUrl()}/api/projects/${identifier}`, {
     method: "GET",
   });
 
-  return handleResponse<TProject>(res);
+  return readApiResponse<TProject>(res);
 }
+
+export const getProjectById = getProjectByIdentifier;
 
 export async function getAdminProjects(
   params?: TQueryParams,
@@ -85,7 +76,7 @@ export async function getAdminProjects(
     }
   );
 
-  return handleResponse<TProject[]>(res);
+  return readApiResponse<TProject[]>(res);
 }
 
 export async function getAdminProjectById(
@@ -99,10 +90,10 @@ export async function getAdminProjectById(
     signal: options.signal,
   });
 
-  return handleResponse<TProject>(res);
+  return readApiResponse<TProject>(res);
 }
 
-export async function createProject(data: Partial<TProject>) {
+export async function createProject(data: TProjectInput) {
   const res = await fetch(`${getBaseUrl()}/api/projects/admin`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -110,10 +101,10 @@ export async function createProject(data: Partial<TProject>) {
     body: JSON.stringify(data),
   });
 
-  return handleResponse<TProject>(res);
+  return readApiResponse<TProject>(res);
 }
 
-export async function updateProject(id: string, data: Partial<TProject>) {
+export async function updateProject(id: string, data: TProjectInput) {
   const res = await fetch(`${getBaseUrl()}/api/projects/${id}/admin`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -121,7 +112,7 @@ export async function updateProject(id: string, data: Partial<TProject>) {
     body: JSON.stringify(data),
   });
 
-  return handleResponse<TProject>(res);
+  return readApiResponse<TProject>(res);
 }
 
 export async function deleteProject(id: string) {
@@ -130,7 +121,7 @@ export async function deleteProject(id: string) {
     credentials: "include",
   });
 
-  return handleResponse<null>(res);
+  return readApiResponse<null>(res);
 }
 
 export async function deleteProjects(ids: string[]) {
@@ -141,5 +132,5 @@ export async function deleteProjects(ids: string[]) {
     body: JSON.stringify({ ids }),
   });
 
-  return handleResponse<TBulkDeleteResult>(res);
+  return readApiResponse<TBulkDeleteResult>(res);
 }

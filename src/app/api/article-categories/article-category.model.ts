@@ -1,10 +1,18 @@
 import type {
-  TArticleCategory,
   TArticleCategoryDocument,
   TArticleCategoryModel,
 } from "./article-category.type";
-import type { Query} from "mongoose";
 import mongoose, { Schema } from "mongoose";
+import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
+import { CONTENT_SLUG_PATTERN } from "@/lib/content/slug";
+
+const slugHistorySchema = new Schema(
+  {
+    slug: { type: String, required: true },
+    changed_at: { type: Date, required: true },
+  },
+  { _id: false }
+);
 
 const articleCategorySchema = new Schema<TArticleCategoryDocument>(
   {
@@ -20,7 +28,6 @@ const articleCategorySchema = new Schema<TArticleCategoryDocument>(
     name: {
       type: String,
       required: [true, "Name is required"],
-      unique: true,
       trim: true,
       minlength: [2, "Name must be at least 2 characters"],
       maxlength: [50, "Name cannot exceed 50 characters"],
@@ -28,12 +35,13 @@ const articleCategorySchema = new Schema<TArticleCategoryDocument>(
     slug: {
       type: String,
       required: [true, "Slug is required"],
-      unique: true,
       trim: true,
       lowercase: true,
       minlength: [1, "Slug must be at least 1 character"],
-      maxlength: [50, "Slug cannot exceed 50 characters"],
+      maxlength: [96, "Slug cannot exceed 96 characters"],
+      match: [CONTENT_SLUG_PATTERN, "Slug must be canonical"],
     },
+    slug_history: { type: [slugHistorySchema], default: [] },
     description: {
       type: String,
       trim: true,
@@ -59,6 +67,7 @@ const articleCategorySchema = new Schema<TArticleCategoryDocument>(
       default: "default",
     },
     is_deleted: { type: Boolean, default: false, select: false },
+    deleted_at: { type: Date, default: null, select: false },
   },
   {
     timestamps: {
@@ -67,6 +76,23 @@ const articleCategorySchema = new Schema<TArticleCategoryDocument>(
     },
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+  }
+);
+
+articleCategorySchema.index(
+  { name: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { is_deleted: false },
+    name: "unique_article_category_name_active",
+  }
+);
+articleCategorySchema.index(
+  { slug: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { is_deleted: false },
+    name: "unique_article_category_slug_active",
   }
 );
 
@@ -79,36 +105,10 @@ articleCategorySchema.virtual("children", {
 
 articleCategorySchema.methods.toJSON = function () {
   const category = this.toObject();
-  delete category.is_deleted;
   return category;
 };
 
-articleCategorySchema.pre(
-  /^find/,
-  function (this: Query<TArticleCategory, TArticleCategory>, next) {
-    this.setQuery({
-      ...this.getQuery(),
-      is_deleted: { $ne: true },
-    });
-    next();
-  }
-);
-
-articleCategorySchema.pre(
-  /^update/,
-  function (this: Query<TArticleCategory, TArticleCategory>, next) {
-    this.setQuery({
-      ...this.getQuery(),
-      is_deleted: { $ne: true },
-    });
-    next();
-  }
-);
-
-articleCategorySchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
-  next();
-});
+applySoftDeletePlugin(articleCategorySchema);
 
 articleCategorySchema.statics.isCategoryExist = async function (_id: string) {
   return await this.findById(_id);
@@ -116,6 +116,7 @@ articleCategorySchema.statics.isCategoryExist = async function (_id: string) {
 
 articleCategorySchema.methods.softDelete = async function () {
   this.is_deleted = true;
+  this.deleted_at = new Date();
   return await this.save();
 };
 
@@ -127,4 +128,3 @@ export const ArticleCategory =
   );
 
 export default ArticleCategory;
-

@@ -1,5 +1,5 @@
 import type { TResponse } from "./response.type";
-import type { TUser } from "./user.type";
+import type { TRole } from "./jsonwebtoken.type";
 
 export type SignInPayload = {
   email: string;
@@ -23,9 +23,20 @@ export type ForgetPasswordPayload = {
 };
 
 export type ResetPasswordPayload = {
+  token: string;
   password: string;
 };
 
+export type SessionInfo = {
+  id: string;
+  name: string;
+  role: TRole;
+  image?: string;
+  is_verified: boolean;
+  capabilities: readonly string[];
+  access_expires_at: string;
+};
+
 export type AuthResponse = TResponse<{
-  info?: TUser;
+  info?: SessionInfo;
 }>;

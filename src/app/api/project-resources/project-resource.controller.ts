@@ -150,9 +150,7 @@ export const deleteProjectResources = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} project resources deleted successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
   },
 );
@@ -166,9 +164,7 @@ export const deleteProjectResourcesPermanent = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} project resources permanently deleted successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
   },
 );
@@ -195,9 +191,7 @@ export const restoreProjectResources = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} project resources restored successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
   },
 );

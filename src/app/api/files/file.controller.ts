@@ -1,87 +1,66 @@
-import type { TStorageResult } from '@/lib/storage';
-import type { AuthRequest } from '@/middleware/auth.middleware';
-import catchAsync from '@/utils/catch-async';
-import sendResponse from '@/utils/send-response';
-import httpStatus from 'http-status';
-import path from 'path';
-import * as FileService from './file.service';
+import type { TPreparedStorageMedia } from "@/middleware/storage.middleware";
+import type { AuthRequest } from "@/middleware/auth.middleware";
+import catchAsync from "@/utils/catch-async";
+import sendResponse from "@/utils/send-response";
+import httpStatus from "http-status";
+import * as FileService from "./file.service";
 
 type SavedFilesRequest = AuthRequest & {
   parsedBody?: any;
   files?: Record<string, File[]>;
   savedFiles?: Record<string, string[]>;
-  storages?: TStorageResult[];
-  storageUploadsCommitted?: boolean;
+  preparedMedia?: TPreparedStorageMedia[];
 };
 
-const buildBaseUrl = (req: AuthRequest | Request): string => {
-  const url = new URL(req.url);
-  return `${url.protocol}//${url.host}`;
-};
-
-export const createLocalFile = catchAsync(async (req: SavedFilesRequest) => {
+export const createManagedFiles = catchAsync(async (req: SavedFilesRequest) => {
   const body = req.parsedBody || {};
-  const fileObj = req.files?.file?.[0];
-  const savedPath = req.savedFiles?.file?.[0];
+  const preparedMedia = req.preparedMedia ?? [];
 
-  if (!fileObj || !savedPath) {
-    return sendResponse({
-      status: httpStatus.BAD_REQUEST,
-      success: false,
-      message: 'No file uploaded',
-      data: null,
-    });
-  }
-
-  const baseUrl = buildBaseUrl(req);
-
-  const result = await FileService.createLocalFile(
+  const result = await FileService.createManagedFiles(
     req.user!,
-    {
-      filename: path.basename(savedPath),
-      originalname: fileObj.name,
-      path: savedPath,
-      mimetype: fileObj.type,
-      size: fileObj.size,
-    },
-    body,
-    baseUrl,
+    preparedMedia,
+    body
   );
 
   return sendResponse({
     status: httpStatus.CREATED,
     success: true,
-    message: 'File uploaded to local storage successfully',
+    message: "Media ingested successfully",
     data: result,
   });
 });
 
-export const createCloudFiles = catchAsync(async (req: SavedFilesRequest) => {
-  const body = req.parsedBody || {};
-  const storages = req.storages ?? [];
-
-  const result = await FileService.createCloudFiles(req.user!, storages, body);
-  req.storageUploadsCommitted = true;
-
-  return sendResponse({
-    status: httpStatus.CREATED,
-    success: true,
-    message: 'Files uploaded to cloud storage successfully',
-    data: result,
-  });
-});
+export const getFileDelivery = catchAsync(
+  async (req: AuthRequest, { params }: { params: { id: string } }) => {
+    const rawTtl = new URL(req.url).searchParams.get("expires_in");
+    const result = await FileService.getFileDelivery(
+      params.id,
+      req.user,
+      rawTtl ? Number(rawTtl) : undefined
+    );
+    const response = sendResponse({
+      status: httpStatus.OK,
+      success: true,
+      message: "Media delivery created successfully",
+      data: result,
+    });
+    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    return response;
+  }
+);
 
 export const getFile = catchAsync(
   async (req: AuthRequest, { params }: { params: { id: string } }) => {
-    const result = await FileService.getFile(params.id);
+    const result = await FileService.getFile(params.id, req.user!);
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'File retrieved successfully',
+      message: "File retrieved successfully",
       data: result,
     });
-  },
+  }
 );
 
 export const getFiles = catchAsync(async (req: AuthRequest | Request) => {
@@ -96,7 +75,7 @@ export const getFiles = catchAsync(async (req: AuthRequest | Request) => {
   return sendResponse({
     status: httpStatus.OK,
     success: true,
-    message: 'Files retrieved successfully',
+    message: "Files retrieved successfully",
     meta: result.meta,
     data: result.data,
   });
@@ -114,27 +93,24 @@ export const getSelfFiles = catchAsync(async (req: AuthRequest) => {
   return sendResponse({
     status: httpStatus.OK,
     success: true,
-    message: 'Your files retrieved successfully',
+    message: "Your files retrieved successfully",
     meta: result.meta,
     data: result.data,
   });
 });
 
 export const updateFile = catchAsync(
-  async (
-    req: SavedFilesRequest,
-    { params }: { params: { id: string } },
-  ) => {
+  async (req: SavedFilesRequest, { params }: { params: { id: string } }) => {
     const body = req.parsedBody || (await req.json());
-    const result = await FileService.updateFile(params.id, body);
+    const result = await FileService.updateFile(req.user!, params.id, body);
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'File updated successfully',
+      message: "File updated successfully",
       data: result,
     });
-  },
+  }
 );
 
 export const updateFiles = catchAsync(async (req: SavedFilesRequest) => {
@@ -145,22 +121,22 @@ export const updateFiles = catchAsync(async (req: SavedFilesRequest) => {
   return sendResponse({
     status: httpStatus.OK,
     success: true,
-    message: 'Files updated successfully',
+    message: "Files updated successfully",
     data: result,
   });
 });
 
 export const deleteFile = catchAsync(
   async (req: AuthRequest, { params }: { params: { id: string } }) => {
-    await FileService.deleteFile(params.id);
+    await FileService.deleteFile(req.user!, params.id);
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'File soft deleted successfully',
+      message: "File soft deleted successfully",
       data: null,
     });
-  },
+  }
 );
 
 export const deleteFiles = catchAsync(async (req: SavedFilesRequest) => {
@@ -172,7 +148,7 @@ export const deleteFiles = catchAsync(async (req: SavedFilesRequest) => {
     status: httpStatus.OK,
     success: true,
     message: `${result.count} files soft deleted successfully`,
-    data: { not_found_ids: result.not_found_ids },
+    data: result,
   });
 });
 
@@ -183,10 +159,10 @@ export const deleteFilePermanent = catchAsync(
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'File and physical storage permanently deleted',
+      message: "File and physical storage permanently deleted",
       data: null,
     });
-  },
+  }
 );
 
 export const deleteFilesPermanent = catchAsync(
@@ -199,9 +175,9 @@ export const deleteFilesPermanent = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} files and assets permanently deleted`,
-      data: { not_found_ids: result.not_found_ids },
+      data: result,
     });
-  },
+  }
 );
 
 export const restoreFile = catchAsync(
@@ -211,10 +187,10 @@ export const restoreFile = catchAsync(
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'File restored successfully',
+      message: "File restored successfully",
       data: result,
     });
-  },
+  }
 );
 
 export const restoreFiles = catchAsync(async (req: SavedFilesRequest) => {
@@ -226,6 +202,16 @@ export const restoreFiles = catchAsync(async (req: SavedFilesRequest) => {
     status: httpStatus.OK,
     success: true,
     message: `${result.count} files restored successfully`,
-    data: { not_found_ids: result.not_found_ids },
+    data: result,
+  });
+});
+
+export const reconcileFailedMedia = catchAsync(async () => {
+  const result = await FileService.reconcileFailedManagedMedia();
+  return sendResponse({
+    status: httpStatus.OK,
+    success: true,
+    message: "Managed media reconciliation completed",
+    data: result,
   });
 });

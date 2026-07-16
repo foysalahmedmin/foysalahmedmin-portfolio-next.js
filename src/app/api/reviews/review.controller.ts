@@ -170,9 +170,7 @@ export const deleteReviews = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} reviews deleted successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
   },
 );
@@ -186,9 +184,7 @@ export const deleteReviewsPermanent = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} reviews permanently deleted successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
   },
 );
@@ -215,9 +211,7 @@ export const restoreReviews = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} reviews restored successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
   },
 );

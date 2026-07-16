@@ -1,6 +1,12 @@
 import type { TJwtPayload, TRole } from "@/types/jsonwebtoken.type";
 
-export const ADMIN_ROLES = ["super-admin", "admin"] as const;
+export const ADMIN_ROLES = [
+  "super-admin",
+  "admin",
+  "editor",
+  "author",
+  "contributor",
+] as const;
 
 export type AdminRole = (typeof ADMIN_ROLES)[number];
 

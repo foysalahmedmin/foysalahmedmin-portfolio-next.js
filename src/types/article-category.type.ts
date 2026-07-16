@@ -1,32 +1,25 @@
 // Frontend types with populated data (for API responses)
 
-export type TArticleCategoryStatus = 'active' | 'inactive';
-
-export type TArticleCategorySEO = {
-  title?: string;
-  description?: string;
-  keywords?: string[];
-};
+export type TArticleCategoryStatus = "active" | "inactive";
 
 export type TArticleCategoryPopulated = {
   _id: string;
   name: string;
-  slug: string;
+  slug?: string;
 };
 
 export type TArticleCategory = {
   _id: string;
   sequence: number;
   icon?: string;
-  thumbnail?: string;
   name: string;
   slug: string;
+  slug_history?: Array<{ slug: string; changed_at: string }>;
   description?: string;
-  status: TArticleCategoryStatus;
+  status?: TArticleCategoryStatus;
   tags: string[];
   parent?: TArticleCategoryPopulated | null;
   layout?: string;
-  seo?: TArticleCategorySEO;
   created_at?: string;
   updated_at?: string;
 };

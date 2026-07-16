@@ -1,8 +1,8 @@
 import bcrypt from "bcrypt";
-import type { Query } from "mongoose";
 import mongoose, { Schema } from "mongoose";
 import { ENV } from "@/config";
-import type { TUser, TUserDocument, TUserModel } from "./user.type";
+import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
+import type { TUserDocument, TUserModel } from "./user.type";
 
 const userSchema = new Schema<TUserDocument>(
   {
@@ -22,13 +22,12 @@ const userSchema = new Schema<TUserDocument>(
       type: String,
       required: true,
       lowercase: true,
-      unique: true,
       trim: true,
     },
     password: {
       type: String,
       required: true,
-      minlength: [6, "the password should minimum 6 character"],
+      minlength: [12, "Password must be at least 12 characters"],
       maxlength: [72, "Password cannot exceed 72 characters"],
       validate: {
         validator: (value: string) => Buffer.byteLength(value, "utf8") <= 72,
@@ -57,6 +56,7 @@ const userSchema = new Schema<TUserDocument>(
     },
     is_verified: { type: Boolean, default: false },
     is_deleted: { type: Boolean, default: false, select: false },
+    deleted_at: { type: Date, default: null, select: false },
   },
   {
     timestamps: {
@@ -82,7 +82,6 @@ userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
   delete user.password_changed_at;
-  delete user.is_deleted;
   return user;
 };
 
@@ -113,26 +112,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Query middleware to exclude deleted users
-userSchema.pre(/^find/, function (next) {
-  const query = this as unknown as Query<TUser, TUser>;
-  const opts = query.getOptions();
-
-  if (!opts?.bypassDeleted && query.getQuery().is_deleted === undefined) {
-    query.setQuery({
-      ...query.getQuery(),
-      is_deleted: { $ne: true },
-    });
-  }
-
-  next();
-});
-
-// Aggregation pipeline
-userSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
-  next();
-});
+applySoftDeletePlugin(userSchema);
 
 // Static methods
 userSchema.statics.isUserExist = async function (_id: string) {
@@ -148,6 +128,7 @@ userSchema.statics.isUserExistByEmail = async function (email: string) {
 // Instance methods
 userSchema.methods.softDelete = async function () {
   this.is_deleted = true;
+  this.deleted_at = new Date();
   return await this.save();
 };
 

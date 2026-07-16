@@ -15,6 +15,7 @@ export type TProjectResource = {
   description?: string;
   is_private: boolean;
   is_deleted?: boolean;
+  deleted_at?: Date | string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
 };
@@ -29,4 +30,3 @@ export interface TProjectResourceDocument
 export type TProjectResourceModel = Model<TProjectResourceDocument> & {
   isResourceExist(_id: string): Promise<TProjectResourceDocument | null>;
 };
-
