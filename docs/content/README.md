@@ -7,6 +7,7 @@ This directory is the committed, redacted source of truth for deciding what the 
 - `content-truth.schema.json` defines the machine-readable contract and the only allowed truth statuses.
 - `content-truth.v1.json` is the versioned audit of the public source at repository revision `91dddac18ee2` on 2026-07-15.
 - `generated-media-direction.md` locks the P12 visual direction, 17-master production manifest, prompt grammar, pilot/QA gates, provenance template, resolved ingestion prerequisites, and remaining binding/generation blockers without claiming that media has been generated or approved.
+- `generated-media-system-design-pilot.v1.json` stores the exact System Design pilot generation request and metadata checklist; it is not evidence that the pilot exists.
 
 The v1 manifest covers all hardcoded public identity/contact values, positioning, metrics, testimonials, experience, education/courses, project/article assumptions and fallbacks, social accounts, resume exposure, and the current five-pillar coverage. Project and article bodies live outside Git in MongoDB; because no approved seed/export was available, the manifest records their publication contract and blocks individual records rather than pretending to have audited them.
 
