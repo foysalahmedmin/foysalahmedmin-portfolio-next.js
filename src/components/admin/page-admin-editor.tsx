@@ -12,6 +12,7 @@ import {
   EditorialErrorSummary,
   EditorialNotice,
   EditorialPanel,
+  EditorialSeoSocialPreview,
   EditorialStatus,
   EditorialStickyActions,
   EditorialWorkspaceHeader,
@@ -521,6 +522,15 @@ export default function PageAdminEditor({
             </EditorialField>
           </div>
         </div>
+        <EditorialSeoSocialPreview
+          title={draft.seo.title}
+          description={draft.seo.description}
+          url={page.route_path}
+          siteName="Portfolio page draft"
+          fallbackTitle="Inherited published Site title"
+          fallbackDescription="Inherited published Site description"
+          noindex={draft.seo.noindex}
+        />
       </EditorialPanel>
 
       <EditorialPanel

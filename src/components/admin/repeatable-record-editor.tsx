@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  EditorialCompletenessPanel,
+  EditorialPanel,
+  EditorialPublishBar,
+  EditorialSlugEditor,
+  EditorialStatus,
+  EditorialWorkspaceHeader,
+  toEditorialSlug,
+  type TEditorialCompletenessItem,
+} from "@/components/admin/editorial-editor-primitives";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ErrorState, Skeleton } from "@/components/ui/async-state";
 import {
@@ -216,6 +226,58 @@ const RepeatableRecordEditor = ({
     });
     setSubmitError("");
   }, []);
+
+  const completenessItems = useMemo(() => {
+    const validation = validateRepeatableForm(workspace, values, canPublish);
+    const title = String(values.title ?? "").trim();
+    const explicitSlug = String(values.slug ?? "").trim();
+    const requiredDomainFields = workspace.fields.filter(
+      (field) => field.required
+    );
+    const domainFieldsComplete = requiredDomainFields.every(
+      (field) => !validation[field.name]
+    );
+    const editorValid = Object.keys(validation).length === 0;
+
+    return [
+      {
+        id: "title",
+        label: workspace.singular === "FAQ" ? "Question" : "Title",
+        complete: Boolean(title) && !validation.title,
+        detail: "Required for stable editorial identity.",
+      },
+      {
+        id: "slug",
+        label: "Canonical identity",
+        complete:
+          Boolean(explicitSlug || toEditorialSlug(title)) && !validation.slug,
+        detail: explicitSlug
+          ? "An explicit canonical slug is set."
+          : "A valid slug will be derived from the title on create.",
+      },
+      {
+        id: "domain-fields",
+        label: "Required domain fields",
+        complete: domainFieldsComplete,
+        detail: `${requiredDomainFields.length} domain-specific requirement${requiredDomainFields.length === 1 ? "" : "s"} checked.`,
+      },
+      {
+        id: "editor-validation",
+        label: "Editor validation",
+        complete: editorValid,
+        detail:
+          "Server-side relationship, consent, evidence, and concurrency checks still run on save.",
+      },
+      {
+        id: "summary",
+        label: "Editorial summary",
+        complete: Boolean(String(values.summary ?? "").trim()),
+        detail:
+          "Optional here, but useful for cards and metadata where supported.",
+        required: false,
+      },
+    ] satisfies readonly TEditorialCompletenessItem[];
+  }, [canPublish, values, workspace]);
 
   const fieldId = (name: string) => `repeatable-${workspace.key}-${name}`;
   const describedBy = (field: RepeatableAdminField) =>
@@ -706,29 +768,40 @@ const RepeatableRecordEditor = ({
 
   return (
     <div className="space-y-7">
-      <header>
-        <Link
-          href={`/admin/${workspace.key}`}
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
-        >
-          <ArrowLeft aria-hidden="true" className="size-4" />
-          Back to {workspace.label.toLowerCase()}
-        </Link>
-        <p className="text-primary mt-5 text-xs font-bold tracking-[0.18em] uppercase">
-          {mode === "edit"
-            ? "Edit repeatable content"
-            : "New repeatable content"}
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">
-          {mode === "edit"
+      <EditorialWorkspaceHeader
+        eyebrow={
+          mode === "edit" ? "Edit repeatable content" : "New repeatable content"
+        }
+        title={
+          mode === "edit"
             ? `Edit ${workspace.singular}`
-            : `Create ${workspace.singular}`}
-        </h1>
-        <p className="text-muted-foreground mt-2 max-w-3xl text-sm leading-6">
-          Required fields are marked with an asterisk. Publication remains
-          subject to backend evidence and integrity checks.
-        </p>
-      </header>
+            : `Create ${workspace.singular}`
+        }
+        description="Required fields are marked with an asterisk. Publication remains subject to backend evidence and integrity checks."
+        status={
+          <>
+            <EditorialStatus
+              tone={values.status === "published" ? "success" : "neutral"}
+            >
+              {String(values.status)}
+            </EditorialStatus>
+            <EditorialStatus tone={mode === "edit" ? "neutral" : "warning"}>
+              {mode === "edit"
+                ? `Revision ${record?.version ?? "—"}`
+                : "Unsaved"}
+            </EditorialStatus>
+          </>
+        }
+        actions={
+          <Link
+            href={`/admin/${workspace.key}`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            Back to {workspace.label.toLowerCase()}
+          </Link>
+        }
+      />
 
       {referenceError ? (
         <div
@@ -758,175 +831,153 @@ const RepeatableRecordEditor = ({
           </div>
         ) : null}
 
-        <section
-          className="border-border bg-card space-y-5 rounded-3xl border p-5 shadow-sm sm:p-7"
-          aria-labelledby="content-identity-heading"
+        <EditorialPanel
+          id="content-identity-heading"
+          title="Content identity"
+          description="Stable identity, summary, and five-discipline relationships."
         >
-          <div>
-            <h2 id="content-identity-heading" className="text-xl font-bold">
-              Content identity
-            </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Stable identity, summary, and five-discipline relationships.
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2">
-            <FieldFrame
-              id={fieldId("title")}
-              label={workspace.singular === "FAQ" ? "Question" : "Title"}
-              required
-              error={errors.title}
-            >
-              <FormControl
-                id={fieldId("title")}
-                value={String(values.title ?? "")}
-                required
-                maxLength={160}
-                disabled={submitting}
-                aria-invalid={Boolean(errors.title)}
-                aria-describedby={
-                  errors.title ? `${fieldId("title")}-error` : undefined
-                }
-                onChange={(event) => setValue("title", event.target.value)}
-                className="rounded-xl"
-              />
-            </FieldFrame>
-            <FieldFrame
-              id={fieldId("slug")}
-              label="Canonical slug"
-              help="Leave blank when creating to derive it from the title."
-              error={errors.slug}
-            >
-              <FormControl
-                id={fieldId("slug")}
-                value={String(values.slug ?? "")}
-                maxLength={180}
-                disabled={submitting}
-                placeholder="derived-from-title"
-                aria-invalid={Boolean(errors.slug)}
-                aria-describedby={`${fieldId("slug")}-help${errors.slug ? ` ${fieldId("slug")}-error` : ""}`}
-                onChange={(event) => setValue("slug", event.target.value)}
-                className="rounded-xl"
-              />
-            </FieldFrame>
-          </div>
-          <FieldFrame
-            id={fieldId("summary")}
-            label="Summary"
-            help="Keep it concise and evidence-safe; some domains require this before publication."
-            error={errors.summary}
-          >
-            <textarea
-              id={fieldId("summary")}
-              value={String(values.summary ?? "")}
-              rows={4}
-              maxLength={600}
-              disabled={submitting}
-              aria-invalid={Boolean(errors.summary)}
-              aria-describedby={`${fieldId("summary")}-help${errors.summary ? ` ${fieldId("summary")}-error` : ""}`}
-              onChange={(event) => setValue("summary", event.target.value)}
-              className={textareaClassName}
-            />
-          </FieldFrame>
-          {workspace.supportsPillars ? (
+          <div className="space-y-5">
             <div className="grid gap-5 md:grid-cols-2">
               <FieldFrame
-                id={fieldId("primary_pillar")}
-                label="Primary discipline"
-                error={errors.primary_pillar}
+                id={fieldId("title")}
+                label={workspace.singular === "FAQ" ? "Question" : "Title"}
+                required
+                error={errors.title}
               >
-                <select
-                  id={fieldId("primary_pillar")}
-                  value={String(values.primary_pillar ?? "")}
+                <FormControl
+                  id={fieldId("title")}
+                  value={String(values.title ?? "")}
+                  required
+                  maxLength={160}
                   disabled={submitting}
-                  onChange={(event) => {
-                    const primary = event.target.value;
-                    setMatchedField("primary_pillar", primary);
-                    setValue(
-                      "secondary_pillars",
-                      stringArray(values.secondary_pillars).filter(
-                        (item) => item !== primary
-                      )
-                    );
-                  }}
-                  className={inputClassName}
-                >
-                  <option value="">Not assigned</option>
-                  {PILLAR_OPTIONS.map((pillar) => (
-                    <option key={pillar.value} value={pillar.value}>
-                      {pillar.label}
-                    </option>
-                  ))}
-                </select>
+                  aria-invalid={Boolean(errors.title)}
+                  aria-describedby={
+                    errors.title ? `${fieldId("title")}-error` : undefined
+                  }
+                  onChange={(event) => setValue("title", event.target.value)}
+                  className="rounded-xl"
+                />
               </FieldFrame>
-              <fieldset
-                id={fieldId("secondary_pillars")}
-                tabIndex={-1}
-                aria-invalid={Boolean(errors.secondary_pillars)}
-                aria-describedby={
-                  errors.secondary_pillars
-                    ? `${fieldId("secondary_pillars")}-error`
-                    : undefined
-                }
-              >
-                <legend className="mb-1 text-sm font-medium">
-                  Secondary disciplines
-                </legend>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {PILLAR_OPTIONS.map((pillar) => {
-                    const selected = stringArray(values.secondary_pillars);
-                    const disabled = values.primary_pillar === pillar.value;
-                    return (
-                      <label
-                        key={pillar.value}
-                        className="border-input bg-card flex min-h-11 items-center gap-3 rounded-xl border px-3 text-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selected.includes(pillar.value)}
-                          disabled={submitting || disabled}
-                          onChange={(event) =>
-                            setValue(
-                              "secondary_pillars",
-                              event.target.checked
-                                ? [...selected, pillar.value]
-                                : selected.filter(
-                                    (item) => item !== pillar.value
-                                  )
-                            )
-                          }
-                          className="accent-primary size-4"
-                        />
-                        {pillar.label}
-                      </label>
-                    );
-                  })}
-                </div>
-                {errors.secondary_pillars ? (
-                  <FormControlError
-                    id={`${fieldId("secondary_pillars")}-error`}
-                  >
-                    {errors.secondary_pillars}
-                  </FormControlError>
-                ) : null}
-              </fieldset>
+              <EditorialSlugEditor
+                id={fieldId("slug")}
+                value={String(values.slug ?? "")}
+                sourceValue={String(values.title ?? "")}
+                onChange={(value) => setValue("slug", value)}
+                disabled={submitting}
+                error={errors.slug}
+                help="Leave blank when creating to derive it from the title, or set an explicit canonical slug."
+              />
             </div>
-          ) : null}
-        </section>
-
-        <section
-          className="border-border bg-card space-y-5 rounded-3xl border p-5 shadow-sm sm:p-7"
-          aria-labelledby="domain-fields-heading"
-        >
-          <div>
-            <h2 id="domain-fields-heading" className="text-xl font-bold">
-              {workspace.label} fields
-            </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Domain-specific content, relationships, evidence, and consent
-              controls.
-            </p>
+            <FieldFrame
+              id={fieldId("summary")}
+              label="Summary"
+              help="Keep it concise and evidence-safe; some domains require this before publication."
+              error={errors.summary}
+            >
+              <textarea
+                id={fieldId("summary")}
+                value={String(values.summary ?? "")}
+                rows={4}
+                maxLength={600}
+                disabled={submitting}
+                aria-invalid={Boolean(errors.summary)}
+                aria-describedby={`${fieldId("summary")}-help${errors.summary ? ` ${fieldId("summary")}-error` : ""}`}
+                onChange={(event) => setValue("summary", event.target.value)}
+                className={textareaClassName}
+              />
+            </FieldFrame>
+            {workspace.supportsPillars ? (
+              <div className="grid gap-5 md:grid-cols-2">
+                <FieldFrame
+                  id={fieldId("primary_pillar")}
+                  label="Primary discipline"
+                  error={errors.primary_pillar}
+                >
+                  <select
+                    id={fieldId("primary_pillar")}
+                    value={String(values.primary_pillar ?? "")}
+                    disabled={submitting}
+                    onChange={(event) => {
+                      const primary = event.target.value;
+                      setMatchedField("primary_pillar", primary);
+                      setValue(
+                        "secondary_pillars",
+                        stringArray(values.secondary_pillars).filter(
+                          (item) => item !== primary
+                        )
+                      );
+                    }}
+                    className={inputClassName}
+                  >
+                    <option value="">Not assigned</option>
+                    {PILLAR_OPTIONS.map((pillar) => (
+                      <option key={pillar.value} value={pillar.value}>
+                        {pillar.label}
+                      </option>
+                    ))}
+                  </select>
+                </FieldFrame>
+                <fieldset
+                  id={fieldId("secondary_pillars")}
+                  tabIndex={-1}
+                  aria-invalid={Boolean(errors.secondary_pillars)}
+                  aria-describedby={
+                    errors.secondary_pillars
+                      ? `${fieldId("secondary_pillars")}-error`
+                      : undefined
+                  }
+                >
+                  <legend className="mb-1 text-sm font-medium">
+                    Secondary disciplines
+                  </legend>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {PILLAR_OPTIONS.map((pillar) => {
+                      const selected = stringArray(values.secondary_pillars);
+                      const disabled = values.primary_pillar === pillar.value;
+                      return (
+                        <label
+                          key={pillar.value}
+                          className="border-input bg-card flex min-h-11 items-center gap-3 rounded-xl border px-3 text-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(pillar.value)}
+                            disabled={submitting || disabled}
+                            onChange={(event) =>
+                              setValue(
+                                "secondary_pillars",
+                                event.target.checked
+                                  ? [...selected, pillar.value]
+                                  : selected.filter(
+                                      (item) => item !== pillar.value
+                                    )
+                              )
+                            }
+                            className="accent-primary size-4"
+                          />
+                          {pillar.label}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  {errors.secondary_pillars ? (
+                    <FormControlError
+                      id={`${fieldId("secondary_pillars")}-error`}
+                    >
+                      {errors.secondary_pillars}
+                    </FormControlError>
+                  ) : null}
+                </fieldset>
+              </div>
+            ) : null}
           </div>
+        </EditorialPanel>
+
+        <EditorialPanel
+          id="domain-fields-heading"
+          title={`${workspace.label} fields`}
+          description="Domain-specific content, relationships, evidence, and consent controls."
+        >
           <div className="grid gap-5 md:grid-cols-2">
             {workspace.fields.map((field) => (
               <div
@@ -944,139 +995,148 @@ const RepeatableRecordEditor = ({
               </div>
             ))}
           </div>
-        </section>
+        </EditorialPanel>
 
-        <section
-          className="border-border bg-card space-y-5 rounded-3xl border p-5 shadow-sm sm:p-7"
-          aria-labelledby="publication-heading"
+        <EditorialCompletenessPanel items={completenessItems} />
+
+        <EditorialPanel
+          id="publication-heading"
+          title="Publication and lifecycle"
+          description="Publishing invokes backend completeness, evidence, and relationship checks."
         >
-          <div>
-            <h2 id="publication-heading" className="text-xl font-bold">
-              Publication and lifecycle
-            </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Publishing invokes backend completeness, evidence, and
-              relationship checks.
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            <FieldFrame
-              id={fieldId("status")}
-              label="Publication status"
-              required
-              error={errors.status}
-            >
-              <select
+          <div className="space-y-5">
+            <div className="grid gap-5 md:grid-cols-3">
+              <FieldFrame
                 id={fieldId("status")}
-                value={String(values.status)}
-                disabled={submitting}
-                onChange={(event) => setValue("status", event.target.value)}
-                className={inputClassName}
+                label="Publication status"
+                required
+                error={errors.status}
               >
-                <option value="draft">Draft</option>
-                <option value="published" disabled={!canPublish}>
-                  Published
-                </option>
-                <option value="archived">Archived</option>
-              </select>
-            </FieldFrame>
-            <FieldFrame
-              id={fieldId("claim_verification")}
-              label="Claim verification"
-              required
-            >
-              <select
-                id={fieldId("claim_verification")}
-                value={String(values.claim_verification)}
-                disabled={submitting}
-                onChange={(event) =>
-                  setValue("claim_verification", event.target.value)
-                }
-                className={inputClassName}
-              >
-                {workspace.claimVerificationOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                <select
+                  id={fieldId("status")}
+                  value={String(values.status)}
+                  disabled={submitting}
+                  onChange={(event) => setValue("status", event.target.value)}
+                  className={inputClassName}
+                >
+                  <option value="draft">Draft</option>
+                  <option value="published" disabled={!canPublish}>
+                    Published
                   </option>
-                ))}
-              </select>
-            </FieldFrame>
-            <FieldFrame
-              id={fieldId("sequence")}
-              label="Display order"
-              required
-              error={errors.sequence}
-            >
-              <FormControl
+                  <option value="archived">Archived</option>
+                </select>
+              </FieldFrame>
+              <FieldFrame
+                id={fieldId("claim_verification")}
+                label="Claim verification"
+                required
+              >
+                <select
+                  id={fieldId("claim_verification")}
+                  value={String(values.claim_verification)}
+                  disabled={submitting}
+                  onChange={(event) =>
+                    setValue("claim_verification", event.target.value)
+                  }
+                  className={inputClassName}
+                >
+                  {workspace.claimVerificationOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldFrame>
+              <FieldFrame
                 id={fieldId("sequence")}
-                type="number"
-                min={0}
-                max={1_000_000}
-                step={1}
-                value={String(values.sequence)}
-                disabled={submitting}
-                aria-invalid={Boolean(errors.sequence)}
-                onChange={(event) => setValue("sequence", event.target.value)}
-                className="rounded-xl"
-              />
-            </FieldFrame>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <label className="border-input bg-card flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-sm">
-              <input
-                type="checkbox"
-                checked={Boolean(values.enabled)}
-                disabled={submitting}
-                onChange={(event) => setValue("enabled", event.target.checked)}
-                className="accent-primary size-4"
-              />
-              <span>
-                <span className="block font-medium">Enabled</span>
-                <span className="text-muted-foreground text-xs">
-                  Disabled records cannot be projected publicly.
+                label="Display order"
+                required
+                error={errors.sequence}
+              >
+                <FormControl
+                  id={fieldId("sequence")}
+                  type="number"
+                  min={0}
+                  max={1_000_000}
+                  step={1}
+                  value={String(values.sequence)}
+                  disabled={submitting}
+                  aria-invalid={Boolean(errors.sequence)}
+                  onChange={(event) => setValue("sequence", event.target.value)}
+                  className="rounded-xl"
+                />
+              </FieldFrame>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="border-input bg-card flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(values.enabled)}
+                  disabled={submitting}
+                  onChange={(event) =>
+                    setValue("enabled", event.target.checked)
+                  }
+                  className="accent-primary size-4"
+                />
+                <span>
+                  <span className="block font-medium">Enabled</span>
+                  <span className="text-muted-foreground text-xs">
+                    Disabled records cannot be projected publicly.
+                  </span>
                 </span>
-              </span>
-            </label>
-            <label className="border-input bg-card flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-sm">
-              <input
-                type="checkbox"
-                checked={Boolean(values.is_featured)}
-                disabled={submitting}
-                onChange={(event) =>
-                  setValue("is_featured", event.target.checked)
-                }
-                className="accent-primary size-4"
-              />
-              <span>
-                <span className="block font-medium">Featured</span>
-                <span className="text-muted-foreground text-xs">
-                  Featured is an editorial signal, not a verification claim.
+              </label>
+              <label className="border-input bg-card flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(values.is_featured)}
+                  disabled={submitting}
+                  onChange={(event) =>
+                    setValue("is_featured", event.target.checked)
+                  }
+                  className="accent-primary size-4"
+                />
+                <span>
+                  <span className="block font-medium">Featured</span>
+                  <span className="text-muted-foreground text-xs">
+                    Featured is an editorial signal, not a verification claim.
+                  </span>
                 </span>
-              </span>
-            </label>
+              </label>
+            </div>
           </div>
-        </section>
+        </EditorialPanel>
 
-        <div className="border-border bg-background/95 sticky bottom-4 flex flex-col-reverse gap-3 rounded-2xl border p-3 shadow-lg backdrop-blur sm:flex-row sm:justify-end">
-          <Link
-            href={`/admin/${workspace.key}`}
-            className={buttonVariants({ variant: "outline" })}
-          >
-            Cancel
-          </Link>
-          <Button
-            type="submit"
-            disabled={submitting || Boolean(referenceError)}
-            isLoading={submitting}
-          >
-            <Save aria-hidden="true" className="size-4" />
-            {submitting
-              ? "Saving…"
-              : mode === "edit"
-                ? "Save changes"
-                : `Create ${workspace.singular}`}
-          </Button>
-        </div>
+        <EditorialPublishBar
+          busy={submitting}
+          message={
+            submitting
+              ? "Saving and running editorial checks…"
+              : values.status === "published"
+                ? "Saving requests publication; backend evidence checks remain authoritative."
+                : "Save this record without changing its current publication state."
+          }
+        >
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Link
+              href={`/admin/${workspace.key}`}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Cancel
+            </Link>
+            <Button
+              type="submit"
+              disabled={submitting || Boolean(referenceError)}
+              isLoading={submitting}
+            >
+              <Save aria-hidden="true" className="size-4" />
+              {submitting
+                ? "Saving…"
+                : mode === "edit"
+                  ? "Save changes"
+                  : `Create ${workspace.singular}`}
+            </Button>
+          </div>
+        </EditorialPublishBar>
       </form>
     </div>
   );
