@@ -4,9 +4,114 @@ import { withPublicPagination } from "@/utils/public-query";
 import httpStatus from "http-status";
 import * as ReviewRepository from "./review.repository";
 
+type TAdminReviewRelation = Readonly<{ id: string; name: string }>;
+
+export type TAdminReviewProjection = Readonly<{
+  id: string;
+  author: TAdminReviewRelation | null;
+  target: TAdminReviewRelation | null;
+  target_model: "Project" | "Article";
+  rating: number;
+  review: string;
+  status: "pending" | "approved" | "rejected";
+  is_edited: boolean;
+  edited_at: Date | string | null;
+  created_at: Date | string | null;
+  updated_at: Date | string | null;
+  deleted: boolean;
+}>;
+
+const asRecord = (value: unknown): Record<string, unknown> => {
+  if (!value || typeof value !== "object") return {};
+  const candidate = value as {
+    toObject?: () => unknown;
+  };
+  const plain =
+    typeof candidate.toObject === "function" ? candidate.toObject() : value;
+  return plain && typeof plain === "object"
+    ? (plain as Record<string, unknown>)
+    : {};
+};
+
+const idString = (value: unknown): string | null => {
+  if (typeof value === "string") return value;
+  if (!value || typeof value !== "object") return null;
+  const record = value as { _id?: unknown; toString?: () => string };
+  if (record._id !== undefined) return idString(record._id);
+  const serialized = record.toString?.();
+  return serialized && serialized !== "[object Object]" ? serialized : null;
+};
+
+const projectAdminRelation = (value: unknown): TAdminReviewRelation | null => {
+  const record = asRecord(value);
+  const id = idString(record._id ?? record.id ?? value);
+  const name = typeof record.name === "string" ? record.name.trim() : "";
+  return id && name ? { id, name } : null;
+};
+
+const dateValue = (value: unknown): Date | string | null =>
+  value instanceof Date || typeof value === "string" ? value : null;
+
+/**
+ * Server-side allowlist for moderation responses. Repository projections stay
+ * narrow too, but this boundary prevents future population changes from
+ * exposing email, role, private media, or arbitrary account fields.
+ */
+export const toAdminReviewProjection = (
+  value: unknown
+): TAdminReviewProjection => {
+  const record = asRecord(value);
+  const id = idString(record._id ?? record.id);
+  const targetModel =
+    record.target_model === "Article" || record.target_model === "Project"
+      ? record.target_model
+      : null;
+  const status =
+    record.status === "pending" ||
+    record.status === "approved" ||
+    record.status === "rejected"
+      ? record.status
+      : null;
+  const rating = Number(record.rating);
+  const review = typeof record.review === "string" ? record.review : null;
+  if (
+    !id ||
+    !targetModel ||
+    !status ||
+    !Number.isInteger(rating) ||
+    rating < 1 ||
+    rating > 5 ||
+    review === null
+  ) {
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "Review response could not be projected safely"
+    );
+  }
+
+  return {
+    id,
+    author: projectAdminRelation(record.author),
+    target: projectAdminRelation(record.target),
+    target_model: targetModel,
+    rating,
+    review,
+    status,
+    is_edited: record.is_edited === true,
+    edited_at: dateValue(record.edited_at),
+    created_at: dateValue(record.created_at),
+    updated_at: dateValue(record.updated_at),
+    deleted: record.is_deleted === true || record.deleted === true,
+  };
+};
+
 export const getReviews = async (queryParams: Record<string, unknown>) => {
   await connectDB();
-  return await ReviewRepository.findPaginated(queryParams);
+  const result = await ReviewRepository.findPaginated(queryParams);
+  return {
+    ...result,
+    data: result.data.map(toAdminReviewProjection),
+  };
 };
 
 export const getPublicReviews = async (
@@ -26,7 +131,7 @@ export const getReviewById = async (id: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Review not found");
   }
 
-  return review;
+  return toAdminReviewProjection(review);
 };
 
 export const getPublicReviewById = async (id: string) => {
@@ -109,7 +214,7 @@ export const updateReviewById = async (
   await review.save();
 
   return await review.populate([
-    { path: "author", select: "_id name email image" },
+    { path: "author", select: "_id name" },
     { path: "target", select: "_id name" },
   ]);
 };
@@ -280,8 +385,9 @@ export const updateReviewStatusById = async (
     throw new AppError(httpStatus.NOT_FOUND, "Review not found");
   }
 
-  return await review.populate([
-    { path: "author", select: "_id name email image" },
+  const populated = await review.populate([
+    { path: "author", select: "_id name" },
     { path: "target", select: "_id name" },
   ]);
+  return toAdminReviewProjection(populated);
 };

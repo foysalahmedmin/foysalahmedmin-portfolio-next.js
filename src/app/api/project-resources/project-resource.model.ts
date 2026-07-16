@@ -44,7 +44,7 @@ const projectResourceSchema = new Schema<TProjectResourceDocument>(
     },
     is_private: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     is_deleted: {
       type: Boolean,

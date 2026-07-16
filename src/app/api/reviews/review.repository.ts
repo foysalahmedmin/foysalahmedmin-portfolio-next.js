@@ -16,7 +16,7 @@ import { Review } from "./review.model";
 import type { TReview, TReviewDocument } from "./review.type";
 
 const POPULATE_FIELDS = [
-  { path: "author", select: "_id name email image" },
+  { path: "author", select: "_id name" },
   { path: "target", select: "_id name" },
 ];
 const PUBLIC_FILE_SELECT =

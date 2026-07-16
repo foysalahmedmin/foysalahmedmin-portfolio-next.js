@@ -137,7 +137,7 @@ export const toSafeReviewModerationItem = (
     edited_at: toIso(record.edited_at),
     created_at: toIso(record.created_at),
     updated_at: toIso(record.updated_at),
-    deleted: record.is_deleted === true,
+    deleted: record.deleted === true || record.is_deleted === true,
   };
 };
 
