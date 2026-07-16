@@ -343,7 +343,9 @@ export const getAdminPageCapability = (pathname: string): Capability | null => {
   }
   if (
     pathname === "/admin/contacts" ||
-    pathname.startsWith("/admin/contacts/")
+    pathname.startsWith("/admin/contacts/") ||
+    pathname === "/admin/reviews" ||
+    pathname.startsWith("/admin/reviews/")
   ) {
     return "inbox:manage";
   }

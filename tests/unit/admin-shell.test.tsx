@@ -89,6 +89,9 @@ describe("AdminShell", () => {
       screen.queryByRole("link", { name: "Contact inbox" })
     ).not.toBeInTheDocument();
     expect(
+      screen.queryByRole("link", { name: "Review moderation" })
+    ).not.toBeInTheDocument();
+    expect(
       screen.queryByRole("link", { name: "Audit log" })
     ).not.toBeInTheDocument();
     expect(
@@ -96,7 +99,7 @@ describe("AdminShell", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("registers the contact inbox only for inbox operators", () => {
+  it("registers inbox workspaces only for inbox operators", () => {
     render(
       <AdminShell
         user={{
@@ -112,6 +115,9 @@ describe("AdminShell", () => {
 
     expect(
       screen.getAllByRole("link", { name: "Contact inbox" })
+    ).not.toHaveLength(0);
+    expect(
+      screen.getAllByRole("link", { name: "Review moderation" })
     ).not.toHaveLength(0);
   });
 

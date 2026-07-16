@@ -17,6 +17,7 @@ import {
   LoaderCircle,
   LogOut,
   Mail,
+  MessageSquareQuote,
   Menu,
   ScrollText,
   Settings,
@@ -92,6 +93,12 @@ const adminNavGroups: ReadonlyArray<
         icon: Mail,
         capability: "inbox:manage",
       },
+      {
+        name: "Review moderation",
+        href: "/admin/reviews",
+        icon: MessageSquareQuote,
+        capability: "inbox:manage",
+      },
     ],
   },
   {
@@ -130,6 +137,7 @@ const routeLabels: Readonly<Record<string, string>> = {
   articles: "Articles",
   projects: "Projects",
   contacts: "Contact inbox",
+  reviews: "Review moderation",
   audit: "Audit log",
   users: "Users",
   site: "Site settings",
