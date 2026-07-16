@@ -1118,7 +1118,7 @@ The supported stable boundary is the complete chain through `c06ff91`; `1008baa`
 - [ ] Add ProjectResource management with private/public state.
 - [ ] Add Review moderation with safe author data.
 - [ ] Add Users management only for authorized roles.
-- [ ] Add audit log viewer and filters.
+- [x] Add a capability-gated, privacy-safe audit log with bounded date windows, remote filters, pagination, and no-store delivery.
 - [ ] Add permissions and integration tests for every workspace.
 
 **Suggested commit:** `Complete admin relationship and system workspaces`
