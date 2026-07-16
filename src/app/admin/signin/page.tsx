@@ -1,6 +1,9 @@
 import AdminSignInForm from "@/components/admin/admin-signin-form";
 import { getSafeAdminReturnPath } from "@/lib/auth/admin-access";
-import { getAdminSession } from "@/lib/auth/admin-session";
+import {
+  getAdminSession,
+  hasRefreshSessionCookie,
+} from "@/lib/auth/admin-session";
 import { redirect } from "next/navigation";
 
 type AdminSignInPageProps = {
@@ -17,7 +20,13 @@ const AdminSignInPage = async ({ searchParams }: AdminSignInPageProps) => {
 
   if (session) redirect(returnTo);
 
-  return <AdminSignInForm returnTo={returnTo} />;
+  const canRecoverSession = await hasRefreshSessionCookie();
+  return (
+    <AdminSignInForm
+      returnTo={returnTo}
+      canRecoverSession={canRecoverSession}
+    />
+  );
 };
 
 export default AdminSignInPage;

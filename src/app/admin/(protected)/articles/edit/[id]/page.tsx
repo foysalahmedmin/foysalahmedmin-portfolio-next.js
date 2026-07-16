@@ -3,7 +3,7 @@
 import ArticleForm from "@/components/admin/article-form";
 import { buttonVariants } from "@/components/ui/button";
 import { getAdminArticleById, updateArticle } from "@/services/article.service";
-import type { TArticle } from "@/types/article.type";
+import type { TArticle, TArticleInput } from "@/types/article.type";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ const AdminEditArticlePage = () => {
     return () => controller.abort();
   }, [id]);
 
-  const handleSubmit = async (data: Partial<TArticle>) => {
+  const handleSubmit = async (data: TArticleInput) => {
     setSaving(true);
     setError(null);
     try {
