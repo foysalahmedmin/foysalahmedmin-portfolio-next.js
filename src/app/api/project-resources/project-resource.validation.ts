@@ -15,7 +15,7 @@ export const createProjectResourceSchema = z.object({
       .enum(["repository", "design", "documentation", "other"])
       .default("other"),
     description: z.string().max(300).optional(),
-    is_private: z.boolean().default(false),
+    is_private: z.boolean().default(true),
   }),
 });
 

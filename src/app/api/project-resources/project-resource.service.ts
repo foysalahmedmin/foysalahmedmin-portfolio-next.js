@@ -73,7 +73,7 @@ export const createProjectResource = async (payload: {
   return await ProjectResourceRepository.create({
     ...payload,
     type: payload.type || "other",
-    is_private: payload.is_private || false,
+    is_private: payload.is_private ?? true,
   } as never);
 };
 

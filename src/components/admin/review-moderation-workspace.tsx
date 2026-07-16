@@ -431,8 +431,8 @@ const ReviewModerationWorkspace = () => {
             aria-hidden="true"
           />
           <p className="text-muted-foreground">
-            Author email, role, account metadata, and private media are removed
-            at the client boundary.
+            Author email, role, account metadata, and private media are excluded
+            from the server moderation response.
           </p>
         </div>
       </header>
