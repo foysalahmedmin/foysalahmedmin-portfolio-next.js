@@ -62,6 +62,11 @@ export type TManagedMediaCandidate = TPreparedManagedMedia & {
   storage: { bucket?: string; folder?: string };
 };
 
+export type TManagedFilePersistenceResult = Readonly<{
+  file: TFile;
+  disposition: "created" | "reused";
+}>;
+
 const getStoredIdempotencyKey = (
   key: string | undefined,
   index: number
@@ -150,7 +155,7 @@ const persistPreparedMedia = async (input: {
   prepared: TManagedMediaCandidate;
   payload: TFileInput;
   index: number;
-}): Promise<TFile> => {
+}): Promise<TManagedFilePersistenceResult> => {
   const storedIdempotencyKey = getStoredIdempotencyKey(
     input.payload.idempotency_key,
     input.index
@@ -172,7 +177,10 @@ const persistPreparedMedia = async (input: {
           "The upload idempotency key was already used for different media"
         );
       }
-      return stripOperationalFields(existing);
+      return {
+        file: stripOperationalFields(existing),
+        disposition: "reused",
+      };
     }
   }
 
@@ -192,7 +200,10 @@ const persistPreparedMedia = async (input: {
         "Matching media already exists with a different source classification"
       );
     }
-    return stripOperationalFields(duplicate);
+    return {
+      file: stripOperationalFields(duplicate),
+      disposition: "reused",
+    };
   }
 
   const storage = await uploadPreparedMedia({
@@ -248,7 +259,10 @@ const persistPreparedMedia = async (input: {
   try {
     const ready = await FileRepository.finalizeUploadingById(id);
     if (!ready) throw new Error("finalization rejected");
-    return stripOperationalFields(ready);
+    return {
+      file: stripOperationalFields(ready),
+      disposition: "created",
+    };
   } catch {
     let compensated = false;
     try {
@@ -271,11 +285,17 @@ const persistPreparedMedia = async (input: {
   }
 };
 
-export const createManagedFiles = async (
+/**
+ * Internal ingestion result used by workflows that must compensate only
+ * provider objects created by their own call. The disposition is decided in
+ * the same service branch that creates or reuses the File; callers never infer
+ * ownership with a follow-up read.
+ */
+export const createManagedFilesWithDisposition = async (
   user: TJwtPayload,
   preparedMedia: TManagedMediaCandidate[],
   payload: TFileInput
-): Promise<TFile[]> => {
+): Promise<TManagedFilePersistenceResult[]> => {
   await connectDB();
   if (!preparedMedia.length) {
     throw new AppError(
@@ -284,7 +304,7 @@ export const createManagedFiles = async (
     );
   }
 
-  const results: TFile[] = [];
+  const results: TManagedFilePersistenceResult[] = [];
   for (const [index, prepared] of preparedMedia.entries()) {
     results.push(
       await persistPreparedMedia({ user, prepared, payload, index })
@@ -292,6 +312,16 @@ export const createManagedFiles = async (
   }
   return results;
 };
+
+/** Keep the existing controller/API result shape backward compatible. */
+export const createManagedFiles = async (
+  user: TJwtPayload,
+  preparedMedia: TManagedMediaCandidate[],
+  payload: TFileInput
+): Promise<TFile[]> =>
+  (await createManagedFilesWithDisposition(user, preparedMedia, payload)).map(
+    ({ file }) => file
+  );
 
 export const getFile = async (
   id: string,

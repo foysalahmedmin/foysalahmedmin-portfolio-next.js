@@ -3,6 +3,7 @@ import type {
   TPublicSiteMediaDto,
 } from "@/app/api/site/site.type";
 import { PILLAR_KEYS, type PillarKey } from "@/lib/content/pillars";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import {
   normalizeMetadataMediaUrl,
   normalizePublicRoutePath,
@@ -92,10 +93,16 @@ const toManagedVisual = (
 
 const kindFallback = (
   site: TPublicSiteDto,
-  kind: TDynamicOgKind
+  kind: TDynamicOgKind,
+  pillar?: PillarKey
 ): TPublicSiteMediaDto | undefined => {
-  if (kind === "project") return site.fallbacks.project;
-  if (kind === "article") return site.fallbacks.article;
+  if (kind === "project" || kind === "article") {
+    return resolvePublicContentFallback({
+      kind,
+      pillar,
+      fallbacks: site.fallbacks,
+    });
+  }
   return undefined;
 };
 
@@ -112,7 +119,7 @@ export const buildDynamicOgInput = (
 
   const candidates = [
     input.image,
-    kindFallback(site, input.kind),
+    kindFallback(site, input.kind, input.pillar),
     site.seo.default_og,
   ];
   const visual =

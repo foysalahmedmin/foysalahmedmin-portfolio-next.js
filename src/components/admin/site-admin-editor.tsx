@@ -23,6 +23,7 @@ import {
   type TEditorErrors,
 } from "@/components/admin/editorial-editor-primitives";
 import {
+  getPillarLabel,
   PILLAR_ACCENTS,
   PILLAR_ICON_KEYS,
   PILLAR_KEYS,
@@ -1768,6 +1769,66 @@ export default function SiteAdminEditor({
               />
             )
           )}
+          <div className="border-border/70 md:col-span-2 xl:col-span-4 border-t pt-5">
+            <h3 className="font-black">Project fallbacks by pillar</h3>
+            <p className="text-muted-foreground mt-1 text-sm leading-6">
+              A matching pillar asset takes priority over the legacy generic
+              project fallback.
+            </p>
+          </div>
+          {PILLAR_KEYS.map((pillar) => (
+            <ManagedFileReferenceField
+              key={`fallback-project-${pillar}`}
+              path={`fallbacks.project_files_by_pillar.${pillar}`}
+              label={`${getPillarLabel(pillar)} project fallback`}
+              value={draft.fallbacks.project_files_by_pillar[pillar]}
+              onChange={(value) =>
+                setDraft({
+                  ...draft,
+                  fallbacks: {
+                    ...draft.fallbacks,
+                    project_files_by_pillar: {
+                      ...draft.fallbacks.project_files_by_pillar,
+                      [pillar]: value,
+                    },
+                  },
+                })
+              }
+              purpose="project"
+              errors={errors}
+              disabled={disabled}
+            />
+          ))}
+          <div className="border-border/70 md:col-span-2 xl:col-span-4 border-t pt-5">
+            <h3 className="font-black">Article fallbacks by pillar</h3>
+            <p className="text-muted-foreground mt-1 text-sm leading-6">
+              A matching pillar asset takes priority over the legacy generic
+              article fallback.
+            </p>
+          </div>
+          {PILLAR_KEYS.map((pillar) => (
+            <ManagedFileReferenceField
+              key={`fallback-article-${pillar}`}
+              path={`fallbacks.article_files_by_pillar.${pillar}`}
+              label={`${getPillarLabel(pillar)} article fallback`}
+              value={draft.fallbacks.article_files_by_pillar[pillar]}
+              onChange={(value) =>
+                setDraft({
+                  ...draft,
+                  fallbacks: {
+                    ...draft.fallbacks,
+                    article_files_by_pillar: {
+                      ...draft.fallbacks.article_files_by_pillar,
+                      [pillar]: value,
+                    },
+                  },
+                })
+              }
+              purpose="article"
+              errors={errors}
+              disabled={disabled}
+            />
+          ))}
         </div>
       </EditorialPanel>
 

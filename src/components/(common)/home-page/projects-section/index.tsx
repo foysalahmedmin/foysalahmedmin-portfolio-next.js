@@ -1,3 +1,4 @@
+import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import {
   Description,
@@ -6,6 +7,8 @@ import {
   Title,
 } from "@/components/ui/section-title";
 import { getPillarLabel } from "@/lib/content/pillars";
+import { resolveMediaAlt } from "@/lib/media/presentation";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TProjectListItem } from "@/types/project.type";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -17,22 +20,37 @@ const TYPE_LABELS = {
   lab: "Engineering lab",
 } as const;
 
-function ProjectCard({ project }: { project: TProjectListItem }) {
+function ProjectCard({
+  project,
+  fallbacks,
+}: {
+  project: TProjectListItem;
+  fallbacks?: TPublicSiteFallbacksDto;
+}) {
   const href = `/projects/${project.slug ?? project._id}`;
   const outcome = project.outcomes?.find(
     ({ verification_state }) => verification_state !== "unverified"
   );
+  const managedFallback = fallbacks
+    ? resolvePublicContentFallback({
+        kind: "project",
+        pillar: project.primary_pillar,
+        fallbacks,
+      })
+    : undefined;
+  const cover = project.thumbnail?.url ? project.thumbnail : managedFallback;
 
   return (
     <article className="fade-up group bg-card border-border relative overflow-hidden rounded-[var(--radius-xl-token)] border shadow-[var(--shadow-xs)] transition-[border-color,box-shadow,transform] duration-[var(--motion-standard)] hover:shadow-[var(--shadow-md)] motion-safe:hover:-translate-y-1">
       <div className="relative aspect-[4/3] w-full overflow-hidden">
         <OptimizedMedia
-          src={project.thumbnail?.url}
-          alt={
-            project.thumbnail?.alt_text || `${project.name} case-study visual`
-          }
+          src={cover?.url}
+          alt={resolveMediaAlt(cover, `${project.name} case-study visual`)}
           fallback="project"
           pillar={project.primary_pillar}
+          focalPoint={cover?.focal_point}
+          dominantColor={cover?.dominant_color}
+          blurDataUrl={cover?.blur_data_url}
           sizes="(max-width: 768px) 100vw, 33vw"
           className="h-full w-full object-cover transition-transform duration-[var(--motion-slow)] motion-safe:group-hover:scale-[1.03]"
         />
@@ -75,10 +93,12 @@ export default function ProjectsSection({
   projects,
   unavailable = false,
   heading,
+  fallbacks,
 }: {
   projects: readonly TProjectListItem[];
   unavailable?: boolean;
   heading?: string;
+  fallbacks?: TPublicSiteFallbacksDto;
 }) {
   return (
     <section id="projects" className="py-[var(--space-section)]">
@@ -104,7 +124,11 @@ export default function ProjectsSection({
         {projects.length ? (
           <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
             {projects.slice(0, 6).map((project) => (
-              <ProjectCard key={project._id} project={project} />
+              <ProjectCard
+                key={project._id}
+                project={project}
+                fallbacks={fallbacks}
+              />
             ))}
           </div>
         ) : (

@@ -49,6 +49,21 @@ publication with field paths; partial publication is impossible.
 Files carry separate `draft` and `published` references to the Site. Replacing a
 draft asset cannot remove the protection held by the last publication.
 
+Project and article fallbacks support sparse, canonical five-pillar maps through
+`project_files_by_pillar` and `article_files_by_pillar`. Only `frontend`,
+`backend`, `ai_automation`, `system_design`, and `full_stack` are valid keys.
+The legacy generic `project_file` and `article_file` fields remain supported for
+older snapshots and content without a pillar. Missing maps normalize to `{}` so
+schema-version `1` draft and published snapshots remain readable without a data
+migration. File reference collection visits each canonical pillar in contract
+order and validates mapped assets against the `project` or `article` purpose.
+
+The public DTO exposes the projected maps as `project_by_pillar` and
+`article_by_pillar`; each value contains only safe public rendering metadata.
+Resolution is deterministic: explicit content media, then the matching managed
+pillar fallback, then the legacy generic managed fallback. When none exists, the
+rendering component owns the final code-bundled SVG fallback.
+
 ## API and capabilities
 
 - `GET /api/site` returns the minimal published DTO or the compile-time emergency

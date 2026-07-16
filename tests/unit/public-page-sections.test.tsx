@@ -19,13 +19,37 @@ vi.mock("@/components/(common)/about-page/about-details-section", () => ({
   default: () => <section>about introduction</section>,
 }));
 vi.mock("@/components/(common)/home-page/projects-section", () => ({
-  default: ({ projects }: { projects: Array<{ name: string }> }) => (
-    <section>projects:{projects.map(({ name }) => name).join(",")}</section>
+  default: ({
+    projects,
+    fallbacks,
+  }: {
+    projects: Array<{ name: string }>;
+    fallbacks?: {
+      project_by_pillar?: { backend?: { url?: string } };
+    };
+  }) => (
+    <section data-project-fallback={fallbacks?.project_by_pillar?.backend?.url}>
+      projects:{projects.map(({ name }) => name).join(",")}
+    </section>
   ),
 }));
 vi.mock("@/components/(common)/home-page/articles-section", () => ({
-  default: ({ articles }: { articles: Array<{ name: string }> }) => (
-    <section>articles:{articles.map(({ name }) => name).join(",")}</section>
+  default: ({
+    articles,
+    fallbacks,
+  }: {
+    articles: Array<{ name: string }>;
+    fallbacks?: {
+      article_by_pillar?: { system_design?: { url?: string } };
+    };
+  }) => (
+    <section
+      data-article-fallback={
+        fallbacks?.article_by_pillar?.system_design?.url
+      }
+    >
+      articles:{articles.map(({ name }) => name).join(",")}
+    </section>
   ),
 }));
 vi.mock("@/components/sections/services-section", () => ({
@@ -69,6 +93,15 @@ describe("PublicPageSections", () => {
   afterEach(cleanup);
 
   it("renders primary content in the exact published Page order", () => {
+    const site = createEmergencyPublicSite();
+    site.fallbacks.project_by_pillar.backend = {
+      id: "507f1f77bcf86cd799439031",
+      url: "https://cdn.example.com/project-backend.webp",
+    };
+    site.fallbacks.article_by_pillar.system_design = {
+      id: "507f1f77bcf86cd799439032",
+      url: "https://cdn.example.com/article-system-design.webp",
+    };
     const payload: TResolvedPublishedPagePayload = {
       page: {
         route_key: "home",
@@ -80,7 +113,7 @@ describe("PublicPageSections", () => {
         published_at: "2026-07-15T00:00:00.000Z",
         seo: { noindex: false },
       },
-      site: createEmergencyPublicSite(),
+      site,
       sections: [
         section("projects", "project-collection", [
           { _id: "project-1", name: "First case study" },
@@ -104,6 +137,18 @@ describe("PublicPageSections", () => {
     const { container } = render(<PublicPageSections payload={payload} />);
     expect(container.textContent).toBe(
       "projects:First case studyheroarticles:First insightcontact"
+    );
+    expect(
+      container.querySelector("[data-project-fallback]")
+    ).toHaveAttribute(
+      "data-project-fallback",
+      "https://cdn.example.com/project-backend.webp"
+    );
+    expect(
+      container.querySelector("[data-article-fallback]")
+    ).toHaveAttribute(
+      "data-article-fallback",
+      "https://cdn.example.com/article-system-design.webp"
     );
   });
 });

@@ -1,7 +1,9 @@
 import type { Document } from "mongodb";
 import { z } from "zod";
+import { FILE_PURPOSES } from "../../app/api/files/file.type.ts";
 import { canonicalSeedJson, hashSeedValue } from "./canonical.ts";
 import { SeedError } from "./errors.ts";
+import { getSeedFileReferenceModel } from "./file-references.ts";
 import {
   SEED_ALLOWED_TARGET_COLLECTIONS,
   SEED_STAGE_ORDER,
@@ -9,11 +11,126 @@ import {
   type SeedManifest,
   type SeedMediaPlan,
   type SeedRecordDefinition,
+  type ResolvedSeedFileReference,
 } from "./types.ts";
 
 const SAFE_KEY = /^[a-z][a-z0-9]*(?:[-_.:][a-z0-9]+)*$/;
 const SAFE_FIELD_PATH = /^[a-z][a-z0-9_]*(?:\.(?:[a-z][a-z0-9_]*|\d+))*$/;
 const SHA256 = /^[a-f0-9]{64}$/;
+const OBJECT_ID = /^[a-f0-9]{24}$/i;
+const RASTER_SOURCE = /\.(?:avif|jpe?g|png|webp)$/i;
+const FILE_PURPOSE_SET = new Set<string>(FILE_PURPOSES);
+
+const safeHttpsUrlSchema = z
+  .string()
+  .trim()
+  .max(2048)
+  .superRefine((value, context) => {
+    let parsed: URL;
+    try {
+      parsed = new URL(value);
+    } catch {
+      context.addIssue({ code: "custom", message: "Invalid URL." });
+      return;
+    }
+    if (
+      parsed.protocol !== "https:" ||
+      parsed.username ||
+      parsed.password ||
+      parsed.hash
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "URL must be public HTTPS without credentials or a fragment.",
+      });
+    }
+  });
+
+const seedMediaAttributionSchema = z
+  .object({
+    creator_name: z.string().trim().min(1).max(200).optional(),
+    creator_url: safeHttpsUrlSchema.optional(),
+    source_url: safeHttpsUrlSchema.optional(),
+    credit_text: z.string().trim().min(1).max(500).optional(),
+    license: z.enum([
+      "owned",
+      "client-provided",
+      "cc0",
+      "cc-by-4.0",
+      "cc-by-sa-4.0",
+      "unsplash",
+      "other",
+    ]),
+    license_url: safeHttpsUrlSchema.optional(),
+  })
+  .strict()
+  .superRefine((attribution, context) => {
+    if (
+      ["cc-by-4.0", "cc-by-sa-4.0", "unsplash", "other"].includes(
+        attribution.license
+      ) &&
+      (!attribution.credit_text || !attribution.source_url)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["credit_text"],
+        message: "The selected license requires source credit.",
+      });
+    }
+    if (attribution.license === "other" && !attribution.license_url) {
+      context.addIssue({
+        code: "custom",
+        path: ["license_url"],
+        message: "A custom license requires its public terms URL.",
+      });
+    }
+  });
+
+const seedMediaProvenanceSchema = z
+  .object({
+    generator: z.string().trim().min(1).max(160),
+    model: z.string().trim().min(1).max(160),
+    prompt: z.string().trim().min(1).max(8000),
+    version: z.string().trim().min(1).max(120),
+    seed: z.string().trim().min(1).max(256).optional(),
+    generated_at: z.string().datetime({ offset: true }).optional(),
+  })
+  .strict();
+
+const seedMediaMetadataSchema = z
+  .object({
+    name: z.string().trim().min(1).max(160),
+    source: z.enum(["generated", "uploaded"]),
+    alt_text: z.string().trim().max(300).optional(),
+    is_decorative: z.boolean().optional(),
+    focal_point: z
+      .object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })
+      .strict()
+      .optional(),
+    dominant_color: z
+      .string()
+      .trim()
+      .regex(/^#[a-f0-9]{6}$/)
+      .optional(),
+    blur_data_url: z
+      .string()
+      .max(8192)
+      .regex(/^data:image\/(?:webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/)
+      .optional(),
+    attribution: seedMediaAttributionSchema.optional(),
+    provenance: seedMediaProvenanceSchema.optional(),
+  })
+  .strict()
+  .superRefine((metadata, context) => {
+    if (metadata.is_decorative && metadata.alt_text) {
+      context.addIssue({
+        code: "custom",
+        path: ["alt_text"],
+        message: "Decorative managed media cannot carry alternative text.",
+      });
+    }
+  });
 
 const truthSchema = z
   .object({
@@ -134,19 +251,25 @@ export const validateSeedManifest = (manifest: SeedManifest): SeedManifest => {
       );
     }
     mediaKeys.add(media.media_key);
-    if (!SAFE_KEY.test(media.purpose) || !media.metadata.name.trim()) {
+    const parsedMetadata = seedMediaMetadataSchema.safeParse(media.metadata);
+    if (!FILE_PURPOSE_SET.has(media.purpose) || !parsedMetadata.success) {
       throw new SeedError(
         "SEED_MANIFEST_INVALID",
-        "Managed-media seed metadata is invalid."
+        "Managed-media seed metadata is invalid.",
+        parsedMetadata.success
+          ? [media.media_key]
+          : parsedMetadata.error.issues.map(
+              (issue) => `${media.media_key}.metadata.${issue.path.join(".")}`
+            )
       );
     }
     if (
-      media.metadata.is_decorative &&
-      Boolean(media.metadata.alt_text?.trim())
+      hashSeedValue(parsedMetadata.data) !== hashSeedValue(media.metadata)
     ) {
       throw new SeedError(
         "SEED_MANIFEST_INVALID",
-        "Decorative managed media cannot carry alternative text."
+        "Managed-media metadata must already use its canonical trimmed form.",
+        [media.media_key]
       );
     }
     if (media.source.kind === "repository_file") {
@@ -161,11 +284,59 @@ export const validateSeedManifest = (manifest: SeedManifest): SeedManifest => {
           "Repository media requires a safe relative path and SHA-256 checksum."
         );
       }
-    } else if (!media.source.requirement.trim()) {
-      throw new SeedError(
-        "SEED_MANIFEST_INVALID",
-        "Pending generated media requires a bounded editorial requirement."
-      );
+      const metadata = parsedMetadata.data;
+      const incomplete = new Set<string>();
+      if (!metadata.attribution) incomplete.add("attribution");
+      if (metadata.source === "generated" && !metadata.provenance) {
+        incomplete.add("provenance");
+      }
+      if (metadata.source === "uploaded" && metadata.provenance) {
+        throw new SeedError(
+          "SEED_MANIFEST_INVALID",
+          "Uploaded repository media cannot claim generation provenance.",
+          [`${media.media_key}.metadata.provenance`]
+        );
+      }
+      if (RASTER_SOURCE.test(media.source.relative_path)) {
+        if (metadata.is_decorative === undefined) {
+          incomplete.add("is_decorative");
+        } else if (!metadata.is_decorative && !metadata.alt_text) {
+          incomplete.add("alt_text");
+        }
+        if (!metadata.focal_point) incomplete.add("focal_point");
+        if (!metadata.dominant_color) incomplete.add("dominant_color");
+        if (!metadata.blur_data_url) incomplete.add("blur_data_url");
+      }
+      if (incomplete.size) {
+        throw new SeedError(
+          "SEED_MANIFEST_INVALID",
+          "Repository media requires complete editorial, rights, and provenance metadata.",
+          [...incomplete]
+            .sort()
+            .map((field) => `${media.media_key}.metadata.${field}`)
+        );
+      }
+    } else {
+      if (!media.source.requirement.trim()) {
+        throw new SeedError(
+          "SEED_MANIFEST_INVALID",
+          "Pending generated media requires a bounded editorial requirement."
+        );
+      }
+      if (parsedMetadata.data.source !== "generated") {
+        throw new SeedError(
+          "SEED_MANIFEST_INVALID",
+          "Pending generated media must use the generated source classification.",
+          [`${media.media_key}.metadata.source`]
+        );
+      }
+      if (parsedMetadata.data.provenance) {
+        throw new SeedError(
+          "SEED_MANIFEST_INVALID",
+          "Pending media cannot claim provenance before an asset exists.",
+          [`${media.media_key}.metadata.provenance`]
+        );
+      }
     }
   }
 
@@ -236,11 +407,25 @@ export const validateSeedManifest = (manifest: SeedManifest): SeedManifest => {
         [identity]
       );
     }
+    const referenceFields = new Set<string>();
+    if (
+      ((record.media_bindings?.length ?? 0) > 0 ||
+        (record.file_references?.length ?? 0) > 0) &&
+      !getSeedFileReferenceModel(record.collection)
+    ) {
+      throw new SeedError(
+        "SEED_MANIFEST_INVALID",
+        "This seed collection cannot own managed File references.",
+        [identity]
+      );
+    }
     for (const binding of record.media_bindings ?? []) {
       if (
         !mediaKeys.has(binding.media_key) ||
         !SAFE_FIELD_PATH.test(binding.field_path) ||
-        !binding.purposes.length
+        !binding.purposes.length ||
+        binding.purposes.some((purpose) => !FILE_PURPOSE_SET.has(purpose)) ||
+        referenceFields.has(binding.field_path)
       ) {
         throw new SeedError(
           "SEED_MANIFEST_INVALID",
@@ -248,6 +433,23 @@ export const validateSeedManifest = (manifest: SeedManifest): SeedManifest => {
           [identity, binding.media_key]
         );
       }
+      referenceFields.add(binding.field_path);
+    }
+    for (const reference of record.file_references ?? []) {
+      if (
+        !OBJECT_ID.test(reference.file_id) ||
+        !SAFE_FIELD_PATH.test(reference.field) ||
+        !reference.purposes.length ||
+        reference.purposes.some((purpose) => !FILE_PURPOSE_SET.has(purpose)) ||
+        referenceFields.has(reference.field)
+      ) {
+        throw new SeedError(
+          "SEED_MANIFEST_INVALID",
+          "A seed File reference is invalid.",
+          [identity, reference.field]
+        );
+      }
+      referenceFields.add(reference.field);
     }
   }
   return manifest;
@@ -313,10 +515,10 @@ export const resolveSeedMediaBindings = (input: {
   media: readonly SeedMediaPlan[];
 }): {
   records: SeedRecordDefinition[];
-  references: SeedFileReference[];
+  references: ResolvedSeedFileReference[];
 } => {
   const mediaByKey = new Map(input.media.map((item) => [item.media_key, item]));
-  const references: SeedFileReference[] = [];
+  const references: ResolvedSeedFileReference[] = [];
   const records = input.records.map((definition) => {
     const payload = cloneSeedValue(definition.payload) as Document;
     for (const binding of definition.media_bindings ?? []) {
@@ -334,11 +536,19 @@ export const resolveSeedMediaBindings = (input: {
       setBoundValue(payload, binding.field_path, media.file_id);
       references.push({
         file_id: media.file_id,
-        field: `${definition.seed_key}.${binding.field_path}`,
+        field: binding.field_path,
         purposes: binding.purposes,
+        target_collection: definition.collection,
+        seed_key: definition.seed_key,
       });
     }
-    references.push(...(definition.file_references ?? []));
+    references.push(
+      ...(definition.file_references ?? []).map((reference) => ({
+        ...reference,
+        target_collection: definition.collection,
+        seed_key: definition.seed_key,
+      }))
+    );
     return { ...definition, payload };
   });
   return { records, references };

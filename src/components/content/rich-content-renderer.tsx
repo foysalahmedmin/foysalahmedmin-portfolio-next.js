@@ -1,4 +1,6 @@
 import { prepareEditorialDocument } from "@/lib/content/editorial-document";
+import type { FallbackMediaKind } from "@/lib/content/fallback-media";
+import type { PillarKey } from "@/lib/content/pillars";
 import type { RichContentDocument } from "@/lib/content/rich-content";
 import { cn } from "@/lib/utils";
 import OptimizedMedia from "@/components/ui/optimized-media";
@@ -27,10 +29,14 @@ export const RichContentRenderer = ({
   document,
   legacyHtml,
   className,
+  fallback = "article",
+  pillar,
 }: {
   document?: RichContentDocument | null;
   legacyHtml: string;
   className?: string;
+  fallback?: Extract<FallbackMediaKind, "project" | "article">;
+  pillar?: PillarKey;
 }) => {
   const prepared = prepareEditorialDocument({
     document,
@@ -109,7 +115,8 @@ export const RichContentRenderer = ({
                   <OptimizedMedia
                     src={file.url}
                     alt={block.alt || file.alt_text || ""}
-                    fallback="article"
+                    fallback={fallback}
+                    pillar={pillar}
                     sizes="(max-width: 1024px) 100vw, 70vw"
                     className="object-cover"
                   />

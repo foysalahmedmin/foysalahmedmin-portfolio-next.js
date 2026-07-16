@@ -308,17 +308,31 @@ describe("dynamic Open Graph contract", () => {
     });
   });
 
-  it("uses explicit, kind, and Site media in that priority order", () => {
+  it("uses explicit, pillar, generic, and Site media in that priority order", () => {
     const site = buildPublishedSite();
     site.seo.default_og = media("site-default");
     site.fallbacks.project = media("project-fallback");
+    site.fallbacks.project_by_pillar.backend = media(
+      "project-backend-fallback"
+    );
 
     const project = buildDynamicOgInput(site, {
       kind: "project",
       title: "Project",
       canonical_path: "/projects/example",
+      pillar: "backend",
     });
     expect(project?.visual).toMatchObject({
+      source: "managed_media",
+      media_id: "project-backend-fallback",
+    });
+
+    const genericProject = buildDynamicOgInput(site, {
+      kind: "project",
+      title: "Project",
+      canonical_path: "/projects/example",
+    });
+    expect(genericProject?.visual).toMatchObject({
       source: "managed_media",
       media_id: "project-fallback",
     });
@@ -327,6 +341,7 @@ describe("dynamic Open Graph contract", () => {
       kind: "project",
       title: "Project",
       canonical_path: "/projects/example",
+      pillar: "backend",
       image: media("explicit"),
     });
     expect(explicit?.visual).toMatchObject({

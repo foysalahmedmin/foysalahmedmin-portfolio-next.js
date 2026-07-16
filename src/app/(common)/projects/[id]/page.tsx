@@ -11,6 +11,7 @@ import {
   buildWebPageJsonLd,
 } from "@/lib/metadata/json-ld";
 import { readPublishedSite } from "@/lib/site/published-site";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TProject, TProjectListItem } from "@/types/project.type";
 import AppError from "@/builder/app-error";
 import type { Metadata } from "next";
@@ -92,6 +93,12 @@ export default async function ProjectDetailsPage({ params }: Props) {
   const related = (relatedResult.data as unknown as TProjectListItem[])
     .filter((item) => item._id !== project._id)
     .slice(0, 3);
+  const managedFallback = resolvePublicContentFallback({
+    kind: "project",
+    pillar: project.primary_pillar,
+    fallbacks: site.fallbacks,
+  });
+  const coverUrl = project.thumbnail?.url || managedFallback?.url;
 
   const pathname = `/projects/${project.slug ?? id}`;
   const structuredData = [
@@ -106,7 +113,7 @@ export default async function ProjectDetailsPage({ params }: Props) {
       description: project.description,
       created_at: project.started_at,
       creator_name: project.author?.name,
-      image_url: project.thumbnail?.url,
+      image_url: coverUrl,
       keywords: [
         ...(project.tags ?? []),
         ...(project.primary_pillar ? [project.primary_pillar] : []),
@@ -126,6 +133,7 @@ export default async function ProjectDetailsPage({ params }: Props) {
         project={project}
         resources={resources}
         related={related}
+        fallbacks={site.fallbacks}
       />
     </>
   );

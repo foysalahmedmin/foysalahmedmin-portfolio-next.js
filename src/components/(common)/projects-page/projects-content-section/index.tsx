@@ -1,5 +1,6 @@
 "use client";
 
+import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -24,6 +25,8 @@ import {
   getPillarLabel,
   PILLAR_RELATIONSHIP_OPTIONS,
 } from "@/lib/content/pillars";
+import { resolveMediaAlt } from "@/lib/media/presentation";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import { PROJECT_TYPES } from "@/lib/content/portfolio-contract";
 import {
   DEFAULT_PROJECT_DISCOVERY_QUERY,
@@ -59,6 +62,7 @@ type ProjectsContentSectionProps = {
   categories: TProjectCategory[];
   facets: ProjectFacets;
   initialError?: boolean;
+  fallbacks?: TPublicSiteFallbacksDto;
 };
 
 const formatDate = (value?: string) => {
@@ -290,6 +294,7 @@ const ProjectsContentSection = ({
   categories,
   facets,
   initialError = false,
+  fallbacks,
 }: ProjectsContentSectionProps) => {
   const [projects, setProjects] = useState(initialProjects);
   const [meta, setMeta] = useState(initialMeta);
@@ -659,6 +664,16 @@ const ProjectsContentSection = ({
                 const href = `/projects/${project.slug ?? project._id}`;
                 const date = formatDate(project.started_at);
                 const outcomes = (project.outcomes ?? []).slice(0, 2);
+                const managedFallback = fallbacks
+                  ? resolvePublicContentFallback({
+                      kind: "project",
+                      pillar: project.primary_pillar,
+                      fallbacks,
+                    })
+                  : undefined;
+                const cover = project.thumbnail?.url
+                  ? project.thumbnail
+                  : managedFallback;
                 return (
                   <article
                     key={project._id}
@@ -672,13 +687,16 @@ const ProjectsContentSection = ({
                       className="focus-visible:ring-ring relative block aspect-[16/10] overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset"
                     >
                       <OptimizedMedia
-                        src={project.thumbnail?.url}
-                        alt={
-                          project.thumbnail?.alt_text ||
+                        src={cover?.url}
+                        alt={resolveMediaAlt(
+                          cover,
                           `${project.name} project visual`
-                        }
+                        )}
                         fallback="project"
                         pillar={project.primary_pillar}
+                        focalPoint={cover?.focal_point}
+                        dominantColor={cover?.dominant_color}
+                        blurDataUrl={cover?.blur_data_url}
                         sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
                         className="h-full w-full object-cover transition-transform duration-700 motion-safe:group-hover:scale-[1.04]"
                       />

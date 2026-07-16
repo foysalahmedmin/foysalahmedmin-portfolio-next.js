@@ -1,5 +1,6 @@
 "use client";
 
+import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/async-state";
 import { Button } from "@/components/ui/button";
 import OptimizedMedia from "@/components/ui/optimized-media";
@@ -14,6 +15,8 @@ import {
   getPillarLabel,
   PILLAR_RELATIONSHIP_OPTIONS,
 } from "@/lib/content/pillars";
+import { resolveMediaAlt } from "@/lib/media/presentation";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import {
   DEFAULT_ARTICLE_DISCOVERY_QUERY,
   PUBLIC_DISCOVERY_PAGE_SIZE,
@@ -49,6 +52,7 @@ type ArticlesContentSectionProps = {
   categories: TArticleCategory[];
   facets: ArticleFacets;
   initialError?: boolean;
+  fallbacks?: TPublicSiteFallbacksDto;
 };
 
 const formatDate = (value?: string) => {
@@ -107,6 +111,7 @@ const ArticlesContentSection = ({
   categories,
   facets,
   initialError = false,
+  fallbacks,
 }: ArticlesContentSectionProps) => {
   const [articles, setArticles] = useState(initialArticles);
   const [meta, setMeta] = useState(initialMeta);
@@ -471,6 +476,16 @@ const ArticlesContentSection = ({
                 )
                   ? formatDate(article.updated_at)
                   : null;
+                const managedFallback = fallbacks
+                  ? resolvePublicContentFallback({
+                      kind: "article",
+                      pillar: article.primary_pillar,
+                      fallbacks,
+                    })
+                  : undefined;
+                const cover = article.thumbnail?.url
+                  ? article.thumbnail
+                  : managedFallback;
                 return (
                   <article
                     key={article._id}
@@ -484,13 +499,16 @@ const ArticlesContentSection = ({
                       className="focus-visible:ring-ring relative block aspect-[16/10] overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset"
                     >
                       <OptimizedMedia
-                        src={article.thumbnail?.url}
-                        alt={
-                          article.thumbnail?.alt_text ||
+                        src={cover?.url}
+                        alt={resolveMediaAlt(
+                          cover,
                           `${article.name} article visual`
-                        }
+                        )}
                         fallback="article"
                         pillar={article.primary_pillar}
+                        focalPoint={cover?.focal_point}
+                        dominantColor={cover?.dominant_color}
+                        blurDataUrl={cover?.blur_data_url}
                         sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
                         className="h-full w-full object-cover transition-transform duration-700 motion-safe:group-hover:scale-[1.04]"
                       />

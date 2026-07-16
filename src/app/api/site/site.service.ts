@@ -3,6 +3,7 @@ import type { TFile, TFilePurpose } from "@/app/api/files/file.type";
 import * as FileRepository from "@/app/api/files/file.repository";
 import { assertAllowedProviderUrl } from "@/app/api/files/managed-media.policy";
 import connectDB from "@/lib/db";
+import { PILLAR_KEYS, type PillarKey } from "@/lib/content/pillars";
 import { normalizeMediaAltText } from "@/lib/media/presentation";
 import type { TRole } from "@/types/jsonwebtoken.type";
 import type { ClientSession } from "mongoose";
@@ -622,6 +623,15 @@ const toPublicDto = (
 ): TPublicSiteDto => {
   const media = (id: string | undefined) =>
     id ? toPublicSiteMedia(files.get(id)) : undefined;
+  const mediaByPillar = (
+    ids: Partial<Record<PillarKey, string>>
+  ): Partial<Record<PillarKey, TPublicSiteMediaDto>> =>
+    Object.fromEntries(
+      PILLAR_KEYS.flatMap((pillar) => {
+        const value = media(ids[pillar]);
+        return value ? [[pillar, value] as const] : [];
+      })
+    );
   const resume = media(draft.brand.resume_file);
 
   return {
@@ -701,7 +711,13 @@ const toPublicDto = (
     fallbacks: {
       emergency_visual_key: draft.fallbacks.emergency_visual_key,
       project: media(draft.fallbacks.project_file),
+      project_by_pillar: mediaByPillar(
+        draft.fallbacks.project_files_by_pillar
+      ),
       article: media(draft.fallbacks.article_file),
+      article_by_pillar: mediaByPillar(
+        draft.fallbacks.article_files_by_pillar
+      ),
       profile: media(draft.fallbacks.profile_file),
     },
     process: draft.process.filter((step) => step.enabled),

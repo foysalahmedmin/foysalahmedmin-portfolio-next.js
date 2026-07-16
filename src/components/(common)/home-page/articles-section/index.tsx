@@ -1,3 +1,4 @@
+import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import {
   Description,
@@ -6,6 +7,8 @@ import {
   Title,
 } from "@/components/ui/section-title";
 import { getPillarLabel } from "@/lib/content/pillars";
+import { resolveMediaAlt } from "@/lib/media/presentation";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TArticleListItem } from "@/types/article.type";
 import { ArrowRight, Calendar, Clock, User } from "lucide-react";
 import Link from "next/link";
@@ -18,20 +21,37 @@ const formatDate = (value: string): string =>
     timeZone: "UTC",
   }).format(new Date(value));
 
-function ArticleCard({ article }: { article: TArticleListItem }) {
+function ArticleCard({
+  article,
+  fallbacks,
+}: {
+  article: TArticleListItem;
+  fallbacks?: TPublicSiteFallbacksDto;
+}) {
   const href = `/articles/${article.slug ?? article._id}`;
   const topic =
     article.category?.name ??
     (article.primary_pillar ? getPillarLabel(article.primary_pillar) : null);
+  const managedFallback = fallbacks
+    ? resolvePublicContentFallback({
+        kind: "article",
+        pillar: article.primary_pillar,
+        fallbacks,
+      })
+    : undefined;
+  const cover = article.thumbnail?.url ? article.thumbnail : managedFallback;
 
   return (
     <article className="fade-up group bg-card border-border flex h-full flex-col overflow-hidden rounded-[var(--radius-xl-token)] border shadow-[var(--shadow-xs)] transition-[border-color,box-shadow,transform] duration-[var(--motion-standard)] hover:shadow-[var(--shadow-md)] motion-safe:hover:-translate-y-1">
       <div className="relative aspect-[16/10] overflow-hidden">
         <OptimizedMedia
-          src={article.thumbnail?.url}
-          alt={article.thumbnail?.alt_text || `${article.name} article visual`}
+          src={cover?.url}
+          alt={resolveMediaAlt(cover, `${article.name} article visual`)}
           fallback="article"
           pillar={article.primary_pillar}
+          focalPoint={cover?.focal_point}
+          dominantColor={cover?.dominant_color}
+          blurDataUrl={cover?.blur_data_url}
           sizes="(max-width: 768px) 100vw, 33vw"
           className="h-full w-full object-cover transition-transform duration-[var(--motion-slow)] motion-safe:group-hover:scale-[1.03]"
         />
@@ -84,10 +104,12 @@ export default function ArticlesSection({
   articles,
   unavailable = false,
   heading,
+  fallbacks,
 }: {
   articles: readonly TArticleListItem[];
   unavailable?: boolean;
   heading?: string;
+  fallbacks?: TPublicSiteFallbacksDto;
 }) {
   return (
     <section id="articles" className="py-[var(--space-section)]">
@@ -112,7 +134,11 @@ export default function ArticlesSection({
         {articles.length ? (
           <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
             {articles.slice(0, 6).map((article) => (
-              <ArticleCard key={article._id} article={article} />
+              <ArticleCard
+                key={article._id}
+                article={article}
+                fallbacks={fallbacks}
+              />
             ))}
           </div>
         ) : (

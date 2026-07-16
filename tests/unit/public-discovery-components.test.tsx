@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { createEmergencyPublicSite } from "@/app/api/site/site.policy";
 import ArticlesContentSection from "@/components/(common)/articles-page/articles-content-section";
 import ProjectsContentSection from "@/components/(common)/projects-page/projects-content-section";
 import {
@@ -61,6 +62,23 @@ const article: TArticleListItem = {
   is_premium: false,
 };
 
+const site = createEmergencyPublicSite();
+site.fallbacks.project_by_pillar.backend = {
+  id: "507f1f77bcf86cd799439041",
+  url: "https://cdn.example.com/project-backend.webp",
+  alt_text: "Backend managed project fallback",
+  is_decorative: false,
+  focal_point: { x: 0.7, y: 0.45 },
+  dominant_color: "#102a43",
+  blur_data_url: "data:image/webp;base64,UklGRg==",
+};
+site.fallbacks.article_by_pillar.system_design = {
+  id: "507f1f77bcf86cd799439042",
+  url: "https://cdn.example.com/article-system-design.webp",
+  alt_text: "System design managed article fallback",
+  is_decorative: false,
+};
+
 describe("public discovery components", () => {
   beforeEach(() => {
     vi.mocked(getProjects).mockResolvedValue({
@@ -91,6 +109,7 @@ describe("public discovery components", () => {
         initialQuery={parseProjectDiscoveryQuery({})}
         categories={[]}
         facets={{ technologies: ["Node.js", "Redis"], years: [2025] }}
+        fallbacks={site.fallbacks}
       />
     );
 
@@ -102,7 +121,56 @@ describe("public discovery components", () => {
     expect(
       screen.getByText("Lead engineer and systems architect")
     ).toBeVisible();
+    expect(
+      screen.getByRole("img", { name: "Backend managed project fallback" })
+    ).toBeVisible();
     await waitFor(() => expect(getProjects).not.toHaveBeenCalled());
+  });
+
+  it("keeps the managed pillar fallback after an asynchronous refresh", async () => {
+    window.history.replaceState({}, "", "/projects");
+    const user = userEvent.setup();
+    const refreshedProject = {
+      ...project,
+      _id: "refreshed-project-id",
+      slug: "refreshed-queue-platform",
+      name: "Refreshed queue platform",
+    };
+    vi.mocked(getProjects).mockResolvedValueOnce({
+      success: true,
+      status: 200,
+      data: [refreshedProject],
+      meta: { total: 1, page: 1, limit: 9 },
+    });
+
+    render(
+      <ProjectsContentSection
+        initialProjects={[project]}
+        initialMeta={{ total: 1, page: 1, limit: 9 }}
+        initialQuery={parseProjectDiscoveryQuery({})}
+        categories={[]}
+        facets={{ technologies: ["Node.js", "Redis"], years: [2025] }}
+        fallbacks={site.fallbacks}
+      />
+    );
+
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Discipline" }),
+      "backend"
+    );
+
+    expect(
+      await screen.findByRole("link", {
+        name: "Read Refreshed queue platform case study",
+      })
+    ).toHaveAttribute("href", "/projects/refreshed-queue-platform");
+    expect(
+      screen.getByRole("img", { name: "Backend managed project fallback" })
+    ).toBeVisible();
+    expect(getProjects).toHaveBeenCalledWith(
+      expect.objectContaining({ pillar: "backend" }),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
   });
 
   it("keeps mobile filters URL-backed and restores focus and scroll on Escape", async () => {
@@ -165,6 +233,7 @@ describe("public discovery components", () => {
         initialQuery={parseArticleDiscoveryQuery({})}
         categories={[]}
         facets={{ topics: ["Threat modeling"] }}
+        fallbacks={site.fallbacks}
       />
     );
 
@@ -173,6 +242,11 @@ describe("public discovery components", () => {
     ).toHaveAttribute("href", "/articles/safe-boundaries");
     expect(screen.getByText("Foysal Ahmed")).toBeVisible();
     expect(screen.getByText("8 min read")).toBeVisible();
+    expect(
+      screen.getByRole("img", {
+        name: "System design managed article fallback",
+      })
+    ).toBeVisible();
     expect(screen.getByText("Feb 1, 2025").closest("dd")).toHaveTextContent(
       "Updated Feb 1, 2025"
     );

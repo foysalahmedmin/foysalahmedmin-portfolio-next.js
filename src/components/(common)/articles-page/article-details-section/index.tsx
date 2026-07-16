@@ -1,7 +1,10 @@
+import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
 import ShareButton from "@/components/content/share-button";
 import { RichContentRenderer } from "@/components/content/rich-content-renderer";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import { getPillarLabel } from "@/lib/content/pillars";
+import { resolveMediaAlt } from "@/lib/media/presentation";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TArticleListItem, TPublicArticle } from "@/types/article.type";
 import {
   ArrowLeft,
@@ -26,9 +29,11 @@ const dateLabel = (value?: string): string | null => {
 const ArticleDetailsSection = ({
   article,
   related,
+  fallbacks,
 }: {
   article: TPublicArticle;
   related: readonly TArticleListItem[];
+  fallbacks?: TPublicSiteFallbacksDto;
 }) => {
   const published = dateLabel(article.published_at);
   const pillar = article.primary_pillar
@@ -37,6 +42,14 @@ const ArticleDetailsSection = ({
   const tags = [
     ...new Set([...(article.topics ?? []), ...(article.tags ?? [])]),
   ];
+  const managedFallback = fallbacks
+    ? resolvePublicContentFallback({
+        kind: "article",
+        pillar: article.primary_pillar,
+        fallbacks,
+      })
+    : undefined;
+  const cover = article.thumbnail?.url ? article.thumbnail : managedFallback;
 
   return (
     <main className="min-h-screen">
@@ -107,14 +120,13 @@ const ArticleDetailsSection = ({
       <div className="container mx-auto -mt-8 px-6 lg:-mt-12">
         <div className="border-border bg-muted relative aspect-[16/9] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
           <OptimizedMedia
-            src={article.thumbnail?.url}
-            alt={
-              article.thumbnail?.is_decorative
-                ? ""
-                : article.thumbnail?.alt_text || article.name
-            }
+            src={cover?.url}
+            alt={resolveMediaAlt(cover, article.name)}
             fallback="article"
             pillar={article.primary_pillar}
+            focalPoint={cover?.focal_point}
+            dominantColor={cover?.dominant_color}
+            blurDataUrl={cover?.blur_data_url}
             sizes="100vw"
             priority
             className="object-cover"
@@ -127,6 +139,8 @@ const ArticleDetailsSection = ({
           <RichContentRenderer
             document={article.rich_content}
             legacyHtml={article.content}
+            fallback="article"
+            pillar={article.primary_pillar}
           />
 
           {tags.length > 0 && (

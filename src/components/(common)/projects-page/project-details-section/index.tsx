@@ -1,9 +1,12 @@
+import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
 import { RichContentRenderer } from "@/components/content/rich-content-renderer";
 import { ProjectGallery } from "@/components/content/project-gallery";
 import ParallaxLayer from "@/components/motion/parallax-layer";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import { getPillarLabel } from "@/lib/content/pillars";
 import { isAllowedPublicProjectUrl } from "@/lib/content/portfolio-contract";
+import { resolveMediaAlt } from "@/lib/media/presentation";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TProject, TProjectListItem } from "@/types/project.type";
 import {
   ArrowLeft,
@@ -58,10 +61,12 @@ const ProjectDetailsSection = ({
   project,
   resources,
   related,
+  fallbacks,
 }: {
   project: TProject;
   resources: readonly TPublicProjectResource[];
   related: readonly TProjectListItem[];
+  fallbacks?: TPublicSiteFallbacksDto;
 }) => {
   const pillar = project.primary_pillar
     ? getPillarLabel(project.primary_pillar)
@@ -77,6 +82,14 @@ const ProjectDetailsSection = ({
   const safeResources = resources.filter((resource) =>
     isAllowedPublicProjectUrl(resource.url)
   );
+  const managedFallback = fallbacks
+    ? resolvePublicContentFallback({
+        kind: "project",
+        pillar: project.primary_pillar,
+        fallbacks,
+      })
+    : undefined;
+  const cover = project.thumbnail?.url ? project.thumbnail : managedFallback;
 
   return (
     <main className="bg-background min-h-screen">
@@ -140,26 +153,16 @@ const ProjectDetailsSection = ({
         <div className="border-border bg-surface-subtle relative aspect-[16/9] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
           <ParallaxLayer className="absolute -inset-[3%]" depth="subtle">
             <OptimizedMedia
-              src={project.thumbnail?.url}
-              alt={
-                project.thumbnail?.is_decorative
-                  ? ""
-                  : project.thumbnail?.alt_text || project.name
-              }
+              src={cover?.url}
+              alt={resolveMediaAlt(cover, project.name)}
               fallback="project"
               pillar={project.primary_pillar}
+              focalPoint={cover?.focal_point}
+              dominantColor={cover?.dominant_color}
+              blurDataUrl={cover?.blur_data_url}
               sizes="100vw"
               priority
               className="object-cover"
-              style={
-                project.thumbnail?.focal_point
-                  ? {
-                      objectPosition: `${Math.round(
-                        project.thumbnail.focal_point.x * 100
-                      )}% ${Math.round(project.thumbnail.focal_point.y * 100)}%`,
-                    }
-                  : undefined
-              }
             />
           </ParallaxLayer>
         </div>
@@ -170,6 +173,8 @@ const ProjectDetailsSection = ({
           <RichContentRenderer
             document={project.rich_content}
             legacyHtml={project.content}
+            fallback="project"
+            pillar={project.primary_pillar}
           />
 
           {project.problem && (
