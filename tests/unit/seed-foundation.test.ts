@@ -4,6 +4,7 @@ import { siteDraftSnapshotSchema } from "@/app/api/site/site.validation";
 import {
   createFoundationSeedManifest,
   getSeedManifestChecksum,
+  resolveSeedMediaBindings,
   validateSeedManifest,
 } from "@/lib/seed";
 import { ObjectId } from "mongodb";
@@ -46,10 +47,102 @@ describe("truthful foundation seed", () => {
       )
     ).toBe(true);
     expect(siteDraftSnapshotSchema.parse(draft).process).toHaveLength(6);
+    expect(site.media_bindings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          media_key: "hero.frontend",
+          field_path: "draft.pillars.0.visual_file",
+          required: false,
+        }),
+        expect.objectContaining({
+          media_key: "hero.backend",
+          field_path: "draft.pillars.1.visual_file",
+          required: false,
+        }),
+        expect.objectContaining({
+          media_key: "hero.ai_automation",
+          field_path: "draft.pillars.2.visual_file",
+          required: false,
+        }),
+        expect.objectContaining({
+          media_key: "hero.system_design",
+          field_path: "draft.pillars.3.visual_file",
+          required: false,
+        }),
+        expect.objectContaining({
+          media_key: "hero.full_stack",
+          field_path: "draft.pillars.4.visual_file",
+          required: false,
+        }),
+        expect.objectContaining({
+          media_key: "site.default-social",
+          field_path: "draft.seo.default_og_file",
+          required: false,
+        }),
+      ])
+    );
     expect(site.payload.published).toBeNull();
     expect(
       getSitePublishIssues(siteDraftSnapshotSchema.parse(draft))
     ).not.toHaveLength(0);
+  });
+
+  it("binds ready managed media to the Site draft through provider-neutral seed references", () => {
+    const manifest = createFoundationSeedManifest(actor);
+    const fileIds = [
+      "64b000000000000000000001",
+      "64b000000000000000000002",
+      "64b000000000000000000003",
+      "64b000000000000000000004",
+      "64b000000000000000000005",
+      "64b000000000000000000006",
+    ];
+
+    const resolved = resolveSeedMediaBindings({
+      records: manifest.records,
+      media: manifest.media.map((item, index) => ({
+        media_key: item.media_key,
+        action: "created" as const,
+        file_id: fileIds[index],
+        source_sha256: "a".repeat(64),
+      })),
+    });
+    const site = resolved.records.find(
+      (record) => record.seed_key === "site.primary"
+    )!;
+    const draft = site.payload.draft as {
+      pillars: Array<{ visual_file?: string }>;
+      seo: { default_og_file?: string };
+    };
+
+    expect(draft.pillars.map((pillar) => pillar.visual_file)).toEqual(
+      fileIds.slice(0, 5)
+    );
+    expect(draft.seo.default_og_file).toBe(fileIds[5]);
+    expect(resolved.references).toHaveLength(6);
+    expect(resolved.references).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          field: "draft.pillars.3.visual_file",
+          file_id: fileIds[3],
+          target_collection: "sites",
+        }),
+        expect.objectContaining({
+          field: "draft.seo.default_og_file",
+          file_id: fileIds[5],
+          target_collection: "sites",
+        }),
+      ])
+    );
+    expect(() =>
+      site.validate({
+        ...site.payload,
+        created_by: actor._id,
+        updated_by: actor._id,
+        created_at: new Date("2026-07-17T00:00:00.000Z"),
+        updated_at: new Date("2026-07-17T00:00:00.000Z"),
+      })
+    ).not.toThrow();
   });
 
   it("uses seven fixed draft Page compositions that satisfy the Page schemas", () => {

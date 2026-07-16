@@ -10,7 +10,7 @@ import type {
   SeedTruthMarker,
 } from "./types.ts";
 
-export const FOUNDATION_SEED_VERSION = 2 as const;
+export const FOUNDATION_SEED_VERSION = 3 as const;
 
 const foundationTruth = Object.freeze({
   content_tier: "foundation",
@@ -30,6 +30,8 @@ const objectIdSchema = z.custom<ObjectId>(
   (value) => value instanceof ObjectId,
   "Expected a MongoDB ObjectId"
 );
+
+const objectIdStringSchema = z.string().regex(/^[a-f0-9]{24}$/i);
 
 const foundationObjectId = (seed: string): ObjectId =>
   new ObjectId(
@@ -79,6 +81,7 @@ const pillarSchema = z
     ]),
     accent: z.enum(["cyan", "blue", "violet", "amber", "emerald"]),
     fallback_visual_key: z.string().min(1).max(64),
+    visual_file: objectIdStringSchema.optional(),
   })
   .strict();
 
@@ -125,6 +128,7 @@ const sitePayloadSchema = z
           .object({
             default_title: z.string().min(2).max(120),
             default_description: z.string().min(2).max(320),
+            default_og_file: objectIdStringSchema.optional(),
             allow_indexing: z.literal(false),
           })
           .strict(),
@@ -574,6 +578,20 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
   insert_only: { created_by: actor._id, updated_by: actor._id },
   update_only: { updated_by: actor._id },
   truth: foundationTruth,
+  media_bindings: [
+    ...PILLAR_CONTRACT.map((pillar, index) => ({
+      media_key: `hero.${pillar.key}`,
+      field_path: `draft.pillars.${index}.visual_file`,
+      required: false,
+      purposes: ["hero"] as const,
+    })),
+    {
+      media_key: "site.default-social",
+      field_path: "draft.seo.default_og_file",
+      required: false,
+      purposes: ["social"] as const,
+    },
+  ],
   validate: (document) => assertSchema(sitePayloadSchema, document),
 });
 

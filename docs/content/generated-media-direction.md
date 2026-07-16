@@ -128,14 +128,14 @@ the foundation seed contract.
 
 ### Hero and identity masters (6)
 
-|   # | Stable asset ID / media key                               | Dimensions      | Accessibility intent                                                                                              | Intended binding                                | Current gate                                            |
-| --: | --------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------- |
-|  01 | `hero.frontend.master.v1` / `hero.frontend`               | 2400×1350, 16:9 | Decorative; empty alt because adjacent slide copy carries the meaning                                             | `Site.draft.pillars[frontend].visual_file`      | Blocked by B1 and B2                                    |
-|  02 | `hero.backend.master.v1` / `hero.backend`                 | 2400×1350, 16:9 | Decorative; empty alt                                                                                             | `Site.draft.pillars[backend].visual_file`       | Blocked by B1 and B2                                    |
-|  03 | `hero.ai_automation.master.v1` / `hero.ai_automation`     | 2400×1350, 16:9 | Decorative; empty alt                                                                                             | `Site.draft.pillars[ai_automation].visual_file` | Blocked by B1 and B2                                    |
-|  04 | `hero.system_design.master.v1` / `hero.system_design`     | 2400×1350, 16:9 | Decorative; empty alt                                                                                             | `Site.draft.pillars[system_design].visual_file` | **Selected pilot**; blocked by B1 and B2                |
-|  05 | `hero.full_stack.master.v1` / `hero.full_stack`           | 2400×1350, 16:9 | Decorative; empty alt                                                                                             | `Site.draft.pillars[full_stack].visual_file`    | Blocked by B1 and B2                                    |
-|  06 | `identity.about.master.v1` / **planned** `identity.about` | 1600×2000, 4:5  | Informative candidate alt: “Abstract five-layer technical system in the portfolio's five-pillar visual language.” | `Site.draft.brand.profile_file`                 | Non-human direction resolved; blocked by B2, B3, and B6 |
+|   # | Stable asset ID / media key                               | Dimensions      | Accessibility intent                                                                                              | Intended binding                                | Current gate                                               |
+| --: | --------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------- |
+|  01 | `hero.frontend.master.v1` / `hero.frontend`               | 2400×1350, 16:9 | Decorative; empty alt because adjacent slide copy carries the meaning                                             | `Site.draft.pillars[frontend].visual_file`      | Source generation and approval pending; B1/B2 resolved     |
+|  02 | `hero.backend.master.v1` / `hero.backend`                 | 2400×1350, 16:9 | Decorative; empty alt                                                                                             | `Site.draft.pillars[backend].visual_file`       | Source generation and approval pending; B1/B2 resolved     |
+|  03 | `hero.ai_automation.master.v1` / `hero.ai_automation`     | 2400×1350, 16:9 | Decorative; empty alt                                                                                             | `Site.draft.pillars[ai_automation].visual_file` | Source generation and approval pending; B1/B2 resolved     |
+|  04 | `hero.system_design.master.v1` / `hero.system_design`     | 2400×1350, 16:9 | Decorative; empty alt                                                                                             | `Site.draft.pillars[system_design].visual_file` | **Selected pilot**; source generation and approval pending |
+|  05 | `hero.full_stack.master.v1` / `hero.full_stack`           | 2400×1350, 16:9 | Decorative; empty alt                                                                                             | `Site.draft.pillars[full_stack].visual_file`    | Source generation and approval pending; B1/B2 resolved     |
+|  06 | `identity.about.master.v1` / **planned** `identity.about` | 1600×2000, 4:5  | Informative candidate alt: “Abstract five-layer technical system in the portfolio's five-pillar visual language.” | `Site.draft.brand.profile_file`                 | Non-human direction resolved; blocked by B3 and B6         |
 
 Hero decorative intent must be rechecked in the composed page. If an image adds
 information not present in adjacent copy, it becomes informative and receives
@@ -143,24 +143,24 @@ purposeful alt text before ingestion or attachment.
 
 ### Project fallback masters (5)
 
-|   # | Stable asset ID / planned media key                                           | Dimensions     | Accessibility intent                                             | Intended consumer                                         | Current gate              |
-| --: | ----------------------------------------------------------------------------- | -------------- | ---------------------------------------------------------------- | --------------------------------------------------------- | ------------------------- |
-|  07 | `fallback.project.frontend.master.v1` / `fallback.project.frontend`           | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | Frontend project cards/details missing primary media      | Blocked by B2, B4, and B6 |
-|  08 | `fallback.project.backend.master.v1` / `fallback.project.backend`             | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | Backend project cards/details missing primary media       | Blocked by B2, B4, and B6 |
-|  09 | `fallback.project.ai_automation.master.v1` / `fallback.project.ai_automation` | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | AI Automation project cards/details missing primary media | Blocked by B2, B4, and B6 |
-|  10 | `fallback.project.system_design.master.v1` / `fallback.project.system_design` | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | System Design project cards/details missing primary media | Blocked by B2, B4, and B6 |
-|  11 | `fallback.project.full_stack.master.v1` / `fallback.project.full_stack`       | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | Full-Stack project cards/details missing primary media    | Blocked by B2, B4, and B6 |
+|   # | Stable asset ID / planned media key                                           | Dimensions     | Accessibility intent                                             | Intended consumer                                         | Current gate                  |
+| --: | ----------------------------------------------------------------------------- | -------------- | ---------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------- |
+|  07 | `fallback.project.frontend.master.v1` / `fallback.project.frontend`           | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | Frontend project cards/details missing primary media      | Blocked by B6; B2/B4 resolved |
+|  08 | `fallback.project.backend.master.v1` / `fallback.project.backend`             | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | Backend project cards/details missing primary media       | Blocked by B6; B2/B4 resolved |
+|  09 | `fallback.project.ai_automation.master.v1` / `fallback.project.ai_automation` | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | AI Automation project cards/details missing primary media | Blocked by B6; B2/B4 resolved |
+|  10 | `fallback.project.system_design.master.v1` / `fallback.project.system_design` | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | System Design project cards/details missing primary media | Blocked by B6; B2/B4 resolved |
+|  11 | `fallback.project.full_stack.master.v1` / `fallback.project.full_stack`       | 1600×1200, 4:3 | Decorative; empty alt; adjacent card/detail copy carries meaning | Full-Stack project cards/details missing primary media    | Blocked by B6; B2/B4 resolved |
 
 ### Article fallback and social masters (6)
 
-|   # | Stable asset ID / media key                                                               | Dimensions       | Accessibility intent                                                                                          | Intended binding/consumer                                 | Current gate              |
-| --: | ----------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------- |
-|  12 | `fallback.article.frontend.master.v1` / **planned** `fallback.article.frontend`           | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | Frontend article cards/details missing primary media      | Blocked by B2, B4, and B6 |
-|  13 | `fallback.article.backend.master.v1` / **planned** `fallback.article.backend`             | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | Backend article cards/details missing primary media       | Blocked by B2, B4, and B6 |
-|  14 | `fallback.article.ai_automation.master.v1` / **planned** `fallback.article.ai_automation` | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | AI Automation article cards/details missing primary media | Blocked by B2, B4, and B6 |
-|  15 | `fallback.article.system_design.master.v1` / **planned** `fallback.article.system_design` | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | System Design article cards/details missing primary media | Blocked by B2, B4, and B6 |
-|  16 | `fallback.article.full_stack.master.v1` / **planned** `fallback.article.full_stack`       | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | Full-Stack article cards/details missing primary media    | Blocked by B2, B4, and B6 |
-|  17 | `social.default.master.v1` / `site.default-social`                                        | 1200×630, 40:21  | Informative candidate alt: “Abstract connected system representing the portfolio's five engineering pillars.” | `Site.draft.seo.default_og_file`                          | Blocked by B1 and B2      |
+|   # | Stable asset ID / media key                                                               | Dimensions       | Accessibility intent                                                                                          | Intended binding/consumer                                 | Current gate                                           |
+| --: | ----------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------ |
+|  12 | `fallback.article.frontend.master.v1` / **planned** `fallback.article.frontend`           | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | Frontend article cards/details missing primary media      | Blocked by B6; B2/B4 resolved                          |
+|  13 | `fallback.article.backend.master.v1` / **planned** `fallback.article.backend`             | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | Backend article cards/details missing primary media       | Blocked by B6; B2/B4 resolved                          |
+|  14 | `fallback.article.ai_automation.master.v1` / **planned** `fallback.article.ai_automation` | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | AI Automation article cards/details missing primary media | Blocked by B6; B2/B4 resolved                          |
+|  15 | `fallback.article.system_design.master.v1` / **planned** `fallback.article.system_design` | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | System Design article cards/details missing primary media | Blocked by B6; B2/B4 resolved                          |
+|  16 | `fallback.article.full_stack.master.v1` / **planned** `fallback.article.full_stack`       | 1600×1000, 16:10 | Decorative; empty alt; adjacent card/detail copy carries meaning                                              | Full-Stack article cards/details missing primary media    | Blocked by B6; B2/B4 resolved                          |
+|  17 | `social.default.master.v1` / `site.default-social`                                        | 1200×630, 40:21  | Informative candidate alt: “Abstract connected system representing the portfolio's five engineering pillars.” | `Site.draft.seo.default_og_file`                          | Source generation and approval pending; B1/B2 resolved |
 
 The five project rows also use **planned** media keys; the bold marker is stated
 once here to keep the table compact. The optional Contact/CTA wide visual is not
@@ -184,26 +184,34 @@ export. Until a responsive-media contract exists, public rendering uses the
 single hero File and its normalized focal point; the QA crops remain review
 evidence only.
 
-## Known binding and ingestion blockers
+## Binding and ingestion status
 
-These are implementation prerequisites, not documentation gaps:
+These notes separate implemented prerequisites from remaining blockers. They do
+not mean any image bytes have been generated, approved, ingested, attached, or
+published.
 
-- **B1 — Seed attachment:** the foundation declares five hero intents and one
-  social intent, but the Site seed record has no `media_bindings`. Successful
-  ingestion therefore cannot yet attach those File IDs to the Site draft.
-- **B2 — Complete provider-neutral ingestion:** `scripts/seed.ts` does not yet
-  construct/pass `createManagedMediaSeedGateway`. The seed request/gateway also
-  cannot yet carry the complete focal, color, blur, rights, and generated
-  provenance template into the File record. No asset may bypass this by calling
-  Cloudinary or GCP directly.
+### Resolved prerequisites
+
+- **B1 — Seed attachment:** the foundation Site record now declares optional
+  `media_bindings` for the five hero intents and the default social intent.
+  Pending generated media still skips attachment; ready managed Files bind to
+  the draft fields through seed reference reconciliation.
+- **B2 — Complete provider-neutral ingestion:** `scripts/seed.ts` constructs
+  the managed-media seed gateway for repository media and carries source,
+  focal, dominant color, blur, attribution, rights, and generated provenance
+  metadata through the same File service boundary used by uploads. No asset may
+  bypass this by calling Cloudinary or GCP directly.
+- **B4 — Pillar fallback contract:** Site now supports sparse
+  `project_files_by_pillar` and `article_files_by_pillar` maps, and public
+  project/article consumers resolve explicit media, pillar managed fallback,
+  legacy generic managed fallback, then code-owned emergency fallback.
+
+### Remaining blockers
+
 - **B3 — About identity art approval:** user direction and the content-truth
   policy resolve the medium as a non-human abstract identity. Generation still
   waits for the selected direction's pilot approval and a reviewed identity
   composition. The compatible target is `Site.draft.brand.profile_file`.
-- **B4 — Pillar fallback contract:** Site currently has one project fallback
-  File and one article fallback File, not five pillar-keyed maps, and public
-  content consumers do not yet resolve all pillar-specific managed fallbacks.
-  Do not attach five Files to invented fields.
 - **B5 — Responsive hero contract:** a pillar currently owns one `visual_file`;
   there is no separate mobile File binding. Mobile derivatives are QA artifacts
   until the product deliberately adopts a responsive attachment contract.
