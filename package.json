@@ -2,6 +2,7 @@
   "name": "foysalahmedmin",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.33.2",
   "engines": {
     "node": "24.x",
@@ -24,13 +25,13 @@
     "test:visual": "playwright test tests/e2e/visual.spec.ts --project=chromium-desktop",
     "test:visual:update": "playwright test tests/e2e/visual.spec.ts --project=chromium-desktop --update-snapshots",
     "test:performance": "pnpm build && lhci autorun",
-    "db:migrate:dry-run": "node --experimental-strip-types --experimental-default-type=module scripts/migrate.ts --dry-run",
-    "db:migrate": "node --experimental-strip-types --experimental-default-type=module scripts/migrate.ts --apply",
-    "auth:bootstrap-super-admin": "node --experimental-strip-types --experimental-default-type=module scripts/bootstrap-super-admin.ts",
-    "seed": "node --experimental-strip-types --experimental-default-type=module scripts/seed.ts --apply",
-    "seed:dry-run": "node --experimental-strip-types --experimental-default-type=module scripts/seed.ts --dry-run",
-    "seed:demo": "node --experimental-strip-types --experimental-default-type=module scripts/seed.ts --demo --apply",
-    "seed:reset": "node --experimental-strip-types --experimental-default-type=module scripts/seed.ts --reset"
+    "db:migrate:dry-run": "tsx scripts/migrate.ts --dry-run",
+    "db:migrate": "tsx scripts/migrate.ts --apply",
+    "auth:bootstrap-super-admin": "tsx scripts/bootstrap-super-admin.ts",
+    "seed": "tsx scripts/seed.ts --apply",
+    "seed:dry-run": "tsx scripts/seed.ts --dry-run",
+    "seed:demo": "tsx scripts/seed.ts --demo --apply",
+    "seed:reset": "tsx scripts/seed.ts --reset"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.19.0",
@@ -87,6 +88,7 @@
     "prettier-plugin-css-order": "^2.1.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^4.1.11",
+    "tsx": "4.23.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vitest": "^4.1.10"
