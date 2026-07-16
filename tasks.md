@@ -1133,9 +1133,9 @@ The supported stable boundary is the complete chain through `c06ff91`; `1008baa`
 
 - [ ] Create two or three compact non-human technical-editorial direction boards.
 - [ ] Evaluate copy-safe area, pillar differentiation, theme compatibility, crop resilience, and originality.
-- [ ] Select one “Architected Intelligence” direction and lock prompt grammar.
-- [ ] Define forbidden motifs: people, logos, fake text/UI, robots, brains, stock keyboards, excessive neon.
-- [ ] Store prompt/version/provenance template.
+- [x] Select one “Architected Intelligence” direction and lock prompt grammar.
+- [x] Define forbidden motifs: people, logos, fake text/UI, robots, brains, stock keyboards, excessive neon.
+- [x] Store prompt/version/provenance template.
 - [ ] Generate and approve one pillar pilot before batch generation.
 - [ ] Test the pilot at desktop/mobile crops, 320–1920 widths, and both themes.
 - [ ] Enforce pilot media budgets: mobile hero ≤ 200 KB and desktop hero ≤ 350 KB after optimization.
