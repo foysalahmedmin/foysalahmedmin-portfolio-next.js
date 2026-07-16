@@ -1082,7 +1082,7 @@ The supported stable boundary is the complete chain through `c06ff91`; `1008baa`
 
 - [x] Add Services table/form.
 - [x] Add Skills/Skill Groups table/form.
-- [ ] Add embedded Process and Metrics editors inside the appropriate Site/Page workspace rather than independent table CRUD. Metrics are complete; the typed Process editor remains.
+- [x] Add typed Process and Metrics editors inside the revisioned Site workspace rather than independent table CRUD, with legacy compatibility and publish-time completeness checks.
 - [x] Add Experience/Education/Credentials table/forms.
 - [x] Add FAQ table/form.
 - [x] Add Testimonials verification/consent queue and form.
@@ -1620,7 +1620,7 @@ These are not permitted to distract from the main roadmap:
 ## Current next action
 
 1. Preserve clean checkpoint `c06ff91`; end every new logical slice with focused verification, ledger reconciliation, and a reviewable commit.
-2. Finish the two unchecked **P11.1** shared-editor primitives, then the typed **P11.3** Process editor and **P11.5** system workspaces with browser acceptance.
+2. Finish the two unchecked **P11.1** shared-editor primitives, then the remaining **P11.5** system workspaces with browser acceptance.
 3. Complete **P12** generated non-human media through the shared managed-media path.
 4. Finish **P14**, **P17**, **P18**, and **P19**, then run the complete **P20** release matrix.
 5. Keep production publication blocked for any claim/media/contact item that still lacks owner verification or credentials.

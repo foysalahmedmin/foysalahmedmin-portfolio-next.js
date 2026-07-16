@@ -136,6 +136,7 @@ const sitePayloadSchema = z
         fallbacks: z
           .object({ emergency_visual_key: z.literal("abstract-grid-v1") })
           .strict(),
+        process: z.array(z.never()).length(0),
         metrics: z.array(z.never()).length(0),
       })
       .strict(),
@@ -351,6 +352,7 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
         },
       },
       fallbacks: { emergency_visual_key: "abstract-grid-v1" },
+      process: [],
       metrics: [],
     },
     published: null,

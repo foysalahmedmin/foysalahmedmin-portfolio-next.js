@@ -45,6 +45,7 @@ describe("truthful foundation seed", () => {
         (pillar) => !pillar.enabled
       )
     ).toBe(true);
+    expect(siteDraftSnapshotSchema.parse(draft).process).toEqual([]);
     expect(site.payload.published).toBeNull();
     expect(
       getSitePublishIssues(siteDraftSnapshotSchema.parse(draft))

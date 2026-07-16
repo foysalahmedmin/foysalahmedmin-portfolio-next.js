@@ -249,6 +249,20 @@ describe("revisioned Site service", () => {
         enabled: true,
       },
     ];
+    publishedDraft.process = [
+      {
+        key: "discovery",
+        title: "Discovery",
+        summary: "Align the problem and constraints.",
+        deliverable: "Reviewed delivery brief",
+        enabled: true,
+      },
+      {
+        key: "internal-draft",
+        title: "Internal draft step",
+        enabled: false,
+      },
+    ];
     const currentDraft = buildPublishableSiteDraft();
     currentDraft.positioning.compact = "Unpublished draft copy";
     const published: TSitePublishedSnapshot = {
@@ -270,6 +284,13 @@ describe("revisioned Site service", () => {
     expect(result.contact.availability).toBe("unknown");
     expect(result.contact).not.toHaveProperty("availability_label");
     expect(result.metrics).toEqual([]);
+    expect(result.process).toEqual([
+      expect.objectContaining({
+        key: "discovery",
+        deliverable: "Reviewed delivery brief",
+      }),
+    ]);
+    expect(serialized).not.toContain("Internal draft step");
     expect(serialized).not.toContain("Unpublished draft copy");
     expect(result).not.toHaveProperty("draft");
     expect(result).not.toHaveProperty("published_by");

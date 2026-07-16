@@ -142,6 +142,14 @@ export type TSiteFallbacks = {
   profile_file?: string;
 };
 
+export type TSiteProcessStep = {
+  key: string;
+  title: string;
+  summary?: string;
+  deliverable?: string;
+  enabled: boolean;
+};
+
 export type TSiteMetric = {
   key: string;
   label: string;
@@ -163,6 +171,7 @@ export type TSiteDraftSnapshot = {
   seo: TSiteSeo;
   experience: TSiteExperienceDefaults;
   fallbacks: TSiteFallbacks;
+  process: TSiteProcessStep[];
   metrics: TSiteMetric[];
 };
 
@@ -258,6 +267,7 @@ export type TPublicSiteDto = {
     article?: TPublicSiteMediaDto;
     profile?: TPublicSiteMediaDto;
   };
+  process: TSiteProcessStep[];
   metrics: TSiteMetric[];
 };
 

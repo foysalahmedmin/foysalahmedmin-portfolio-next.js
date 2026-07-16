@@ -10,6 +10,7 @@ import {
   SITE_SNAPSHOT_MAX_BYTES,
   type TSiteDraftSnapshot,
   type TSiteLink,
+  type TSiteProcessStep,
 } from "./site.type";
 
 export const siteObjectIdSchema = z
@@ -28,6 +29,14 @@ const safeKeySchema = z
 
 const requiredText = (minimum: number, maximum: number) =>
   z.string().trim().min(minimum).max(maximum);
+
+const safePlainText = (minimum: number, maximum: number) =>
+  requiredText(minimum, maximum).refine(
+    (value) =>
+      !/[<>\u0000-\u001f\u007f]/.test(value) &&
+      !/(?:javascript|data|vbscript)\s*:/i.test(value),
+    "Use plain text without markup or executable content"
+  );
 
 const optionalText = (minimum: number, maximum: number) =>
   z.preprocess(
@@ -191,6 +200,16 @@ const pillarSchema = z
       });
     }
   });
+
+export const siteProcessStepSchema: z.ZodType<TSiteProcessStep> = z
+  .object({
+    key: safeKeySchema,
+    title: safePlainText(1, 100),
+    summary: safePlainText(2, 500).optional(),
+    deliverable: safePlainText(2, 240).optional(),
+    enabled: z.boolean(),
+  })
+  .strict();
 
 export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
   .object({
@@ -368,6 +387,11 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
         profile_file: siteObjectIdSchema.optional(),
       })
       .strict(),
+    process: z
+      .array(siteProcessStepSchema)
+      .max(12)
+      .refine(uniqueKeys, "Process step keys must be unique")
+      .default([]),
     metrics: z
       .array(
         z
