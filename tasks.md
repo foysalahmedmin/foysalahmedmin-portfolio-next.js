@@ -1114,7 +1114,7 @@ The supported stable boundary is the complete chain through `c06ff91`; `1008baa`
 **Dependencies:** P10.2, P08.4
 
 - [x] Add a capability-gated Contact inbox with redacted list rows, explicit no-store detail access, and revision-safe status actions.
-- [ ] Add Article and Project category management.
+- [x] Add capability-gated Article and Project category management with URL-backed remote discovery, explicit slug identity, hierarchy-safe parent choices, and complete deletion lifecycle controls.
 - [x] Add capability-gated ProjectResource management with authorized project references, explicit private/public state, multi-select lifecycle actions, and truthful deleted-record projections.
 - [x] Add capability-gated Review moderation with allowlisted author/target data, remote filters, on-demand detail, and bounded status actions.
 - [x] Add capability-gated Users management with allowlisted account data, self/privileged-role safeguards, session-revoking access changes, and protected lifecycle actions.
