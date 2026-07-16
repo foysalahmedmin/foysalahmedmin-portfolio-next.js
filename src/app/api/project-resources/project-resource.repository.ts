@@ -140,6 +140,7 @@ export const findPaginated = async (queryParams: Record<string, unknown>) => {
         ProjectResource.findById((resource as { _id: unknown })._id),
         scope
       )
+        .select("+is_deleted +deleted_at")
         .populate(POPULATE_PROJECT)
         .lean();
     })
