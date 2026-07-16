@@ -1,35 +1,35 @@
 # Portfolio Transformation Master Plan
 
 **Project:** `foysalahmedmin-portfolio-next.js`
-**Plan version:** 2.0
+**Plan version:** 2.1
 **Audit date:** 2026-07-15
 **Last reconciled:** 2026-07-16
-**Status:** Active execution; foundations are implemented, product completion and release verification remain
+**Status:** Active execution from a clean, verified Git checkpoint; product completion and release verification remain
 **Execution ledger:** [`tasks.md`](./tasks.md)
 
 ## 0. Execution and handoff dashboard
 
-This document is the product and architecture contract. [`tasks.md`](./tasks.md) is the authoritative checkbox ledger. A task is marked complete only when its implementation and proportional verification are present; the dashboard also distinguishes work that is implemented but not yet isolated into a reviewed commit.
+This document is the product and architecture contract. [`tasks.md`](./tasks.md) is the authoritative checkbox ledger. A task is marked complete only when its implementation and proportional verification are present. The recovery work is now isolated in reviewable commits; phase states remain conservative until their full acceptance gates pass.
 
 | Phase | Current state | Delivered or verified now | Remaining release work |
 | --- | --- | --- | --- |
 | P00 — Audit and decisions | Partial | Architecture decisions, redacted truth manifest, test foundation, and technical baseline are versioned | User-owned verified facts and the reproducible browser/visual baseline matrix |
-| P01 — Public integrity | Verification | Public projections, visibility rules, contracts, and admin route protection are implemented | Final aggregate/populate regression pass and milestone commit isolation |
-| P02 — Security boundaries | Verification | Contact intake, safe rich content, managed media, and durable admin sessions are implemented with focused tests | Final real-database/integration run and milestone commit isolation |
+| P01 — Public integrity | Verification | Public projections, visibility rules, contracts, and admin route protection are implemented and committed | Final aggregate/populate and release-wide regression acceptance |
+| P02 — Security boundaries | Verification | Contact intake, safe rich content, managed media, and durable admin sessions are implemented; the replica-set integration suite passes | End-to-end abuse/session/media acceptance |
 | P03 — Design system | Verification | Custom tokens, typography, layout, async states, and accessible primitives are implemented | Cross-device visual and accessibility acceptance pass |
 | P04 — Motion/parallax | Verification | Reduced-motion policy, reveal, parallax, autoplay, and focus behavior are implemented without a runtime motion framework | Browser trace and final narrative-level motion tuning |
 | P05 — Resilience/testing | Partial | Route states, deterministic fallbacks, Playwright/axe/Lighthouse foundations, and CI wiring exist | Production-build browser matrix, saved baselines, and visual regression approval |
-| P06 — Migrations/domain evolution | Verification | Migration runner, audit foundation, content contracts, and File metadata evolution are implemented | Full replica-set migration/integration verification and isolated commit |
-| P07 — Site/five pillars | Verification | Revisioned Site singleton, exactly-five-pillar invariant, published cache, and metadata helpers are implemented | Final integration/build verification and isolated commit |
-| P08 — Pages/repeatables | Verification | Typed fixed pages, repeatable domains, inbox/dashboard services, and published page resolver are implemented | Final cross-domain integration verification and isolated commit |
+| P06 — Migrations/domain evolution | Verification | Migration runner, audit foundation, content contracts, and File metadata evolution are committed; replica-set integration passes | Production rehearsal, rollback, and operational acceptance |
+| P07 — Site/five pillars | Verification | Revisioned Site singleton, exactly-five-pillar invariant, published cache, metadata helpers, and build verification are committed | Final browser/cache-invalidation acceptance |
+| P08 — Pages/repeatables | Verification | Typed fixed pages, repeatable domains, inbox/dashboard services, and published page resolver are committed | Final admin/public cross-domain browser acceptance |
 | P09 — Seeds | Partial | Idempotent guarded seed engine and truthful draft foundation seed are implemented | Real-database seed run; verified production records require approved user facts/media |
-| P10 — Admin shell/dashboard | Verification | Capability-aware accessible shell and real operational dashboard are implemented | Browser acceptance and isolated commit |
+| P10 — Admin shell/dashboard | Verification | Capability-aware accessible shell and real operational dashboard are implemented and committed | Browser and cross-device acceptance |
 | P11 — Admin content OS | Partial | Shared editorial primitives plus Site/Page, repeatable-content, and media workspaces exist | Complete/verify relationship and system workspaces, then browser/integration acceptance |
 | P12 — Generated media | Pending | Direction and media contracts are specified; truthful pending media intents exist | Generate, review, optimize, ingest, attach, and verify the non-human media set |
 | P13 — Public shell/hero | Partial | Dynamic Header/Footer and accessible five-slide hero run with deterministic fallbacks | Attach approved managed hero media and finish browser/performance verification |
 | P14 — Homepage | Partial | Server Page composition and several dynamic evidence sections are implemented | Complete sticky five-pillar, architecture, AI workflow, proof/process/trust narrative |
-| P15 — Projects | Verification | URL-backed discovery and case-study detail implementation exist | Current health check, browser acceptance, and isolated commit |
-| P16 — Articles | Verification | URL-backed discovery and safe editorial detail implementation exist | Current health check, browser acceptance, and isolated commit |
+| P15 — Projects | Verification | URL-backed discovery, accessible responsive filters, role projection, and case-study detail are committed with focused tests | Full browser/device acceptance |
+| P16 — Articles | Verification | URL-backed discovery and safe editorial detail are committed with focused tests | Full browser/device acceptance |
 | P17 — About/contact/legal | Partial | Contact and legal flows are dynamic and hardened; About consumes published Page/Site data | Complete the deeper About narrative and renderer-parity preview |
 | P18 — SEO/performance | Partial | Metadata/JSON-LD, image fallbacks, security policy, and Web Vitals foundations exist | Full image/font/network audit, CWV measurement, and budget enforcement |
 | P19 — Security/a11y/ops | Partial | CSP, request context, redacted logging, privacy-safe telemetry, and core accessibility primitives exist | End-to-end abuse, accessibility, observability, and operational acceptance pass |
@@ -42,6 +42,19 @@ This document is the product and architecture contract. [`tasks.md`](./tasks.md)
 - Keep `storage.middleware.ts` and `ManagedMediaService` as the single provider-neutral media boundary; content modules never call Cloudinary/GCP directly.
 - Never turn demo data, pending media, or unverified claims into public production content.
 - End each logical slice with focused tests, diff inspection, ledger updates, and an isolated commit.
+
+### Stable Git checkpoint — 2026-07-16
+
+The recovery audit ended at clean product checkpoint `c06ff91`. The dependency-ordered commit chain is:
+
+1. `d27203b` — track the portfolio roadmap and execution ledger.
+2. `106aee5` — remove duplicate case-conflicting partials.
+3. `1008baa` — establish secure platform and data foundations.
+4. `33aa9ee` — build the custom design and motion system.
+5. `8f19a0f` — build the secure admin content workspace.
+6. `c06ff91` — rebuild the dynamic public portfolio experience.
+
+`1008baa` is an intentional dependency-layer checkpoint and was not independently type-clean against the legacy UI. The supported stable product boundary is the complete chain through `c06ff91`. At that boundary the worktree is clean; TypeScript, lint, 542/542 unit tests, the real MongoDB replica-set integration run, the isolated Contact Chromium flow, and the 65-page no-database production build pass.
 
 ## 1. Executive outcome
 
@@ -116,7 +129,7 @@ At the original 2026-07-15 baseline, these quality commands passed:
 - `pnpm lint`
 - `pnpm build`
 
-That statement is historical, not the current release verdict. The active transformation now includes unit/integration suites, Playwright/axe/Lighthouse configuration, a migration runner, and guarded seed tooling. On 2026-07-16, TypeScript and lint passed; the latest unit run passed 530/530 and the full replica-set run passed 556/556. An earlier unit run exposed a focus-restoration flake that remains under observation. A production build with a valid test database passed and emitted all 65 static pages, while the ordinary no-database build still fails while prerendering `/privacy` because the legal-document reader does not yet convert missing database configuration into its honest public fallback. A valid isolated Chromium subset passed About, Contact page load, and motion-preference behavior; contact-flow assertions still need selectors scoped away from unrelated global live regions. Full browser/Lighthouse acceptance has not yet produced release evidence.
+That statement is historical, not the current release verdict. The active transformation now includes unit/integration suites, Playwright/axe/Lighthouse configuration, a migration runner, and guarded seed tooling. On 2026-07-16, TypeScript and lint passed; the latest unit run passed 99 files and 542/542 tests. The real MongoDB replica-set integration run passed 6 files/26 tests, with its combined run passing 103 files/556 tests. The ProjectGallery focus-restoration flake was removed by stabilizing the modal state callback. A production build without `DATABASE_URL` now emits all 65 static pages; legal routes use their honest noindex fallback for known database-unavailable conditions while programming/query/content errors still surface. The isolated Chromium Contact flow passes 3/3 with scoped status assertions and a verified isolated-server marker. Full cross-browser, Lighthouse, and visual acceptance still require release evidence.
 
 ### 3.1 Strengths to preserve
 
