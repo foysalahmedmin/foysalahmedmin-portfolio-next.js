@@ -21,7 +21,7 @@ describe("truthful foundation seed", () => {
     expect(getSeedManifestChecksum(manifest)).toBe(
       getSeedManifestChecksum(otherActorManifest)
     );
-    expect(manifest.records).toHaveLength(14);
+    expect(manifest.records).toHaveLength(52);
     expect(manifest.media).toHaveLength(6);
   });
 
@@ -45,7 +45,7 @@ describe("truthful foundation seed", () => {
         (pillar) => !pillar.enabled
       )
     ).toBe(true);
-    expect(siteDraftSnapshotSchema.parse(draft).process).toEqual([]);
+    expect(siteDraftSnapshotSchema.parse(draft).process).toHaveLength(6);
     expect(site.payload.published).toBeNull();
     expect(
       getSitePublishIssues(siteDraftSnapshotSchema.parse(draft))
@@ -87,18 +87,22 @@ describe("truthful foundation seed", () => {
       manifest.records.map((record) => record.collection)
     );
     for (const collection of [
+      "testimonials",
+      "projects",
+      "articles",
+      "timeline_entries",
+      "credentials",
+    ]) {
+      expect(collections.has(collection as never)).toBe(false);
+    }
+    for (const collection of [
       "services",
       "skill_groups",
       "skills",
-      "timeline_entries",
-      "credentials",
       "faqs",
-      "testimonials",
       "legal_documents",
-      "projects",
-      "articles",
     ]) {
-      expect(collections.has(collection as never)).toBe(false);
+      expect(collections.has(collection as never)).toBe(true);
     }
     expect(
       manifest.media.every((item) => item.source.kind === "pending_generated")
