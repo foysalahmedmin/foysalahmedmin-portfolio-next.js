@@ -1119,7 +1119,7 @@ The supported stable boundary is the complete chain through `c06ff91`; `1008baa`
 - [x] Add capability-gated Review moderation with allowlisted author/target data, remote filters, on-demand detail, and bounded status actions.
 - [x] Add capability-gated Users management with allowlisted account data, self/privileged-role safeguards, session-revoking access changes, and protected lifecycle actions.
 - [x] Add a capability-gated, privacy-safe audit log with bounded date windows, remote filters, pagination, and no-store delivery.
-- [ ] Add permissions and integration tests for every workspace.
+- [x] Add cross-workspace server-route, navigation, role, and sensitive API authority contract tests.
 
 **Suggested commit:** `Complete admin relationship and system workspaces`
 
