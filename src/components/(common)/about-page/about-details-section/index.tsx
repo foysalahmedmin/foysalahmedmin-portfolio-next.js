@@ -2,6 +2,7 @@ import type { TPublicSiteDto } from "@/app/api/site/site.type";
 import { PublicSiteLink } from "@/components/content/public-site-link";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import { getPrimaryPublicCta } from "@/lib/site/public-shell";
+import { resolveMediaAlt } from "@/lib/media/presentation";
 import { ArrowRight, Layers3 } from "lucide-react";
 import Link from "next/link";
 
@@ -21,12 +22,14 @@ const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
             <div className="border-border bg-surface-subtle relative aspect-[4/5] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)]">
               <OptimizedMedia
                 src={profile?.url}
-                alt={
-                  profile?.is_decorative
-                    ? ""
-                    : profile?.alt_text || "Abstract portfolio identity visual"
-                }
+                alt={resolveMediaAlt(
+                  profile,
+                  "Abstract portfolio identity visual"
+                )}
                 fallback="profile"
+                focalPoint={profile?.focal_point}
+                dominantColor={profile?.dominant_color}
+                blurDataUrl={profile?.blur_data_url}
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 42vw"
               />

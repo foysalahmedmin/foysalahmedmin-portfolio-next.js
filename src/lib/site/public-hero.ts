@@ -1,4 +1,7 @@
-import type { TPublicSiteDto } from "@/app/api/site/site.type";
+import type {
+  TPublicSiteDto,
+  TPublicSiteMediaDto,
+} from "@/app/api/site/site.type";
 import type { PillarKey } from "@/lib/content/pillars";
 import {
   getPrimaryPublicCta,
@@ -13,8 +16,7 @@ export type TPublicHeroSlide = Readonly<{
   summary: string;
   outcome?: string;
   capabilities: readonly string[];
-  image?: string;
-  image_alt: string;
+  image?: TPublicSiteMediaDto;
   priority: boolean;
   cta: TPublicShellLink | null;
 }>;
@@ -45,11 +47,7 @@ export const buildPublicHero = (site: TPublicSiteDto): TPublicHero => {
       ? { outcome: pillar.client_outcome.trim() }
       : {}),
     capabilities: pillar.capabilities.slice(0, 4),
-    ...(pillar.visual?.url ? { image: pillar.visual.url } : {}),
-    image_alt:
-      pillar.visual?.is_decorative === true
-        ? ""
-        : pillar.visual?.alt_text?.trim() || "",
+    ...(pillar.visual ? { image: pillar.visual } : {}),
     priority: index === 0,
     cta: pillar.cta ? resolvePublicSiteLink(pillar.cta, site) : null,
   }));

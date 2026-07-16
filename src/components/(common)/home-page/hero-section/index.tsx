@@ -7,6 +7,7 @@ import OptimizedMedia from "@/components/ui/optimized-media";
 import { useAutoplayController } from "@/hooks/ui/use-autoplay-controller";
 import { buildPublicHero } from "@/lib/site/public-hero";
 import type { TPublicShellLink } from "@/lib/site/public-shell";
+import { resolveMediaAlt } from "@/lib/media/presentation";
 import { cn } from "@/lib/utils";
 import {
   ArrowDown,
@@ -90,10 +91,13 @@ const HeroSection = ({ site }: { site: TPublicSiteDto }) => {
         <div className="absolute inset-0">
           <OptimizedMedia
             key={activeSlide.key}
-            src={activeSlide.image}
-            alt={activeSlide.image_alt}
+            src={activeSlide.image?.url}
+            alt={resolveMediaAlt(activeSlide.image)}
             fallback="hero"
             pillar={activeSlide.key}
+            focalPoint={activeSlide.image?.focal_point}
+            dominantColor={activeSlide.image?.dominant_color}
+            blurDataUrl={activeSlide.image?.blur_data_url}
             sizes="100vw"
             priority={activeSlide.priority}
             className="scale-[1.03] object-cover opacity-45 saturate-75 transition-[opacity,transform] duration-[var(--motion-slow)] motion-reduce:transform-none motion-reduce:transition-none"

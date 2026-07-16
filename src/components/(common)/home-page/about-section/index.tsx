@@ -1,6 +1,7 @@
 import type { TPublicSiteDto } from "@/app/api/site/site.type";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
+import { resolveMediaAlt } from "@/lib/media/presentation";
 import { ArrowRight, Layers3 } from "lucide-react";
 import Link from "next/link";
 
@@ -16,12 +17,14 @@ const AboutSection = ({ site }: { site: TPublicSiteDto }) => {
             <div className="border-border bg-surface-subtle group relative mx-auto aspect-square max-w-[34rem] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)]">
               <OptimizedMedia
                 src={profile?.url}
-                alt={
-                  profile?.is_decorative
-                    ? ""
-                    : profile?.alt_text || "Abstract portfolio identity visual"
-                }
+                alt={resolveMediaAlt(
+                  profile,
+                  "Abstract portfolio identity visual"
+                )}
                 fallback="profile"
+                focalPoint={profile?.focal_point}
+                dominantColor={profile?.dominant_color}
+                blurDataUrl={profile?.blur_data_url}
                 className="object-cover transition-transform duration-[var(--motion-slow)] group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
                 sizes="(max-width: 1024px) 100vw, 45vw"
               />
