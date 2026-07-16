@@ -1,0 +1,241 @@
+{
+  "manifest_contract": "portfolio-generated-media/1.0.0",
+  "prompt_contract": "architected-intelligence/1.0.0",
+  "state": "generated_candidate_set",
+  "approved": false,
+  "generated_at": "2026-07-16T23:37:26Z",
+  "repository_policy": "image bytes are local ignored files under seed-assets; commit checksums and evidence only",
+  "shared_gates": {
+    "source_dimensions": "pass_candidate",
+    "optimization_budget": "pass_candidate",
+    "manual_negative_prompt_review": "pass_candidate",
+    "responsive_composed_review": "pending",
+    "rights_license_review": "pending",
+    "managed_media_ingestion": "pending",
+    "site_attachment": "pending",
+    "public_publish_validation": "pending"
+  },
+  "assets": [
+    {
+      "asset_id": "hero.frontend.master.v1",
+      "media_key": "hero.frontend",
+      "pillar": "frontend",
+      "source": {
+        "local_path": "seed-assets/heroes/frontend.master.png",
+        "raw_local_path": "seed-assets/heroes/frontend.raw.png",
+        "width": 2400,
+        "height": 1350,
+        "sha256": "0522bde5710dd8be93c0fe77287a448840a276c1f5f4f3842ea091e7765414da",
+        "raw_width": 1672,
+        "raw_height": 941,
+        "raw_sha256": "aa0caa787add3cc7e4536d10f9da0ead217bc9dff6488a48334c677676ab19e3"
+      },
+      "derivatives": {
+        "desktop_webp": {
+          "local_path": "seed-assets/heroes/derivatives/frontend.desktop.q82.webp",
+          "width": 1600,
+          "height": 900,
+          "quality": 82,
+          "bytes": 48708,
+          "sha256": "00d76b84305fbe7721deb3dd54b0d4a72cb98b37bc0d5116c2e751119b62aa9f",
+          "budget_gate": "pass"
+        },
+        "mobile_webp": {
+          "local_path": "seed-assets/heroes/derivatives/frontend.mobile.q78.webp",
+          "width": 1080,
+          "height": 1350,
+          "quality": 78,
+          "bytes": 56534,
+          "sha256": "ad2a17aa5e2b8e3c6464859f8c695411400e9dd83b026293ea334e6a8c43aabc",
+          "budget_gate": "pass"
+        }
+      },
+      "review": {
+        "status": "pass_candidate_with_note",
+        "notes": [
+          "Strong copy-safe left field and modular presentation-plane topology.",
+          "No obvious text, UI, logo, person, robot, or code artifacts.",
+          "Accent reads more violet than the current frontend cyan label; final approval should decide whether to regenerate or accept the visual family balance."
+        ]
+      }
+    },
+    {
+      "asset_id": "hero.backend.master.v1",
+      "media_key": "hero.backend",
+      "pillar": "backend",
+      "source": {
+        "local_path": "seed-assets/heroes/backend.master.png",
+        "raw_local_path": "seed-assets/heroes/backend.raw.png",
+        "width": 2400,
+        "height": 1350,
+        "sha256": "1b55ad618e371d627dca2e0b47730a776bc431967a410ed1164c9f228968a496",
+        "raw_width": 1672,
+        "raw_height": 941,
+        "raw_sha256": "e93b6f18c12cd1b64536073e7d8edc1b66e61d44f3d494433c143b5648d4472a"
+      },
+      "derivatives": {
+        "desktop_webp": {
+          "local_path": "seed-assets/heroes/derivatives/backend.desktop.q82.webp",
+          "width": 1600,
+          "height": 900,
+          "quality": 82,
+          "bytes": 43450,
+          "sha256": "9a4fee842feae9a939fe0fcbaa61bbe844b0efa1efd960ceedc6b9ddc7913574",
+          "budget_gate": "pass"
+        },
+        "mobile_webp": {
+          "local_path": "seed-assets/heroes/derivatives/backend.mobile.q78.webp",
+          "width": 1080,
+          "height": 1350,
+          "quality": 78,
+          "bytes": 53700,
+          "sha256": "d7f67906f324fd80f8b19cc035dae315076230f4b51e9e8c3aa76d3bfeb403b9",
+          "budget_gate": "pass"
+        }
+      },
+      "review": {
+        "status": "pass_candidate",
+        "notes": [
+          "Clear service/data flow topology with copy-safe left field.",
+          "No obvious text, logo, person, robot, server-rack stock image, or cloud-provider diagram artifacts."
+        ]
+      }
+    },
+    {
+      "asset_id": "hero.ai_automation.master.v1",
+      "media_key": "hero.ai_automation",
+      "pillar": "ai_automation",
+      "source": {
+        "local_path": "seed-assets/heroes/ai-automation.master.png",
+        "raw_local_path": "seed-assets/heroes/ai-automation.raw.png",
+        "width": 2400,
+        "height": 1350,
+        "sha256": "cdbc5e9904cfc06f7e6c0eba54d7e1ab77b17a47db8cd7f136220193b1195d88",
+        "raw_width": 1672,
+        "raw_height": 941,
+        "raw_sha256": "d4fb4240195fe784190f8fa907deb893ff9aaa9055f4577322907faa20192294"
+      },
+      "derivatives": {
+        "desktop_webp": {
+          "local_path": "seed-assets/heroes/derivatives/ai-automation.desktop.q82.webp",
+          "width": 1600,
+          "height": 900,
+          "quality": 82,
+          "bytes": 41024,
+          "sha256": "10ce4cc9ff842f221969c66bab68883e97bc4ad4b387f7fa3c87bb23d5ef5641",
+          "budget_gate": "pass"
+        },
+        "mobile_webp": {
+          "local_path": "seed-assets/heroes/derivatives/ai-automation.mobile.q78.webp",
+          "width": 1080,
+          "height": 1350,
+          "quality": 78,
+          "bytes": 50094,
+          "sha256": "888e750325994d1d7b9be7f04aac2ba57b2d2cab09846af11f727e5a2e1da8ad",
+          "budget_gate": "pass"
+        }
+      },
+      "review": {
+        "status": "pass_candidate",
+        "notes": [
+          "Readable abstract orchestration loop with review-boundary feeling.",
+          "No obvious brain, robot, face, chatbot UI, text, logo, or metrics."
+        ]
+      }
+    },
+    {
+      "asset_id": "hero.system_design.master.v1",
+      "media_key": "hero.system_design",
+      "pillar": "system_design",
+      "source": {
+        "local_path": "seed-assets/heroes/system-design-pilot.master.png",
+        "raw_local_path": "seed-assets/heroes/system-design-pilot.raw.png",
+        "width": 2400,
+        "height": 1350,
+        "sha256": "cff50878cfd638fe5252238a2e517a463bc679958503b7971d8d03437087a937",
+        "raw_width": 1672,
+        "raw_height": 941,
+        "raw_sha256": "78940c005788982bc7bc92f17191dd5db0b0e57b498e8631bc255fc26bba2347"
+      },
+      "derivatives": {
+        "desktop_webp": {
+          "local_path": "seed-assets/heroes/derivatives/system-design-pilot.desktop.q82.webp",
+          "width": 1600,
+          "height": 900,
+          "quality": 82,
+          "bytes": 79378,
+          "sha256": "d0999687bf928bdd24f89ce618621a3ae107a769f72221d09ef08c3ffe2c883b",
+          "budget_gate": "pass"
+        },
+        "mobile_webp": {
+          "local_path": "seed-assets/heroes/derivatives/system-design-pilot.mobile.q78.webp",
+          "width": 1080,
+          "height": 1350,
+          "quality": 78,
+          "bytes": 95428,
+          "sha256": "88335d4bb61aba63bc5c2603612b5138edd5aeb7f971f048cbaa51de1038d535",
+          "budget_gate": "pass"
+        }
+      },
+      "review": {
+        "status": "pass_candidate",
+        "notes": [
+          "Strong resilient architecture topology with alternate paths.",
+          "No obvious person, logo, readable text, UI, or brand mark."
+        ]
+      }
+    },
+    {
+      "asset_id": "hero.full_stack.master.v1",
+      "media_key": "hero.full_stack",
+      "pillar": "full_stack",
+      "source": {
+        "local_path": "seed-assets/heroes/full-stack.master.png",
+        "raw_local_path": "seed-assets/heroes/full-stack.raw.png",
+        "width": 2400,
+        "height": 1350,
+        "sha256": "eb651e5758ed85bb6a034312610f1d22b1ed843baecfcc7e103616a8b81723ce",
+        "raw_width": 1672,
+        "raw_height": 941,
+        "raw_sha256": "11233c67c3bafce40458ebf2f4a8bd59a132c684806dc11966de46f09a4a13b8"
+      },
+      "derivatives": {
+        "desktop_webp": {
+          "local_path": "seed-assets/heroes/derivatives/full-stack.desktop.q82.webp",
+          "width": 1600,
+          "height": 900,
+          "quality": 82,
+          "bytes": 59044,
+          "sha256": "e5aa6e97d7a0786f869ed377d7dacb1236b4f088cfb19e5032ba923f80de37a6",
+          "budget_gate": "pass"
+        },
+        "mobile_webp": {
+          "local_path": "seed-assets/heroes/derivatives/full-stack.mobile.q78.webp",
+          "width": 1080,
+          "height": 1350,
+          "quality": 78,
+          "bytes": 77526,
+          "sha256": "45254fe6a2215a98ce8bbf2bbe4898a16a5fb353f9fbfe4417553a5021a057e8",
+          "budget_gate": "pass"
+        }
+      },
+      "review": {
+        "status": "pass_candidate",
+        "notes": [
+          "Strong integrated vertical layer topology with copy-safe left field.",
+          "No obvious text, UI, logo, person, robot, screenshot, or code artifacts."
+        ]
+      }
+    }
+  ],
+  "remaining_gates": [
+    "final owner/creative approval",
+    "browser responsive composed review at 320, 375, 768, 1024, 1440, and 1920 CSS pixels in light/dark themes",
+    "accessibility intent confirmation in composed hero",
+    "dominant color and blur placeholder extraction",
+    "rights/license review",
+    "managed-media ingestion",
+    "Site draft attachment",
+    "publish graph validation"
+  ]
+}
