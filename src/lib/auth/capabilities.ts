@@ -350,6 +350,9 @@ export const getAdminPageCapability = (pathname: string): Capability | null => {
   if (pathname === "/admin/audit" || pathname.startsWith("/admin/audit/")) {
     return "audit:read";
   }
+  if (pathname === "/admin/users" || pathname.startsWith("/admin/users/")) {
+    return "users:manage";
+  }
   return pathname === "/admin" || pathname.startsWith("/admin/")
     ? "admin:access"
     : null;
