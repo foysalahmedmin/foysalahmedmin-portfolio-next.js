@@ -1,0 +1,65 @@
+{
+  "manifest_contract": "portfolio-generated-media/1.0.0",
+  "prompt_contract": "architected-intelligence/1.0.0",
+  "asset_id": "hero.system_design.master.v1",
+  "media_key": "hero.system_design",
+  "state": "planned",
+  "is_generated": false,
+  "is_approved": false,
+  "asset_role": {
+    "role": "hero master",
+    "width": 2400,
+    "height": 1350,
+    "aspect_ratio": "16:9",
+    "purpose": "hero",
+    "decorative_intent": true
+  },
+  "pillar": {
+    "key": "system_design",
+    "label": "System Design",
+    "accent": "amber",
+    "accent_token": "--pillar-system",
+    "light_theme_sample": "oklch(0.58 0.16 67)",
+    "dark_theme_sample": "oklch(0.79 0.14 78)"
+  },
+  "effective_prompt": "PROMPT_CONTRACT: architected-intelligence/1.0.0\n\nCreate a non-human technical-editorial image in the Architected Intelligence visual language: warm ivory and graphite neutral surfaces, precise engineered geometry, layered translucent planes, physically plausible cinematic depth, restrained light, fine structural detail, and one semantic system-design accent sampled from --pillar-system: light theme oklch(0.58 0.16 67), dark theme oklch(0.79 0.14 78).\n\nASSET ROLE: 2400x1350 landscape atmosphere; quiet left 58%; compact focal topology centered near normalized (0.72, 0.50); preserve a coherent 4:5 crop around the focal core.\nSYSTEM TOPOLOGY: A fault-aware system architecture topology with explicit boundaries, redundancy, observability paths, graceful alternate routes, controlled failure isolation, and clear relationship hierarchy. It should communicate architecture-level resilience rather than a literal cloud-provider diagram.\nCOMPOSITION: Keep the left 58% low-detail and low-contrast for live hero copy; place the compact focal system in the right 35-40% with an expendable peripheral path network. Important geometry must not touch any edge. Avoid any visual element that could read as UI, text, logo, chart, metric, or brand.\nRENDER INTENT: authored editorial artwork, coherent at thumbnail size, clean silhouette, bounded contrast, quiet edges, no meaning dependent on animation.\n\nNEGATIVE CONSTRAINTS: people, person, face, portrait, hands, body, silhouette of a human, robot, android, humanoid, brain, neural-brain icon, chatbot, stock keyboard, laptop hero shot, office desk, generic server rack, literal cloud-provider diagram, brand mark, company logo, watermark, signature, readable text, letters, numbers, code, fake UI, browser chrome, dashboard screenshot, phone screen, product logo, client identity, trophy, currency, analytics metric, excessive neon, cyberpunk, rainbow gradient, uncontrolled bloom, dense particles, visual clutter, low-detail stock render, distorted geometry, broken perspective, compression artifacts",
+  "locked_negative_prompt": "people, person, face, portrait, hands, body, silhouette of a human, robot, android, humanoid, brain, neural-brain icon, chatbot, stock keyboard, laptop hero shot, office desk, generic server rack, literal cloud-provider diagram, brand mark, company logo, watermark, signature, readable text, letters, numbers, code, fake UI, browser chrome, dashboard screenshot, phone screen, product logo, client identity, trophy, currency, analytics metric, excessive neon, cyberpunk, rainbow gradient, uncontrolled bloom, dense particles, visual clutter, low-detail stock render, distorted geometry, broken perspective, compression artifacts",
+  "metadata_requirements": {
+    "source_sha256": null,
+    "canonical_sha256": null,
+    "focal_point": {
+      "x": 0.72,
+      "y": 0.5
+    },
+    "dominant_color": null,
+    "blur_data_url": null,
+    "alt_text": "",
+    "is_decorative": true,
+    "source": "generated",
+    "license": null,
+    "provenance": {
+      "generator": null,
+      "model": null,
+      "version": null,
+      "seed": null,
+      "generated_at": null,
+      "prompt": null
+    }
+  },
+  "approval_gates": [
+    "source",
+    "creative",
+    "composition",
+    "responsive",
+    "accessibility",
+    "optimization",
+    "technical",
+    "ingestion",
+    "attachment"
+  ],
+  "notes": [
+    "This file is a generation request, not generated-media evidence.",
+    "Do not replace null checksums, model, seed, license, or File IDs with guesses.",
+    "A successful pilot does not approve the remaining hero batch."
+  ]
+}
