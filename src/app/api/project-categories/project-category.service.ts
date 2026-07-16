@@ -4,6 +4,7 @@ import { normalizeSlugIdentifier } from "@/lib/content/slug";
 import { withPublicPagination } from "@/utils/public-query";
 import httpStatus from "http-status";
 import { Types } from "mongoose";
+import { assertCategoryParentIntegrity } from "../category-parent-integrity";
 import {
   allocateContentSlug,
   reserveContentSlug,
@@ -13,6 +14,17 @@ import {
   partitionCategoryRestoreCandidates,
 } from "../category-lifecycle";
 import * as ProjectCategoryRepository from "./project-category.repository";
+
+const assertProjectCategoryParentIntegrity = async (
+  categoryIds: Iterable<string>,
+  parentId: string | null | undefined
+) =>
+  await assertCategoryParentIntegrity({
+    categoryLabel: "Project category",
+    categoryIds,
+    parentId,
+    findParentNodeById: ProjectCategoryRepository.findParentHierarchyNodeById,
+  });
 
 export const getProjectCategories = async (
   queryParams: Record<string, unknown>
@@ -103,6 +115,7 @@ export const createProjectCategory = async (payload: {
 }) => {
   const db = await connectDB();
   const entityId = new Types.ObjectId().toString();
+  await assertProjectCategoryParentIntegrity([entityId], payload.parent);
   const slug = await allocateContentSlug({
     scope: "project_category",
     requested: payload.slug || payload.name,
@@ -121,7 +134,7 @@ export const createProjectCategory = async (payload: {
           _id: entityId,
           slug,
           slug_history: [],
-          parent: payload.parent || null,
+          parent: payload.parent ?? null,
           status: payload.status || "active",
           tags: payload.tags || [],
           layout: payload.layout || "default",
@@ -163,6 +176,11 @@ export const updateProjectCategoryBySlug = async (
   if (!category) {
     throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
+
+  await assertProjectCategoryParentIntegrity(
+    [category._id.toString()],
+    payload.parent
+  );
 
   const nextSlug = payload.slug
     ? await allocateContentSlug({
@@ -219,6 +237,8 @@ export const updateProjectCategoryById = async (
     throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
+  await assertProjectCategoryParentIntegrity([id], payload.parent);
+
   const nextSlug = payload.slug
     ? await allocateContentSlug({
         scope: "project_category",
@@ -270,6 +290,11 @@ export const updateProjectCategories = async (
   const foundSlugs = categories.map((cat) => cat.slug);
   const notFoundSlugs = slugs.filter(
     (slug) => !foundSlugs.includes(normalizeSlugIdentifier(slug) ?? "")
+  );
+
+  await assertProjectCategoryParentIntegrity(
+    categories.map((category) => category._id.toString()),
+    payload.parent
   );
 
   const result = await ProjectCategoryRepository.updateManyBySlugs(
