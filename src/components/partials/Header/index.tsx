@@ -1,455 +1,321 @@
 "use client";
 
-import { ActiveLink } from "@/components/ui/active-link";
-import { Button } from "@/components/ui/button";
+import type { TPublicSiteDto } from "@/app/api/site/site.type";
+import { Button, buttonVariants } from "@/components/ui/button";
+import OptimizedMedia from "@/components/ui/optimized-media";
+import { useDialogFocus } from "@/hooks/ui/use-dialog-focus";
 import { useScrollPosition } from "@/hooks/ui/use-scroll-position";
-import { useVisibleSection } from "@/hooks/utils/use-visible-section";
+import {
+  getPrimaryPublicCta,
+  getPublicShellLinks,
+  type TPublicShellLink,
+} from "@/lib/site/public-shell";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { toggleTheme } from "@/redux/slices/setting-slice";
-import {
-  Briefcase,
-  Download,
-  Home,
-  Mail,
-  Monitor,
-  Moon,
-  PenTool,
-  Sun,
-  User,
-} from "lucide-react";
-import Image from "next/image";
+import { ArrowUpRight, Menu, Monitor, Moon, Sun, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
-
-// Types
-type NavLink = {
-  href: string;
-  name: string;
-  icon?: React.ElementType;
-};
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type HeaderProps = {
+  site: TPublicSiteDto;
   className?: string;
 };
 
-// Constants
-const ALL_PAGE_NAV_LINKS: NavLink[] = [
-  { href: "/", name: "Home", icon: Home },
-  { href: "/about", name: "About", icon: User },
-  { href: "/projects", name: "Projects", icon: Briefcase },
-  { href: "/articles", name: "Articles", icon: PenTool },
-  { href: "/contact", name: "Contact", icon: Mail },
-] as const;
+const isActivePath = (pathname: string, href: string): boolean =>
+  href === "/"
+    ? pathname === "/"
+    : pathname.startsWith(`${href}/`) || pathname === href;
 
-const HOME_PAGE_NAV_LINKS: NavLink[] = [
-  { href: "#home", name: "Home", icon: Home },
-  { href: "#about", name: "About", icon: User },
-  { href: "#projects", name: "Projects", icon: Briefcase },
-  { href: "#articles", name: "Articles", icon: PenTool },
-  { href: "#contact", name: "Contact", icon: Mail },
-] as const;
-
-const VISIBLE_SECTIONS = ["home", "about", "projects", "articles", "contact"];
-
-// Custom hook for mobile menu
-const useMobileMenu = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen((prev) => {
-      const newState = !prev;
-      document.body.style.overflow = newState ? "hidden" : "auto";
-      return newState;
-    });
-  }, []);
-
-  const closeMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen(false);
-    document.body.style.overflow = "auto";
-  }, []);
-
-  // Close menu on escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isMobileMenuOpen) {
-        closeMobileMenu();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isMobileMenuOpen, closeMobileMenu]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
-
-  return {
-    isMobileMenuOpen,
-    toggleMobileMenu,
-    closeMobileMenu,
-  };
-};
-
-// Components
-const Logo: React.FC = () => (
-  <Link
-    href="/"
-    className="flex w-full items-center gap-2 text-xl font-medium transition-opacity duration-300 hover:opacity-80"
-    aria-label="Home"
-  >
-    <Image
-      src="/logo.png"
-      alt="Logo"
-      width={48}
-      height={48}
-      className="size-12 rounded-full object-contain object-left"
-      priority
-    />
-    <div className="leading-4">
-      <p className="dark:text-foreground text-primary">FOYSAL AHMED</p>
-      <span className="text-xs font-thin">Application Developer</span>
-    </div>
-  </Link>
-);
-
-const NavItem: React.FC<{
-  link: NavLink;
-  visibleSection?: string;
+const PublicLink = ({
+  link,
+  className,
+  onClick,
+  children,
+}: {
+  link: TPublicShellLink;
+  className?: string;
   onClick?: () => void;
-}> = ({ link, visibleSection, onClick }) => {
-  const url = new URL(link.href, "http://localhost");
-  const isHashed = !!url.hash;
-  const isActive = visibleSection === url.hash.replace("#", "");
-  const pathname = usePathname();
-
-  // For non-hashed links, check exact path match
-  const isPathActive = !isHashed && pathname === link.href;
-  const isLinkActive = isHashed ? isActive : isPathActive;
-
-  const linkClassName = cn(
-    "relative flex items-center gap-2 text-sm font-medium uppercase tracking-widest transition-all duration-300",
-    isLinkActive
-      ? "text-foreground opacity-100"
-      : "text-muted-foreground hover:text-foreground opacity-60 hover:opacity-100"
-  );
-
-  const activeIndicator = (
-    <span
-      className={cn(
-        "bg-foreground absolute -bottom-1.5 left-0 h-0.5 transition-all duration-300",
-        isLinkActive ? "w-full" : "w-0"
-      )}
-    />
-  );
-
-  const handleHashClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isHashed) {
-      e.preventDefault();
-      const targetId = url.hash.replace("#", "");
-      const element = document.getElementById(targetId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-        window.history.pushState(null, "", link.href);
-      }
-      if (onClick) onClick();
-    }
-  };
-
-  if (isHashed) {
+  children?: React.ReactNode;
+}) => {
+  if (link.external) {
     return (
-      <Link
+      <a
         href={link.href}
-        className={linkClassName}
-        onClick={handleHashClick}
+        className={className}
+        onClick={onClick}
+        target={link.href.startsWith("https:") ? "_blank" : undefined}
+        rel={link.href.startsWith("https:") ? "noopener noreferrer" : undefined}
       >
-        {link.icon && <link.icon className="size-4" />}
-        {link.name}
-        {activeIndicator}
-      </Link>
+        {children ?? link.label}
+      </a>
     );
   }
-
   return (
-    <ActiveLink
-      href={link.href}
-      className={linkClassName}
-      activeClassName="!opacity-100 !text-foreground"
-      onClick={onClick}
-    >
-      {link.icon && <link.icon className="size-4" />}
-      {link.name}
-      {/* Active dot for non-hashed pages */}
-      <span
-        className={cn(
-          "bg-foreground absolute -bottom-1.5 left-0 h-0.5 transition-all duration-300",
-          pathname === link.href ? "w-full" : "w-0"
-        )}
-      />
-    </ActiveLink>
+    <Link href={link.href} className={className} onClick={onClick}>
+      {children ?? link.label}
+    </Link>
   );
 };
 
-const DesktopNavigation: React.FC<{
-  navLinks: NavLink[];
-  visibleSection?: string;
-}> = ({ navLinks, visibleSection }) => (
-  <nav className="hidden flex-1 items-center justify-center gap-4 px-0 lg:flex lg:gap-6 lg:px-16">
-    {navLinks.map((link, index) => (
-      <NavItem
-        key={`${link.href}-${index}`}
-        link={link}
-        visibleSection={visibleSection}
-      />
-    ))}
-  </nav>
-);
+const ThemeToggle = () => {
+  const { theme } = useAppSelector((state) => state.setting);
+  const dispatch = useAppDispatch();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-const MobileMenuButton: React.FC<{
-  isOpen: boolean;
-  onClick: () => void;
-}> = ({ isOpen, onClick }) => (
-  <button
-    className="group z-50 flex h-10 w-10 flex-col items-center justify-center gap-1.5 focus:outline-none lg:hidden"
-    onClick={onClick}
-    aria-label={isOpen ? "Close menu" : "Open menu"}
-    aria-expanded={isOpen}
-  >
-    <span
-      className={cn(
-        "bg-foreground h-0.5 w-6 rounded-full transition-all duration-300 ease-out",
-        isOpen && "translate-y-2 rotate-45"
-      )}
-    />
-    <span
-      className={cn(
-        "bg-foreground h-0.5 w-6 rounded-full transition-all duration-300 ease-out",
-        isOpen && "w-0 opacity-0"
-      )}
-    />
-    <span
-      className={cn(
-        "bg-foreground h-0.5 w-6 rounded-full transition-all duration-300 ease-out",
-        isOpen && "-translate-y-2 -rotate-45"
-      )}
-    />
-  </button>
-);
+  const icon = !mounted ? (
+    <Monitor className="size-5" aria-hidden="true" />
+  ) : theme === "dark" ? (
+    <Sun className="size-5" aria-hidden="true" />
+  ) : theme === "light" ? (
+    <Moon className="size-5" aria-hidden="true" />
+  ) : (
+    <Monitor className="size-5" aria-hidden="true" />
+  );
 
-const MobileNavigation: React.FC<{
-  navLinks: NavLink[];
-  visibleSection?: string;
-  isOpen: boolean;
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      shape="icon"
+      onClick={() => dispatch(toggleTheme())}
+      aria-label="Change color theme"
+    >
+      {icon}
+    </Button>
+  );
+};
+
+const Brand = ({ site }: { site: TPublicSiteDto }) => {
+  const name =
+    site.identity.short_name ||
+    site.identity.public_name ||
+    "Engineering Portfolio";
+  const tagline =
+    site.positioning.mobile ||
+    site.positioning.compact ||
+    "Product engineering";
+  const logo = site.brand.logo_dark ?? site.brand.logo_light;
+
+  return (
+    <Link
+      href="/"
+      className="focus-visible:ring-primary flex min-h-11 min-w-0 items-center gap-3 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
+      aria-label={`${name} home`}
+    >
+      <span className="border-border bg-surface-subtle relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-2xl border">
+        {logo ? (
+          <OptimizedMedia
+            src={logo.url}
+            alt=""
+            fallback="profile"
+            sizes="44px"
+            className="object-contain p-1"
+          />
+        ) : (
+          <span className="text-primary text-sm font-black" aria-hidden="true">
+            {name
+              .split(/\s+/)
+              .slice(0, 2)
+              .map((part) => part[0])
+              .join("")
+              .toUpperCase()}
+          </span>
+        )}
+      </span>
+      <span className="hidden min-w-0 leading-tight sm:block">
+        <span className="block truncate text-sm font-black tracking-wide uppercase">
+          {name}
+        </span>
+        <span className="text-muted-foreground block max-w-48 truncate text-[0.68rem] font-semibold">
+          {tagline}
+        </span>
+      </span>
+    </Link>
+  );
+};
+
+const MobileNavigation = ({
+  open,
+  links,
+  site,
+  onClose,
+}: {
+  open: boolean;
+  links: readonly TPublicShellLink[];
+  site: TPublicSiteDto;
   onClose: () => void;
-}> = ({ navLinks, visibleSection, isOpen, onClose }) => {
-  // Prevent scrolling when menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+}) => {
+  const pathname = usePathname();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus({ active: open, containerRef: dialogRef, onEscape: onClose });
 
   return (
     <div
+      ref={dialogRef}
+      id="public-mobile-navigation"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="public-mobile-navigation-title"
+      aria-hidden={!open}
+      inert={!open}
+      tabIndex={-1}
       className={cn(
-        "fixed inset-0 z-40 flex flex-col items-center justify-center backdrop-blur-xl transition-all duration-500",
-        isOpen
-          ? "bg-background/90 visible opacity-100"
-          : "bg-background/0 pointer-events-none invisible opacity-0"
+        "bg-background/95 fixed inset-0 z-[calc(var(--z-header)+1)] overflow-y-auto px-6 py-6 backdrop-blur-2xl transition-[opacity,visibility] duration-[var(--motion-standard)] motion-reduce:transition-none xl:hidden",
+        open ? "visible opacity-100" : "pointer-events-none invisible opacity-0"
       )}
     >
-      {/* Decorative background blobs */}
-      <div className="bg-primary/20 absolute top-1/4 -left-20 size-96 rounded-full blur-[100px]" />
-      <div className="bg-secondary/20 absolute -right-20 bottom-1/4 size-96 rounded-full blur-[100px]" />
-
-      <nav
-        className="relative z-10 flex flex-col items-center gap-8"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {[...navLinks].map((link, index) => {
-          const isActive = visibleSection === link.href.replace("#", "");
-
-          const handleMobileClick = (
-            e: React.MouseEvent<HTMLAnchorElement>
-          ) => {
-            if (link.href.startsWith("#")) {
-              e.preventDefault();
-              const targetId = link.href.replace("#", "");
-              const element = document.getElementById(targetId);
-              if (element) {
-                element.scrollIntoView({ behavior: "smooth" });
-                window.history.pushState(null, "", link.href);
-              }
-            }
-            onClose();
-          };
-
-          return (
-            <Link
-              key={`mobile-${link.href}-${index}`}
-              href={link.href}
-              onClick={handleMobileClick}
-              className={cn(
-                "hover:text-primary text-4xl font-black tracking-tight transition-all duration-500",
-                isOpen
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-10 opacity-0",
-                isActive ? "text-primary" : "text-muted-foreground"
-              )}
-              style={{ transitionDelay: `${index * 100}ms` }}
-            >
-              <span className="flex items-center gap-4">
-                {link.icon && <link.icon className="size-8 stroke-[2.5]" />}
-                {link.name}
-              </span>
-            </Link>
-          );
-        })}
-        <Link
-          href="https://drive.google.com/file/d/1BUDGgWeCHh-p7gSUPGDGzGRMUrfWpHAe/view?usp=sharing"
-          target="_blank"
-          className={cn(
-            "hover:text-primary text-4xl font-black tracking-tight transition-all duration-500",
-            isOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-          )}
-          style={{ transitionDelay: `${navLinks.length * 100}ms` }}
-          onClick={onClose}
-        >
-          <span className="flex items-center gap-4">
-            <Download className="size-8 stroke-[2.5]" />
-            Resume
-          </span>
-        </Link>
-      </nav>
-
-      <div
-        className={cn(
-          "absolute bottom-20 transition-all delay-300 duration-700",
-          isOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-        )}
-      >
-        <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-          Build . Design . Innovate
+      <div className="mx-auto flex min-h-full max-w-2xl flex-col">
+        <div className="flex items-center justify-between gap-5">
+          <p
+            id="public-mobile-navigation-title"
+            className="text-sm font-black tracking-[0.18em] uppercase"
+          >
+            Navigation
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            shape="icon"
+            data-initial-focus
+            onClick={onClose}
+            aria-label="Close navigation"
+          >
+            <X className="size-5" aria-hidden="true" />
+          </Button>
+        </div>
+        <nav className="my-auto py-12" aria-label="Mobile primary navigation">
+          <ul className="space-y-2" role="list">
+            {links.map((link, index) => {
+              const active =
+                !link.external && isActivePath(pathname, link.href);
+              return (
+                <li key={link.key}>
+                  <PublicLink
+                    link={link}
+                    onClick={onClose}
+                    className={cn(
+                      "focus-visible:ring-primary group flex min-h-16 items-center justify-between rounded-2xl px-4 text-2xl font-black tracking-tight focus-visible:ring-2 focus-visible:outline-none sm:text-3xl",
+                      active ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                    )}
+                  >
+                    <span className="flex items-baseline gap-4">
+                      <span className="text-muted-foreground text-xs tabular-nums">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      {link.label}
+                    </span>
+                    {link.external && (
+                      <ArrowUpRight className="size-5" aria-hidden="true" />
+                    )}
+                  </PublicLink>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        <p className="text-muted-foreground border-border border-t pt-6 text-sm leading-6">
+          {site.positioning.canonical ||
+            "Frontend · Backend · AI Automation · System Design · Full-Stack"}
         </p>
       </div>
     </div>
   );
 };
 
-const ThemeToggler: React.FC = () => {
-  const { theme } = useAppSelector((state) => state.setting);
-  const dispatch = useAppDispatch();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <Button
-        variant="ghost"
-        shape="icon"
-        className="text-foreground hover:bg-muted"
-        aria-label="Toggle theme"
-      >
-        <Monitor className="size-5" />
-      </Button>
-    );
-  }
-
-  return (
-    <Button
-      variant="ghost"
-      shape="icon"
-      onClick={() => dispatch(toggleTheme())}
-      className="text-foreground hover:bg-muted"
-      aria-label="Toggle theme"
-    >
-      {theme === "dark" ? (
-        <Sun className="size-5" />
-      ) : theme === "light" ? (
-        <Moon className="size-5" />
-      ) : (
-        <Monitor className="size-5" />
-      )}
-    </Button>
-  );
-};
-
-// Main Header Component
-const Header: React.FC<HeaderProps> = ({ className }) => {
+const Header = ({ site, className }: HeaderProps) => {
   const pathname = usePathname();
-  const isHomePage = pathname === "/";
-  const navLinks = isHomePage ? HOME_PAGE_NAV_LINKS : ALL_PAGE_NAV_LINKS;
-
   const { scrollTop, scrollDirection } = useScrollPosition();
-  const { visibleSection } = useVisibleSection(VISIBLE_SECTIONS, 0.5);
-  const { isMobileMenuOpen, toggleMobileMenu, closeMobileMenu } =
-    useMobileMenu();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const links = getPublicShellLinks(site, "header");
+  const cta = getPrimaryPublicCta(site);
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
 
-  // Header styling based on scroll and page
-  const headerClassName = cn(
-    "text-foreground top-0 right-0 left-0 z-50 h-20 bg-background/50 backdrop-blur-xs transition-all duration-300 ease-in-out",
-    {
-      fixed: isHomePage,
-      "bg-card sticky": !isHomePage,
-      "bg-background/95 shadow-sm": scrollTop > 80 && isHomePage,
-      "bg-background/95": isMobileMenuOpen && isHomePage,
-      "-translate-y-full":
-        scrollDirection === "down" && scrollTop > 80 && isHomePage,
-      "translate-y-0":
-        (scrollDirection === "up" && isHomePage) ||
-        (scrollTop <= 80 && isHomePage),
-    },
-    className
-  );
+  useEffect(() => closeMobile(), [closeMobile, pathname]);
 
   return (
     <>
-      <header className={headerClassName}>
-        <div className="container flex h-full items-center justify-between">
-          <Logo />
-
-          <DesktopNavigation
-            navLinks={navLinks}
-            visibleSection={visibleSection || undefined}
-          />
-
-          <div className="flex items-center gap-2 lg:gap-4">
-            <Link
-              href="https://drive.google.com/file/d/1BUDGgWeCHh-p7gSUPGDGzGRMUrfWpHAe/view?usp=sharing"
-              target="_blank"
-              className="hidden sm:inline-flex"
+      <header
+        className={cn(
+          "bg-background/85 text-foreground sticky top-0 z-[var(--z-header)] h-20 border-b backdrop-blur-xl transition-[background-color,box-shadow,transform,border-color] duration-[var(--motion-standard)] motion-reduce:transform-none motion-reduce:transition-none",
+          scrollTop > 24 ? "border-border shadow-sm" : "border-transparent",
+          scrollDirection === "down" && scrollTop > 160 && !mobileOpen
+            ? "-translate-y-full"
+            : "translate-y-0",
+          className
+        )}
+      >
+        <div className="container mx-auto flex h-full items-center justify-between gap-4 px-6">
+          <Brand site={site} />
+          {links.length > 0 && (
+            <nav
+              className="hidden min-w-0 items-center justify-center xl:flex"
+              aria-label="Primary navigation"
             >
-              <Button asChild={true}>
-                Resume <Download className="size-4" />
-              </Button>
-            </Link>
-            <ThemeToggler />
-            <MobileMenuButton
-              isOpen={isMobileMenuOpen}
-              onClick={toggleMobileMenu}
-            />
+              <ul className="flex items-center gap-1" role="list">
+                {links.map((link) => {
+                  const active =
+                    !link.external && isActivePath(pathname, link.href);
+                  return (
+                    <li key={link.key}>
+                      <PublicLink
+                        link={link}
+                        className={cn(
+                          "focus-visible:ring-primary relative flex min-h-11 items-center rounded-xl px-3 text-xs font-bold tracking-[0.12em] uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none",
+                          active
+                            ? "text-primary"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {link.label}
+                        {active && (
+                          <span className="bg-primary absolute right-3 bottom-1 left-3 h-0.5 rounded-full" />
+                        )}
+                      </PublicLink>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          )}
+          <div className="flex shrink-0 items-center gap-1.5">
+            {cta && (
+              <PublicLink
+                link={cta}
+                className={cn(
+                  buttonVariants({ size: "sm" }),
+                  "hidden 2xl:inline-flex"
+                )}
+              >
+                {cta.label}
+                {cta.external && (
+                  <ArrowUpRight className="size-4" aria-hidden="true" />
+                )}
+              </PublicLink>
+            )}
+            <ThemeToggle />
+            <Button
+              type="button"
+              variant="outline"
+              shape="icon"
+              className="xl:hidden"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation"
+              aria-expanded={mobileOpen}
+              aria-controls="public-mobile-navigation"
+            >
+              <Menu className="size-5" aria-hidden="true" />
+            </Button>
           </div>
         </div>
       </header>
-
       <MobileNavigation
-        navLinks={navLinks}
-        visibleSection={visibleSection || undefined}
-        isOpen={isMobileMenuOpen}
-        onClose={closeMobileMenu}
+        open={mobileOpen}
+        links={links}
+        site={site}
+        onClose={closeMobile}
       />
     </>
   );

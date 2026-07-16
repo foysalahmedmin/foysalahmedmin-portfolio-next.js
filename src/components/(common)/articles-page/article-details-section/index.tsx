@@ -1,142 +1,212 @@
-"use client";
+import ShareButton from "@/components/content/share-button";
+import { RichContentRenderer } from "@/components/content/rich-content-renderer";
+import OptimizedMedia from "@/components/ui/optimized-media";
+import { getPillarLabel } from "@/lib/content/pillars";
+import type { TArticleListItem, TPublicArticle } from "@/types/article.type";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  CalendarDays,
+  Clock3,
+  User,
+} from "lucide-react";
+import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
-import type { TArticle } from "@/types/article.type";
-import { ArrowLeft, Share2, User } from "lucide-react";
-import { useRouter } from "next/navigation";
+const dateLabel = (value?: string): string | null => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "long",
+    timeZone: "UTC",
+  }).format(date);
+};
 
-interface ArticleDetailsSectionProps {
-  article: TArticle;
-}
-
-const ArticleDetailsSection: React.FC<ArticleDetailsSectionProps> = ({
+const ArticleDetailsSection = ({
   article,
+  related,
+}: {
+  article: TPublicArticle;
+  related: readonly TArticleListItem[];
 }) => {
-  const router = useRouter();
-
-  if (!article)
-    return (
-      <div className="flex flex-col items-center justify-center py-32 text-center">
-        <h2 className="text-2xl font-bold">Article not found</h2>
-        <Button
-          onClick={() => router.back()}
-          variant="outline"
-          className="mt-8"
-        >
-          Go Back
-        </Button>
-      </div>
-    );
-
-  const date = article.published_at
-    ? new Date(article.published_at).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "Recently Published";
+  const published = dateLabel(article.published_at);
+  const pillar = article.primary_pillar
+    ? getPillarLabel(article.primary_pillar)
+    : null;
+  const tags = [
+    ...new Set([...(article.topics ?? []), ...(article.tags ?? [])]),
+  ];
 
   return (
     <main className="min-h-screen">
-      {/* Article Header */}
-      <section className="bg-muted/30 border-border border-b py-20 lg:py-32">
-        <div className="container mx-auto px-6">
-          <Button
-            onClick={() => router.back()}
-            variant="ghost"
-            className="hover:text-primary mb-12 pl-0 transition-colors hover:bg-transparent"
+      <header className="bg-surface-subtle border-border relative overflow-hidden border-b py-20 lg:py-28">
+        <div className="bg-primary/10 pointer-events-none absolute -top-40 left-1/2 size-[38rem] -translate-x-1/2 rounded-full blur-[150px]" />
+        <div className="relative container mx-auto px-6">
+          <Link
+            href="/articles"
+            className="text-muted-foreground hover:text-primary focus-visible:ring-primary inline-flex min-h-11 items-center gap-2 rounded-lg pr-3 text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
           >
-            <ArrowLeft className="mr-2 size-4" /> Back to Articles
-          </Button>
-
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="text-primary mb-6 flex items-center justify-center gap-4 text-xs font-bold tracking-widest uppercase">
-              <span>{article.category?.name || "Tutorial"}</span>
-              <span className="bg-border size-1 rounded-full" />
-              <span>{date}</span>
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            All articles
+          </Link>
+          <div className="mx-auto mt-10 max-w-5xl text-center">
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-bold">
+              {pillar && (
+                <span className="bg-primary/10 text-primary rounded-full px-3 py-1.5">
+                  {pillar}
+                </span>
+              )}
+              {article.category?.name && (
+                <span className="border-border bg-card rounded-full border px-3 py-1.5">
+                  {article.category.name}
+                </span>
+              )}
             </div>
-            <h1 className="text-4xl leading-tight font-bold tracking-tight md:text-6xl lg:text-7xl">
+            <h1 className="mt-6 text-4xl leading-[1.03] font-black tracking-tight text-balance sm:text-6xl lg:text-7xl">
               {article.name}
             </h1>
-
-            <div className="mt-12 flex items-center justify-center gap-4">
-              <div className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full">
-                <User className="size-6" />
-              </div>
-              <div className="text-left">
-                <p className="font-bold">
-                  {article.author?.name || "Foysal Ahmed"}
-                </p>
-                <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                  Software Engineer
-                </p>
-              </div>
-            </div>
+            {(article.excerpt || article.description) && (
+              <p className="text-muted-foreground mx-auto mt-7 max-w-3xl text-xl leading-9">
+                {article.excerpt || article.description}
+              </p>
+            )}
+            <dl className="text-muted-foreground mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm">
+              {article.author?.name && (
+                <div className="flex items-center gap-2">
+                  <User className="size-4" aria-hidden="true" />
+                  <dt className="sr-only">Author</dt>
+                  <dd className="font-semibold">{article.author.name}</dd>
+                </div>
+              )}
+              {published && (
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="size-4" aria-hidden="true" />
+                  <dt className="sr-only">Published</dt>
+                  <dd>
+                    <time
+                      dateTime={new Date(article.published_at!).toISOString()}
+                    >
+                      {published}
+                    </time>
+                  </dd>
+                </div>
+              )}
+              {article.reading_time_minutes && (
+                <div className="flex items-center gap-2">
+                  <Clock3 className="size-4" aria-hidden="true" />
+                  <dt className="sr-only">Reading time</dt>
+                  <dd>{article.reading_time_minutes} min read</dd>
+                </div>
+              )}
+            </dl>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Hero Image */}
-      <div className="container mx-auto -mt-16 px-6 md:-mt-24 lg:-mt-32">
-        <div className="border-border relative aspect-[21/9] w-full overflow-hidden rounded-3xl border shadow-2xl">
-          <img
-            src={article.thumbnail?.url || "/images/placeholder-article.png"}
-            alt={article.name}
-            className="h-full w-full object-cover"
+      <div className="container mx-auto -mt-8 px-6 lg:-mt-12">
+        <div className="border-border bg-muted relative aspect-[16/9] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
+          <OptimizedMedia
+            src={article.thumbnail?.url}
+            alt={
+              article.thumbnail?.is_decorative
+                ? ""
+                : article.thumbnail?.alt_text || article.name
+            }
+            fallback="article"
+            pillar={article.primary_pillar}
+            sizes="100vw"
+            priority
+            className="object-cover"
           />
         </div>
       </div>
 
-      {/* Content */}
-      <section className="py-24 lg:py-32">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
-            <div className="lg:col-span-8 lg:col-start-3">
-              <div
-                className="prose prose-lg dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border max-w-none"
-                dangerouslySetInnerHTML={{ __html: article.content }}
-              />
+      <article className="container mx-auto px-6 py-20 lg:py-28">
+        <div className="mx-auto max-w-6xl">
+          <RichContentRenderer
+            document={article.rich_content}
+            legacyHtml={article.content}
+          />
 
-              <div className="border-border mt-20 flex flex-wrap gap-3 border-t pt-10">
-                <span className="text-muted-foreground mr-4 flex items-center gap-2 text-sm font-bold tracking-widest uppercase">
-                  Tags:
-                </span>
-                {article.tags?.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="bg-muted border-border rounded-full border px-4 py-1.5 text-[10px] font-bold tracking-widest uppercase"
+          {tags.length > 0 && (
+            <div className="border-border mt-14 border-t pt-8">
+              <h2 className="text-sm font-black tracking-[0.14em] uppercase">
+                Topics
+              </h2>
+              <ul className="mt-4 flex flex-wrap gap-2" role="list">
+                {tags.map((tag) => (
+                  <li
+                    key={tag}
+                    className="bg-muted rounded-full px-3 py-1.5 text-xs font-bold"
                   >
                     {tag}
-                  </span>
+                  </li>
                 ))}
-              </div>
-
-              <div className="border-border bg-card mt-16 flex flex-col items-center gap-8 rounded-3xl border p-10 md:flex-row">
-                <div className="bg-primary/10 text-primary flex size-24 flex-shrink-0 items-center justify-center rounded-3xl">
-                  <User className="size-12" />
-                </div>
-                <div className="space-y-3 text-center md:text-left">
-                  <h4 className="text-xl font-bold">Written by Foysal Ahmed</h4>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    I'm a full-stack engineer passionate about building scalable
-                    web applications and sharing my experiences in system
-                    engineering and performance optimization.
-                  </p>
-                  <div className="flex justify-center gap-4 pt-2 md:justify-start">
-                    <Button
-                      variant="outline"
-                      shape="icon"
-                      className="h-10 w-10 rounded-full"
-                    >
-                      <Share2 className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              </ul>
             </div>
+          )}
+
+          <div className="border-border bg-card mt-14 flex flex-col items-start justify-between gap-6 rounded-2xl border p-6 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-black">
+                Share the canonical article
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Use the native share sheet or copy the current link.
+              </p>
+            </div>
+            <ShareButton title={article.name} />
           </div>
         </div>
-      </section>
+      </article>
+
+      {related.length > 0 && (
+        <section
+          className="border-border bg-surface-subtle border-t py-20"
+          aria-labelledby="related-articles-title"
+        >
+          <div className="container mx-auto px-6">
+            <div className="flex items-center gap-3">
+              <BookOpen className="text-primary size-6" aria-hidden="true" />
+              <h2
+                id="related-articles-title"
+                className="text-3xl font-black tracking-tight"
+              >
+                Continue reading
+              </h2>
+            </div>
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              {related.map((item) => (
+                <Link
+                  key={item._id}
+                  href={`/articles/${item.slug ?? item._id}`}
+                  className="border-border bg-card hover:border-primary group rounded-2xl border p-6"
+                >
+                  <p className="text-primary text-xs font-black uppercase">
+                    {item.primary_pillar
+                      ? getPillarLabel(item.primary_pillar)
+                      : "Article"}
+                  </p>
+                  <h3 className="mt-3 text-xl font-black">{item.name}</h3>
+                  {(item.excerpt || item.description) && (
+                    <p className="text-muted-foreground mt-3 line-clamp-3 text-sm leading-6">
+                      {item.excerpt || item.description}
+                    </p>
+                  )}
+                  <span className="text-primary mt-5 inline-flex items-center gap-2 text-sm font-bold">
+                    Read article
+                    <ArrowRight
+                      className="size-4 transition-transform group-hover:translate-x-1"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 };

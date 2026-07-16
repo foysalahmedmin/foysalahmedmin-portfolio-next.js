@@ -1,0 +1,109 @@
+// @vitest-environment jsdom
+
+import { createEmergencyPublicSite } from "@/app/api/site/site.policy";
+import type {
+  TResolvedPageSection,
+  TResolvedPublishedPagePayload,
+} from "@/app/api/pages/page-resolver.type";
+import { PublicPageSections } from "@/components/pages/public-page-sections";
+import { cleanup, render } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@/components/(common)/home-page/hero-section", () => ({
+  default: () => <section>hero</section>,
+}));
+vi.mock("@/components/(common)/home-page/about-section", () => ({
+  default: () => <section>introduction</section>,
+}));
+vi.mock("@/components/(common)/about-page/about-details-section", () => ({
+  default: () => <section>about introduction</section>,
+}));
+vi.mock("@/components/(common)/home-page/projects-section", () => ({
+  default: ({ projects }: { projects: Array<{ name: string }> }) => (
+    <section>projects:{projects.map(({ name }) => name).join(",")}</section>
+  ),
+}));
+vi.mock("@/components/(common)/home-page/articles-section", () => ({
+  default: ({ articles }: { articles: Array<{ name: string }> }) => (
+    <section>articles:{articles.map(({ name }) => name).join(",")}</section>
+  ),
+}));
+vi.mock("@/components/sections/services-section", () => ({
+  default: () => <section>services</section>,
+}));
+vi.mock("@/components/sections/skills-section", () => ({
+  default: () => <section>skills</section>,
+}));
+vi.mock("@/components/sections/contact-cta-section", () => ({
+  default: () => <section>contact</section>,
+}));
+vi.mock("@/components/(common)/contact-page/contact-content-section", () => ({
+  default: () => <section>contact form</section>,
+}));
+vi.mock("@/components/sections/evidence-sections", () => ({
+  TimelineSection: () => <section>timeline</section>,
+  CredentialsSection: () => <section>credentials</section>,
+  FAQSection: () => <section>faqs</section>,
+  TestimonialsSection: () => <section>testimonials</section>,
+}));
+const section = (
+  key: string,
+  kind: TResolvedPageSection["kind"],
+  items: readonly Readonly<Record<string, unknown>>[] = []
+): TResolvedPageSection => ({
+  key,
+  kind,
+  layout: "test",
+  source_mode: "automatic",
+  items,
+  health: {
+    status: items.length ? "healthy" : "empty",
+    requested_records: items.length,
+    resolved_records: items.length,
+    omitted_records: 0,
+    reason_codes: items.length ? [] : ["source_empty"],
+  },
+});
+
+describe("PublicPageSections", () => {
+  afterEach(cleanup);
+
+  it("renders primary content in the exact published Page order", () => {
+    const payload: TResolvedPublishedPagePayload = {
+      page: {
+        route_key: "home",
+        route_path: "/",
+        locale: "en",
+        schema_version: 1,
+        contract_version: 1,
+        published_revision: 3,
+        published_at: "2026-07-15T00:00:00.000Z",
+        seo: { noindex: false },
+      },
+      site: createEmergencyPublicSite(),
+      sections: [
+        section("projects", "project-collection", [
+          { _id: "project-1", name: "First case study" },
+        ]),
+        section("hero", "site-hero"),
+        section("articles", "article-collection", [
+          { _id: "article-1", name: "First insight" },
+        ]),
+        section("contact", "contact-cta"),
+      ],
+      health: {
+        status: "healthy",
+        total_sections: 4,
+        healthy_sections: 4,
+        degraded_sections: 0,
+        resolved_records: 2,
+        omitted_records: 0,
+      },
+    };
+
+    const { container } = render(<PublicPageSections payload={payload} />);
+    expect(container.textContent).toBe(
+      "projects:First case studyheroarticles:First insightcontact"
+    );
+  });
+});

@@ -1,14 +1,18 @@
 import AnimationApplier from "@/components/appliers/animation-applier";
 import ThemeApplier from "@/components/appliers/theme-applier";
+import { buildSiteMetadata } from "@/lib/metadata/site-metadata";
+import { readPublishedSite } from "@/lib/site/published-site";
 import ReduxProvider from "@/providers/redux-provider";
+import MotionProvider from "@/providers/motion-provider";
+import ParallaxProvider from "@/providers/parallax-provider";
+import { WebVitalsReporter } from "@/components/observability/web-vitals-reporter";
 import type { Metadata } from "next";
 import React from "react";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "FOYSAL AHMED",
-  description: "A full-stack developer",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return buildSiteMetadata(await readPublishedSite());
+}
 
 export default function RootLayout({
   children,
@@ -18,7 +22,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="max-w-screen overflow-x-hidden scroll-smooth"
+      className="max-w-screen overflow-x-hidden"
+      data-motion="reduced"
+      data-motion-capability="static"
+      data-document-visible="false"
       suppressHydrationWarning
     >
       <head>
@@ -64,10 +71,15 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <ReduxProvider>
-          {/* Appliers */}
-          <ThemeApplier />
-          {children}
-          <AnimationApplier />
+          <MotionProvider>
+            <ParallaxProvider>
+              {/* Appliers */}
+              <ThemeApplier />
+              {children}
+              <AnimationApplier />
+              <WebVitalsReporter />
+            </ParallaxProvider>
+          </MotionProvider>
         </ReduxProvider>
       </body>
     </html>
