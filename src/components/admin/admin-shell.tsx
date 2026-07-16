@@ -22,6 +22,7 @@ import {
   Menu,
   ScrollText,
   Settings,
+  Tags,
   Users,
   X,
 } from "lucide-react";
@@ -89,6 +90,12 @@ const adminNavGroups: ReadonlyArray<
         icon: Link2,
         capability: "content:read",
       },
+      {
+        name: "Taxonomy",
+        href: "/admin/taxonomy",
+        icon: Tags,
+        capability: "content:read",
+      },
     ],
   },
   {
@@ -144,6 +151,7 @@ const routeLabels: Readonly<Record<string, string>> = {
   articles: "Articles",
   projects: "Projects",
   "project-resources": "Project resources",
+  taxonomy: "Taxonomy",
   contacts: "Contact inbox",
   reviews: "Review moderation",
   audit: "Audit log",
