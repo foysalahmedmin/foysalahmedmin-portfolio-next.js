@@ -1150,9 +1150,10 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Define forbidden motifs: people, logos, fake text/UI, robots, brains, stock keyboards, excessive neon.
 - [x] Store prompt/version/provenance template.
 - [x] Store the exact System Design pilot generation request and metadata checklist without claiming generated evidence.
+- [x] Generate the System Design pilot candidate and record local ignored asset paths, dimensions, checksums, and candidate review notes.
 - [ ] Generate and approve one pillar pilot before batch generation.
 - [ ] Test the pilot at desktop/mobile crops, 320–1920 widths, and both themes.
-- [ ] Enforce pilot media budgets: mobile hero ≤ 200 KB and desktop hero ≤ 350 KB after optimization.
+- [x] Enforce pilot media budgets: mobile hero ≤ 200 KB and desktop hero ≤ 350 KB after optimization.
 - [x] Resolve seed/media engineering prerequisites for generated hero/social media: managed seed gateway construction, metadata/provenance pass-through, optional Site media bindings, and seed reference reconciliation are implemented.
 
 **Acceptance criteria**

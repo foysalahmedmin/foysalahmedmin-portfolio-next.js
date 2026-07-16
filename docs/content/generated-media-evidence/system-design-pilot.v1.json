@@ -1,0 +1,84 @@
+{
+  "manifest_contract": "portfolio-generated-media/1.0.0",
+  "prompt_contract": "architected-intelligence/1.0.0",
+  "asset_id": "hero.system_design.master.v1",
+  "media_key": "hero.system_design",
+  "state": "generated_candidate",
+  "approved": false,
+  "source": {
+    "local_path": "seed-assets/heroes/system-design-pilot.master.png",
+    "raw_local_path": "seed-assets/heroes/system-design-pilot.raw.png",
+    "width": 2400,
+    "height": 1350,
+    "sha256": "cff50878cfd638fe5252238a2e517a463bc679958503b7971d8d03437087a937",
+    "raw_width": 1672,
+    "raw_height": 941,
+    "raw_sha256": "78940c005788982bc7bc92f17191dd5db0b0e57b498e8631bc255fc26bba2347",
+    "repository_policy": "binary ignored; commit checksum/provenance only"
+  },
+  "derivatives": {
+    "desktop_webp": {
+      "local_path": "seed-assets/heroes/derivatives/system-design-pilot.desktop.q82.webp",
+      "width": 1600,
+      "height": 900,
+      "quality": 82,
+      "bytes": 79378,
+      "sha256": "d0999687bf928bdd24f89ce618621a3ae107a769f72221d09ef08c3ffe2c883b",
+      "budget_bytes": 358400,
+      "budget_gate": "pass"
+    },
+    "mobile_webp": {
+      "local_path": "seed-assets/heroes/derivatives/system-design-pilot.mobile.q78.webp",
+      "width": 1080,
+      "height": 1350,
+      "quality": 78,
+      "bytes": 95428,
+      "sha256": "88335d4bb61aba63bc5c2603612b5138edd5aeb7f971f048cbaa51de1038d535",
+      "budget_bytes": 204800,
+      "budget_gate": "pass"
+    },
+    "desktop_png_intermediate_sha256": "147f558c14806096ba20c0eae8954e6a466c037d19bd7a739f2b00db5e5da918",
+    "mobile_crop_png_intermediate_sha256": "e7c693a567ee91711cea25463a1147f8c6055571ee56a9c3bee4259d4278ca0a"
+  },
+  "generation": {
+    "generator": "built-in image_gen",
+    "model": null,
+    "version": null,
+    "seed": null,
+    "generated_at": "2026-07-16T23:25:48Z",
+    "prompt_source": "docs/content/generated-media-system-design-pilot.v1.json",
+    "prompt_checksum": "8bdfb099e60e1dc16f1bde35b4c6218bb2c5e6ca808b52d2095d60f2be411831"
+  },
+  "editorial_review": {
+    "creative_gate": "pass_candidate",
+    "composition_gate": "pass_candidate",
+    "negative_prompt_gate": "pass_candidate",
+    "source_gate": "pass_candidate",
+    "optimization_gate": "pass_candidate",
+    "notes": [
+      "Quiet low-detail left field leaves room for hero copy.",
+      "Right-side focal topology communicates resilient system architecture with alternate routes and bounded nodes.",
+      "No obvious person, logo, readable text, UI, or brand mark was visible in the manual inspection.",
+      "The canonical master was resampled from the raw built-in image output to the required 2400x1350 source-master dimensions.",
+      "Desktop and mobile WebP derivatives are below the documented optimization budgets."
+    ]
+  },
+  "remaining_gates": [
+    "responsive crop inspection",
+    "accessibility intent confirmation in composed hero",
+    "dominant color and blur placeholder extraction",
+    "rights/license review",
+    "managed-media ingestion",
+    "Site draft attachment",
+    "publish graph validation"
+  ],
+  "managed_file": {
+    "file_id": null,
+    "canonical_sha256": null,
+    "lifecycle_state": null
+  },
+  "approval": {
+    "approved_at": null,
+    "approved_by": null
+  }
+}

@@ -27,6 +27,7 @@
 .DS_Store
 *.pem
 /credentials/*.json
+/seed-assets/
 
 # debug
 npm-debug.log*
