@@ -1117,7 +1117,7 @@ The supported stable boundary is the complete chain through `c06ff91`; `1008baa`
 - [ ] Add Article and Project category management.
 - [ ] Add ProjectResource management with private/public state.
 - [ ] Add Review moderation with safe author data.
-- [ ] Add Users management only for authorized roles.
+- [x] Add capability-gated Users management with allowlisted account data, self/privileged-role safeguards, session-revoking access changes, and protected lifecycle actions.
 - [x] Add a capability-gated, privacy-safe audit log with bounded date windows, remote filters, pagination, and no-store delivery.
 - [ ] Add permissions and integration tests for every workspace.
 

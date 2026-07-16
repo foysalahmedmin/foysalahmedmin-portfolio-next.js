@@ -20,6 +20,7 @@ import {
   Menu,
   ScrollText,
   Settings,
+  Users,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -97,6 +98,12 @@ const adminNavGroups: ReadonlyArray<
     label: "System",
     links: [
       {
+        name: "Users",
+        href: "/admin/users",
+        icon: Users,
+        capability: "users:manage",
+      },
+      {
         name: "Audit log",
         href: "/admin/audit",
         icon: ScrollText,
@@ -124,6 +131,7 @@ const routeLabels: Readonly<Record<string, string>> = {
   projects: "Projects",
   contacts: "Contact inbox",
   audit: "Audit log",
+  users: "Users",
   site: "Site settings",
   pages: "Pages",
   settings: "Profile settings",

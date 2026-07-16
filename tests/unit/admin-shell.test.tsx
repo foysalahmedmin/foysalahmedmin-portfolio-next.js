@@ -91,6 +91,9 @@ describe("AdminShell", () => {
     expect(
       screen.queryByRole("link", { name: "Audit log" })
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Users" })
+    ).not.toBeInTheDocument();
   });
 
   it("registers the contact inbox only for inbox operators", () => {
@@ -129,6 +132,23 @@ describe("AdminShell", () => {
     expect(screen.getAllByRole("link", { name: "Audit log" })).not.toHaveLength(
       0
     );
+  });
+
+  it("registers user management only for authorized account operators", () => {
+    render(
+      <AdminShell
+        user={{
+          ...user,
+          capabilities: [...user.capabilities, "users:manage"],
+        }}
+        environment="preview"
+        siteState={{ configured: true, published: false }}
+      >
+        <h1>User management</h1>
+      </AdminShell>
+    );
+
+    expect(screen.getAllByRole("link", { name: "Users" })).not.toHaveLength(0);
   });
 
   it("persists the desktop sidebar preference", async () => {
