@@ -1,22 +1,50 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { signIn } from "@/services/auth.service";
+import { refreshToken, signIn, signOut } from "@/services/auth.service";
 import { Lock, LogIn, Mail, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type AdminSignInFormProps = {
   returnTo: string;
+  canRecoverSession: boolean;
 };
 
-const AdminSignInForm = ({ returnTo }: AdminSignInFormProps) => {
+const AdminSignInForm = ({
+  returnTo,
+  canRecoverSession,
+}: AdminSignInFormProps) => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!canRecoverSession) return;
+    let active = true;
+    setLoading(true);
+    void refreshToken()
+      .then(async (response) => {
+        if (!active) return;
+        if (!response.data.info?.capabilities.includes("admin:access")) {
+          await signOut().catch(() => undefined);
+          setLoading(false);
+          return;
+        }
+        router.replace(returnTo);
+        router.refresh();
+      })
+      .catch(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [canRecoverSession, returnTo, router]);
 
   const handleSignin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,13 +54,18 @@ const AdminSignInForm = ({ returnTo }: AdminSignInFormProps) => {
     try {
       const response = await signIn({ email, password });
 
-      if (response.success) {
+      if (
+        response.success &&
+        response.data.info?.capabilities.includes("admin:access")
+      ) {
         router.replace(returnTo);
         router.refresh();
         return;
       }
 
-      setError(response.message || "Invalid credentials");
+      if (response.success) await signOut().catch(() => undefined);
+
+      setError("Invalid email or password.");
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -86,12 +119,20 @@ const AdminSignInForm = ({ returnTo }: AdminSignInFormProps) => {
               </div>
             </div>
             <div className="space-y-2">
-              <label
-                htmlFor="admin-password"
-                className="text-muted-foreground text-xs font-bold tracking-widest uppercase"
-              >
-                Password
-              </label>
+              <div className="flex items-center justify-between gap-4">
+                <label
+                  htmlFor="admin-password"
+                  className="text-muted-foreground text-xs font-bold tracking-widest uppercase"
+                >
+                  Password
+                </label>
+                <Link
+                  href="/admin/forgot-password"
+                  className="text-primary focus-visible:ring-ring rounded-sm text-xs font-semibold underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <Lock
                   className="text-muted-foreground absolute top-1/2 left-4 size-4 -translate-y-1/2"

@@ -4,6 +4,7 @@ import ArticleForm from "@/components/admin/article-form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { createArticle } from "@/services/article.service";
+import type { TArticleInput } from "@/types/article.type";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ const AdminNewArticlePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: TArticleInput) => {
     setLoading(true);
     setError(null);
     try {

@@ -75,6 +75,7 @@ export default function SettingsPage() {
             Profile Image
           </label>
           <FileUploader
+            purpose="profile"
             value={formData.image as TFilePopulated | null}
             onChange={(file) =>
               setFormData((prev) => ({ ...prev, image: file }))

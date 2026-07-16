@@ -1,27 +1,16 @@
-import type { Metadata } from "next";
+import { buildNoIndexMetadata } from "@/lib/metadata/noindex";
 import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
+export const metadata = buildNoIndexMetadata({
+  referrer: "no-referrer",
   title: {
     default: "Admin Portal",
     template: "%s | Admin Portal",
   },
-  robots: {
-    index: false,
-    follow: false,
-    nocache: true,
-    googleBot: {
-      index: false,
-      follow: false,
-      noarchive: true,
-      noimageindex: true,
-      nosnippet: true,
-    },
-  },
-};
+});
 
 const AdminRootLayout = ({ children }: { children: ReactNode }) => children;
 

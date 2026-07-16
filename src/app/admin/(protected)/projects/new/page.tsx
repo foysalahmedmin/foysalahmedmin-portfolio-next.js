@@ -4,6 +4,7 @@ import ProjectForm from "@/components/admin/project-form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { createProject } from "@/services/project.service";
+import type { TProjectInput } from "@/types/project.type";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ const AdminNewProjectPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: TProjectInput) => {
     setLoading(true);
     setError(null);
     try {

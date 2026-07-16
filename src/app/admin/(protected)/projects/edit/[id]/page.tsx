@@ -3,7 +3,7 @@
 import ProjectForm from "@/components/admin/project-form";
 import { buttonVariants } from "@/components/ui/button";
 import { getAdminProjectById, updateProject } from "@/services/project.service";
-import type { TProject } from "@/types/project.type";
+import type { TProject, TProjectInput } from "@/types/project.type";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ const AdminEditProjectPage = () => {
     return () => controller.abort();
   }, [id]);
 
-  const handleSubmit = async (data: Partial<TProject>) => {
+  const handleSubmit = async (data: TProjectInput) => {
     setSaving(true);
     setError(null);
     try {

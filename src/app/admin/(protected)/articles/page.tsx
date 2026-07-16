@@ -186,7 +186,7 @@ const AdminArticlesPage = () => {
                 {article.name}
               </p>
               <p className="text-muted-foreground max-w-72 truncate text-xs">
-                {article.slug}
+                {article.description || "No summary provided"}
               </p>
             </div>
           </div>
