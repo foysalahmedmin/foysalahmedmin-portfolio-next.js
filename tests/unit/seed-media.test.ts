@@ -33,7 +33,6 @@ describe("managed-media seed staging", () => {
         };
       }),
       compensate,
-      validateReferences: vi.fn(),
     };
 
     await expect(stageSeedMedia(requests, gateway)).rejects.toEqual(

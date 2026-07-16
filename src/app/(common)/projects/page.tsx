@@ -41,14 +41,17 @@ export default async function ProjectsPage({
   const rawSearchParams = await searchParams;
   const query = parseProjectDiscoveryQuery(rawSearchParams);
   const currentQueryString = querySourceToQueryString(rawSearchParams);
-  const [projectsResult, categoriesResult, facetsResult] =
-    await Promise.allSettled([
+  const [site, [projectsResult, categoriesResult, facetsResult]] =
+    await Promise.all([
+      readPublishedSite(),
+      Promise.allSettled([
       ProjectService.getPublicProjectDiscovery(query),
       ProjectCategoryService.getPublicProjectCategories({
         limit: 50,
         sort: "sequence,name",
       }),
       ProjectService.getPublicProjectDiscoveryFacets(),
+      ]),
     ]);
 
   const hasInitialError = projectsResult.status === "rejected";
@@ -124,6 +127,7 @@ export default async function ProjectsPage({
         initialQuery={query}
         categories={categories}
         facets={facets}
+        fallbacks={site.fallbacks}
         initialError={hasInitialError}
       />
     </main>

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { MongoClient } from "mongodb";
+import { fileURLToPath } from "node:url";
 import {
   assertSeedOperationAllowed,
   createDemoSeedManifest,
@@ -12,6 +13,7 @@ import {
   runSeedManifest,
   SeedError,
 } from "../src/lib/seed/index.ts";
+import { createSeedMediaGateway } from "./seed-media.ts";
 
 type CliOptions = {
   operation: "apply" | "dry_run" | "reset";
@@ -135,6 +137,13 @@ const main = async (): Promise<void> => {
       );
       return;
     }
+    const mediaGateway = await createSeedMediaGateway({
+      actor,
+      configured_asset_root: process.env.SEED_MEDIA_ASSET_ROOT,
+      db,
+      manifest,
+      repository_root: fileURLToPath(new URL("..", import.meta.url)),
+    });
     const options = {
       client,
       db,
@@ -143,6 +152,7 @@ const main = async (): Promise<void> => {
       dry_run: cli.operation === "dry_run",
       force: cli.force,
       production_confirmation: process.env.SEED_PRODUCTION_CONFIRM,
+      ...(mediaGateway ? { media_gateway: mediaGateway } : {}),
     } as const;
     const plan =
       cli.operation === "dry_run"

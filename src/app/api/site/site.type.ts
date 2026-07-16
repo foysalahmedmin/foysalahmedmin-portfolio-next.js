@@ -139,8 +139,12 @@ export type TSiteExperienceDefaults = {
 
 export type TSiteFallbacks = {
   emergency_visual_key: "abstract-grid-v1";
+  /** Legacy generic fallback retained for snapshots and clients without a pillar. */
   project_file?: string;
+  project_files_by_pillar: Partial<Record<PillarKey, string>>;
+  /** Legacy generic fallback retained for snapshots and clients without a pillar. */
   article_file?: string;
+  article_files_by_pillar: Partial<Record<PillarKey, string>>;
   profile_file?: string;
 };
 
@@ -230,6 +234,15 @@ export type TPublicSitePillarDto = Omit<
   visual?: TPublicSiteMediaDto;
 };
 
+export type TPublicSiteFallbacksDto = {
+  emergency_visual_key: "abstract-grid-v1";
+  project?: TPublicSiteMediaDto;
+  project_by_pillar: Partial<Record<PillarKey, TPublicSiteMediaDto>>;
+  article?: TPublicSiteMediaDto;
+  article_by_pillar: Partial<Record<PillarKey, TPublicSiteMediaDto>>;
+  profile?: TPublicSiteMediaDto;
+};
+
 export type TPublicSiteDto = {
   content_source: "published" | "emergency";
   site_key: typeof SITE_KEY;
@@ -266,12 +279,7 @@ export type TPublicSiteDto = {
     default_og?: TPublicSiteMediaDto;
   };
   experience: TSiteExperienceDefaults;
-  fallbacks: {
-    emergency_visual_key: "abstract-grid-v1";
-    project?: TPublicSiteMediaDto;
-    article?: TPublicSiteMediaDto;
-    profile?: TPublicSiteMediaDto;
-  };
+  fallbacks: TPublicSiteFallbacksDto;
   process: TSiteProcessStep[];
   metrics: TSiteMetric[];
 };

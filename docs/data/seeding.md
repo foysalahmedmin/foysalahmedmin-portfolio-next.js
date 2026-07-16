@@ -24,9 +24,11 @@ pnpm seed
 
 If more than one eligible super-admin exists, set `SEED_ACTOR_EMAIL` to select
 one. The address is used only for an exact database lookup and is not emitted in
-the plan. `DATABASE_URL` must include an explicit non-system database name. Seed
-writes require replica-set or mongos transaction support; there is no
-non-transactional write fallback.
+the plan. The managed-media adapter receives only that account's ObjectId and
+role, then supplies reserved non-personal session placeholders; it never reads,
+passes, or logs the administrator's name or email. `DATABASE_URL` must include
+an explicit non-system database name. Seed writes require replica-set or mongos
+transaction support; there is no non-transactional write fallback.
 
 Additional commands are deliberately narrower:
 
@@ -98,12 +100,27 @@ failure rolls all database writes back.
 
 Seed definitions cannot contain binary blobs or remote media URLs. A repository
 asset request must have a safe path beneath an explicitly configured asset root
-and the SHA-256 checksum of its source bytes. The trusted adapter in
+and the SHA-256 checksum of its source bytes. `SEED_MEDIA_ASSET_ROOT` is a
+repository-relative path, defaults to `seed-assets`, and rejects absolute,
+backslash, and traversal forms. The trusted adapter in
 `managed-media.seed-gateway.ts` passes the bytes through
 `prepareManagedMedia` and `createManagedFiles`, so signature checks,
 canonicalization, purpose policy, immutable storage keys, provider validation,
 File lifecycle, and checksum deduplication are identical to normal managed
-uploads. It never imports a Cloudinary/GCP SDK and never performs HTTP itself.
+uploads. The gateway never calls a Cloudinary/GCP SDK or performs HTTP itself;
+provider selection remains downstream inside the shared managed-media service.
+
+The CLI lazy-loads and constructs that adapter only when the selected manifest
+contains at least one `repository_file` request. Pending-only manifests do not
+load the managed File/storage graph, inspect an asset directory, or require
+Cloudinary/GCP credentials. Repository raster requests are rejected before
+provider work unless they include explicit decorative/alt intent, focal point,
+six-digit dominant color, supported blur data URL, reviewed license/rights, and
+credit fields required by that license. Generated requests additionally require
+the exact generator, model, prompt, and version; optional seed/timestamp values
+are recorded only when the generator actually supplies them. The gateway adds
+the verified source-byte SHA-256 as `provenance.source_checksum` and forwards
+the remaining fields unchanged to `createManagedFiles`.
 
 Provider work happens before the content transaction. An already-ready matching
 File is reused. A File newly created by the run is tagged with a deterministic

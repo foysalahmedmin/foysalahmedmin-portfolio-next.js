@@ -637,7 +637,7 @@ export const createFoundationSeedManifest = (
   media: [
     ...PILLAR_CONTRACT.map((pillar) => ({
       media_key: `hero.${pillar.key}`,
-      purpose: "hero",
+      purpose: "hero" as const,
       source: {
         kind: "pending_generated" as const,
         requirement: `Non-human editorial visual for the ${pillar.label} hero presentation.`,
@@ -645,21 +645,19 @@ export const createFoundationSeedManifest = (
       metadata: {
         name: `${pillar.label} hero visual`,
         source: "generated" as const,
-        provenance_key: `foundation.hero.${pillar.key}.v1`,
       },
     })),
     {
       media_key: "site.default-social",
-      purpose: "social",
+      purpose: "social" as const,
       source: {
-        kind: "pending_generated",
+        kind: "pending_generated" as const,
         requirement:
           "Non-human editorial social preview aligned with the five-pillar system.",
       },
       metadata: {
         name: "Default social preview",
-        source: "generated",
-        provenance_key: "foundation.social.default.v1",
+        source: "generated" as const,
       },
     },
   ],

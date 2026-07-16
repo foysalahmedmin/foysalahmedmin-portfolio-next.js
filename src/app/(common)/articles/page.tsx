@@ -41,14 +41,17 @@ export default async function ArticlesPage({
   const rawSearchParams = await searchParams;
   const query = parseArticleDiscoveryQuery(rawSearchParams);
   const currentQueryString = querySourceToQueryString(rawSearchParams);
-  const [articlesResult, categoriesResult, facetsResult] =
-    await Promise.allSettled([
+  const [site, [articlesResult, categoriesResult, facetsResult]] =
+    await Promise.all([
+      readPublishedSite(),
+      Promise.allSettled([
       ArticleService.getPublicArticleDiscovery(query),
       ArticleCategoryService.getPublicArticleCategories({
         limit: 50,
         sort: "sequence,name",
       }),
       ArticleService.getPublicArticleDiscoveryFacets(),
+      ]),
     ]);
 
   const hasInitialError = articlesResult.status === "rejected";
@@ -122,6 +125,7 @@ export default async function ArticlesPage({
         initialQuery={query}
         categories={categories}
         facets={facets}
+        fallbacks={site.fallbacks}
         initialError={hasInitialError}
       />
     </main>

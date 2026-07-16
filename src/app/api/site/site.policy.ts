@@ -1,6 +1,7 @@
 import {
   PILLAR_CONTRACT,
   PILLAR_CONTRACT_VERSION,
+  PILLAR_KEYS,
 } from "@/lib/content/pillars";
 import type { TFile } from "@/app/api/files/file.type";
 import {
@@ -92,7 +93,11 @@ export const createNeutralSiteDraft = (): TSiteDraftSnapshot => ({
       show_testimonials: false,
     },
   },
-  fallbacks: { emergency_visual_key: "abstract-grid-v1" },
+  fallbacks: {
+    emergency_visual_key: "abstract-grid-v1",
+    project_files_by_pillar: {},
+    article_files_by_pillar: {},
+  },
   process: [],
   metrics: [],
 });
@@ -280,7 +285,21 @@ export const collectSiteFileReferences = (
   add(snapshot.brand.resume_file, "brand.resume_file", ["resume"]);
   add(snapshot.seo.default_og_file, "seo.default_og_file", ["social"]);
   add(snapshot.fallbacks.project_file, "fallbacks.project_file", ["project"]);
+  for (const pillar of PILLAR_KEYS) {
+    add(
+      snapshot.fallbacks.project_files_by_pillar[pillar],
+      `fallbacks.project_files_by_pillar.${pillar}`,
+      ["project"]
+    );
+  }
   add(snapshot.fallbacks.article_file, "fallbacks.article_file", ["article"]);
+  for (const pillar of PILLAR_KEYS) {
+    add(
+      snapshot.fallbacks.article_files_by_pillar[pillar],
+      `fallbacks.article_files_by_pillar.${pillar}`,
+      ["article"]
+    );
+  }
   add(snapshot.fallbacks.profile_file, "fallbacks.profile_file", ["profile"]);
   for (const pillar of snapshot.pillars) {
     add(pillar.visual_file, `pillars.${pillar.key}.visual_file`, ["hero"]);
@@ -362,7 +381,11 @@ export const createEmergencyPublicSite = (): TPublicSiteDto => ({
       show_testimonials: false,
     },
   },
-  fallbacks: { emergency_visual_key: "abstract-grid-v1" },
+  fallbacks: {
+    emergency_visual_key: "abstract-grid-v1",
+    project_by_pillar: {},
+    article_by_pillar: {},
+  },
   process: [],
   metrics: [],
 });

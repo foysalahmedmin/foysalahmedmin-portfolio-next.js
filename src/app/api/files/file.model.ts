@@ -1,6 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
-import type { TFileDocument, TFileModel } from "./file.type";
+import {
+  FILE_PURPOSES,
+  type TFileDocument,
+  type TFileModel,
+} from "./file.type";
 
 const focalPointSchema = new Schema(
   {
@@ -126,23 +130,7 @@ const fileSchema = new Schema<TFileDocument>(
     },
     purpose: {
       type: String,
-      enum: [
-        "logo",
-        "hero",
-        "project",
-        "article",
-        "profile",
-        "resume",
-        "page",
-        "service",
-        "skill",
-        "timeline",
-        "credential",
-        "testimonial",
-        "social",
-        "document",
-        "generic",
-      ],
+      enum: FILE_PURPOSES,
       default: "generic",
       required: true,
     },

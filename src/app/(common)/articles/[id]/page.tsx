@@ -9,6 +9,7 @@ import {
   buildWebPageJsonLd,
 } from "@/lib/metadata/json-ld";
 import { readPublishedSite } from "@/lib/site/published-site";
+import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TArticleListItem, TPublicArticle } from "@/types/article.type";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -81,6 +82,12 @@ export default async function ArticleDetailsPage({ params }: Props) {
   const related = (relatedResult.data as unknown as TArticleListItem[])
     .filter((item) => item._id !== article._id)
     .slice(0, 3);
+  const managedFallback = resolvePublicContentFallback({
+    kind: "article",
+    pillar: article.primary_pillar,
+    fallbacks: site.fallbacks,
+  });
+  const coverUrl = article.thumbnail?.url || managedFallback?.url;
 
   const pathname = `/articles/${article.slug ?? id}`;
   const structuredData = [
@@ -96,7 +103,7 @@ export default async function ArticleDetailsPage({ params }: Props) {
       published_at: article.published_at,
       updated_at: article.updated_at,
       author_name: article.author?.name,
-      image_url: article.thumbnail?.url,
+      image_url: coverUrl,
       keywords: [
         ...(article.topics ?? []),
         ...(article.tags ?? []),
@@ -113,7 +120,11 @@ export default async function ArticleDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <ArticleDetailsSection article={article} related={related} />
+      <ArticleDetailsSection
+        article={article}
+        related={related}
+        fallbacks={site.fallbacks}
+      />
     </>
   );
 }

@@ -1,27 +1,12 @@
 import { z } from "zod";
+import { FILE_PURPOSES } from "./file.type";
 
 const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
   message: "Invalid ID format",
 });
 
 const statusSchema = z.enum(["active", "inactive", "archived"]);
-export const purposeSchema = z.enum([
-  "logo",
-  "hero",
-  "project",
-  "article",
-  "profile",
-  "resume",
-  "page",
-  "service",
-  "skill",
-  "timeline",
-  "credential",
-  "testimonial",
-  "social",
-  "document",
-  "generic",
-]);
+export const purposeSchema = z.enum(FILE_PURPOSES);
 const sourceSchema = z.enum(["uploaded", "generated"]);
 const licenseSchema = z.enum([
   "owned",

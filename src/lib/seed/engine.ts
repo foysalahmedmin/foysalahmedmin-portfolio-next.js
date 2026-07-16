@@ -15,6 +15,11 @@ import {
 } from "./database.ts";
 import { SeedError } from "./errors.ts";
 import {
+  detachSeedRecordFileReferences,
+  reconcileSeedRecordFileReferences,
+  validateSeedFileReferences,
+} from "./file-references.ts";
+import {
   getSeedManifestChecksum,
   resolveSeedMediaBindings,
   validateSeedManifest,
@@ -38,6 +43,7 @@ import type {
   SeedRecordDefinition,
   SeedRecordMetadata,
   SeedRecordPlan,
+  ResolvedSeedFileReference,
   SeedRunOptions,
 } from "./types.ts";
 import { SEED_STAGE_ORDER } from "./types.ts";
@@ -213,7 +219,8 @@ const metadataForPlan = (
   manifest: SeedManifest,
   plan: SeedRecordPlan,
   targetId: ObjectId,
-  now: Date
+  now: Date,
+  fileReferenceFields: readonly string[]
 ): SeedRecordMetadata => ({
   _id: seedRecordMetadataId(
     manifest.manifest_key,
@@ -227,6 +234,7 @@ const metadataForPlan = (
   seed_version: plan.definition.seed_version,
   last_seed_hash: plan.desired_hash,
   controlled_fields: Object.keys(plan.definition.payload).sort(),
+  file_reference_fields: [...new Set(fileReferenceFields)].sort(),
   truth: plan.definition.truth,
   applied_at: now,
 });
@@ -237,6 +245,7 @@ const applyRecordPlan = async (input: {
   plan: SeedRecordPlan;
   now: Date;
   session: ClientSession;
+  references: readonly ResolvedSeedFileReference[];
 }): Promise<void> => {
   const { plan } = input;
   if (plan.action === "conflict") {
@@ -322,12 +331,30 @@ const applyRecordPlan = async (input: {
   if ((plan.action === "adopt" || plan.action === "unchanged") && plan.target) {
     plan.definition.validate(plan.target);
   }
-  const metadata = metadataForPlan(input.manifest, plan, targetId, input.now);
+  await reconcileSeedRecordFileReferences({
+    db: input.db,
+    manifest_key: input.manifest.manifest_key,
+    target_collection: plan.definition.collection,
+    seed_key: plan.definition.seed_key,
+    target_id: targetId,
+    previous_fields: plan.metadata?.file_reference_fields ?? [],
+    references: input.references,
+    session: input.session,
+  });
+  const metadata = metadataForPlan(
+    input.manifest,
+    plan,
+    targetId,
+    input.now,
+    input.references.map((reference) => reference.field)
+  );
   if (
     plan.action !== "unchanged" ||
     !plan.metadata ||
     plan.metadata.seed_version !== metadata.seed_version ||
-    hashSeedValue(plan.metadata.truth) !== hashSeedValue(metadata.truth)
+    hashSeedValue(plan.metadata.truth) !== hashSeedValue(metadata.truth) ||
+    hashSeedValue(plan.metadata.file_reference_fields ?? []) !==
+      hashSeedValue(metadata.file_reference_fields ?? [])
   ) {
     const { _id, ...metadataBody } = metadata;
     await input.db
@@ -375,26 +402,27 @@ const applyTransaction = async (input: {
   }
 
   if (input.references.length) {
-    if (!input.options.media_gateway) {
-      throw new SeedError(
-        "SEED_MEDIA_GATEWAY_REQUIRED",
-        "File references require a managed-media gateway."
-      );
-    }
-    await input.options.media_gateway.validateReferences(
-      input.references,
-      input.session
-    );
+    await validateSeedFileReferences({
+      db: input.options.db,
+      references: input.references,
+      session: input.session,
+    });
   }
 
   const now = input.options.now?.() ?? new Date();
   for (const record of plan.records) {
+    const recordReferences = input.references.filter(
+      (reference) =>
+        reference.target_collection === record.definition.collection &&
+        reference.seed_key === record.definition.seed_key
+    );
     await applyRecordPlan({
       db: input.options.db,
       manifest: input.manifest,
       plan: record,
       now,
       session: input.session,
+      references: recordReferences,
     });
   }
   await input.options.db
@@ -582,6 +610,15 @@ export const resetSeedManifest = async (input: {
         );
       });
       for (const record of ordered) {
+        await detachSeedRecordFileReferences({
+          db: input.db,
+          manifest_key: record.manifest_key,
+          target_collection: record.target_collection,
+          seed_key: record.seed_key,
+          target_id: record.target_id,
+          fields: record.file_reference_fields ?? [],
+          session,
+        });
         const target = await input.db
           .collection(record.target_collection)
           .findOne({ _id: record.target_id }, { session });

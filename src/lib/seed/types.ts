@@ -6,6 +6,7 @@ import type {
   ObjectId,
   WithId,
 } from "mongodb";
+import type { TFilePurpose } from "../../app/api/files/file.type.ts";
 
 export const SEED_STAGE_ORDER = [
   "admin",
@@ -57,14 +58,20 @@ export type SeedTruthMarker = Readonly<{
 export type SeedFileReference = Readonly<{
   file_id: string;
   field: string;
-  purposes: readonly string[];
+  purposes: readonly TFilePurpose[];
 }>;
+
+export type ResolvedSeedFileReference = SeedFileReference &
+  Readonly<{
+    target_collection: SeedTargetCollection;
+    seed_key: string;
+  }>;
 
 export type SeedMediaBinding = Readonly<{
   media_key: string;
   field_path: string;
   required: boolean;
-  purposes: readonly string[];
+  purposes: readonly TFilePurpose[];
 }>;
 
 export type PendingSeedMediaSource = Readonly<{
@@ -78,16 +85,47 @@ export type RepositorySeedMediaSource = Readonly<{
   source_sha256: string;
 }>;
 
+export type SeedMediaLicense =
+  | "owned"
+  | "client-provided"
+  | "cc0"
+  | "cc-by-4.0"
+  | "cc-by-sa-4.0"
+  | "unsplash"
+  | "other";
+
+export type SeedMediaAttribution = Readonly<{
+  creator_name?: string;
+  creator_url?: string;
+  source_url?: string;
+  credit_text?: string;
+  license: SeedMediaLicense;
+  license_url?: string;
+}>;
+
+export type SeedMediaGenerationProvenance = Readonly<{
+  generator: string;
+  model: string;
+  prompt: string;
+  version: string;
+  seed?: string;
+  generated_at?: string;
+}>;
+
 export type SeedMediaRequest = Readonly<{
   media_key: string;
-  purpose: string;
+  purpose: TFilePurpose;
   source: PendingSeedMediaSource | RepositorySeedMediaSource;
   metadata: Readonly<{
     name: string;
     source: "generated" | "uploaded";
     alt_text?: string;
     is_decorative?: boolean;
-    provenance_key?: string;
+    focal_point?: Readonly<{ x: number; y: number }>;
+    dominant_color?: string;
+    blur_data_url?: string;
+    attribution?: SeedMediaAttribution;
+    provenance?: SeedMediaGenerationProvenance;
   }>;
 }>;
 
@@ -125,6 +163,7 @@ export type SeedRecordMetadata = Readonly<{
   seed_version: number;
   last_seed_hash: string;
   controlled_fields: readonly string[];
+  file_reference_fields?: readonly string[];
   truth: SeedTruthMarker;
   applied_at: Date;
 }>;
@@ -178,10 +217,6 @@ export type SeedMediaGateway = Readonly<{
   inspect: (request: SeedMediaRequest) => Promise<SeedMediaPlan>;
   stage: (request: SeedMediaRequest) => Promise<SeedMediaPlan>;
   compensate: (item: SeedMediaPlan) => Promise<void>;
-  validateReferences: (
-    references: readonly SeedFileReference[],
-    session: ClientSession
-  ) => Promise<void>;
 }>;
 
 export type SeedRunOptions = Readonly<{

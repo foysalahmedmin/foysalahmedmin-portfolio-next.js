@@ -86,6 +86,7 @@ export const PublicPageSections = ({ payload }: Props) => (
           content = (
             <ProjectsSection
               projects={asItems<TProjectListItem>(section.items)}
+              fallbacks={payload.site.fallbacks}
               unavailable={unavailable}
               heading={section.heading}
             />
@@ -95,6 +96,7 @@ export const PublicPageSections = ({ payload }: Props) => (
           content = (
             <ArticlesSection
               articles={asItems<TArticleListItem>(section.items)}
+              fallbacks={payload.site.fallbacks}
               unavailable={unavailable}
               heading={section.heading}
             />

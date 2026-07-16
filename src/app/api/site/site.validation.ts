@@ -19,6 +19,18 @@ export const siteObjectIdSchema = z
   .toLowerCase()
   .regex(/^[a-f0-9]{24}$/, "Invalid File ID");
 
+const sitePillarFileMapSchema = z
+  .object(
+    Object.fromEntries(
+      PILLAR_KEYS.map((key) => [key, siteObjectIdSchema.optional()])
+    ) as Record<
+      (typeof PILLAR_KEYS)[number],
+      z.ZodOptional<typeof siteObjectIdSchema>
+    >
+  )
+  .strict()
+  .default({});
+
 const safeKeySchema = z
   .string()
   .trim()
@@ -383,7 +395,9 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
       .object({
         emergency_visual_key: z.literal("abstract-grid-v1"),
         project_file: siteObjectIdSchema.optional(),
+        project_files_by_pillar: sitePillarFileMapSchema,
         article_file: siteObjectIdSchema.optional(),
+        article_files_by_pillar: sitePillarFileMapSchema,
         profile_file: siteObjectIdSchema.optional(),
       })
       .strict(),

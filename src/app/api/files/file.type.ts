@@ -11,22 +11,25 @@ export type TFileLifecycleState =
 export type TFilePersistedLifecycleState =
   | TFileLifecycleState
   | "delete_failed";
-export type TFilePurpose =
-  | "logo"
-  | "hero"
-  | "project"
-  | "article"
-  | "profile"
-  | "resume"
-  | "page"
-  | "service"
-  | "skill"
-  | "timeline"
-  | "credential"
-  | "testimonial"
-  | "social"
-  | "document"
-  | "generic";
+export const FILE_PURPOSES = [
+  "logo",
+  "hero",
+  "project",
+  "article",
+  "profile",
+  "resume",
+  "page",
+  "service",
+  "skill",
+  "timeline",
+  "credential",
+  "testimonial",
+  "social",
+  "document",
+  "generic",
+] as const;
+
+export type TFilePurpose = (typeof FILE_PURPOSES)[number];
 export type TFileAccess = "public" | "private";
 export type TFileSource = "uploaded" | "generated";
 export type TFileType = "image" | "video" | "audio" | "document" | "other";
