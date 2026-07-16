@@ -5,6 +5,7 @@ import type {
   TSiteDraftSnapshot,
   TSiteLink,
   TSiteMetric,
+  TSiteProcessStep,
   TSiteSocialLink,
 } from "@/app/api/site/site.type";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,14 @@ import {
   publishAdminSiteClient,
   updateAdminSiteClient,
 } from "@/services/site-page-admin.service";
-import { Plus, RotateCcw, Send, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Plus,
+  RotateCcw,
+  Send,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type {
@@ -731,6 +739,191 @@ function MetricsEditor({
   );
 }
 
+const nextProcessStepKey = (steps: readonly TSiteProcessStep[]): string => {
+  let suffix = steps.length + 1;
+  let key = `process-step-${suffix}`;
+  while (steps.some((step) => step.key === key)) {
+    suffix += 1;
+    key = `process-step-${suffix}`;
+  }
+  return key;
+};
+
+function ProcessEditor({
+  steps,
+  disabled,
+  errors,
+  onChange,
+}: {
+  steps: readonly TSiteProcessStep[];
+  disabled: boolean;
+  errors: TEditorErrors;
+  onChange: (steps: TSiteProcessStep[]) => void;
+}) {
+  const update = (index: number, patch: Partial<TSiteProcessStep>) =>
+    onChange(
+      steps.map((step, itemIndex) =>
+        itemIndex === index ? { ...step, ...patch } : step
+      )
+    );
+  const move = (index: number, direction: -1 | 1) => {
+    const destination = index + direction;
+    if (destination < 0 || destination >= steps.length) return;
+    const reordered = [...steps];
+    const [step] = reordered.splice(index, 1);
+    if (!step) return;
+    reordered.splice(destination, 0, step);
+    onChange(reordered);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="font-black">Client-facing delivery process</h3>
+          <p className="text-muted-foreground mt-1 max-w-3xl text-xs leading-5">
+            Array order is the public sequence. Disabled steps remain private
+            draft material; enabled steps require both a summary and concrete
+            deliverable before Site publication.
+          </p>
+        </div>
+        {!disabled && steps.length < 12 ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              onChange([
+                ...steps,
+                {
+                  key: nextProcessStepKey(steps),
+                  title: "",
+                  enabled: false,
+                },
+              ])
+            }
+          >
+            <Plus className="size-4" />
+            Add process step
+          </Button>
+        ) : null}
+      </div>
+
+      {steps.map((step, index) => {
+        const prefix = `process.${index}`;
+        const accessibleName = step.title || `process step ${index + 1}`;
+        return (
+          <fieldset
+            key={`${step.key}-${index}`}
+            className="border-border rounded-xl border p-4"
+          >
+            <legend className="px-2 text-sm font-black">
+              Step {String(index + 1).padStart(2, "0")} ·{" "}
+              {step.title || "Untitled draft"}
+            </legend>
+            <div className="mb-4 flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                shape="icon"
+                aria-label={`Move ${accessibleName} up`}
+                disabled={disabled || index === 0}
+                onClick={() => move(index, -1)}
+              >
+                <ArrowUp className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                shape="icon"
+                aria-label={`Move ${accessibleName} down`}
+                disabled={disabled || index === steps.length - 1}
+                onClick={() => move(index, 1)}
+              >
+                <ArrowDown className="size-4" />
+              </Button>
+              {!disabled ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  shape="icon"
+                  aria-label={`Remove ${accessibleName}`}
+                  onClick={() =>
+                    onChange(
+                      steps.filter((_, itemIndex) => itemIndex !== index)
+                    )
+                  }
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              ) : null}
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <TextField
+                path={`${prefix}.key`}
+                label="Stable key"
+                value={step.key}
+                onChange={(value) => update(index, { key: value })}
+                errors={errors}
+                disabled={disabled}
+                required
+              />
+              <TextField
+                path={`${prefix}.title`}
+                label="Step title"
+                value={step.title}
+                onChange={(value) => update(index, { title: value })}
+                errors={errors}
+                disabled={disabled}
+                required
+              />
+              <TextareaField
+                path={`${prefix}.summary`}
+                label="Step summary"
+                value={step.summary}
+                onChange={(value) =>
+                  update(index, { summary: optional(value) })
+                }
+                errors={errors}
+                disabled={disabled}
+                hint="Explain the collaboration, decision, or engineering activity in plain language."
+              />
+              <TextareaField
+                path={`${prefix}.deliverable`}
+                label="Concrete deliverable"
+                value={step.deliverable}
+                onChange={(value) =>
+                  update(index, { deliverable: optional(value) })
+                }
+                errors={errors}
+                disabled={disabled}
+                hint="Name what the client receives or can review at this step."
+              />
+            </div>
+            <div className="mt-4 max-w-sm">
+              <CheckField
+                path={`${prefix}.enabled`}
+                label="Include in published process"
+                checked={step.enabled}
+                onChange={(value) => update(index, { enabled: value })}
+                disabled={disabled}
+                hint="Publication still validates the complete Site revision atomically."
+              />
+            </div>
+          </fieldset>
+        );
+      })}
+
+      {steps.length === 0 ? (
+        <p className="text-muted-foreground rounded-xl border border-dashed p-4 text-sm">
+          No process steps configured. The public Site receives an empty list;
+          no generic methodology is invented.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export default function SiteAdminEditor({
   initialSite,
   canEdit,
@@ -867,7 +1060,7 @@ export default function SiteAdminEditor({
         <EditorialWorkspaceHeader
           eyebrow="Site authority"
           title="Site settings"
-          description="The revisioned Site singleton owns portfolio identity, positioning, five pillars, public navigation, contact policy and metadata defaults."
+          description="The revisioned Site singleton owns portfolio identity, positioning, five pillars, delivery process, public navigation, contact policy and metadata defaults."
           status={
             <EditorialStatus tone="warning">Not configured</EditorialStatus>
           }
@@ -899,7 +1092,7 @@ export default function SiteAdminEditor({
       <EditorialWorkspaceHeader
         eyebrow="Site authority"
         title="Site settings"
-        description="One revisioned source for public identity, positioning, contact policy, navigation, brand media, metadata and the exact five-pillar narrative."
+        description="One revisioned source for public identity, positioning, contact policy, process, navigation, brand media, metadata and the exact five-pillar narrative."
         status={
           <>
             <EditorialStatus>Draft r{site.revision}</EditorialStatus>
@@ -1817,6 +2010,19 @@ export default function SiteAdminEditor({
             disabled={disabled}
           />
         </div>
+      </EditorialPanel>
+
+      <EditorialPanel
+        id="site-process"
+        title="Embedded delivery process"
+        description="Process is low-volume Site content, not a standalone CRUD domain. Stable typed steps publish with the same optimistic revision as positioning, pillars and metrics."
+      >
+        <ProcessEditor
+          steps={draft.process}
+          disabled={disabled}
+          errors={errors}
+          onChange={(process) => setDraft({ ...draft, process })}
+        />
       </EditorialPanel>
 
       <EditorialPanel

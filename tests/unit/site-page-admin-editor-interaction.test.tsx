@@ -15,7 +15,13 @@ import {
   updateAdminSiteClient,
 } from "@/services/site-page-admin.service";
 import type * as SitePageAdminServiceModule from "@/services/site-page-admin.service";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildPublishableSiteDraft } from "../helpers/site-fixture";
@@ -160,6 +166,71 @@ describe("Site and Page admin editor interactions", () => {
       screen.getByText("This field is invalid or unsupported.")
     ).toBeVisible();
     expect(publicName).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("adds, types, reorders and revision-saves embedded Process steps", async () => {
+    const user = userEvent.setup();
+    const initialDraft = buildPublishableSiteDraft();
+    initialDraft.process = [
+      {
+        key: "delivery",
+        title: "Delivery",
+        summary: "Ship in reviewable increments.",
+        deliverable: "Tested release",
+        enabled: true,
+      },
+    ];
+    vi.mocked(updateAdminSiteClient).mockImplementation(
+      async (_revision, draft) => siteDto(draft, 4)
+    );
+    render(
+      <SiteAdminEditor
+        initialSite={siteDto(initialDraft)}
+        canEdit
+        canPublish={false}
+      />
+    );
+
+    const processPanel = screen.getByRole("region", {
+      name: "Embedded delivery process",
+    });
+    await user.click(
+      within(processPanel).getByRole("button", { name: "Add process step" })
+    );
+    const titles = within(processPanel).getAllByLabelText(/Step title/);
+    const summaries = within(processPanel).getAllByLabelText("Step summary");
+    const deliverables = within(processPanel).getAllByLabelText(
+      "Concrete deliverable"
+    );
+    await user.type(titles[1]!, "Discovery");
+    await user.type(summaries[1]!, "Align the problem and constraints.");
+    await user.type(deliverables[1]!, "Reviewed delivery brief");
+    await user.click(
+      within(processPanel).getAllByRole("checkbox", {
+        name: /Include in published process/,
+      })[1]!
+    );
+    await user.click(
+      within(processPanel).getByRole("button", { name: "Move Discovery up" })
+    );
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+
+    await waitFor(() =>
+      expect(updateAdminSiteClient).toHaveBeenCalledWith(
+        3,
+        expect.objectContaining({
+          process: [
+            expect.objectContaining({
+              key: "process-step-2",
+              title: "Discovery",
+              enabled: true,
+            }),
+            expect.objectContaining({ key: "delivery" }),
+          ],
+        })
+      )
+    );
+    expect(await screen.findByText("Site draft saved.")).toBeVisible();
   });
 
   it("supports keyboard-equivalent ordering, revision save and structural preview", async () => {

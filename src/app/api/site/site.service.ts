@@ -662,6 +662,7 @@ const toPublicDto = (
       article: media(draft.fallbacks.article_file),
       profile: media(draft.fallbacks.profile_file),
     },
+    process: draft.process.filter((step) => step.enabled),
     metrics: draft.experience.feature_flags.show_metrics
       ? draft.metrics.filter(
           (metric) => metric.enabled && metric.verification !== "unverified"

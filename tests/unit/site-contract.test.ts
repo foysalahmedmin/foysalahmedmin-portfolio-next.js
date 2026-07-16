@@ -26,6 +26,49 @@ describe("Site five-pillar contract", () => {
     expect(emergency.pillars).toHaveLength(5);
     expect(PILLAR_CONTRACT).toHaveLength(5);
     expect(emergency.content_source).toBe("emergency");
+    expect(emergency.process).toEqual([]);
+    expect(neutral.process).toEqual([]);
+  });
+
+  it("normalizes legacy snapshots without Process data to an empty typed list", () => {
+    const legacySnapshot = structuredClone(
+      buildPublishableSiteDraft()
+    ) as unknown as Record<string, unknown>;
+    delete legacySnapshot.process;
+
+    const normalized = siteDraftSnapshotSchema.parse(legacySnapshot);
+
+    expect(normalized.process).toEqual([]);
+    expect(getSitePublishIssues(normalized)).toEqual([]);
+  });
+
+  it("keeps Process keys unique and requires complete enabled steps at publish time", () => {
+    const draft = buildPublishableSiteDraft();
+    draft.process = [
+      {
+        key: "discovery",
+        title: "Discovery",
+        enabled: true,
+      },
+    ];
+
+    expect(siteDraftSnapshotSchema.safeParse(draft).success).toBe(true);
+    expect(getSitePublishIssues(draft)).toEqual(
+      expect.arrayContaining(["process.0.summary", "process.0.deliverable"])
+    );
+
+    draft.process[0]!.summary = "Align scope and decision boundaries.";
+    draft.process[0]!.deliverable = "A reviewed delivery brief.";
+    const completeIssues = getSitePublishIssues(draft);
+    expect(completeIssues).not.toContain("process.0.summary");
+    expect(completeIssues).not.toContain("process.0.deliverable");
+
+    draft.process.push({
+      ...draft.process[0]!,
+      title: "Duplicate key",
+      enabled: false,
+    });
+    expect(siteDraftSnapshotSchema.safeParse(draft).success).toBe(false);
   });
 
   it("allows incomplete draft work but blocks it from publication", () => {

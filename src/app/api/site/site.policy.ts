@@ -86,6 +86,7 @@ export const createNeutralSiteDraft = (): TSiteDraftSnapshot => ({
     },
   },
   fallbacks: { emergency_visual_key: "abstract-grid-v1" },
+  process: [],
   metrics: [],
 });
 
@@ -236,6 +237,12 @@ export const getSitePublishIssues = (draft: TSiteDraftSnapshot): string[] => {
   ) {
     issues.push("contact.availability");
   }
+  draft.process.forEach((step, index) => {
+    if (!step.enabled) return;
+    if (!isPresent(step.summary)) issues.push(`process.${index}.summary`);
+    if (!isPresent(step.deliverable))
+      issues.push(`process.${index}.deliverable`);
+  });
 
   const size = Buffer.byteLength(JSON.stringify(draft), "utf8");
   if (size > SITE_SNAPSHOT_MAX_BYTES) issues.push("snapshot.size");
@@ -347,5 +354,6 @@ export const createEmergencyPublicSite = (): TPublicSiteDto => ({
     },
   },
   fallbacks: { emergency_visual_key: "abstract-grid-v1" },
+  process: [],
   metrics: [],
 });
