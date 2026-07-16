@@ -85,6 +85,28 @@ describe("AdminShell", () => {
     expect(screen.getByText("Preview")).toBeVisible();
     expect(screen.getByText("Published r3")).toBeVisible();
     expect(screen.getByRole("main")).toHaveTextContent("Dashboard content");
+    expect(
+      screen.queryByRole("link", { name: "Contact inbox" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("registers the contact inbox only for inbox operators", () => {
+    render(
+      <AdminShell
+        user={{
+          ...user,
+          capabilities: [...user.capabilities, "inbox:manage"],
+        }}
+        environment="preview"
+        siteState={{ configured: true, published: false }}
+      >
+        <h1>Inbox content</h1>
+      </AdminShell>
+    );
+
+    expect(
+      screen.getAllByRole("link", { name: "Contact inbox" })
+    ).not.toHaveLength(0);
   });
 
   it("persists the desktop sidebar preference", async () => {

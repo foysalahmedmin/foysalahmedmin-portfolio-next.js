@@ -1113,7 +1113,7 @@ The supported stable boundary is the complete chain through `c06ff91`; `1008baa`
 
 **Dependencies:** P10.2, P08.4
 
-- [ ] Add Contact inbox list/detail/status actions.
+- [x] Add a capability-gated Contact inbox with redacted list rows, explicit no-store detail access, and revision-safe status actions.
 - [ ] Add Article and Project category management.
 - [ ] Add ProjectResource management with private/public state.
 - [ ] Add Review moderation with safe author data.
