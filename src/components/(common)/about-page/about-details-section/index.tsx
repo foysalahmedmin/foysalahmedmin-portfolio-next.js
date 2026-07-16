@@ -1,70 +1,102 @@
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import type { TPublicSiteDto } from "@/app/api/site/site.type";
+import { PublicSiteLink } from "@/components/content/public-site-link";
+import OptimizedMedia from "@/components/ui/optimized-media";
+import { getPrimaryPublicCta } from "@/lib/site/public-shell";
+import { ArrowRight, Layers3 } from "lucide-react";
 import Link from "next/link";
 
-const AboutDetailsSection = () => {
-  return (
-    <section className="py-24 lg:py-32">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
-          <div className="fade-left">
-            <img
-              src="/images/profile.png"
-              alt="Foysal Ahmed"
-              className="rounded-2xl shadow-2xl grayscale transition-all duration-700 hover:grayscale-0"
-            />
-          </div>
-          <div className="fade-right space-y-8">
-            <h2 className="text-3xl font-bold md:text-4xl">
-              I Design and Build Intelligent Systems as a Full-Stack Developer &
-              System Architect
-            </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed">
-              I am a{" "}
-              <span className="text-primary font-bold">
-                Full-Stack Developer & System Architect
-              </span>{" "}
-              with expertise in designing, developing, and scaling complex
-              systems across web, mobile, and backend platforms. I specialize in
-              architecting robust solutions based on project requirements and
-              business logic, ensuring that every system is efficient,
-              maintainable, and future-proof. My experience spans building
-              responsive applications, managing SQL and NoSQL databases,
-              implementing automated workflows, integrating AI-driven solutions,
-              and optimizing user experiences. I focus on delivering
-              high-quality, end-to-end solutions that empower businesses and
-              provide seamless experiences for users.
-            </p>
+const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
+  const profile = site.brand.profile ?? site.fallbacks.profile;
+  const cta = getPrimaryPublicCta(site);
+  const enabledPillars = site.pillars.filter((pillar) => pillar.enabled);
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-foreground font-bold">Name:</p>
-                <p className="text-muted-foreground">Foysal Ahmed</p>
-              </div>
-              <div>
-                <p className="text-foreground font-bold">Email:</p>
-                <p className="text-muted-foreground">
-                  foysalahmedmin@gmail.com
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground font-bold">Location:</p>
-                <p className="text-muted-foreground">Dhaka, Bangladesh</p>
-              </div>
-              <div>
-                <p className="text-foreground font-bold">Freelance:</p>
-                <p className="text-muted-foreground">Available</p>
-              </div>
+  return (
+    <section
+      className="py-[var(--space-section)]"
+      aria-labelledby="about-practice-title"
+    >
+      <div className="container mx-auto px-6">
+        <div className="grid items-center gap-16 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="relative">
+            <div className="border-border bg-surface-subtle relative aspect-[4/5] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)]">
+              <OptimizedMedia
+                src={profile?.url}
+                alt={
+                  profile?.is_decorative
+                    ? ""
+                    : profile?.alt_text || "Abstract portfolio identity visual"
+                }
+                fallback="profile"
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 42vw"
+              />
+              <div className="from-background/60 absolute inset-0 bg-gradient-to-t via-transparent to-transparent" />
             </div>
-            <Link
-              href="https://drive.google.com/file/d/1BUDGgWeCHh-p7gSUPGDGzGRMUrfWpHAe/view?usp=sharing"
-              target="_blank"
+            <div className="border-border bg-card absolute -right-4 -bottom-8 max-w-64 rounded-2xl border p-5 shadow-[var(--shadow-md)] sm:right-8">
+              <Layers3 className="text-primary size-6" aria-hidden="true" />
+              <p className="mt-3 text-sm leading-6 font-semibold">
+                {enabledPillars.length} connected engineering disciplines, one
+                accountable delivery practice.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-primary text-sm font-black tracking-[0.18em] uppercase">
+              Working philosophy
+            </p>
+            <h2
+              id="about-practice-title"
+              className="mt-4 text-3xl font-black tracking-tight text-balance sm:text-4xl lg:text-5xl"
             >
-              <Button size="lg" variant="outline">
-                Download CV
-                <Download className="ml-2 size-4 transition-transform group-hover:-translate-y-1" />
-              </Button>
-            </Link>
+              {site.positioning.long ||
+                site.positioning.compact ||
+                "A connected product engineering practice"}
+            </h2>
+            <p className="text-muted-foreground mt-6 text-lg leading-8">
+              {site.positioning.long_bio ||
+                site.positioning.short_bio ||
+                "Published practice details are being prepared."}
+            </p>
+            {site.positioning.client_promise && (
+              <blockquote className="border-primary bg-primary/5 mt-7 rounded-r-2xl border-l-2 p-5 text-base leading-7 font-semibold">
+                {site.positioning.client_promise}
+              </blockquote>
+            )}
+
+            <ol
+              className="mt-8 grid gap-3 sm:grid-cols-2"
+              aria-label="Engineering disciplines"
+            >
+              {enabledPillars.map((pillar) => (
+                <li
+                  key={pillar.key}
+                  className="border-border bg-card flex min-h-14 items-center gap-3 rounded-xl border px-4 text-sm font-bold"
+                >
+                  <span className="text-primary text-xs tabular-nums">
+                    {String(pillar.order).padStart(2, "0")}
+                  </span>
+                  {pillar.label}
+                </li>
+              ))}
+            </ol>
+
+            <div className="mt-9 flex flex-wrap gap-3">
+              {cta && (
+                <PublicSiteLink
+                  link={cta}
+                  showIcon
+                  className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex min-h-12 items-center gap-2 rounded-xl px-6 text-sm font-black focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                />
+              )}
+              <Link
+                href="/projects"
+                className="border-border bg-card hover:border-primary focus-visible:ring-primary inline-flex min-h-12 items-center gap-2 rounded-xl border px-6 text-sm font-black focus-visible:ring-2 focus-visible:outline-none"
+              >
+                Explore the work
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

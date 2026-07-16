@@ -39,8 +39,97 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Start transaction-capable MongoDB
+        run: |
+          docker run --detach \
+            --name portfolio-test-mongodb \
+            --publish 27017:27017 \
+            --health-cmd="mongosh --quiet --eval 'quit(db.adminCommand({ ping: 1 }).ok ? 0 : 2)'" \
+            --health-interval=2s \
+            --health-timeout=5s \
+            --health-retries=30 \
+            mongo:8.0 \
+            --replSet rs0 \
+            --bind_ip_all
+
+          for attempt in {1..30}; do
+            if [ "$(docker inspect --format='{{.State.Health.Status}}' portfolio-test-mongodb)" = "healthy" ]; then
+              break
+            fi
+            sleep 2
+          done
+
+          test "$(docker inspect --format='{{.State.Health.Status}}' portfolio-test-mongodb)" = "healthy"
+          docker exec portfolio-test-mongodb mongosh --quiet --eval 'rs.initiate({_id: "rs0", members: [{_id: 0, host: "127.0.0.1:27017"}]})'
+
+          for attempt in {1..30}; do
+            if docker exec portfolio-test-mongodb mongosh --quiet --eval 'quit(db.hello().isWritablePrimary ? 0 : 2)'; then
+              break
+            fi
+            sleep 2
+          done
+
+          docker exec portfolio-test-mongodb mongosh --quiet --eval 'quit(db.hello().isWritablePrimary ? 0 : 2)'
+
       - name: Test
         run: pnpm test
+        env:
+          TEST_MONGODB_URI: "mongodb://127.0.0.1:27017/portfolio_test?replicaSet=rs0&directConnection=true"
 
       - name: Build
         run: pnpm build
+
+  browser:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'quit(db.adminCommand({ ping: 1 }).ok ? 0 : 2)'"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install pinned Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run public browser and accessibility checks
+        run: >-
+          pnpm exec playwright test
+          tests/e2e/contact.spec.ts
+          tests/e2e/public-quality.spec.ts
+          --project=chromium-desktop
+          --project=chromium-mobile
+        env:
+          TEST_MONGODB_URI: mongodb://127.0.0.1:27017/portfolio_e2e
+          NEXT_PUBLIC_URL: http://127.0.0.1:3000
+
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-diagnostics
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7

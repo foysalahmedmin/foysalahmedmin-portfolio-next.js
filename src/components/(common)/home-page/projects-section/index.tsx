@@ -1,113 +1,127 @@
-import { getPublicProjects } from "@/app/api/projects/project.service";
-import { Button } from "@/components/ui/button";
-import { SectionTitle, Subtitle, Title } from "@/components/ui/section-title";
-import type { TProject } from "@/types/project.type";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import OptimizedMedia from "@/components/ui/optimized-media";
+import {
+  Description,
+  SectionTitle,
+  Subtitle,
+  Title,
+} from "@/components/ui/section-title";
+import { getPillarLabel } from "@/lib/content/pillars";
+import type { TProjectListItem } from "@/types/project.type";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
-const ProjectCard: React.FC<{ project: TProject; index: number }> = ({
-  project,
-  index,
-}) => {
+const TYPE_LABELS = {
+  client: "Client work",
+  internal: "Internal product",
+  open_source: "Open source",
+  lab: "Engineering lab",
+} as const;
+
+function ProjectCard({ project }: { project: TProjectListItem }) {
+  const href = `/projects/${project.slug ?? project._id}`;
+  const outcome = project.outcomes?.find(
+    ({ verification_state }) => verification_state !== "unverified"
+  );
+
   return (
-    <div
-      className="fade-up group bg-card border-border/50 hover:shadow-primary/5 relative overflow-hidden rounded-[2rem] border shadow-sm transition-all duration-500 hover:shadow-2xl"
-      style={{ transitionDelay: `${index * 100}ms` } as React.CSSProperties}
-    >
-      <div className="aspect-[4/3] w-full overflow-hidden">
-        <img
-          src={project.thumbnail?.url || "/images/placeholder.png"}
-          alt={project.name}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+    <article className="fade-up group bg-card border-border relative overflow-hidden rounded-[var(--radius-xl-token)] border shadow-[var(--shadow-xs)] transition-[border-color,box-shadow,transform] duration-[var(--motion-standard)] hover:shadow-[var(--shadow-md)] motion-safe:hover:-translate-y-1">
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <OptimizedMedia
+          src={project.thumbnail?.url}
+          alt={
+            project.thumbnail?.alt_text || `${project.name} case-study visual`
+          }
+          fallback="project"
+          pillar={project.primary_pillar}
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="h-full w-full object-cover transition-transform duration-[var(--motion-slow)] motion-safe:group-hover:scale-[1.03]"
         />
-        <div className="from-background/90 via-background/20 absolute inset-0 flex items-center justify-center bg-gradient-to-t to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <Link
-            href={`/projects/${project._id}`}
-            className="bg-primary text-primary-foreground flex size-16 scale-0 rotate-12 items-center justify-center rounded-full transition-transform delay-100 duration-500 group-hover:scale-100 group-hover:rotate-0"
-          >
-            <ArrowUpRight className="size-8" />
-          </Link>
-        </div>
       </div>
 
-      <div className="p-8">
-        <div className="mb-4 flex flex-wrap gap-2">
-          {project.tags?.slice(0, 3).map((tag, i) => (
-            <span
-              key={i}
-              className="glass border-primary/20 text-primary rounded-full px-4 py-1.5 text-[10px] font-bold tracking-[0.1em] uppercase"
-            >
-              {tag}
-            </span>
-          ))}
+      <div className="p-7 lg:p-8">
+        <div className="text-muted-foreground mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-bold tracking-wide uppercase">
+          {project.project_type ? (
+            <span>{TYPE_LABELS[project.project_type]}</span>
+          ) : null}
+          {project.primary_pillar ? (
+            <span>{getPillarLabel(project.primary_pillar)}</span>
+          ) : null}
         </div>
-        <h3 className="group-hover:text-primary mb-3 text-2xl font-black tracking-tighter transition-colors">
+        <h3 className="group-hover:text-primary text-2xl font-black tracking-tight transition-colors">
           {project.name}
         </h3>
-        <p className="text-muted-foreground/80 line-clamp-2 text-base font-medium">
-          {project.description}
-        </p>
+        {project.description ? (
+          <p className="text-muted-foreground mt-3 line-clamp-3 leading-relaxed">
+            {project.description}
+          </p>
+        ) : null}
+        {outcome ? (
+          <p className="border-border mt-5 border-l-2 pl-4 text-sm">
+            <span className="font-bold">{outcome.label}:</span> {outcome.value}
+          </p>
+        ) : null}
+        <Link
+          href={href}
+          className="text-primary focus-visible:ring-ring mt-7 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-black tracking-widest uppercase underline-offset-8 hover:underline focus-visible:ring-2"
+        >
+          Read case study <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
+      </div>
+    </article>
+  );
+}
 
-        <div className="mt-8 flex items-center justify-between">
+export default function ProjectsSection({
+  projects,
+  unavailable = false,
+  heading,
+}: {
+  projects: readonly TProjectListItem[];
+  unavailable?: boolean;
+  heading?: string;
+}) {
+  return (
+    <section id="projects" className="py-[var(--space-section)]">
+      <div className="container">
+        <div className="mb-14 flex flex-col justify-between gap-8 md:flex-row md:items-end">
+          <SectionTitle variant="none" className="mb-0 max-w-2xl">
+            <Subtitle>Project evidence</Subtitle>
+            <Title>{heading || "Published technical case studies"}</Title>
+            <Description className="mx-0">
+              Public records show only approved project context, engineering
+              decisions, and verified or derived outcomes.
+            </Description>
+          </SectionTitle>
           <Link
-            href={`/projects/${project._id}`}
-            className="text-primary flex items-center gap-2 text-sm font-black tracking-widest uppercase underline-offset-8 hover:underline"
+            href="/projects"
+            className="border-border hover:border-primary focus-visible:ring-ring inline-flex min-h-11 w-fit items-center gap-3 rounded-full border px-5 text-sm font-bold focus-visible:ring-2"
           >
-            Case Study <ArrowRight className="arrow-slide-right size-4" />
+            Explore projects{" "}
+            <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
-      </div>
-    </div>
-  );
-};
 
-const ProjectsSection = async () => {
-  const { data: projects } = await getPublicProjects({ limit: 3 });
-
-  return (
-    <section id="projects" className="relative overflow-hidden py-24 lg:py-48">
-      <div className="bg-primary/5 absolute top-0 right-0 size-96 translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" />
-
-      <div className="container mx-auto px-6">
-        <div className="mb-20 flex flex-col items-center justify-between gap-8 md:flex-row md:items-end">
-          <SectionTitle
-            variant="none"
-            className="mb-0 max-w-xl text-center md:text-left"
-          >
-            <Subtitle className="mb-4 text-[11px] font-black tracking-[0.3em]">
-              Curated Works
-            </Subtitle>
-            <Title className="leading-tight font-black tracking-tighter">
-              Selected Projects
-            </Title>
-          </SectionTitle>
-          <div className="scale-in delay-200">
-            <Link href="/projects">
-              <Button
-                variant="none"
-                className="group glass hover:bg-primary hover:text-primary-foreground rounded-2xl px-8 py-6 text-sm font-black tracking-widest uppercase transition-all"
-              >
-                The Archive
-                <ArrowRight className="ml-3 size-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-          {Array.isArray(projects) &&
-            projects.map((project: any, index: number) => (
-              <ProjectCard
-                key={project._id}
-                project={project as TProject}
-                index={index}
-              />
+        {projects.length ? (
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {projects.slice(0, 6).map((project) => (
+              <ProjectCard key={project._id} project={project} />
             ))}
-        </div>
+          </div>
+        ) : (
+          <div className="border-border bg-surface-subtle rounded-[var(--radius-lg-token)] border p-8 text-center">
+            <h3 className="font-bold">
+              {unavailable
+                ? "Case studies are temporarily unavailable"
+                : "No approved public case study is available yet"}
+            </h3>
+            <p className="text-muted-foreground mx-auto mt-2 max-w-xl text-sm">
+              {unavailable
+                ? "The public portfolio reader could not be reached. The projects page can be retried directly."
+                : "Draft, incomplete, and unverified records stay private until their publication checks pass."}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
-};
-
-export default ProjectsSection;
+}

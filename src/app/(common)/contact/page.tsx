@@ -1,15 +1,16 @@
 import ContactContentSection from "@/components/(common)/contact-page/contact-content-section";
-import GoogleMapSection from "@/components/(common)/contact-page/google-map-section";
 import PageHeaderSection from "@/components/sections/page-header-section";
 import type { Metadata } from "next";
+import { readPublishedSite } from "@/lib/site/published-site";
 
 export const metadata: Metadata = {
-  title: "Contact | Foysal Ahmed",
+  title: "Contact",
   description:
-    "Get in touch with Foysal Ahmed for collaborations, opportunities, or just a friendly chat.",
+    "Share the goals, constraints, and context for a potential product engineering engagement.",
 };
 
-const ContactPage = () => {
+const ContactPage = async () => {
+  const site = await readPublishedSite();
   const breadcrumbItems = [
     { index: 1, name: "Home", href: "/", icon: "house" },
     { index: 2, name: "Contact", href: "/contact" },
@@ -19,13 +20,14 @@ const ContactPage = () => {
     <main className="min-h-screen">
       <PageHeaderSection
         title="Get in Touch"
-        description="I'm always open to new opportunities, collaborations, or just a friendly chat. Feel free to reach out using the form below or through my contact details."
+        description={
+          site.positioning.client_promise ||
+          "Share the problem, desired outcome, timeline, and constraints through the protected inquiry workflow."
+        }
         breadcrumbItems={breadcrumbItems}
       />
 
-      <ContactContentSection />
-
-      <GoogleMapSection />
+      <ContactContentSection site={site} />
     </main>
   );
 };

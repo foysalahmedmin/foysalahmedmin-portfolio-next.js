@@ -1,61 +1,51 @@
-"use client";
+import type { TPublicSiteDto } from "@/app/api/site/site.type";
+import { PublicSiteLink } from "@/components/content/public-site-link";
+import { getPrimaryPublicCta } from "@/lib/site/public-shell";
+import { Braces, MessageSquare, ShieldCheck } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Mail, MessageSquare, Send, Smile } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+const ContactCTASection = ({ site }: { site: TPublicSiteDto }) => {
+  const cta = getPrimaryPublicCta(site);
+  if (!cta) return null;
 
-const ContactCTASection: React.FC = () => {
   return (
-    <section id="contact" className="py-24 lg:py-32">
+    <section id="contact" className="py-[var(--space-section)]">
       <div className="container mx-auto px-6">
-        <div className="bg-primary text-primary-foreground relative overflow-hidden rounded-3xl px-6 py-16 md:px-16 md:py-24">
-          {/* Background decoration */}
+        <div className="bg-primary text-primary-foreground relative overflow-hidden rounded-[2rem] px-6 py-16 md:px-16 md:py-24">
           <div className="bg-background/10 absolute -top-24 -right-24 size-96 rounded-full blur-3xl" />
           <div className="bg-background/10 absolute -bottom-24 -left-24 size-96 rounded-full blur-3xl" />
-
           <div className="relative z-10 flex flex-col items-center text-center">
-            <span className="bg-primary/20 mb-6 inline-flex size-16 items-center justify-center rounded-2xl text-3xl shadow-inner backdrop-blur-sm">
-              <Smile className="size-20" />
+            <span className="bg-background/10 mb-6 inline-flex size-16 items-center justify-center rounded-2xl shadow-inner backdrop-blur-sm">
+              <Braces className="size-9" aria-hidden="true" />
             </span>
-            <h2 className="mb-6 max-w-3xl text-2xl leading-tight font-bold md:text-5xl">
-              Have a Project in Mind? Let's Build Something Amazing.
+            <h2 className="max-w-4xl text-3xl leading-tight font-black tracking-tight text-balance md:text-5xl">
+              {site.positioning.client_promise ||
+                "Bring the goal and constraints. Shape the engineering path together."}
             </h2>
-            <p className="mb-10 max-w-xl opacity-90 md:text-xl">
-              I'm always open to discussing new projects, creative ideas or
-              opportunities to be part of your visions.
-            </p>
-
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link href="/contact">
-                <Button
-                  size="lg"
-                  variant="default"
-                  className="font-bold tracking-wide uppercase"
-                >
-                  Conversation <Send className="ml-2 size-4" />
-                </Button>
-              </Link>
-              <Link href="mailto:foysalahmedmin@gmail.com">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="font-bold tracking-wide uppercase"
-                >
-                  <Mail className="mr-2 size-4" /> Email Me
-                </Button>
-              </Link>
-            </div>
-
-            <div className="mt-12 flex gap-8">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="hidden size-5 opacity-70 md:inline-block" />
-                <span className="text-sm font-medium">Quick Reply</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Send className="hidden size-5 opacity-70 md:inline-block" />
-                <span className="text-sm font-medium">Available for Hire</span>
-              </div>
+            {site.positioning.short_bio && (
+              <p className="mt-6 max-w-2xl text-lg leading-8 opacity-90">
+                {site.positioning.short_bio}
+              </p>
+            )}
+            <PublicSiteLink
+              link={cta}
+              showIcon
+              className="bg-background text-foreground focus-visible:ring-ring mt-9 inline-flex min-h-12 items-center gap-2 rounded-xl px-6 text-sm font-black focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            />
+            <div className="mt-10 flex flex-wrap justify-center gap-6 text-sm font-semibold">
+              <span className="flex items-center gap-2">
+                <MessageSquare
+                  className="size-4 opacity-75"
+                  aria-hidden="true"
+                />
+                Outcome-led brief
+              </span>
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="size-4 opacity-75" aria-hidden="true" />
+                Protected intake
+              </span>
+              {site.contact.response_promise && (
+                <span>{site.contact.response_promise}</span>
+              )}
             </div>
           </div>
         </div>

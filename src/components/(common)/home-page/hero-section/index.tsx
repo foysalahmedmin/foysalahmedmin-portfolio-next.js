@@ -1,207 +1,252 @@
 "use client";
 
+import type { TPublicSiteDto } from "@/app/api/site/site.type";
+import ParallaxLayer from "@/components/motion/parallax-layer";
 import { Button } from "@/components/ui/button";
-import Magnetic from "@/components/ui/magnetic";
+import OptimizedMedia from "@/components/ui/optimized-media";
+import { useAutoplayController } from "@/hooks/ui/use-autoplay-controller";
+import { buildPublicHero } from "@/lib/site/public-hero";
+import type { TPublicShellLink } from "@/lib/site/public-shell";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Sparkles } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Pause,
+  Play,
+  Sparkles,
+} from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useCallback, useMemo, useState, type ComponentProps } from "react";
 
-const slides = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1920&auto=format&fit=crop",
-    title: "Full Stack Developer",
-    subtitle:
-      "Designing and building scalable, high-performance applications end to end.",
-    highlight: "Full Stack",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1920&auto=format&fit=crop",
-    title: "AI & Automation",
-    subtitle:
-      "Designing and implementing AI-driven workflows to optimize processes.",
-    highlight: "AI &",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1920&auto=format&fit=crop",
-    title: "System Architect",
-    subtitle:
-      "Designing robust system architectures for scalable, high-traffic platforms.",
-    highlight: "System",
-  },
-];
+type HeroLinkProps = { link: TPublicShellLink } & Omit<
+  ComponentProps<"a">,
+  "href" | "target" | "rel"
+>;
 
-const HeroSection: React.FC = () => {
+const HeroLink = ({ link, ...props }: HeroLinkProps) => {
+  const content = (
+    <>
+      <span>{link.label}</span>
+      {link.external ? (
+        <ArrowUpRight className="size-4" aria-hidden="true" />
+      ) : (
+        <ArrowRight className="size-4" aria-hidden="true" />
+      )}
+    </>
+  );
+  return link.external ? (
+    <a
+      {...props}
+      href={link.href}
+      target={link.href.startsWith("https:") ? "_blank" : undefined}
+      rel={link.href.startsWith("https:") ? "noopener noreferrer" : undefined}
+    >
+      {content}
+    </a>
+  ) : (
+    <Link {...props} href={link.href}>
+      {content}
+    </Link>
+  );
+};
+
+const HeroSection = ({ site }: { site: TPublicSiteDto }) => {
+  const hero = useMemo(() => buildPublicHero(site), [site]);
+  const slides = hero.slides;
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setSelectedIndex((prev) => (prev + 1) % slides.length);
-        setIsTransitioning(false);
-      }, 500);
-    }, 6000);
-    return () => clearInterval(timer);
+  const handleSlideChange = useCallback((index: number) => {
+    setSelectedIndex(index);
   }, []);
-
-  const handleSlideChange = (index: number) => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setSelectedIndex(index);
-      setIsTransitioning(false);
-    }, 500);
-  };
+  const autoplay = useAutoplayController({
+    itemCount: slides.length,
+    activeIndex: selectedIndex,
+    onChange: handleSlideChange,
+    intervalMs: 7_000,
+    label: (index) => `${slides[index]?.label}, slide ${index + 1} of 5`,
+  });
+  const activeSlide = slides[selectedIndex];
+  const secondaryCta =
+    activeSlide.cta?.href === hero.primary_cta?.href ? null : activeSlide.cta;
 
   return (
     <section
+      {...autoplay.rootProps}
       id="home"
-      className="bg-background text-foreground relative flex min-h-[40rem] w-full max-w-screen flex-col overflow-hidden py-24 md:py-32 lg:min-h-[50rem]"
+      aria-roledescription="carousel"
+      aria-label="Five engineering capabilities"
+      className="bg-background text-foreground relative flex min-h-[43rem] w-full max-w-screen flex-col overflow-hidden py-24 md:py-32 lg:min-h-[52rem]"
     >
-      {/* Background Ambience */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="animate-pulse-slow bg-background/10 absolute top-1/4 -left-1/4 h-[500px] w-[500px] rounded-full blur-3xl" />
-        <div
-          className="animate-pulse-slow bg-background/5 absolute -right-1/4 bottom-1/4 h-[500px] w-[500px] rounded-full blur-3xl"
-          style={{ animationDelay: "2s" }}
-        />
-
+      <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <ParallaxLayer
+          depth="medium"
+          pointerStrength={0.25}
+          className="absolute inset-0"
+        >
+          <div className="bg-primary/15 absolute top-[8%] -left-[18%] size-[32rem] rounded-full blur-[120px]" />
+          <div className="bg-secondary/20 absolute -right-[15%] bottom-[5%] size-[30rem] rounded-full blur-[120px]" />
+        </ParallaxLayer>
         <div className="absolute inset-0">
-          {slides.map((slide, index) => (
-            <div
-              key={index}
-              className={cn(
-                "absolute inset-0 transition-opacity duration-[2000ms] ease-in-out will-change-[opacity,transform]",
-                selectedIndex === index ? "opacity-100" : "opacity-0"
-              )}
-            >
-              <img
-                src={slide.image || "/images/hero-banner.png"}
-                alt=""
-                className="h-full w-full object-cover grayscale"
-              />
-              {/* Overlay to blend image with theme background */}
-              <div className="bg-background/80 absolute inset-0 mix-blend-overlay transition-colors duration-1000" />
-              <div className="bg-background/60 absolute inset-0 transition-colors duration-1000" />
-
-              {/* Gradient for smooth transition to content */}
-              <div className="from-background/0 via-background/40 to-background absolute inset-0 bg-gradient-to-b" />
-            </div>
-          ))}
+          <OptimizedMedia
+            key={activeSlide.key}
+            src={activeSlide.image}
+            alt={activeSlide.image_alt}
+            fallback="hero"
+            pillar={activeSlide.key}
+            sizes="100vw"
+            priority={activeSlide.priority}
+            className="scale-[1.03] object-cover opacity-45 saturate-75 transition-[opacity,transform] duration-[var(--motion-slow)] motion-reduce:transform-none motion-reduce:transition-none"
+          />
+          <div className="from-background via-background/75 to-background/95 absolute inset-0 bg-gradient-to-r" />
+          <div className="from-background/10 via-background/50 to-background absolute inset-0 bg-gradient-to-b" />
+          <div className="hero-grid-mask absolute inset-0 opacity-35" />
         </div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 container mx-auto mb-10 flex h-full flex-1 flex-col justify-center px-6">
-        <div className="flex max-w-4xl flex-1 flex-col justify-center">
-          <div className="fade-down active border-primary/20 bg-background/20 text-primary mb-6 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase backdrop-blur-md">
-            <Sparkles className="text-foreground size-4 animate-pulse" />
-            <span>Available for new projects</span>
-          </div>
+      <div className="relative z-10 container mx-auto flex flex-1 items-center px-6">
+        <div className="grid w-full gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
+          <div className="max-w-5xl">
+            <div className="border-primary/20 bg-background/65 text-primary inline-flex min-h-9 items-center gap-2 rounded-full border px-4 py-2 text-[0.68rem] font-black tracking-[0.18em] uppercase backdrop-blur-xl">
+              <Sparkles className="size-4" aria-hidden="true" />
+              <span>{hero.eyebrow}</span>
+            </div>
 
-          <div className="overflow-hidden">
+            <p className="text-muted-foreground mt-8 text-sm font-black tracking-[0.2em] uppercase">
+              {String(selectedIndex + 1).padStart(2, "0")} / 05 ·{" "}
+              {activeSlide.label}
+            </p>
             <h1
-              className={cn(
-                "text-foreground text-5xl leading-[0.9] font-black tracking-tighter transition-all duration-700 ease-out md:text-7xl lg:text-9xl",
-                isTransitioning
-                  ? "translate-y-10 skew-y-6 opacity-0"
-                  : "translate-y-0 skew-y-0 opacity-100"
-              )}
+              key={`${activeSlide.key}-headline`}
+              className="type-display mt-4 max-w-5xl text-balance"
             >
-              {slides[selectedIndex].title.split(" ").map((word, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    word === slides[selectedIndex].highlight
-                      ? "text-primary text-glow"
-                      : "text-foreground"
-                  )}
-                >
-                  {word}{" "}
-                </span>
-              ))}
+              {activeSlide.headline}
             </h1>
+            <p
+              key={`${activeSlide.key}-summary`}
+              className="type-lead mt-6 max-w-3xl text-balance"
+            >
+              {activeSlide.summary}
+            </p>
+            {activeSlide.outcome && (
+              <p className="border-primary text-foreground mt-6 max-w-2xl border-l-2 pl-4 text-sm leading-7 font-semibold">
+                {activeSlide.outcome}
+              </p>
+            )}
+
+            {activeSlide.capabilities.length > 0 && (
+              <ul
+                className="mt-7 flex flex-wrap gap-2"
+                aria-label={`${activeSlide.label} capabilities`}
+              >
+                {activeSlide.capabilities.map((capability) => (
+                  <li
+                    key={capability}
+                    className="border-border bg-background/70 rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur"
+                  >
+                    {capability}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {(hero.primary_cta || secondaryCta) && (
+              <div className="mt-9 flex flex-wrap items-center gap-3">
+                {hero.primary_cta && (
+                  <Button asChild>
+                    <HeroLink link={hero.primary_cta} />
+                  </Button>
+                )}
+                {secondaryCta && (
+                  <Button variant="outline" asChild>
+                    <HeroLink link={secondaryCta} />
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
-          <p
-            className={cn(
-              "text-muted-foreground/80 mt-6 mb-8 max-w-2xl text-xl leading-relaxed transition-all delay-100 duration-700 ease-out md:text-2xl",
-              isTransitioning
-                ? "translate-y-10 opacity-0"
-                : "translate-y-0 opacity-100"
-            )}
-          >
-            {slides[selectedIndex].subtitle}
-          </p>
-
-          <div className="fade-up active flex flex-wrap items-center gap-2 delay-300 md:gap-4">
-            <Magnetic strength={0.2}>
-              <Link href="/about">
-                <Button className="primary">
-                  <span className="relative z-10">About Me</span>
-                  <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-            </Magnetic>
-            <Magnetic strength={0.2}>
-              <Link href="/projects">
-                <Button variant="outline" className="primary">
-                  <span className="relative z-10">View Projects</span>
-                  <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-            </Magnetic>
+          <div className="border-border bg-background/70 hidden rounded-3xl border p-5 backdrop-blur-xl lg:block">
+            <p className="text-muted-foreground text-xs font-bold tracking-[0.16em] uppercase">
+              Capability map
+            </p>
+            <ol className="mt-4 space-y-1" aria-label="Select capability slide">
+              {slides.map((slide, index) => (
+                <li key={slide.key}>
+                  <button
+                    type="button"
+                    onClick={() => autoplay.goTo(index)}
+                    className={cn(
+                      "focus-visible:ring-primary flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none",
+                      index === selectedIndex
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                    aria-current={index === selectedIndex ? "true" : undefined}
+                  >
+                    <span className="text-xs tabular-nums">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span>{slide.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </div>
 
-      {/* Modern Progress Indicators */}
-      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 flex-row gap-6 md:bottom-4">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => handleSlideChange(i)}
-            className="group flex cursor-pointer flex-col items-center gap-1"
+      <div className="relative z-10 container mx-auto mt-10 flex items-center justify-between gap-5 px-6">
+        <Link
+          href="#about"
+          className="text-muted-foreground focus-visible:ring-primary inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-xs font-black tracking-[0.16em] uppercase focus-visible:ring-2 focus-visible:outline-none"
+        >
+          Explore the practice
+          <ArrowDown className="size-4" aria-hidden="true" />
+        </Link>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            shape="icon"
+            onClick={autoplay.previous}
+            aria-label="Previous capability"
           >
-            <span
-              className={cn(
-                "text-[10px] font-bold transition-all duration-500",
-                selectedIndex === i
-                  ? "text-primary opacity-100"
-                  : "text-muted-foreground opacity-0 group-hover:opacity-100"
-              )}
-            >
-              0{i + 1}
-            </span>
-            <div className="flex w-8 items-center justify-center lg:w-12">
-              <div
-                className={cn(
-                  "h-1 rounded-full transition-all duration-500",
-                  selectedIndex === i
-                    ? "bg-primary w-8 lg:w-12"
-                    : "bg-muted-foreground/30 w-4 group-hover:w-6 lg:w-6 lg:group-hover:w-8"
-                )}
-              />
-            </div>
-          </button>
-        ))}
+            <ArrowLeft className="size-4" aria-hidden="true" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            shape="icon"
+            onClick={autoplay.toggleUserPause}
+            aria-label={
+              autoplay.userPaused
+                ? "Play capability slides"
+                : "Pause capability slides"
+            }
+            aria-pressed={autoplay.userPaused}
+          >
+            {autoplay.userPaused ? (
+              <Play className="size-4" aria-hidden="true" />
+            ) : (
+              <Pause className="size-4" aria-hidden="true" />
+            )}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            shape="icon"
+            onClick={autoplay.next}
+            aria-label="Next capability"
+          >
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Button>
+        </div>
       </div>
 
-      {/* Unique Scroll indicator */}
-      <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2">
-        <Link href="#about" className="flex flex-col items-center gap-3">
-          <div className="border-muted-foreground/20 relative h-10 w-6 rounded-full border-2 p-1">
-            <div className="bg-primary animate-bounce-slow absolute top-2 right-0.5 left-0.5 h-1 w-4 rounded-full px-1" />
-          </div>
-          <span className="text-muted-foreground/50 text-[10px] font-bold tracking-[0.3em] uppercase">
-            Scroll
-          </span>
-        </Link>
-      </div>
+      <span className="sr-only" role="status" aria-live="polite">
+        {autoplay.manualAnnouncement}
+      </span>
     </section>
   );
 };
