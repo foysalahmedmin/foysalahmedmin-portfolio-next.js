@@ -18,6 +18,7 @@ import {
   LogOut,
   Mail,
   Menu,
+  ScrollText,
   Settings,
   X,
 } from "lucide-react";
@@ -96,6 +97,12 @@ const adminNavGroups: ReadonlyArray<
     label: "System",
     links: [
       {
+        name: "Audit log",
+        href: "/admin/audit",
+        icon: ScrollText,
+        capability: "audit:read",
+      },
+      {
         name: "Profile settings",
         href: "/admin/settings",
         icon: Settings,
@@ -116,6 +123,7 @@ const routeLabels: Readonly<Record<string, string>> = {
   articles: "Articles",
   projects: "Projects",
   contacts: "Contact inbox",
+  audit: "Audit log",
   site: "Site settings",
   pages: "Pages",
   settings: "Profile settings",
