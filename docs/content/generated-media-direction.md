@@ -243,6 +243,10 @@ and derivative image bytes are local ignored files under `seed-assets/`; only
 checksums, dimensions, and gate status are committed. Candidate evidence is not
 approval and does not permit public attachment by itself.
 
+The full five-hero candidate set is recorded in
+`docs/content/generated-media-evidence/hero-candidates.v1.json` with the same
+binary policy and pending approval/ingestion gates.
+
 The pilot must pass every gate before any batch generation:
 
 1. **Source gate:** exact 2400×1350 dimensions; no unintended alpha edge;

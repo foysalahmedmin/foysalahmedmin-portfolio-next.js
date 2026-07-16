@@ -9,6 +9,7 @@ This directory is the committed, redacted source of truth for deciding what the 
 - `generated-media-direction.md` locks the P12 visual direction, 17-master production manifest, prompt grammar, pilot/QA gates, provenance template, resolved ingestion prerequisites, and remaining binding/generation blockers without claiming that media has been generated or approved.
 - `generated-media-system-design-pilot.v1.json` stores the exact System Design pilot generation request and metadata checklist; it is not evidence that the pilot exists.
 - `generated-media-evidence/system-design-pilot.v1.json` records the generated System Design pilot candidate, local ignored asset paths, checksums, and pending approval gates; it is not publication approval.
+- `generated-media-evidence/hero-candidates.v1.json` records the five generated hero candidates, local ignored asset paths, checksums, optimization evidence, and remaining approval/ingestion gates.
 
 The v1 manifest covers all hardcoded public identity/contact values, positioning, metrics, testimonials, experience, education/courses, project/article assumptions and fallbacks, social accounts, resume exposure, and the current five-pillar coverage. Project and article bodies live outside Git in MongoDB; because no approved seed/export was available, the manifest records their publication contract and blocks individual records rather than pretending to have audited them.
 
