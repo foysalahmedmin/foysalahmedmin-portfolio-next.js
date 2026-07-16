@@ -1,4 +1,5 @@
 import AppQuery from "@/builder/app-query";
+import { parseSoftDeleteScope, setSoftDeleteScope } from "@/lib/db/soft-delete";
 import ProjectCategory from "../project-categories/project-category.model";
 import Project from "../projects/project.model";
 import {
@@ -77,16 +78,51 @@ export const findPublicByIdPopulated = async (id: string) => {
 export const findByIdWithDeleted = async (
   id: string
 ): Promise<TProjectResourceDocument | null> => {
-  return await ProjectResource.findById(id).setOptions({ bypassDeleted: true });
+  return await setSoftDeleteScope(ProjectResource.findById(id), "with_deleted");
+};
+
+export const findDeletedById = async (
+  id: string
+): Promise<TProjectResourceDocument | null> => {
+  return await setSoftDeleteScope(ProjectResource.findById(id), "only_deleted");
 };
 
 export const findManyByIds = async (ids: string[]) => {
   return await ProjectResource.find({ _id: { $in: ids } }).lean();
 };
 
+export const findDeletedManyByIds = async (ids: string[]) => {
+  return await setSoftDeleteScope(
+    ProjectResource.find({ _id: { $in: ids } }),
+    "only_deleted"
+  ).lean();
+};
+
+export const findNotRestorableIds = async (
+  resources: Array<Pick<TProjectResource, "project"> & { _id: unknown }>
+): Promise<string[]> => {
+  if (!resources.length) return [];
+
+  const projectIds = [
+    ...new Set(resources.map(({ project }) => project.toString())),
+  ];
+  const projects = await Project.find({ _id: { $in: projectIds } })
+    .select("_id")
+    .lean();
+  const activeProjectIds = new Set(projects.map(({ _id }) => _id.toString()));
+
+  return resources
+    .filter(({ project }) => !activeProjectIds.has(project.toString()))
+    .map(({ _id }) => (_id as { toString(): string }).toString());
+};
+
+export const isProjectActive = async (id: string): Promise<boolean> =>
+  Boolean(await Project.exists({ _id: id }));
+
 export const findPaginated = async (queryParams: Record<string, unknown>) => {
+  const scope = parseSoftDeleteScope(queryParams.deleted_scope);
   const query = new AppQuery<TProjectResourceDocument>(
-    ProjectResource.find(),
+    setSoftDeleteScope(ProjectResource.find(), scope),
     queryParams
   );
 
@@ -100,7 +136,10 @@ export const findPaginated = async (queryParams: Record<string, unknown>) => {
 
   const populated = await Promise.all(
     result.data.map(async (resource) => {
-      return await ProjectResource.findById((resource as { _id: unknown })._id)
+      return await setSoftDeleteScope(
+        ProjectResource.findById((resource as { _id: unknown })._id),
+        scope
+      )
         .populate(POPULATE_PROJECT)
         .lean();
     })
@@ -159,30 +198,51 @@ export const updateMany = async (
 };
 
 export const softDeleteMany = async (ids: string[]) => {
-  await ProjectResource.updateMany({ _id: { $in: ids } }, { is_deleted: true });
+  return await ProjectResource.updateMany(
+    { _id: { $in: ids } },
+    { is_deleted: true, deleted_at: new Date() }
+  );
+};
+
+export const softDeleteById = async (id: string) => {
+  return await ProjectResource.findByIdAndUpdate(
+    id,
+    { is_deleted: true, deleted_at: new Date() },
+    { new: true, runValidators: false }
+  );
 };
 
 export const restoreById = async (id: string) => {
-  return await ProjectResource.findOneAndUpdate(
-    { _id: id, is_deleted: true },
-    { is_deleted: false },
-    { new: true }
+  return await setSoftDeleteScope(
+    ProjectResource.findByIdAndUpdate(
+      id,
+      { is_deleted: false, deleted_at: null },
+      { new: true }
+    ),
+    "only_deleted"
   );
 };
 
 export const restoreMany = async (ids: string[]) => {
-  return await ProjectResource.updateMany(
-    { _id: { $in: ids }, is_deleted: true },
-    { is_deleted: false }
+  return await setSoftDeleteScope(
+    ProjectResource.updateMany(
+      { _id: { $in: ids } },
+      { is_deleted: false, deleted_at: null }
+    ),
+    "only_deleted"
   );
 };
 
 export const hardDeleteById = async (id: string) => {
-  await ProjectResource.findByIdAndDelete(id);
+  return await setSoftDeleteScope(
+    ProjectResource.findByIdAndDelete(id),
+    "only_deleted"
+  );
 };
 
 export const hardDeleteMany = async (ids: string[]) => {
-  await ProjectResource.deleteMany({ _id: { $in: ids } }).setOptions({
-    bypassDeleted: true,
-  });
+  return await setSoftDeleteScope(
+    ProjectResource.deleteMany({ _id: { $in: ids } }),
+    "only_deleted"
+  );
 };

@@ -13,6 +13,7 @@ export type TUser = {
   status: TStatus;
   is_verified: boolean;
   is_deleted: boolean;
+  deleted_at?: Date | string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
 };
@@ -26,4 +27,3 @@ export type TUserModel = Model<TUserDocument> & {
   isUserExist(_id: string): Promise<TUserDocument | null>;
   isUserExistByEmail(email: string): Promise<TUserDocument | null>;
 };
-

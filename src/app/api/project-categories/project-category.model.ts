@@ -1,10 +1,18 @@
 import type {
-  TProjectCategory,
   TProjectCategoryDocument,
   TProjectCategoryModel,
 } from "./project-category.type";
-import type { Query} from "mongoose";
 import mongoose, { Schema } from "mongoose";
+import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
+import { CONTENT_SLUG_PATTERN } from "@/lib/content/slug";
+
+const slugHistorySchema = new Schema(
+  {
+    slug: { type: String, required: true },
+    changed_at: { type: Date, required: true },
+  },
+  { _id: false }
+);
 
 const projectCategorySchema = new Schema<TProjectCategoryDocument>(
   {
@@ -20,7 +28,6 @@ const projectCategorySchema = new Schema<TProjectCategoryDocument>(
     name: {
       type: String,
       required: [true, "Name is required"],
-      unique: true,
       trim: true,
       minlength: [2, "Name must be at least 2 characters"],
       maxlength: [50, "Name cannot exceed 50 characters"],
@@ -28,12 +35,13 @@ const projectCategorySchema = new Schema<TProjectCategoryDocument>(
     slug: {
       type: String,
       required: [true, "Slug is required"],
-      unique: true,
       trim: true,
       lowercase: true,
       minlength: [1, "Slug must be at least 1 character"],
-      maxlength: [50, "Slug cannot exceed 50 characters"],
+      maxlength: [96, "Slug cannot exceed 96 characters"],
+      match: [CONTENT_SLUG_PATTERN, "Slug must be canonical"],
     },
+    slug_history: { type: [slugHistorySchema], default: [] },
     description: {
       type: String,
       trim: true,
@@ -59,6 +67,7 @@ const projectCategorySchema = new Schema<TProjectCategoryDocument>(
       default: "default",
     },
     is_deleted: { type: Boolean, default: false, select: false },
+    deleted_at: { type: Date, default: null, select: false },
   },
   {
     timestamps: {
@@ -67,6 +76,23 @@ const projectCategorySchema = new Schema<TProjectCategoryDocument>(
     },
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+  }
+);
+
+projectCategorySchema.index(
+  { name: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { is_deleted: false },
+    name: "unique_project_category_name_active",
+  }
+);
+projectCategorySchema.index(
+  { slug: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { is_deleted: false },
+    name: "unique_project_category_slug_active",
   }
 );
 
@@ -79,36 +105,10 @@ projectCategorySchema.virtual("children", {
 
 projectCategorySchema.methods.toJSON = function () {
   const category = this.toObject();
-  delete category.is_deleted;
   return category;
 };
 
-projectCategorySchema.pre(
-  /^find/,
-  function (this: Query<TProjectCategory, TProjectCategory>, next) {
-    this.setQuery({
-      ...this.getQuery(),
-      is_deleted: { $ne: true },
-    });
-    next();
-  }
-);
-
-projectCategorySchema.pre(
-  /^update/,
-  function (this: Query<TProjectCategory, TProjectCategory>, next) {
-    this.setQuery({
-      ...this.getQuery(),
-      is_deleted: { $ne: true },
-    });
-    next();
-  }
-);
-
-projectCategorySchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
-  next();
-});
+applySoftDeletePlugin(projectCategorySchema);
 
 projectCategorySchema.statics.isCategoryExist = async function (_id: string) {
   return await this.findById(_id);
@@ -116,6 +116,7 @@ projectCategorySchema.statics.isCategoryExist = async function (_id: string) {
 
 projectCategorySchema.methods.softDelete = async function () {
   this.is_deleted = true;
+  this.deleted_at = new Date();
   return await this.save();
 };
 
@@ -127,4 +128,3 @@ export const ProjectCategory =
   );
 
 export default ProjectCategory;
-

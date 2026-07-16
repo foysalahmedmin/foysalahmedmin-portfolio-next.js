@@ -69,7 +69,7 @@ describe("getSafeAdminReturnPath", () => {
 });
 
 describe("decideAdminAccess", () => {
-  it.each(["admin", "super-admin"] as const)(
+  it.each(["admin", "super-admin", "editor", "author", "contributor"] as const)(
     "allows an active %s session",
     (role) => {
       expect(decideAdminAccess(claims({ role }), user({ role }))).toEqual({
@@ -85,8 +85,8 @@ describe("decideAdminAccess", () => {
     ).toEqual({ allowed: false, reason: "invalid-token-claims" });
   });
 
-  it("rejects a non-admin token even when the user is now an admin", () => {
-    expect(decideAdminAccess(claims({ role: "editor" }), user())).toEqual({
+  it("rejects a public-account token even when the user is now an admin", () => {
+    expect(decideAdminAccess(claims({ role: "user" }), user())).toEqual({
       allowed: false,
       reason: "token-role-not-allowed",
     });
@@ -108,7 +108,7 @@ describe("decideAdminAccess", () => {
   it.each([
     [user({ is_deleted: true }), "user-deleted"],
     [user({ status: "blocked" }), "user-blocked"],
-    [user({ role: "editor" }), "user-role-not-allowed"],
+    [user({ role: "user" }), "user-role-not-allowed"],
   ] as const)("rejects an ineligible persisted user", (record, reason) => {
     expect(decideAdminAccess(claims(), record)).toEqual({
       allowed: false,

@@ -1,6 +1,6 @@
-import type { TReview, TReviewDocument, TReviewModel } from "./review.type";
-import type { Query} from "mongoose";
 import mongoose, { Schema } from "mongoose";
+import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
+import type { TReviewDocument, TReviewModel } from "./review.type";
 
 const reviewSchema = new Schema<TReviewDocument>(
   {
@@ -56,6 +56,11 @@ const reviewSchema = new Schema<TReviewDocument>(
       default: false,
       select: false,
     },
+    deleted_at: {
+      type: Date,
+      default: null,
+      select: false,
+    },
   },
   {
     timestamps: {
@@ -67,37 +72,22 @@ const reviewSchema = new Schema<TReviewDocument>(
   }
 );
 
-reviewSchema.index({ target: 1, target_model: 1, author: 1 }, { unique: true });
+reviewSchema.index(
+  { target: 1, target_model: 1, author: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { is_deleted: false },
+    name: "unique_review_target_author_active",
+  }
+);
 
 // toJSON override to remove sensitive fields from output
 reviewSchema.methods.toJSON = function () {
   const review = this.toObject();
-  delete review.is_deleted;
   return review;
 };
 
-// Query middleware to exclude deleted categories
-reviewSchema.pre(/^find/, function (this: Query<TReview, TReview>, next) {
-  this.setQuery({
-    ...this.getQuery(),
-    is_deleted: { $ne: true },
-  });
-  next();
-});
-
-reviewSchema.pre(/^update/, function (this: Query<TReview, TReview>, next) {
-  this.setQuery({
-    ...this.getQuery(),
-    is_deleted: { $ne: true },
-  });
-  next();
-});
-
-// Aggregation pipeline
-reviewSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
-  next();
-});
+applySoftDeletePlugin(reviewSchema);
 
 // Static methods
 reviewSchema.statics.isReviewExist = async function (_id: string) {
@@ -107,10 +97,10 @@ reviewSchema.statics.isReviewExist = async function (_id: string) {
 // Instance methods
 reviewSchema.methods.softDelete = async function () {
   this.is_deleted = true;
+  this.deleted_at = new Date();
   return await this.save();
 };
 
-export const Review = mongoose.model<TReviewDocument, TReviewModel>(
-  "Review",
-  reviewSchema
-);
+export const Review =
+  (mongoose.models.Review as TReviewModel) ||
+  mongoose.model<TReviewDocument, TReviewModel>("Review", reviewSchema);

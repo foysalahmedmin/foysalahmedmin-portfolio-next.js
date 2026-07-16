@@ -20,6 +20,6 @@ export type TForgetPassword = {
 };
 
 export type TResetPassword = {
+  token: string;
   password: string;
 };
-

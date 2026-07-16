@@ -1,6 +1,26 @@
-import type { Query } from "mongoose";
 import mongoose, { Schema } from "mongoose";
-import type { TArticle, TArticleDocument, TArticleModel } from "./article.type";
+import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
+import { richContentSchema } from "@/lib/content/rich-content-schema";
+import { PILLAR_KEYS } from "@/lib/content/pillars";
+import { CONTENT_SLUG_PATTERN } from "@/lib/content/slug";
+import type { TArticleDocument, TArticleModel } from "./article.type";
+
+const slugHistorySchema = new Schema(
+  {
+    slug: { type: String, required: true },
+    changed_at: { type: Date, required: true },
+  },
+  { _id: false }
+);
+
+const bodyMetadataSchema = new Schema(
+  {
+    schema_version: { type: Number, enum: [1], required: true },
+    word_count: { type: Number, min: 0, required: true },
+    heading_count: { type: Number, min: 0, required: true },
+  },
+  { _id: false }
+);
 
 const articleSchema = new Schema<TArticleDocument>(
   {
@@ -9,14 +29,27 @@ const articleSchema = new Schema<TArticleDocument>(
       required: true,
       trim: true,
     },
+    slug: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: 96,
+      match: CONTENT_SLUG_PATTERN,
+    },
+    slug_history: { type: [slugHistorySchema], default: [] },
     description: {
       type: String,
       trim: true,
       maxlength: 300,
     },
+    excerpt: { type: String, trim: true, maxlength: 500 },
     content: {
       type: String,
       required: true,
+    },
+    rich_content: {
+      type: richContentSchema,
+      required: false,
     },
     thumbnail: {
       type: Schema.Types.ObjectId,
@@ -47,6 +80,16 @@ const articleSchema = new Schema<TArticleDocument>(
       ref: "User",
       default: [],
     },
+    primary_pillar: { type: String, enum: PILLAR_KEYS },
+    secondary_pillars: { type: [String], enum: PILLAR_KEYS, default: [] },
+    topics: { type: [String], default: [] },
+    reading_time_minutes: { type: Number, min: 1, max: 600 },
+    reading_time_source: {
+      type: String,
+      enum: ["derived", "manual"],
+      default: "derived",
+    },
+    body_metadata: { type: bodyMetadataSchema },
     status: {
       type: String,
       enum: ["draft", "pending", "published", "archived"],
@@ -100,6 +143,11 @@ const articleSchema = new Schema<TArticleDocument>(
       default: false,
       select: false,
     },
+    deleted_at: {
+      type: Date,
+      default: null,
+      select: false,
+    },
   },
   {
     timestamps: {
@@ -118,6 +166,19 @@ articleSchema.virtual("reviews", {
   match: { target_model: "Article", is_deleted: { $ne: true } },
 });
 
+articleSchema.index(
+  { slug: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { is_deleted: false, slug: { $type: "string" } },
+    name: "unique_article_slug_active",
+  }
+);
+articleSchema.index(
+  { status: 1, primary_pillar: 1, published_at: -1 },
+  { name: "article_publication_pillar" }
+);
+
 articleSchema.virtual("review_count", {
   ref: "Review",
   localField: "_id",
@@ -128,30 +189,10 @@ articleSchema.virtual("review_count", {
 
 articleSchema.methods.toJSON = function () {
   const article = this.toObject();
-  delete article.is_deleted;
   return article;
 };
 
-articleSchema.pre(/^find/, function (this: Query<TArticle, TArticle>, next) {
-  this.setQuery({
-    ...this.getQuery(),
-    is_deleted: { $ne: true },
-  });
-  next();
-});
-
-articleSchema.pre(/^update/, function (this: Query<TArticle, TArticle>, next) {
-  this.setQuery({
-    ...this.getQuery(),
-    is_deleted: { $ne: true },
-  });
-  next();
-});
-
-articleSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
-  next();
-});
+applySoftDeletePlugin(articleSchema);
 
 articleSchema.statics.isArticleExist = async function (_id: string) {
   return await this.findById(_id);
@@ -159,6 +200,7 @@ articleSchema.statics.isArticleExist = async function (_id: string) {
 
 articleSchema.methods.softDelete = async function () {
   this.is_deleted = true;
+  this.deleted_at = new Date();
   return await this.save();
 };
 

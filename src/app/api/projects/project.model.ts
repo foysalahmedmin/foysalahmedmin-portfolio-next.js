@@ -1,10 +1,46 @@
-import type {
-  TProject,
-  TProjectDocument,
-  TProjectModel,
-} from "./project.type";
-import type { Query} from "mongoose";
+import type { TProjectDocument, TProjectModel } from "./project.type";
 import mongoose, { Schema } from "mongoose";
+import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
+import { richContentSchema } from "@/lib/content/rich-content-schema";
+import { PILLAR_KEYS } from "@/lib/content/pillars";
+import { CONTENT_SLUG_PATTERN } from "@/lib/content/slug";
+import {
+  LINK_VISIBILITIES,
+  OUTCOME_VERIFICATION_STATES,
+  PROJECT_DELIVERY_STATUSES,
+  PROJECT_PUBLICATION_STATUSES,
+  PROJECT_TYPES,
+  isAllowedPublicProjectUrl,
+} from "@/lib/content/portfolio-contract";
+
+const slugHistorySchema = new Schema(
+  {
+    slug: { type: String, required: true },
+    changed_at: { type: Date, required: true },
+  },
+  { _id: false }
+);
+
+const outcomeSchema = new Schema(
+  {
+    label: { type: String, required: true, trim: true, maxlength: 120 },
+    value: { type: String, required: true, trim: true, maxlength: 120 },
+    verification_state: {
+      type: String,
+      enum: OUTCOME_VERIFICATION_STATES,
+      required: true,
+    },
+    evidence_reference: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      required: function (this: { verification_state?: string }) {
+        return this.verification_state === "verified";
+      },
+    },
+  },
+  { _id: false }
+);
 
 const projectSchema = new Schema<TProjectDocument>(
   {
@@ -13,6 +49,14 @@ const projectSchema = new Schema<TProjectDocument>(
       required: true,
       trim: true,
     },
+    slug: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: 96,
+      match: CONTENT_SLUG_PATTERN,
+    },
+    slug_history: { type: [slugHistorySchema], default: [] },
     description: {
       type: String,
       trim: true,
@@ -24,15 +68,20 @@ const projectSchema = new Schema<TProjectDocument>(
       required: true,
     },
 
+    rich_content: {
+      type: richContentSchema,
+      required: false,
+    },
+
     thumbnail: {
       type: Schema.Types.ObjectId,
-      ref: 'File',
+      ref: "File",
       default: null,
     },
 
     images: {
       type: [Schema.Types.ObjectId],
-      ref: 'File',
+      ref: "File",
       default: [],
     },
 
@@ -62,6 +111,60 @@ const projectSchema = new Schema<TProjectDocument>(
       type: [Schema.Types.ObjectId],
       ref: "User",
       default: [],
+    },
+
+    primary_pillar: { type: String, enum: PILLAR_KEYS },
+    secondary_pillars: { type: [String], enum: PILLAR_KEYS, default: [] },
+    delivery_status: { type: String, enum: PROJECT_DELIVERY_STATUSES },
+    publication_status: {
+      type: String,
+      enum: PROJECT_PUBLICATION_STATUSES,
+      default: "draft",
+    },
+    project_type: { type: String, enum: PROJECT_TYPES },
+    problem: { type: String, trim: true, maxlength: 5_000 },
+    constraints: { type: [String], default: [] },
+    role: { type: String, trim: true, maxlength: 1_000 },
+    architecture: { type: String, trim: true, maxlength: 10_000 },
+    decisions: { type: [String], default: [] },
+    implementation: { type: String, trim: true, maxlength: 10_000 },
+    security: { type: String, trim: true, maxlength: 10_000 },
+    performance_reliability: {
+      type: String,
+      trim: true,
+      maxlength: 10_000,
+    },
+    outcomes: { type: [outcomeSchema], default: [] },
+    learnings: { type: [String], default: [] },
+    live_url: {
+      type: String,
+      trim: true,
+      maxlength: 2_048,
+      validate: {
+        validator: (value?: string | null) =>
+          !value || isAllowedPublicProjectUrl(value),
+        message: "live_url must be an allowlisted public HTTPS URL",
+      },
+    },
+    live_url_visibility: {
+      type: String,
+      enum: LINK_VISIBILITIES,
+      default: "hidden",
+    },
+    source_url: {
+      type: String,
+      trim: true,
+      maxlength: 2_048,
+      validate: {
+        validator: (value?: string | null) =>
+          !value || isAllowedPublicProjectUrl(value),
+        message: "source_url must be an allowlisted public HTTPS URL",
+      },
+    },
+    source_url_visibility: {
+      type: String,
+      enum: LINK_VISIBILITIES,
+      default: "hidden",
     },
 
     status: {
@@ -110,6 +213,11 @@ const projectSchema = new Schema<TProjectDocument>(
       default: false,
       select: false,
     },
+    deleted_at: {
+      type: Date,
+      default: null,
+      select: false,
+    },
   },
   {
     timestamps: {
@@ -127,6 +235,19 @@ projectSchema.virtual("resources", {
   foreignField: "project",
   match: { is_deleted: { $ne: true } },
 });
+
+projectSchema.index(
+  { slug: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { is_deleted: false, slug: { $type: "string" } },
+    name: "unique_project_slug_active",
+  }
+);
+projectSchema.index(
+  { publication_status: 1, primary_pillar: 1 },
+  { name: "project_publication_pillar" }
+);
 
 projectSchema.virtual("resource_count", {
   ref: "ProjectResource",
@@ -154,32 +275,10 @@ projectSchema.virtual("review_count", {
 // toJSON override to remove sensitive fields from output
 projectSchema.methods.toJSON = function () {
   const project = this.toObject();
-  delete project.is_deleted;
   return project;
 };
 
-// Query middleware to exclude deleted categories
-projectSchema.pre(/^find/, function (this: Query<TProject, TProject>, next) {
-  this.setQuery({
-    ...this.getQuery(),
-    is_deleted: { $ne: true },
-  });
-  next();
-});
-
-projectSchema.pre(/^update/, function (this: Query<TProject, TProject>, next) {
-  this.setQuery({
-    ...this.getQuery(),
-    is_deleted: { $ne: true },
-  });
-  next();
-});
-
-// Aggregation pipeline
-projectSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
-  next();
-});
+applySoftDeletePlugin(projectSchema);
 
 // Static methods
 projectSchema.statics.isProjectExist = async function (_id: string) {
@@ -189,6 +288,7 @@ projectSchema.statics.isProjectExist = async function (_id: string) {
 // Instance methods
 projectSchema.methods.softDelete = async function () {
   this.is_deleted = true;
+  this.deleted_at = new Date();
   return await this.save();
 };
 
@@ -197,4 +297,3 @@ export const Project =
   mongoose.model<TProjectDocument, TProjectModel>("Project", projectSchema);
 
 export default Project;
-

@@ -69,7 +69,15 @@ describe("public visibility contracts", () => {
   });
 
   it("locks every public domain to its safe status", () => {
-    expect(getPublicProjectFilter()).toEqual({ status: "completed" });
+    expect(getPublicProjectFilter()).toEqual({
+      $or: [
+        { publication_status: "published" },
+        {
+          publication_status: { $exists: false },
+          status: "completed",
+        },
+      ],
+    });
     expect(getPublicCategoryFilter()).toEqual({ status: "active" });
     expect(getPublicProjectResourceFilter()).toEqual({
       is_private: { $ne: true },
@@ -93,9 +101,12 @@ describe("public visibility contracts", () => {
     });
 
     expect(PUBLIC_ARTICLE_LIST_FIELDS).not.toContain("content");
+    expect(PUBLIC_ARTICLE_LIST_FIELDS).toContain("updated_at");
     expect(PUBLIC_ARTICLE_DETAIL_FIELDS).toContain("content");
+    expect(PUBLIC_ARTICLE_DETAIL_FIELDS).toContain("updated_at");
     expect(PUBLIC_ARTICLE_DETAIL_FIELDS).not.toContain("collaborators");
     expect(PUBLIC_PROJECT_LIST_FIELDS).not.toContain("content");
+    expect(PUBLIC_PROJECT_LIST_FIELDS).toContain("role");
     expect(PUBLIC_PROJECT_DETAIL_FIELDS).toContain("content");
     expect(PUBLIC_PROJECT_DETAIL_FIELDS).not.toContain("client");
     expect(PUBLIC_PROJECT_DETAIL_FIELDS).not.toContain("collaborators");

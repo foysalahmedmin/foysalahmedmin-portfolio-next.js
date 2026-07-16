@@ -1,6 +1,8 @@
 import { ENV } from "@/config";
 import type { TUserResponse, TUsersResponse } from "@/types/user.type";
 
+const getBaseUrl = () => (ENV.url && ENV.url !== "undefined" ? ENV.url : "");
+
 // Helper to handle fetch responses
 async function handleResponse(res: Response) {
   if (!res.ok) {
@@ -12,7 +14,7 @@ async function handleResponse(res: Response) {
 
 // GET Self
 export async function fetchSelf(): Promise<TUserResponse> {
-  const res = await fetch(`${ENV.url}/api/user/self`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/self`, {
     credentials: "include",
   });
   return handleResponse(res);
@@ -22,18 +24,23 @@ export async function fetchSelf(): Promise<TUserResponse> {
 export async function fetchUsers(
   query?: Record<string, any>
 ): Promise<TUsersResponse> {
-  const url = new URL(`${ENV.url}/api/user`);
-  if (query)
-    Object.entries(query).forEach(([k, v]) =>
-      url.searchParams.append(k, String(v))
-    );
-  const res = await fetch(url.toString(), { credentials: "include" });
+  const searchParams = new URLSearchParams();
+  Object.entries(query ?? {}).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      searchParams.set(key, String(value));
+    }
+  });
+  const queryString = searchParams.toString();
+  const res = await fetch(
+    `${getBaseUrl()}/api/users/admin${queryString ? `?${queryString}` : ""}`,
+    { credentials: "include" }
+  );
   return handleResponse(res);
 }
 
 // GET Single User by ID (Admin)
 export async function fetchUser(id: string): Promise<TUserResponse> {
-  const res = await fetch(`${ENV.url}/api/user/${id}`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/${id}/admin`, {
     credentials: "include",
   });
   return handleResponse(res);
@@ -47,7 +54,7 @@ export async function updateSelf(
     email: string;
   }>
 ): Promise<TUserResponse> {
-  const res = await fetch(`${ENV.url}/api/users/self`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/self`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -63,7 +70,7 @@ export async function updateUsers(payload: {
   role?: "editor" | "author" | "contributor" | "subscriber" | "user";
   is_verified?: boolean;
 }): Promise<TUsersResponse> {
-  const res = await fetch(`${ENV.url}/api/user/bulk`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/admin`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -84,7 +91,7 @@ export async function updateUser(
     is_verified?: boolean;
   }
 ): Promise<TUserResponse> {
-  const res = await fetch(`${ENV.url}/api/users/${id}/admin`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/${id}/admin`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -97,7 +104,7 @@ export async function updateUser(
 export async function deleteUsersPermanent(payload: {
   ids: string[];
 }): Promise<TUsersResponse> {
-  const res = await fetch(`${ENV.url}/api/user/bulk/permanent`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/admin/permanent`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -110,7 +117,7 @@ export async function deleteUsersPermanent(payload: {
 export async function deleteUsers(payload: {
   ids: string[];
 }): Promise<TUsersResponse> {
-  const res = await fetch(`${ENV.url}/api/user/bulk`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/admin`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -121,7 +128,7 @@ export async function deleteUsers(payload: {
 
 // DELETE Single Permanent (Admin)
 export async function deleteUserPermanent(id: string): Promise<TUserResponse> {
-  const res = await fetch(`${ENV.url}/api/user/${id}/permanent`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/${id}/admin/permanent`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -130,7 +137,7 @@ export async function deleteUserPermanent(id: string): Promise<TUserResponse> {
 
 // DELETE Single Soft Delete (Admin)
 export async function deleteUser(id: string): Promise<TUserResponse> {
-  const res = await fetch(`${ENV.url}/api/user/${id}`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/${id}/admin`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -141,7 +148,7 @@ export async function deleteUser(id: string): Promise<TUserResponse> {
 export async function restoreUsers(payload: {
   ids: string[];
 }): Promise<TUsersResponse> {
-  const res = await fetch(`${ENV.url}/api/user/bulk/restore`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/admin/restore`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -152,7 +159,7 @@ export async function restoreUsers(payload: {
 
 // POST Single Restore (Admin)
 export async function restoreUser(id: string): Promise<TUserResponse> {
-  const res = await fetch(`${ENV.url}/api/user/${id}/restore`, {
+  const res = await fetch(`${getBaseUrl()}/api/users/${id}/admin/restore`, {
     method: "POST",
     credentials: "include",
   });

@@ -1,31 +1,43 @@
-import AppError from '@/builder/app-error';
-import connectDB from '@/lib/db';
-import { withPublicPagination } from '@/utils/public-query';
-import httpStatus from 'http-status';
-import * as ProjectCategoryRepository from './project-category.repository';
+import AppError from "@/builder/app-error";
+import connectDB from "@/lib/db";
+import { normalizeSlugIdentifier } from "@/lib/content/slug";
+import { withPublicPagination } from "@/utils/public-query";
+import httpStatus from "http-status";
+import { Types } from "mongoose";
+import {
+  allocateContentSlug,
+  reserveContentSlug,
+} from "../content-slug-aliases/content-slug-alias.service";
+import {
+  isDuplicateKeyError,
+  partitionCategoryRestoreCandidates,
+} from "../category-lifecycle";
+import * as ProjectCategoryRepository from "./project-category.repository";
 
 export const getProjectCategories = async (
-  queryParams: Record<string, unknown>,
+  queryParams: Record<string, unknown>
 ) => {
   await connectDB();
   return await ProjectCategoryRepository.findPaginated(queryParams);
 };
 
 export const getPublicProjectCategories = async (
-  queryParams: Record<string, unknown>,
+  queryParams: Record<string, unknown>
 ) => {
   await connectDB();
   return await ProjectCategoryRepository.findPublicPaginated(
-    withPublicPagination(queryParams, { defaultLimit: 50 }),
+    withPublicPagination(queryParams, { defaultLimit: 50 })
   );
 };
 
 export const getProjectCategoryBySlug = async (slug: string) => {
   await connectDB();
 
-  const category = await ProjectCategoryRepository.findBySlugPopulated(slug);
+  const category = await ProjectCategoryRepository.findBySlugPopulated(
+    normalizeSlugIdentifier(slug) ?? "__invalid__"
+  );
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
   return category;
@@ -34,10 +46,11 @@ export const getProjectCategoryBySlug = async (slug: string) => {
 export const getPublicProjectCategoryBySlug = async (slug: string) => {
   await connectDB();
 
-  const category =
-    await ProjectCategoryRepository.findPublicBySlugPopulated(slug);
+  const category = await ProjectCategoryRepository.findPublicBySlugPopulated(
+    normalizeSlugIdentifier(slug) ?? "__invalid__"
+  );
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
   return category;
@@ -48,7 +61,7 @@ export const getProjectCategoryById = async (id: string) => {
 
   const category = await ProjectCategoryRepository.findByIdPopulated(id);
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
   return category;
@@ -59,9 +72,21 @@ export const getPublicProjectCategoryById = async (id: string) => {
 
   const category = await ProjectCategoryRepository.findPublicByIdPopulated(id);
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
+  return category;
+};
+
+export const getPublicProjectCategoryByIdentifier = async (
+  identifier: string
+) => {
+  await connectDB();
+  const category =
+    await ProjectCategoryRepository.findPublicByIdentifierPopulated(identifier);
+  if (!category) {
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
+  }
   return category;
 };
 
@@ -72,27 +97,48 @@ export const createProjectCategory = async (payload: {
   description?: string;
   icon?: string;
   parent?: string | null;
-  status?: 'active' | 'inactive';
+  status?: "active" | "inactive";
   tags?: string[];
   layout?: string;
 }) => {
-  await connectDB();
-
-  const existing = await ProjectCategoryRepository.findBySlug(payload.slug);
-  if (existing) {
-    throw new AppError(
-      httpStatus.CONFLICT,
-      'Project category with this slug already exists',
-    );
+  const db = await connectDB();
+  const entityId = new Types.ObjectId().toString();
+  const slug = await allocateContentSlug({
+    scope: "project_category",
+    requested: payload.slug || payload.name,
+    fallback: "project-category",
+    target: entityId,
+  });
+  const session = await db.startSession();
+  try {
+    let category:
+      | Awaited<ReturnType<typeof ProjectCategoryRepository.create>>
+      | undefined;
+    await session.withTransaction(async () => {
+      category = await ProjectCategoryRepository.create(
+        {
+          ...payload,
+          _id: entityId,
+          slug,
+          slug_history: [],
+          parent: payload.parent || null,
+          status: payload.status || "active",
+          tags: payload.tags || [],
+          layout: payload.layout || "default",
+        } as never,
+        session
+      );
+      await reserveContentSlug({
+        scope: "project_category",
+        slug,
+        target: entityId,
+        session,
+      });
+    });
+    return category;
+  } finally {
+    await session.endSession();
   }
-
-  return await ProjectCategoryRepository.create({
-    ...payload,
-    parent: payload.parent || null,
-    status: payload.status || 'active',
-    tags: payload.tags || [],
-    layout: payload.layout || 'default',
-  } as never);
 };
 
 export const updateProjectCategoryBySlug = async (
@@ -104,30 +150,50 @@ export const updateProjectCategoryBySlug = async (
     description: string;
     icon: string;
     parent: string | null;
-    status: 'active' | 'inactive';
+    status: "active" | "inactive";
     tags: string[];
     layout: string;
-  }>,
+  }>
 ) => {
-  await connectDB();
+  const db = await connectDB();
 
-  const category = await ProjectCategoryRepository.findBySlug(slug);
+  const category = await ProjectCategoryRepository.findBySlug(
+    normalizeSlugIdentifier(slug) ?? "__invalid__"
+  );
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
-  if (payload.slug && payload.slug !== slug) {
-    const existing = await ProjectCategoryRepository.findBySlug(payload.slug);
-    if (existing) {
-      throw new AppError(
-        httpStatus.CONFLICT,
-        'Project category with this slug already exists',
-      );
-    }
+  const nextSlug = payload.slug
+    ? await allocateContentSlug({
+        scope: "project_category",
+        requested: payload.slug,
+        fallback: "project-category",
+        target: category._id.toString(),
+      })
+    : category.slug;
+  const previousSlug = category.slug;
+  const session = await db.startSession();
+  try {
+    await session.withTransaction(async () => {
+      await reserveContentSlug({
+        scope: "project_category",
+        slug: nextSlug,
+        target: category._id.toString(),
+        session,
+      });
+      Object.assign(category, payload, { slug: nextSlug });
+      if (nextSlug !== previousSlug) {
+        category.slug_history = [
+          ...(category.slug_history ?? []),
+          { slug: previousSlug, changed_at: new Date() },
+        ];
+      }
+      await category.save({ session });
+    });
+  } finally {
+    await session.endSession();
   }
-
-  Object.assign(category, payload);
-  await category.save();
 
   return category;
 };
@@ -141,30 +207,48 @@ export const updateProjectCategoryById = async (
     description: string;
     icon: string;
     parent: string | null;
-    status: 'active' | 'inactive';
+    status: "active" | "inactive";
     tags: string[];
     layout: string;
-  }>,
+  }>
 ) => {
-  await connectDB();
+  const db = await connectDB();
 
   const category = await ProjectCategoryRepository.findById(id);
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
-  if (payload.slug) {
-    const existing = await ProjectCategoryRepository.findBySlug(payload.slug);
-    if (existing && existing._id.toString() !== id) {
-      throw new AppError(
-        httpStatus.CONFLICT,
-        'Project category with this slug already exists',
-      );
-    }
+  const nextSlug = payload.slug
+    ? await allocateContentSlug({
+        scope: "project_category",
+        requested: payload.slug,
+        fallback: "project-category",
+        target: id,
+      })
+    : category.slug;
+  const previousSlug = category.slug;
+  const session = await db.startSession();
+  try {
+    await session.withTransaction(async () => {
+      await reserveContentSlug({
+        scope: "project_category",
+        slug: nextSlug,
+        target: id,
+        session,
+      });
+      Object.assign(category, payload, { slug: nextSlug });
+      if (nextSlug !== previousSlug) {
+        category.slug_history = [
+          ...(category.slug_history ?? []),
+          { slug: previousSlug, changed_at: new Date() },
+        ];
+      }
+      await category.save({ session });
+    });
+  } finally {
+    await session.endSession();
   }
-
-  Object.assign(category, payload);
-  await category.save();
 
   return category;
 };
@@ -172,19 +256,25 @@ export const updateProjectCategoryById = async (
 export const updateProjectCategories = async (
   slugs: string[],
   payload: Partial<{
-    status: 'active' | 'inactive';
+    status: "active" | "inactive";
     parent: string | null;
-  }>,
+  }>
 ): Promise<{ count: number; not_found_slugs: string[] }> => {
   await connectDB();
 
-  const categories = await ProjectCategoryRepository.findManyBySlugs(slugs);
+  const normalizedSlugs = [
+    ...new Set(slugs.map(normalizeSlugIdentifier).filter(Boolean)),
+  ] as string[];
+  const categories =
+    await ProjectCategoryRepository.findManyBySlugs(normalizedSlugs);
   const foundSlugs = categories.map((cat) => cat.slug);
-  const notFoundSlugs = slugs.filter((slug) => !foundSlugs.includes(slug));
+  const notFoundSlugs = slugs.filter(
+    (slug) => !foundSlugs.includes(normalizeSlugIdentifier(slug) ?? "")
+  );
 
   const result = await ProjectCategoryRepository.updateManyBySlugs(
     foundSlugs,
-    payload as never,
+    payload as never
   );
 
   return {
@@ -196,12 +286,20 @@ export const updateProjectCategories = async (
 export const deleteProjectCategoryBySlug = async (slug: string) => {
   await connectDB();
 
-  const category = await ProjectCategoryRepository.findBySlug(slug);
+  const category = await ProjectCategoryRepository.findBySlug(
+    normalizeSlugIdentifier(slug) ?? "__invalid__"
+  );
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
-  await category.softDelete();
+  const deleted = await ProjectCategoryRepository.softDeleteById(
+    category._id.toString()
+  );
+  if (!deleted) {
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
+  }
+
   return null;
 };
 
@@ -210,114 +308,210 @@ export const deleteProjectCategoryById = async (id: string) => {
 
   const category = await ProjectCategoryRepository.findById(id);
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
-  await category.softDelete();
+  const deleted = await ProjectCategoryRepository.softDeleteById(id);
+  if (!deleted) {
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
+  }
+
   return null;
 };
 
-export const deleteProjectCategoryPermanent = async (
-  slug: string,
-): Promise<void> => {
-  await connectDB();
-
-  const category = await ProjectCategoryRepository.findBySlugWithDeleted(slug);
-  if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
-  }
-
-  await ProjectCategoryRepository.hardDeleteById(category._id.toString());
-};
-
 export const deleteProjectCategoryPermanentById = async (
-  id: string,
+  id: string
 ): Promise<void> => {
   await connectDB();
 
-  const category = await ProjectCategoryRepository.findByIdWithDeleted(id);
+  const category = await ProjectCategoryRepository.findDeletedById(id);
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Project category not found');
+    throw new AppError(httpStatus.NOT_FOUND, "Project category not found");
   }
 
-  await ProjectCategoryRepository.hardDeleteById(id);
+  const dependencyIds =
+    await ProjectCategoryRepository.findPermanentDeleteDependencyIds([id]);
+  if (dependencyIds.includes(id)) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      "Project category cannot be permanently deleted while child categories or projects reference it"
+    );
+  }
+
+  const deleted = await ProjectCategoryRepository.hardDeleteById(id);
+  if (!deleted) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Project category not found or not deleted"
+    );
+  }
 };
 
 export const deleteProjectCategories = async (
-  slugs: string[],
+  slugs: string[]
 ): Promise<{ count: number; not_found_slugs: string[] }> => {
   await connectDB();
 
-  const categories = await ProjectCategoryRepository.findManyBySlugs(slugs);
+  const normalizedSlugs = [
+    ...new Set(slugs.map(normalizeSlugIdentifier).filter(Boolean)),
+  ] as string[];
+  const categories =
+    await ProjectCategoryRepository.findManyBySlugs(normalizedSlugs);
   const foundSlugs = categories.map((cat) => cat.slug);
-  const notFoundSlugs = slugs.filter((slug) => !foundSlugs.includes(slug));
+  const notFoundSlugs = slugs.filter(
+    (slug) => !foundSlugs.includes(normalizeSlugIdentifier(slug) ?? "")
+  );
 
-  await ProjectCategoryRepository.softDeleteManyBySlugs(foundSlugs);
+  const result =
+    await ProjectCategoryRepository.softDeleteManyBySlugs(foundSlugs);
 
   return {
-    count: foundSlugs.length,
+    count: result.modifiedCount,
     not_found_slugs: notFoundSlugs,
   };
 };
 
 export const deleteProjectCategoriesPermanent = async (
-  slugs: string[],
-): Promise<{ count: number; not_found_slugs: string[] }> => {
+  ids: string[]
+): Promise<{ count: number; not_found_ids: string[] }> => {
   await connectDB();
 
-  const categories = await ProjectCategoryRepository.findManyBySlugs(slugs);
-  const foundSlugs = categories.map((cat) => cat.slug);
-  const notFoundSlugs = slugs.filter((slug) => !foundSlugs.includes(slug));
+  const requestedIds = Array.from(new Set(ids));
+  const categories =
+    await ProjectCategoryRepository.findDeletedManyByIds(requestedIds);
+  const foundIds = categories.map((category) => category._id.toString());
+  const foundIdSet = new Set(foundIds);
+  const notFoundIds = requestedIds.filter((id) => !foundIdSet.has(id));
+  const dependencyIds =
+    await ProjectCategoryRepository.findPermanentDeleteDependencyIds(foundIds);
 
-  await ProjectCategoryRepository.hardDeleteManyBySlugs(foundSlugs);
-
-  return {
-    count: foundSlugs.length,
-    not_found_slugs: notFoundSlugs,
-  };
-};
-
-export const restoreProjectCategory = async (slug: string) => {
-  await connectDB();
-
-  const category = await ProjectCategoryRepository.restoreBySlug(slug);
-  if (!category) {
+  if (dependencyIds.length > 0) {
     throw new AppError(
-      httpStatus.NOT_FOUND,
-      'Project category not found or not deleted',
+      httpStatus.CONFLICT,
+      `Project categories cannot be permanently deleted while dependencies reference these IDs: ${dependencyIds.join(", ")}`
     );
   }
 
-  return category;
+  const result = await ProjectCategoryRepository.hardDeleteManyByIds(foundIds);
+
+  return {
+    count: result.deletedCount,
+    not_found_ids: notFoundIds,
+  };
 };
 
 export const restoreProjectCategoryById = async (id: string) => {
   await connectDB();
 
-  const category = await ProjectCategoryRepository.restoreById(id);
+  const category = await ProjectCategoryRepository.findDeletedById(id);
   if (!category) {
     throw new AppError(
       httpStatus.NOT_FOUND,
-      'Project category not found or not deleted',
+      "Project category not found or not deleted"
     );
   }
 
-  return category;
+  const parentIds = category.parent ? [category.parent.toString()] : [];
+  const [activeParents, activeConflicts] = await Promise.all([
+    ProjectCategoryRepository.findActiveParentsByIds(parentIds),
+    ProjectCategoryRepository.findActiveIdentityConflicts([category]),
+  ]);
+  const { nonRestorableIds } = partitionCategoryRestoreCandidates({
+    candidates: [category],
+    activeParentIds: activeParents.map((parent) => parent._id.toString()),
+    activeConflicts,
+  });
+
+  if (nonRestorableIds.length > 0) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      "Project category cannot be restored until its parent is active and its name and slug are available"
+    );
+  }
+
+  try {
+    const restored = await ProjectCategoryRepository.restoreById(id);
+    if (!restored) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        "Project category not found or not deleted"
+      );
+    }
+
+    return restored;
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        "Project category name or slug is already in use"
+      );
+    }
+
+    throw error;
+  }
 };
 
 export const restoreProjectCategories = async (
-  slugs: string[],
-): Promise<{ count: number; not_found_slugs: string[] }> => {
+  ids: string[]
+): Promise<{
+  count: number;
+  not_found_ids: string[];
+  non_restorable_ids: string[];
+}> => {
   await connectDB();
 
-  const result = await ProjectCategoryRepository.restoreManyBySlugs(slugs);
+  const requestedIds = Array.from(new Set(ids));
+  const categories =
+    await ProjectCategoryRepository.findDeletedManyByIds(requestedIds);
+  const foundIdSet = new Set(
+    categories.map((category) => category._id.toString())
+  );
+  const notFoundIdSet = new Set(
+    requestedIds.filter((id) => !foundIdSet.has(id))
+  );
+  const parentIds = Array.from(
+    new Set(
+      categories
+        .map((category) => category.parent?.toString())
+        .filter((parentId): parentId is string => Boolean(parentId))
+    )
+  );
+  const [activeParents, activeConflicts] = await Promise.all([
+    ProjectCategoryRepository.findActiveParentsByIds(parentIds),
+    ProjectCategoryRepository.findActiveIdentityConflicts(categories),
+  ]);
+  const partition = partitionCategoryRestoreCandidates({
+    candidates: categories,
+    activeParentIds: activeParents.map((parent) => parent._id.toString()),
+    activeConflicts,
+  });
+  const restorableIdSet = new Set(partition.restorableIds);
+  const nonRestorableIdSet = new Set(partition.nonRestorableIds);
+  let count = 0;
 
-  const restored = await ProjectCategoryRepository.findManyBySlugs(slugs);
-  const restoredSlugs = restored.map((cat) => cat.slug);
-  const notFoundSlugs = slugs.filter((slug) => !restoredSlugs.includes(slug));
+  for (const id of requestedIds) {
+    if (!restorableIdSet.has(id)) continue;
+
+    try {
+      const restored = await ProjectCategoryRepository.restoreById(id);
+      if (restored) {
+        count += 1;
+      } else {
+        notFoundIdSet.add(id);
+      }
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        nonRestorableIdSet.add(id);
+        continue;
+      }
+
+      throw error;
+    }
+  }
 
   return {
-    count: result.modifiedCount,
-    not_found_slugs: notFoundSlugs,
+    count,
+    not_found_ids: requestedIds.filter((id) => notFoundIdSet.has(id)),
+    non_restorable_ids: requestedIds.filter((id) => nonRestorableIdSet.has(id)),
   };
 };

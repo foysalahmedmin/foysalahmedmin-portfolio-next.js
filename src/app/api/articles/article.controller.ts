@@ -1,8 +1,8 @@
-import type { AuthRequest } from '@/middleware/auth.middleware';
-import catchAsync from '@/utils/catch-async';
-import sendResponse from '@/utils/send-response';
-import httpStatus from 'http-status';
-import * as ArticleService from './article.service';
+import type { AuthRequest } from "@/middleware/auth.middleware";
+import catchAsync from "@/utils/catch-async";
+import sendResponse from "@/utils/send-response";
+import httpStatus from "http-status";
+import * as ArticleService from "./article.service";
 
 export const getArticles = catchAsync(async (req: AuthRequest | Request) => {
   const url = new URL(req.url);
@@ -16,7 +16,7 @@ export const getArticles = catchAsync(async (req: AuthRequest | Request) => {
   return sendResponse({
     status: httpStatus.OK,
     success: true,
-    message: 'Articles retrieved successfully',
+    message: "Articles retrieved successfully",
     data: result.data,
     meta: result.meta,
   });
@@ -29,91 +29,106 @@ export const getPublicArticles = catchAsync(async (req: Request) => {
     queryParams[key] = value;
   });
 
-  const result = await ArticleService.getPublicArticles(queryParams);
+  const result = await ArticleService.getPublicArticleDiscovery(queryParams);
 
   return sendResponse({
     status: httpStatus.OK,
     success: true,
-    message: 'Articles retrieved successfully',
+    message: "Articles retrieved successfully",
     data: result.data,
     meta: result.meta,
   });
 });
 
 export const getArticleById = catchAsync(
-  async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
+  async (
+    req: AuthRequest | Request,
+    { params }: { params: { id: string } }
+  ) => {
     const article = await ArticleService.getArticleById(params.id);
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Article retrieved successfully',
+      message: "Article retrieved successfully",
       data: article,
     });
-  },
+  }
 );
 
 export const getPublicArticleById = catchAsync(
   async (req: Request, { params }: { params: { id: string } }) => {
-    const article = await ArticleService.getPublicArticleById(params.id);
+    const article = await ArticleService.getPublicArticleByIdentifier(
+      params.id
+    );
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Article retrieved successfully',
+      message: "Article retrieved successfully",
       data: article,
     });
-  },
+  }
 );
 
 export const createArticle = catchAsync(
   async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
 
-    const article = await ArticleService.createArticle({
-      ...body,
-      author: req.user?._id || req.user?.id,
-    });
+    const article = await ArticleService.createArticle(
+      {
+        ...body,
+        author: req.user?._id || req.user?.id,
+      },
+      req.user!
+    );
 
     return sendResponse({
       status: httpStatus.CREATED,
       success: true,
-      message: 'Article created successfully',
+      message: "Article created successfully",
       data: article,
     });
-  },
+  }
 );
 
 export const updateArticleById = catchAsync(
   async (
     req: AuthRequest & { parsedBody?: Record<string, unknown> },
-    { params }: { params: { id: string } },
+    { params }: { params: { id: string } }
   ) => {
     const body = req.parsedBody || (await req.json());
 
-    const article = await ArticleService.updateArticleById(params.id, body);
+    const article = await ArticleService.updateArticleById(
+      params.id,
+      body,
+      req.user!
+    );
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Article updated successfully',
+      message: "Article updated successfully",
       data: article,
     });
-  },
+  }
 );
 
 export const updateArticles = catchAsync(
   async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
-    const { ids, ...payload } = body as { ids: string[]; [key: string]: unknown };
+    const { ids, ...payload } = body as {
+      ids: string[];
+      [key: string]: unknown;
+    };
     const result = await ArticleService.updateArticles(ids, payload);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Articles updated successfully',
+      message: "Articles updated successfully",
       data: result,
     });
-  },
+  }
 );
 
 export const deleteArticleById = catchAsync(
@@ -123,10 +138,10 @@ export const deleteArticleById = catchAsync(
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Article deleted successfully',
+      message: "Article deleted successfully",
       data: null,
     });
-  },
+  }
 );
 
 export const deleteArticlePermanentById = catchAsync(
@@ -135,10 +150,10 @@ export const deleteArticlePermanentById = catchAsync(
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Article permanently deleted successfully',
+      message: "Article permanently deleted successfully",
       data: null,
     });
-  },
+  }
 );
 
 export const deleteArticles = catchAsync(
@@ -150,11 +165,9 @@ export const deleteArticles = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} articles deleted successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
-  },
+  }
 );
 
 export const deleteArticlesPermanent = catchAsync(
@@ -166,11 +179,9 @@ export const deleteArticlesPermanent = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} articles permanently deleted successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
-  },
+  }
 );
 
 export const restoreArticleById = catchAsync(
@@ -180,10 +191,10 @@ export const restoreArticleById = catchAsync(
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Article restored successfully',
+      message: "Article restored successfully",
       data: result,
     });
-  },
+  }
 );
 
 export const restoreArticles = catchAsync(
@@ -195,9 +206,7 @@ export const restoreArticles = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} articles restored successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
-  },
+  }
 );

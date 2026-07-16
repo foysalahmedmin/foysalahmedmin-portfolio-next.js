@@ -1,10 +1,10 @@
 import type {
-  TProjectResource,
   TProjectResourceDocument,
   TProjectResourceModel,
 } from "./project-resource.type";
-import type { Query} from "mongoose";
 import mongoose, { Schema } from "mongoose";
+import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
+import { isAllowedPublicProjectUrl } from "@/lib/content/portfolio-contract";
 
 const projectResourceSchema = new Schema<TProjectResourceDocument>(
   {
@@ -32,6 +32,10 @@ const projectResourceSchema = new Schema<TProjectResourceDocument>(
       type: String,
       required: true,
       trim: true,
+      validate: {
+        validator: isAllowedPublicProjectUrl,
+        message: "Resource URL must be an allowlisted public HTTPS URL",
+      },
     },
     description: {
       type: String,
@@ -47,6 +51,11 @@ const projectResourceSchema = new Schema<TProjectResourceDocument>(
       default: false,
       select: false,
     },
+    deleted_at: {
+      type: Date,
+      default: null,
+      select: false,
+    },
   },
   {
     timestamps: {
@@ -60,36 +69,10 @@ const projectResourceSchema = new Schema<TProjectResourceDocument>(
 
 projectResourceSchema.methods.toJSON = function () {
   const resource = this.toObject();
-  delete resource.is_deleted;
   return resource;
 };
 
-projectResourceSchema.pre(
-  /^find/,
-  function (this: Query<TProjectResource, TProjectResource>, next) {
-    this.setQuery({
-      ...this.getQuery(),
-      is_deleted: { $ne: true },
-    });
-    next();
-  }
-);
-
-projectResourceSchema.pre(
-  /^update/,
-  function (this: Query<TProjectResource, TProjectResource>, next) {
-    this.setQuery({
-      ...this.getQuery(),
-      is_deleted: { $ne: true },
-    });
-    next();
-  }
-);
-
-projectResourceSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { is_deleted: { $ne: true } } });
-  next();
-});
+applySoftDeletePlugin(projectResourceSchema);
 
 projectResourceSchema.statics.isResourceExist = async function (_id: string) {
   return await this.findById(_id);
@@ -97,6 +80,7 @@ projectResourceSchema.statics.isResourceExist = async function (_id: string) {
 
 projectResourceSchema.methods.softDelete = async function () {
   this.is_deleted = true;
+  this.deleted_at = new Date();
   return await this.save();
 };
 
@@ -108,4 +92,3 @@ export const ProjectResource =
   );
 
 export default ProjectResource;
-

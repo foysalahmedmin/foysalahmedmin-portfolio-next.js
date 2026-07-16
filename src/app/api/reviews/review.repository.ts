@@ -1,4 +1,5 @@
 import AppQuery from "@/builder/app-query";
+import { parseSoftDeleteScope, setSoftDeleteScope } from "@/lib/db/soft-delete";
 import ArticleCategory from "../article-categories/article-category.model";
 import Article from "../articles/article.model";
 import ProjectCategory from "../project-categories/project-category.model";
@@ -10,6 +11,7 @@ import {
   getPublicReviewFilter,
   withPublicCategories,
 } from "../public-visibility";
+import { User } from "../users/user.model";
 import { Review } from "./review.model";
 import type { TReview, TReviewDocument } from "./review.type";
 
@@ -26,7 +28,12 @@ const PUBLIC_POPULATE_FIELDS = [
     select: "_id name image",
     populate: {
       path: "image",
-      match: { status: "active" },
+      match: {
+        status: "active",
+        lifecycle_state: "ready",
+        access: "public",
+        purpose: "profile",
+      },
       select: PUBLIC_FILE_SELECT,
     },
   },
@@ -43,6 +50,14 @@ const PUBLIC_FIELDS: Array<keyof TReview> = [
   "created_at",
   "updated_at",
 ];
+
+const toIdString = (value: unknown): string =>
+  (value as { toString(): string }).toString();
+
+const getReviewKey = (
+  review: Pick<TReview, "author" | "target" | "target_model">
+): string =>
+  `${review.target_model}:${toIdString(review.target)}:${toIdString(review.author)}`;
 
 const getPublicTargetConditions = async () => {
   const [articleCategories, projectCategories] = await Promise.all([
@@ -110,11 +125,121 @@ export const findPublicByIdPopulated = async (id: string) => {
 export const findByIdWithDeleted = async (
   id: string
 ): Promise<TReviewDocument | null> => {
-  return await Review.findById(id).setOptions({ bypassDeleted: true });
+  return await setSoftDeleteScope(Review.findById(id), "with_deleted");
+};
+
+export const findDeletedById = async (
+  id: string
+): Promise<TReviewDocument | null> => {
+  return await setSoftDeleteScope(Review.findById(id), "only_deleted");
 };
 
 export const findManyByIds = async (ids: string[]) => {
   return await Review.find({ _id: { $in: ids } }).lean();
+};
+
+export const findDeletedManyByIds = async (ids: string[]) => {
+  return await setSoftDeleteScope(
+    Review.find({ _id: { $in: ids } }),
+    "only_deleted"
+  ).lean();
+};
+
+export const findNotRestorableIds = async (
+  reviews: Array<
+    Pick<TReview, "author" | "target" | "target_model"> & { _id: unknown }
+  >
+): Promise<string[]> => {
+  if (!reviews.length) return [];
+
+  const authorIds = [
+    ...new Set(reviews.map(({ author }) => toIdString(author))),
+  ];
+  const articleIds = [
+    ...new Set(
+      reviews
+        .filter(({ target_model }) => target_model === "Article")
+        .map(({ target }) => toIdString(target))
+    ),
+  ];
+  const projectIds = [
+    ...new Set(
+      reviews
+        .filter(({ target_model }) => target_model === "Project")
+        .map(({ target }) => toIdString(target))
+    ),
+  ];
+  const uniqueKeys = new Map(
+    reviews.map((review) => [
+      getReviewKey(review),
+      {
+        author: review.author,
+        target: review.target,
+        target_model: review.target_model,
+      },
+    ])
+  );
+
+  const [authors, articles, projects, activeConflicts] = await Promise.all([
+    User.find({
+      _id: { $in: authorIds },
+      status: "in-progress",
+    })
+      .select("_id")
+      .lean(),
+    Article.find({ _id: { $in: articleIds } })
+      .select("_id")
+      .lean(),
+    Project.find({ _id: { $in: projectIds } })
+      .select("_id")
+      .lean(),
+    Review.find({ $or: [...uniqueKeys.values()] })
+      .select("author target target_model")
+      .lean(),
+  ]);
+
+  const activeAuthorIds = new Set(authors.map(({ _id }) => _id.toString()));
+  const activeArticleIds = new Set(articles.map(({ _id }) => _id.toString()));
+  const activeProjectIds = new Set(projects.map(({ _id }) => _id.toString()));
+  const activeReviewKeys = new Set(activeConflicts.map(getReviewKey));
+  const candidateKeyCounts = reviews.reduce((counts, review) => {
+    const key = getReviewKey(review);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+    return counts;
+  }, new Map<string, number>());
+
+  return reviews
+    .filter((review) => {
+      const targetId = toIdString(review.target);
+      const targetIsActive =
+        review.target_model === "Article"
+          ? activeArticleIds.has(targetId)
+          : activeProjectIds.has(targetId);
+      const key = getReviewKey(review);
+
+      return (
+        !activeAuthorIds.has(toIdString(review.author)) ||
+        !targetIsActive ||
+        activeReviewKeys.has(key) ||
+        (candidateKeyCounts.get(key) ?? 0) > 1
+      );
+    })
+    .map(({ _id }) => toIdString(_id));
+};
+
+export const areReferencesActive = async (
+  authorId: string,
+  targetId: string,
+  targetModel: "Project" | "Article"
+): Promise<boolean> => {
+  const [author, target] = await Promise.all([
+    User.exists({ _id: authorId, status: "in-progress" }),
+    targetModel === "Article"
+      ? Article.exists({ _id: targetId })
+      : Project.exists({ _id: targetId }),
+  ]);
+
+  return Boolean(author && target);
 };
 
 export const findExisting = async (
@@ -130,7 +255,11 @@ export const findExisting = async (
 };
 
 export const findPaginated = async (queryParams: Record<string, unknown>) => {
-  const query = new AppQuery<TReviewDocument>(Review.find(), queryParams);
+  const scope = parseSoftDeleteScope(queryParams.deleted_scope);
+  const query = new AppQuery<TReviewDocument>(
+    setSoftDeleteScope(Review.find(), scope),
+    queryParams
+  );
 
   const result = await query
     .search(["review"])
@@ -142,7 +271,10 @@ export const findPaginated = async (queryParams: Record<string, unknown>) => {
 
   const populated = await Promise.all(
     result.data.map(async (review) => {
-      return await Review.findById((review as { _id: unknown })._id)
+      return await setSoftDeleteScope(
+        Review.findById((review as { _id: unknown })._id),
+        scope
+      )
         .populate(POPULATE_FIELDS)
         .lean();
     })
@@ -182,30 +314,48 @@ export const updateMany = async (ids: string[], payload: Partial<TReview>) => {
 };
 
 export const softDeleteMany = async (ids: string[]) => {
-  await Review.updateMany({ _id: { $in: ids } }, { is_deleted: true });
+  return await Review.updateMany(
+    { _id: { $in: ids } },
+    { is_deleted: true, deleted_at: new Date() }
+  );
+};
+
+export const softDeleteById = async (id: string) => {
+  return await Review.findByIdAndUpdate(
+    id,
+    { is_deleted: true, deleted_at: new Date() },
+    { new: true, runValidators: false }
+  );
 };
 
 export const restoreById = async (id: string) => {
-  return await Review.findByIdAndUpdate(
-    id,
-    { is_deleted: false },
-    { new: true }
+  return await setSoftDeleteScope(
+    Review.findByIdAndUpdate(
+      id,
+      { is_deleted: false, deleted_at: null },
+      { new: true }
+    ),
+    "only_deleted"
   );
 };
 
 export const restoreMany = async (ids: string[]) => {
-  return await Review.updateMany(
-    { _id: { $in: ids }, is_deleted: true },
-    { is_deleted: false }
+  return await setSoftDeleteScope(
+    Review.updateMany(
+      { _id: { $in: ids } },
+      { is_deleted: false, deleted_at: null }
+    ),
+    "only_deleted"
   );
 };
 
 export const hardDeleteById = async (id: string) => {
-  await Review.findByIdAndDelete(id);
+  return await setSoftDeleteScope(Review.findByIdAndDelete(id), "only_deleted");
 };
 
 export const hardDeleteMany = async (ids: string[]) => {
-  await Review.deleteMany({ _id: { $in: ids } }).setOptions({
-    bypassDeleted: true,
-  });
+  return await setSoftDeleteScope(
+    Review.deleteMany({ _id: { $in: ids } }),
+    "only_deleted"
+  );
 };

@@ -1,8 +1,8 @@
-import type { AuthRequest } from '@/middleware/auth.middleware';
-import catchAsync from '@/utils/catch-async';
-import sendResponse from '@/utils/send-response';
-import httpStatus from 'http-status';
-import * as ProjectService from './project.service';
+import type { AuthRequest } from "@/middleware/auth.middleware";
+import catchAsync from "@/utils/catch-async";
+import sendResponse from "@/utils/send-response";
+import httpStatus from "http-status";
+import * as ProjectService from "./project.service";
 
 export const getProjects = catchAsync(async (req: AuthRequest | Request) => {
   const url = new URL(req.url);
@@ -16,7 +16,7 @@ export const getProjects = catchAsync(async (req: AuthRequest | Request) => {
   return sendResponse({
     status: httpStatus.OK,
     success: true,
-    message: 'Projects retrieved successfully',
+    message: "Projects retrieved successfully",
     data: result.data,
     meta: result.meta,
   });
@@ -29,91 +29,106 @@ export const getPublicProjects = catchAsync(async (req: Request) => {
     queryParams[key] = value;
   });
 
-  const result = await ProjectService.getPublicProjects(queryParams);
+  const result = await ProjectService.getPublicProjectDiscovery(queryParams);
 
   return sendResponse({
     status: httpStatus.OK,
     success: true,
-    message: 'Projects retrieved successfully',
+    message: "Projects retrieved successfully",
     data: result.data,
     meta: result.meta,
   });
 });
 
 export const getProjectById = catchAsync(
-  async (req: AuthRequest | Request, { params }: { params: { id: string } }) => {
+  async (
+    req: AuthRequest | Request,
+    { params }: { params: { id: string } }
+  ) => {
     const project = await ProjectService.getProjectById(params.id);
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Project retrieved successfully',
+      message: "Project retrieved successfully",
       data: project,
     });
-  },
+  }
 );
 
 export const getPublicProjectById = catchAsync(
   async (req: Request, { params }: { params: { id: string } }) => {
-    const project = await ProjectService.getPublicProjectById(params.id);
+    const project = await ProjectService.getPublicProjectByIdentifier(
+      params.id
+    );
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Project retrieved successfully',
+      message: "Project retrieved successfully",
       data: project,
     });
-  },
+  }
 );
 
 export const createProject = catchAsync(
   async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
 
-    const project = await ProjectService.createProject({
-      ...body,
-      author: req.user?._id || req.user?.id,
-    });
+    const project = await ProjectService.createProject(
+      {
+        ...body,
+        author: req.user?._id || req.user?.id,
+      },
+      req.user!
+    );
 
     return sendResponse({
       status: httpStatus.CREATED,
       success: true,
-      message: 'Project created successfully',
+      message: "Project created successfully",
       data: project,
     });
-  },
+  }
 );
 
 export const updateProjectById = catchAsync(
   async (
     req: AuthRequest & { parsedBody?: Record<string, unknown> },
-    { params }: { params: { id: string } },
+    { params }: { params: { id: string } }
   ) => {
     const body = req.parsedBody || (await req.json());
 
-    const project = await ProjectService.updateProjectById(params.id, body);
+    const project = await ProjectService.updateProjectById(
+      params.id,
+      body,
+      req.user!
+    );
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Project updated successfully',
+      message: "Project updated successfully",
       data: project,
     });
-  },
+  }
 );
 
 export const updateProjects = catchAsync(
   async (req: AuthRequest & { parsedBody?: Record<string, unknown> }) => {
     const body = req.parsedBody || (await req.json());
-    const { ids, ...payload } = body as { ids: string[]; [key: string]: unknown };
+    const { ids, ...payload } = body as {
+      ids: string[];
+      [key: string]: unknown;
+    };
     const result = await ProjectService.updateProjects(ids, payload);
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Projects updated successfully',
+      message: "Projects updated successfully",
       data: result,
     });
-  },
+  }
 );
 
 export const deleteProjectById = catchAsync(
@@ -123,10 +138,10 @@ export const deleteProjectById = catchAsync(
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Project deleted successfully',
+      message: "Project deleted successfully",
       data: null,
     });
-  },
+  }
 );
 
 export const deleteProjectPermanentById = catchAsync(
@@ -135,10 +150,10 @@ export const deleteProjectPermanentById = catchAsync(
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Project permanently deleted successfully',
+      message: "Project permanently deleted successfully",
       data: null,
     });
-  },
+  }
 );
 
 export const deleteProjects = catchAsync(
@@ -150,11 +165,9 @@ export const deleteProjects = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} projects deleted successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
-  },
+  }
 );
 
 export const deleteProjectsPermanent = catchAsync(
@@ -166,11 +179,9 @@ export const deleteProjectsPermanent = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} projects permanently deleted successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
-  },
+  }
 );
 
 export const restoreProjectById = catchAsync(
@@ -180,10 +191,10 @@ export const restoreProjectById = catchAsync(
     return sendResponse({
       status: httpStatus.OK,
       success: true,
-      message: 'Project restored successfully',
+      message: "Project restored successfully",
       data: result,
     });
-  },
+  }
 );
 
 export const restoreProjects = catchAsync(
@@ -195,9 +206,7 @@ export const restoreProjects = catchAsync(
       status: httpStatus.OK,
       success: true,
       message: `${result.count} projects restored successfully`,
-      data: {
-        not_found_ids: result.not_found_ids,
-      },
+      data: result,
     });
-  },
+  }
 );
