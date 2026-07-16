@@ -57,6 +57,24 @@ const objectId = {
   toString: () => "507f1f77bcf86cd799439021",
 };
 
+const heroFile = (input?: { alt_text?: string; is_decorative?: boolean }) => ({
+  _id: { toString: () => "507f1f77bcf86cd799439099" },
+  url: "https://res.cloudinary.com/test-cloud/image/upload/hero.webp",
+  access: "public" as const,
+  provider: "cloudinary" as const,
+  purpose: "hero" as const,
+  status: "active" as const,
+  lifecycle_state: "ready" as const,
+  metadata_status: "complete" as const,
+  mimetype: "image/webp",
+  alt_text: input?.alt_text,
+  is_decorative: input?.is_decorative ?? false,
+  focal_point: { x: 0.4, y: 0.6 },
+  dominant_color: "#102a43",
+  blur_data_url: "data:image/webp;base64,UklGRg==",
+  metadata: { cloud_name: "test-cloud", width: 1600, height: 900 },
+});
+
 const siteRecord = (input: {
   revision: number;
   draft?: ReturnType<typeof buildPublishableSiteDraft>;
@@ -235,8 +253,55 @@ describe("revisioned Site service", () => {
     expect(mocks.invalidatePublishedSiteCache).not.toHaveBeenCalled();
   });
 
+  it("blocks accessibility drift between a pillar mirror and its File", async () => {
+    const draft = buildPublishableSiteDraft();
+    draft.pillars[0]!.visual_file = "507f1f77bcf86cd799439099";
+    draft.pillars[0]!.visual_alt_text = "Stale pillar alternative text";
+    draft.pillars[0]!.visual_is_decorative = false;
+    mocks.siteRepository.findAdmin.mockResolvedValue(
+      siteRecord({ revision: 2, draft })
+    );
+    mocks.fileRepository.findAttachableByIds.mockResolvedValue([
+      heroFile({ alt_text: "Authoritative File alternative text" }),
+    ]);
+
+    await expect(
+      publishSite({ expected_revision: 2 }, context)
+    ).rejects.toMatchObject({
+      status: 422,
+      code: "SITE_PUBLISH_GRAPH_INVALID",
+      sources: ["pillars.frontend.visual_file"],
+    });
+    expect(mocks.siteRepository.publishConditional).not.toHaveBeenCalled();
+  });
+
+  it("publishes a complete File when deprecated accessibility mirrors are absent", async () => {
+    const draft = buildPublishableSiteDraft();
+    draft.pillars[0]!.visual_file = "507f1f77bcf86cd799439099";
+    delete draft.pillars[0]!.visual_alt_text;
+    delete draft.pillars[0]!.visual_is_decorative;
+    mocks.siteRepository.findAdmin.mockResolvedValue(
+      siteRecord({ revision: 2, draft })
+    );
+    mocks.fileRepository.findAttachableByIds.mockResolvedValue([
+      heroFile({ alt_text: "Authoritative File alternative text" }),
+    ]);
+    mocks.siteRepository.publishConditional.mockImplementation(async (input) =>
+      siteRecord({ revision: 2, published: input.published })
+    );
+
+    const result = await publishSite({ expected_revision: 2 }, context);
+
+    expect(result.site.published?.revision).toBe(2);
+    expect(mocks.siteRepository.publishConditional).toHaveBeenCalledOnce();
+  });
+
   it("reads only the last published snapshot and never leaks draft/admin state", async () => {
     const publishedDraft = buildPublishableSiteDraft();
+    publishedDraft.pillars[0]!.visual_file = "507f1f77bcf86cd799439099";
+    publishedDraft.pillars[0]!.visual_alt_text =
+      "Authoritative File alternative text";
+    publishedDraft.pillars[0]!.visual_is_decorative = false;
     publishedDraft.positioning.compact = "Published compact copy";
     publishedDraft.contact.availability = "available";
     publishedDraft.contact.availability_label = "Available privately";
@@ -274,6 +339,9 @@ describe("revisioned Site service", () => {
     mocks.siteRepository.findPublished.mockResolvedValue(
       siteRecord({ revision: 5, draft: currentDraft, published })
     );
+    mocks.fileRepository.findManyByIds.mockResolvedValue([
+      heroFile({ alt_text: "Authoritative File alternative text" }),
+    ]);
 
     const result = await readPublishedSiteUncached();
     const serialized = JSON.stringify(result);
@@ -294,6 +362,13 @@ describe("revisioned Site service", () => {
     expect(serialized).not.toContain("Unpublished draft copy");
     expect(result).not.toHaveProperty("draft");
     expect(result).not.toHaveProperty("published_by");
+    expect(result.pillars[0]?.visual).toMatchObject({
+      alt_text: "Authoritative File alternative text",
+      focal_point: { x: 0.4, y: 0.6 },
+      dominant_color: "#102a43",
+    });
+    expect(result.pillars[0]).not.toHaveProperty("visual_alt_text");
+    expect(result.pillars[0]).not.toHaveProperty("visual_is_decorative");
     expect(serialized).not.toContain("verification");
   });
 });

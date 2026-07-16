@@ -3,6 +3,7 @@ import type { TFile, TFilePurpose } from "@/app/api/files/file.type";
 import * as FileRepository from "@/app/api/files/file.repository";
 import { assertAllowedProviderUrl } from "@/app/api/files/managed-media.policy";
 import connectDB from "@/lib/db";
+import { normalizeMediaAltText } from "@/lib/media/presentation";
 import type { TRole } from "@/types/jsonwebtoken.type";
 import type { ClientSession } from "mongoose";
 import { invalidatePublishedSiteCache } from "./site.cache";
@@ -136,6 +137,35 @@ const assertFileDescriptor = async (
   return file;
 };
 
+const pillarAccessibilityMirrorMatchesFile = (
+  snapshot: TSiteDraftSnapshot,
+  descriptor: TSiteFileReferenceDescriptor,
+  file: TFile
+): boolean => {
+  const match = /^pillars\.([a-z0-9_]+)\.visual_file$/.exec(descriptor.field);
+  if (!match) return true;
+  const pillar = snapshot.pillars.find(
+    (candidate) => candidate.key === match[1]
+  );
+  if (!pillar) return false;
+  if (
+    pillar.visual_alt_text === undefined &&
+    pillar.visual_is_decorative === undefined
+  ) {
+    return true;
+  }
+
+  const fileIsDecorative = file.is_decorative === true;
+  if ((pillar.visual_is_decorative === true) !== fileIsDecorative) {
+    return false;
+  }
+  if (fileIsDecorative) return true;
+  return (
+    normalizeMediaAltText(pillar.visual_alt_text) ===
+    normalizeMediaAltText(file.alt_text)
+  );
+};
+
 const validateFileGraph = async (
   snapshot: TSiteDraftSnapshot,
   session: ClientSession,
@@ -143,8 +173,15 @@ const validateFileGraph = async (
 ): Promise<void> => {
   const unavailable: string[] = [];
   for (const descriptor of collectSiteFileReferences(snapshot)) {
+    const file = await assertFileDescriptor(
+      descriptor,
+      session,
+      requirePublicComplete
+    );
     if (
-      !(await assertFileDescriptor(descriptor, session, requirePublicComplete))
+      !file ||
+      (requirePublicComplete &&
+        !pillarAccessibilityMirrorMatchesFile(snapshot, descriptor, file))
     ) {
       unavailable.push(descriptor.field);
     }
@@ -157,7 +194,7 @@ const validateFileGraph = async (
         ? "SITE_PUBLISH_GRAPH_INVALID"
         : "SITE_FILE_REFERENCE_INVALID",
       message: requirePublicComplete
-        ? "The Site cannot be published until every referenced File is public, complete, ready, active, and purpose-compatible."
+        ? "The Site cannot be published until every referenced File is public, complete, ready, active, purpose-compatible, and consistent with its compatibility metadata."
         : "One or more Site File references are unavailable or incompatible.",
       sources: unavailable,
     });
@@ -599,7 +636,12 @@ const toPublicDto = (
     identity: draft.identity,
     positioning: draft.positioning,
     pillars: draft.pillars.map((pillar) => {
-      const { visual_file: visualFile, ...publicPillar } = pillar;
+      const {
+        visual_file: visualFile,
+        visual_alt_text: _legacyVisualAlt,
+        visual_is_decorative: _legacyVisualPurpose,
+        ...publicPillar
+      } = pillar;
       return {
         ...publicPillar,
         cta: pillar.cta

@@ -195,6 +195,7 @@ describe("Site five-pillar contract", () => {
   });
 
   it("projects only public rendering metadata from File records", () => {
+    const blurDataUrl = "data:image/webp;base64,UklGRg==";
     const file = {
       _id: { toString: () => "507f1f77bcf86cd799439011" },
       url: "https://cdn.example.com/profile.webp",
@@ -207,7 +208,11 @@ describe("Site five-pillar contract", () => {
         height: 1200,
         public_id: "private-provider-key",
       },
-      alt_text: "Abstract profile visual",
+      alt_text: "  Abstract profile visual  ",
+      is_decorative: false,
+      focal_point: { x: 0.64, y: 0.48 },
+      dominant_color: "#AABBCC",
+      blur_data_url: blurDataUrl,
     } as unknown as TFile;
 
     const projected = toPublicSiteMedia(file);
@@ -215,12 +220,37 @@ describe("Site five-pillar contract", () => {
       id: "507f1f77bcf86cd799439011",
       url: "https://cdn.example.com/profile.webp",
       alt_text: "Abstract profile visual",
+      is_decorative: false,
       width: 1200,
       height: 1200,
+      focal_point: { x: 0.64, y: 0.48 },
+      dominant_color: "#aabbcc",
+      blur_data_url: blurDataUrl,
     });
     expect(projected).not.toHaveProperty("provider");
     expect(projected).not.toHaveProperty("checksum");
     expect(projected).not.toHaveProperty("provenance");
     expect(projected).not.toHaveProperty("metadata.public_id");
+  });
+
+  it("drops invalid presentation metadata and lets decorative purpose win", () => {
+    const file = {
+      _id: { toString: () => "507f1f77bcf86cd799439012" },
+      url: "https://cdn.example.com/decorative.webp",
+      access: "public",
+      mimetype: "image/webp",
+      metadata: { width: 1200, height: Number.NaN },
+      alt_text: "This contradictory copy must not be announced",
+      is_decorative: true,
+      focal_point: { x: 1.2, y: 0.5 },
+      dominant_color: "not-a-color",
+      blur_data_url: "data:image/svg+xml;base64,PHN2Zy8+",
+    } as unknown as TFile;
+
+    expect(toPublicSiteMedia(file)).toEqual({
+      id: "507f1f77bcf86cd799439012",
+      url: "https://cdn.example.com/decorative.webp",
+      is_decorative: true,
+    });
   });
 });

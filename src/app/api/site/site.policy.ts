@@ -4,6 +4,13 @@ import {
 } from "@/lib/content/pillars";
 import type { TFile } from "@/app/api/files/file.type";
 import {
+  normalizeMediaAltText,
+  normalizeMediaBlurDataUrl,
+  normalizeMediaDimension,
+  normalizeMediaDominantColor,
+  normalizeMediaFocalPoint,
+} from "@/lib/media/presentation";
+import {
   SITE_KEY,
   SITE_SCHEMA_VERSION,
   SITE_SNAPSHOT_MAX_BYTES,
@@ -167,13 +174,6 @@ export const getSitePublishIssues = (draft: TSiteDraftSnapshot): string[] => {
     if (!pillar.capabilities.length) issues.push(`${path}.capabilities`);
     if (!pillar.technologies.length) issues.push(`${path}.technologies`);
     if (!pillar.cta?.enabled) issues.push(`${path}.cta`);
-    if (
-      pillar.visual_file &&
-      !pillar.visual_is_decorative &&
-      !isPresent(pillar.visual_alt_text)
-    ) {
-      issues.push(`${path}.visual_alt_text`);
-    }
   });
 
   const links = [
@@ -298,18 +298,27 @@ export const toPublicSiteMedia = (
   file: TFile | undefined
 ): TPublicSiteMediaDto | undefined => {
   if (!file?._id || !file.url || file.access !== "public") return undefined;
+  const width = normalizeMediaDimension(file.metadata?.width);
+  const height = normalizeMediaDimension(file.metadata?.height);
+  const altText =
+    file.is_decorative === true
+      ? undefined
+      : normalizeMediaAltText(file.alt_text);
+  const focalPoint = normalizeMediaFocalPoint(file.focal_point);
+  const dominantColor = normalizeMediaDominantColor(file.dominant_color);
+  const blurDataUrl = normalizeMediaBlurDataUrl(file.blur_data_url);
+
   return {
     id: file._id.toString(),
     url: file.url,
-    ...(file.alt_text ? { alt_text: file.alt_text } : {}),
+    ...(altText ? { alt_text: altText } : {}),
     ...(file.is_decorative !== undefined
-      ? { is_decorative: file.is_decorative }
+      ? { is_decorative: file.is_decorative === true }
       : {}),
-    ...(file.metadata?.width ? { width: file.metadata.width } : {}),
-    ...(file.metadata?.height ? { height: file.metadata.height } : {}),
-    ...(file.focal_point ? { focal_point: file.focal_point } : {}),
-    ...(file.dominant_color ? { dominant_color: file.dominant_color } : {}),
-    ...(file.blur_data_url ? { blur_data_url: file.blur_data_url } : {}),
+    ...(width !== undefined && height !== undefined ? { width, height } : {}),
+    ...(focalPoint ? { focal_point: focalPoint } : {}),
+    ...(dominantColor ? { dominant_color: dominantColor } : {}),
+    ...(blurDataUrl ? { blur_data_url: blurDataUrl } : {}),
   };
 };
 

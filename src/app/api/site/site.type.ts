@@ -55,7 +55,9 @@ export type TSitePillar = {
   accent: PillarAccent;
   fallback_visual_key: string;
   visual_file?: string;
+  /** @deprecated Optional compatibility assertion; the File is authoritative. */
   visual_alt_text?: string;
+  /** @deprecated Optional compatibility assertion; the File is authoritative. */
   visual_is_decorative?: boolean;
   seo_summary?: string;
 };
@@ -221,7 +223,10 @@ export type TPublicSiteMediaDto = {
   blur_data_url?: string;
 };
 
-export type TPublicSitePillarDto = Omit<TSitePillar, "visual_file"> & {
+export type TPublicSitePillarDto = Omit<
+  TSitePillar,
+  "visual_file" | "visual_alt_text" | "visual_is_decorative"
+> & {
   visual?: TPublicSiteMediaDto;
 };
 

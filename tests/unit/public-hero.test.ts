@@ -1,4 +1,5 @@
 import { createEmergencyPublicSite } from "@/app/api/site/site.policy";
+import { resolveMediaAlt } from "@/lib/media/presentation";
 import { buildPublicHero } from "@/lib/site/public-hero";
 import { describe, expect, it } from "vitest";
 
@@ -36,6 +37,9 @@ describe("public hero projection", () => {
         id: "507f1f77bcf86cd799439011",
         url: "https://res.cloudinary.com/demo/image/upload/frontend.png",
         alt_text: "Abstract interface layers",
+        focal_point: { x: 0.7, y: 0.4 },
+        dominant_color: "#102a43",
+        blur_data_url: "data:image/webp;base64,UklGRg==",
       },
     };
 
@@ -45,8 +49,31 @@ describe("public hero projection", () => {
       headline: "Accessible product interfaces",
       summary: "A published summary",
       outcome: "A published outcome",
-      image_alt: "Abstract interface layers",
+      image: expect.objectContaining({
+        url: "https://res.cloudinary.com/demo/image/upload/frontend.png",
+        focal_point: { x: 0.7, y: 0.4 },
+        dominant_color: "#102a43",
+      }),
       cta: { href: "/projects?pillar=frontend" },
     });
+    expect(resolveMediaAlt(hero.slides[0].image)).toBe(
+      "Abstract interface layers"
+    );
+  });
+
+  it("uses File purpose as the sole decorative-alt authority", () => {
+    const site = createEmergencyPublicSite();
+    site.pillars[0] = {
+      ...site.pillars[0],
+      visual: {
+        id: "507f1f77bcf86cd799439011",
+        url: "https://cdn.example.com/frontend.webp",
+        alt_text: "Contradictory legacy copy",
+        is_decorative: true,
+      },
+    };
+
+    const hero = buildPublicHero(site);
+    expect(resolveMediaAlt(hero.slides[0].image)).toBe("");
   });
 });
