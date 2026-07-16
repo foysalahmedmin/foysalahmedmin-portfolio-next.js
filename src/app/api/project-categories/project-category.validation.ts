@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MAX_CONTENT_SLUG_LENGTH } from "@/lib/content/slug";
+import { categoryParentIdSchema } from "../category-parent-integrity";
 
 const slugSchema = z.string().min(1).max(MAX_CONTENT_SLUG_LENGTH);
 
@@ -10,7 +11,7 @@ export const createProjectCategorySchema = z.object({
     sequence: z.number().min(1).max(100),
     description: z.string().max(500).optional(),
     icon: z.string().optional(),
-    parent: z.string().optional().nullable(),
+    parent: categoryParentIdSchema.optional().nullable(),
     status: z.enum(["active", "inactive"]).default("active"),
     tags: z.array(z.string()).default([]),
     layout: z.string().default("default"),
@@ -27,7 +28,7 @@ export const updateProjectCategorySchema = z.object({
     sequence: z.number().min(1).max(100).optional(),
     description: z.string().max(500).optional(),
     icon: z.string().optional(),
-    parent: z.string().optional().nullable(),
+    parent: categoryParentIdSchema.optional().nullable(),
     status: z.enum(["active", "inactive"]).optional(),
     tags: z.array(z.string()).optional(),
     layout: z.string().optional(),
@@ -40,7 +41,7 @@ export const updateProjectCategoriesSchema = z.object({
       .array(slugSchema)
       .min(1, "At least one project category slug is required"),
     status: z.enum(["active", "inactive"]).optional(),
-    parent: z.string().optional().nullable(),
+    parent: categoryParentIdSchema.optional().nullable(),
   }),
 });
 
@@ -58,7 +59,7 @@ export const updateProjectCategoryByIdSchema = z.object({
     sequence: z.number().min(1).max(100).optional(),
     description: z.string().max(500).optional(),
     icon: z.string().optional(),
-    parent: z.string().optional().nullable(),
+    parent: categoryParentIdSchema.optional().nullable(),
     status: z.enum(["active", "inactive"]).optional(),
     tags: z.array(z.string()).optional(),
     layout: z.string().optional(),

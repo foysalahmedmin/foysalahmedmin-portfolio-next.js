@@ -4,6 +4,7 @@ import { normalizeSlugIdentifier } from "@/lib/content/slug";
 import { withPublicPagination } from "@/utils/public-query";
 import httpStatus from "http-status";
 import { Types } from "mongoose";
+import { assertCategoryParentIntegrity } from "../category-parent-integrity";
 import {
   allocateContentSlug,
   reserveContentSlug,
@@ -13,6 +14,17 @@ import {
   partitionCategoryRestoreCandidates,
 } from "../category-lifecycle";
 import * as ArticleCategoryRepository from "./article-category.repository";
+
+const assertArticleCategoryParentIntegrity = async (
+  categoryIds: Iterable<string>,
+  parentId: string | null | undefined
+) =>
+  await assertCategoryParentIntegrity({
+    categoryLabel: "Article category",
+    categoryIds,
+    parentId,
+    findParentNodeById: ArticleCategoryRepository.findParentHierarchyNodeById,
+  });
 
 export const getArticleCategories = async (
   queryParams: Record<string, unknown>
@@ -103,6 +115,7 @@ export const createArticleCategory = async (payload: {
 }) => {
   const db = await connectDB();
   const entityId = new Types.ObjectId().toString();
+  await assertArticleCategoryParentIntegrity([entityId], payload.parent);
   const slug = await allocateContentSlug({
     scope: "article_category",
     requested: payload.slug || payload.name,
@@ -121,7 +134,7 @@ export const createArticleCategory = async (payload: {
           _id: entityId,
           slug,
           slug_history: [],
-          parent: payload.parent || null,
+          parent: payload.parent ?? null,
           status: payload.status || "active",
           tags: payload.tags || [],
           layout: payload.layout || "default",
@@ -163,6 +176,11 @@ export const updateArticleCategoryBySlug = async (
   if (!category) {
     throw new AppError(httpStatus.NOT_FOUND, "Article category not found");
   }
+
+  await assertArticleCategoryParentIntegrity(
+    [category._id.toString()],
+    payload.parent
+  );
 
   const nextSlug = payload.slug
     ? await allocateContentSlug({
@@ -219,6 +237,8 @@ export const updateArticleCategoryById = async (
     throw new AppError(httpStatus.NOT_FOUND, "Article category not found");
   }
 
+  await assertArticleCategoryParentIntegrity([id], payload.parent);
+
   const nextSlug = payload.slug
     ? await allocateContentSlug({
         scope: "article_category",
@@ -270,6 +290,11 @@ export const updateArticleCategories = async (
   const foundSlugs = categories.map((cat) => cat.slug);
   const notFoundSlugs = slugs.filter(
     (slug) => !foundSlugs.includes(normalizeSlugIdentifier(slug) ?? "")
+  );
+
+  await assertArticleCategoryParentIntegrity(
+    categories.map((category) => category._id.toString()),
+    payload.parent
   );
 
   const result = await ArticleCategoryRepository.updateManyBySlugs(

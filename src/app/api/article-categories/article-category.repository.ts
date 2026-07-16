@@ -83,6 +83,12 @@ export const findByIdWithDeleted = async (
   return await setSoftDeleteScope(ArticleCategory.findById(id), "with_deleted");
 };
 
+export const findParentHierarchyNodeById = async (id: string) => {
+  return await setSoftDeleteScope(ArticleCategory.findById(id), "with_deleted")
+    .select("_id parent status +is_deleted")
+    .lean();
+};
+
 export const findDeletedById = async (
   id: string
 ): Promise<TArticleCategoryDocument | null> => {
