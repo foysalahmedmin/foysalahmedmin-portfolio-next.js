@@ -325,7 +325,9 @@ export const getAdminPageCapability = (pathname: string): Capability | null => {
     pathname === "/admin/articles" ||
     pathname.startsWith("/admin/articles/") ||
     pathname === "/admin/projects" ||
-    pathname.startsWith("/admin/projects/")
+    pathname.startsWith("/admin/projects/") ||
+    pathname === "/admin/project-resources" ||
+    pathname.startsWith("/admin/project-resources/")
   ) {
     return "content:read";
   }

@@ -77,6 +77,9 @@ describe("AdminShell", () => {
       screen.getAllByRole("link", { name: "Articles" }).length
     ).toBeGreaterThan(0);
     expect(
+      screen.getAllByRole("link", { name: "Project resources" }).length
+    ).toBeGreaterThan(0);
+    expect(
       screen.getAllByRole("link", { name: "Site settings" }).length
     ).toBeGreaterThan(0);
     expect(

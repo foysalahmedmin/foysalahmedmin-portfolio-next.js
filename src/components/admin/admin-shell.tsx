@@ -14,6 +14,7 @@ import {
   FileStack,
   Globe2,
   LayoutDashboard,
+  Link2,
   LoaderCircle,
   LogOut,
   Mail,
@@ -82,6 +83,12 @@ const adminNavGroups: ReadonlyArray<
         icon: BookOpenText,
         capability: "content:read",
       },
+      {
+        name: "Project resources",
+        href: "/admin/project-resources",
+        icon: Link2,
+        capability: "content:read",
+      },
     ],
   },
   {
@@ -136,6 +143,7 @@ const routeLabels: Readonly<Record<string, string>> = {
   admin: "Dashboard",
   articles: "Articles",
   projects: "Projects",
+  "project-resources": "Project resources",
   contacts: "Contact inbox",
   reviews: "Review moderation",
   audit: "Audit log",
