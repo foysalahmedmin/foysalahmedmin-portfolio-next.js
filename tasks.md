@@ -4,7 +4,7 @@
 **Project:** `foysalahmedmin-portfolio-next.js`
 **Ledger version:** 2.1
 **Last updated:** 2026-07-16
-**Execution state:** Active from clean stable checkpoint `c06ff91`; remaining product and release tasks are tracked below
+**Execution state:** Active from reviewable implementation checkpoint `7b7b2cf`; `c06ff91` remains the recovery baseline and remaining product/release tasks are tracked below
 
 ## Live progress summary
 
@@ -23,8 +23,8 @@ This ledger is the authoritative implementation handoff. The phase table is inte
 | P08 | Verification | Committed repeatables/Page/inbox/dashboard/resolver and tests | Admin/public cross-domain browser acceptance |
 | P09 | Partial | Guarded seed engine and draft/noindex foundation seed | Real-Mongo seed test; owner-approved production content |
 | P10 | Verification | Committed capability-aware shell and live dashboard | Browser and cross-device acceptance |
-| P11 | Partial | Shared forms, Site/Page, repeatable, and media workspaces | Finish P11.1, the P11.3 Process editor, and P11.5; then integration/browser tests |
-| P12 | Pending | Contracts and pending media intents only | Generate and ingest approved non-human visual system |
+| P11 | Verification | P11.1–P11.5 are committed through `7b7b2cf`; 118 files/684 unit tests plus type, lint, build, authority, and real-handler data-boundary gates pass | Complete authenticated admin browser acceptance in P20.2; rerun real-Mongo integration when its isolated URI is available |
+| P12 | Partial | `ba98f68` commits the 17-master direction, prompt/provenance contract, and truthful blockers; no asset is claimed generated | Clear managed seed/binding contracts, then generate and approve the System Design pilot |
 | P13 | Partial | Dynamic shell and accessible five-slide fallback hero | Managed hero media + browser/performance verification |
 | P14 | Partial | Published Page composition and evidence sections | Finish proof-driven homepage narrative |
 | P15 | Verification | Committed discovery/detail, responsive filters, role projection, and focused tests | Full browser/device acceptance |
@@ -40,7 +40,7 @@ This ledger is the authoritative implementation handoff. The phase table is inte
 - `[-]` actively in progress or implemented but awaiting its stated verification.
 - `[ ]` not started or still materially incomplete.
 - `[!]` blocked by an explicit external/user input; the blocker must be written beside it.
-- Recovery is isolated through stable checkpoint `c06ff91`. Future work must return to a clean tree after every logical slice; a phase is not release-complete until its gate evidence is recorded.
+- Recovery is isolated through `c06ff91`, with the later P11 implementation checkpoint verified through `7b7b2cf`. Future work must return to a clean tree after every logical slice; a phase is not release-complete until its gate evidence is recorded.
 - Owner-supplied verified biography, employment/education/credential facts, project outcomes, testimonial consent, resume/contact choices, production secrets, provider credentials, and deployment access remain external inputs. Engineering uses draft/noindex fallbacks until they arrive.
 
 ## How to use this ledger
@@ -75,7 +75,10 @@ These apply continuously:
 
 - [x] `pnpm exec tsc --noEmit` completed successfully.
 - [x] `pnpm lint` completed successfully.
-- [x] Latest full unit rerun completed with 99 files and 542/542 tests passing.
+- [x] Latest full unit rerun at `7b7b2cf` completed with 118 files and 684/684 tests passing.
+- [x] P11 final-head TypeScript, full lint, and 65-page no-database production build completed successfully.
+- [x] P11 route/data boundary suite executes real handlers, auth middleware, validation, controllers, and services for Contact, ProjectResource, Review, Users, Audit, and Taxonomy: 28/28 tests pass.
+- [ ] Fresh real-Mongo integration rerun at the P11 head: all 6 files/26 cases were discovered but skipped because no isolated replica-set URI was supplied in this environment; the earlier `c06ff91` replica-set evidence remains valid only for that baseline.
 - [x] Focused Site/Page, media, resolver/Home, discovery, legal, and editor suites passed.
 - [x] Stabilize the ProjectGallery focus-restoration test by keeping the modal state callback identity stable; the full rerun passes.
 - [x] Run the real MongoDB replica-set integration suite: 6 files/26 tests passed; the combined run passed 103 files/556 tests.
@@ -94,7 +97,7 @@ These apply continuously:
 5. `8f19a0f` — secure admin shell and content workspaces.
 6. `c06ff91` — dynamic public shell, discovery, details, legal fallback, and Page composition.
 
-The supported stable boundary is the complete chain through `c06ff91`; `1008baa` was an intermediate dependency-layer commit, not a standalone product release. Generated media, final narrative work, and the full hardening/release matrix remain roadmap work rather than recovery debt.
+The recovery boundary remains the complete chain through `c06ff91`; `1008baa` was an intermediate dependency-layer commit, not a standalone product release. The current P11 implementation boundary is the later chain through `7b7b2cf`, with `ba98f68` as the interleaved P12 direction contract. Generated assets, final narrative work, authenticated browser acceptance, and the full hardening/release matrix remain roadmap work rather than recovery debt.
 
 ---
 
@@ -1119,9 +1122,16 @@ The supported stable boundary is the complete chain through `c06ff91`; `1008baa`
 - [x] Add capability-gated Review moderation with allowlisted author/target data, remote filters, on-demand detail, and bounded status actions.
 - [x] Add capability-gated Users management with allowlisted account data, self/privileged-role safeguards, session-revoking access changes, and protected lifecycle actions.
 - [x] Add a capability-gated, privacy-safe audit log with bounded date windows, remote filters, pagination, and no-store delivery.
-- [x] Add cross-workspace server-route, navigation, role, and sensitive API authority contract tests.
+- [x] Add cross-workspace page-gate, navigation, role/capability, and sensitive API authority-mapping contract tests.
 
 **Suggested commit:** `Complete admin relationship and system workspaces`
+
+### P11.6 Milestone verification
+
+- [x] Run typecheck, full lint, the full unit suite, and the no-database production build at the final P11 implementation head.
+- [x] Execute representative Contact, Taxonomy, ProjectResource, Review, Users, and Audit read/mutation/lifecycle paths through real route handlers, auth middleware, validation, controllers, and services with repository/session seams isolated.
+- [ ] Rerun all real-Mongo integration suites against an isolated transaction-capable replica set at the final P11 head.
+- [ ] Add/pass production-like authenticated admin browser coverage for sign-in, capability/direct-route denial, edit/preview/publish/conflict, media, inbox, bulk/restore, and logout; this is tracked by P20.2.
 
 ---
 
@@ -1619,8 +1629,7 @@ These are not permitted to distract from the main roadmap:
 
 ## Current next action
 
-1. Preserve clean checkpoint `c06ff91`; end every new logical slice with focused verification, ledger reconciliation, and a reviewable commit.
-2. Finish the remaining **P11.5** system workspaces with browser acceptance.
-3. Complete **P12** generated non-human media through the shared managed-media path.
-4. Finish **P14**, **P17**, **P18**, and **P19**, then run the complete **P20** release matrix.
-5. Keep production publication blocked for any claim/media/contact item that still lacks owner verification or credentials.
+1. Preserve the reviewable P11 implementation boundary through `7b7b2cf`; keep its real-Mongo rerun and authenticated browser matrix explicitly open for P20.2.
+2. Complete **P12** generated non-human media through the shared managed-media path, beginning with the seed-runner/metadata and Site binding blockers documented in `docs/content/generated-media-direction.md`.
+3. Finish **P14**, **P17**, **P18**, and **P19**, then run **P20**, including the full authenticated admin browser matrix.
+4. Keep production publication blocked for any claim/media/contact item that still lacks owner verification or credentials.

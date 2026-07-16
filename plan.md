@@ -24,8 +24,8 @@ This document is the product and architecture contract. [`tasks.md`](./tasks.md)
 | P08 — Pages/repeatables | Verification | Typed fixed pages, repeatable domains, inbox/dashboard services, and published page resolver are committed | Final admin/public cross-domain browser acceptance |
 | P09 — Seeds | Partial | Idempotent guarded seed engine and truthful draft foundation seed are implemented | Real-database seed run; verified production records require approved user facts/media |
 | P10 — Admin shell/dashboard | Verification | Capability-aware accessible shell and real operational dashboard are implemented and committed | Browser and cross-device acceptance |
-| P11 — Admin content OS | Partial | Shared editorial primitives plus Site/Page, repeatable-content, and media workspaces exist | Complete/verify relationship and system workspaces, then browser/integration acceptance |
-| P12 — Generated media | Pending | Direction and media contracts are specified; truthful pending media intents exist | Generate, review, optimize, ingest, attach, and verify the non-human media set |
+| P11 — Admin content OS | Verification | P11.1–P11.5 editorial, Site/Page, repeatable, media, inbox, taxonomy, resource, review, user, and audit workspaces are committed with server/data authority coverage | Production-like authenticated admin browser acceptance remains in P20.2 |
+| P12 — Generated media | Partial | The 17-master Architected Intelligence manifest, prompt grammar, negative constraints, provenance template, and truthful pending intents are committed | Clear ingestion/binding blockers, then generate, review, optimize, ingest, attach, and verify the non-human media set |
 | P13 — Public shell/hero | Partial | Dynamic Header/Footer and accessible five-slide hero run with deterministic fallbacks | Attach approved managed hero media and finish browser/performance verification |
 | P14 — Homepage | Partial | Server Page composition and several dynamic evidence sections are implemented | Complete sticky five-pillar, architecture, AI workflow, proof/process/trust narrative |
 | P15 — Projects | Verification | URL-backed discovery, accessible responsive filters, role projection, and case-study detail are committed with focused tests | Full browser/device acceptance |
@@ -55,6 +55,12 @@ The recovery audit ended at clean product checkpoint `c06ff91`. The dependency-o
 6. `c06ff91` — rebuild the dynamic public portfolio experience.
 
 `1008baa` is an intentional dependency-layer checkpoint and was not independently type-clean against the legacy UI. The supported stable product boundary is the complete chain through `c06ff91`. At that boundary the worktree is clean; TypeScript, lint, 542/542 unit tests, the real MongoDB replica-set integration run, the isolated Contact Chromium flow, and the 65-page no-database production build pass.
+
+### P11 implementation checkpoint — 2026-07-16
+
+P11.1–P11.5 are isolated in the dependency-ordered chain from `8def2a4` through `7b7b2cf`, including the shared editorial framework, Process editor, Contact inbox, audit log, Users, Reviews, ProjectResources, Taxonomy, server-side hierarchy integrity, cross-workspace authority contracts, and real route/data boundary tests. The interleaved `ba98f68` starts P12 documentation without changing that P11 boundary.
+
+At `7b7b2cf`, 118 unit files and 684/684 tests pass, as do TypeScript, full lint, and the 65-page no-database production build. The current environment has no replica-set test URI, so the six real-Mongo integration files (26 cases) were discovered but skipped rather than claimed as a fresh pass. Authenticated admin Playwright acceptance also remains open; P11 is therefore `Verification`, not release-complete.
 
 ## 1. Executive outcome
 
