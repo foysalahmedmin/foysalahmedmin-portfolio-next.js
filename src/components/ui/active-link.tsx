@@ -49,6 +49,7 @@ const ActiveLink = forwardRef<HTMLAnchorElement, ActiveLinkProps>(
     return (
       <Link
         href={href || ""}
+        prefetch={false}
         className={cn(className, {
           [cn("text-primary", activeClassName)]: isActive,
         })}

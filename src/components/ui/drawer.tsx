@@ -1,19 +1,25 @@
 "use client";
 
-import { useClickOutside } from "@/hooks/ui/use-click-outside";
+import { useDialogFocus } from "@/hooks/ui/use-dialog-focus";
 import type { OverlayState } from "@/hooks/ui/use-overlay-state";
 import { useOverlayState } from "@/hooks/ui/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import type { ComponentProps } from "react";
-import React, { createContext, Fragment, useContext } from "react";
+import React, {
+  createContext,
+  Fragment,
+  useContext,
+  useId,
+  useRef,
+} from "react";
 import PortalWrapper from "../wrappers/portal-wrapper";
 import type { ButtonProps } from "./button";
 import { Button } from "./button";
 
 const drawerVariants = cva(
-  "drawer fixed inset-0 z-[1000] invisible opacity-0 transition-all duration-300 ease-in-out",
+  "drawer invisible fixed inset-0 z-[var(--z-modal)] opacity-0 transition-[opacity,visibility] duration-[var(--motion-standard)] ease-[var(--ease-standard)]",
   {
     variants: {
       variant: {
@@ -28,7 +34,7 @@ const drawerVariants = cva(
 );
 
 const drawerBackdropVariants = cva(
-  "drawer-backdrop fixed inset-0 z-[100] bg-black/25 transition-opacity duration-300",
+  "drawer-backdrop bg-overlay fixed inset-0 z-[var(--z-overlay)] transition-opacity duration-[var(--motion-standard)]",
   {
     variants: {
       variant: {
@@ -54,7 +60,7 @@ const drawerBackdropVariants = cva(
 );
 
 const drawerContentVariants = cva(
-  "drawer-content fixed z-[1000] h-full overflow-y-auto bg-card transition-transform duration-300",
+  "drawer-content bg-card text-card-foreground fixed z-[var(--z-modal)] h-full overflow-y-auto transition-transform duration-[var(--motion-standard)] ease-[var(--ease-emphasized)] motion-reduce:transform-none",
   {
     variants: {
       variant: {
@@ -85,7 +91,7 @@ const drawerContentVariants = cva(
 
 type DrawerContextType = OverlayState &
   VariantProps<typeof drawerVariants> &
-  VariantProps<typeof drawerContentVariants>;
+  VariantProps<typeof drawerContentVariants> & { titleId: string };
 type DrawerProps = ComponentProps<"div"> &
   VariantProps<typeof drawerVariants> &
   VariantProps<typeof drawerContentVariants> & {
@@ -127,16 +133,21 @@ const DrawerRoot: React.FC<DrawerProps> = ({
   ...props
 }) => {
   const overlayState = useOverlayState(isOpenProp, setIsOpenProp);
+  const titleId = useId();
 
   const Comp = asPortal ? PortalWrapper : Fragment;
 
   return (
-    <DrawerContext.Provider value={{ ...overlayState, variant, size, side }}>
+    <DrawerContext.Provider
+      value={{ ...overlayState, variant, size, side, titleId }}
+    >
       <Comp>
         <div
           className={cn(drawerVariants({ variant, className }), {
             [cn("visible opacity-100", activeClassName)]: overlayState.isOpen,
           })}
+          aria-hidden={!overlayState.isOpen}
+          inert={!overlayState.isOpen}
           {...props}
         >
           {children}
@@ -182,11 +193,16 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
   children,
   ...props
 }) => {
-  const { isOpen, onClose } = useDrawer();
-  const ref = useClickOutside<HTMLDivElement>(onClose);
+  const { isOpen, onClose, titleId } = useDrawer();
+  const ref = useRef<HTMLDivElement>(null);
+  useDialogFocus({ active: isOpen, containerRef: ref, onEscape: onClose });
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      tabIndex={-1}
       className={cn(drawerContentVariants({ variant, size, side, className }), {
         [cn("translate-x-0", activeClassName)]: isOpen,
       })}
@@ -214,14 +230,22 @@ const DrawerHeader: React.FC<ComponentProps<"div">> = ({
 
 // Drawer Title Component
 const DrawerTitle: React.FC<ComponentProps<"h2">> = ({
+  id,
   className,
   children,
   ...props
-}) => (
-  <h2 className={cn("text-lg font-semibold", className)} {...props}>
-    {children}
-  </h2>
-);
+}) => {
+  const { titleId } = useDrawer();
+  return (
+    <h2
+      id={id ?? titleId}
+      className={cn("text-lg font-semibold", className)}
+      {...props}
+    >
+      {children}
+    </h2>
+  );
+};
 
 // Drawer Body Component
 const DrawerBody: React.FC<ComponentProps<"div">> = ({
@@ -275,6 +299,7 @@ const DrawerTrigger: React.FC<ButtonProps> = ({
 // Drawer Close Trigger Component
 const DrawerCloseTrigger: React.FC<ButtonProps> = ({
   onClick,
+  "aria-label": ariaLabel = "Close drawer",
   variant = "outline",
   shape = "icon",
   children = <X className="h-6 w-6" />,
@@ -284,6 +309,7 @@ const DrawerCloseTrigger: React.FC<ButtonProps> = ({
 
   return (
     <Button
+      aria-label={ariaLabel}
       onClick={(e) => {
         onClose();
         onClick?.(e);

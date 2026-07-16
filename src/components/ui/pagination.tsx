@@ -23,6 +23,7 @@ export type TPaginationProps = {
   disabled?: boolean;
   showPageSize?: boolean;
   showSummary?: boolean;
+  ariaLabel?: string;
   className?: string;
 };
 
@@ -68,6 +69,7 @@ export const Pagination = ({
   disabled = false,
   showPageSize = true,
   showSummary = true,
+  ariaLabel = "Pagination",
   className,
 }: TPaginationProps) => {
   const safeLimit =
@@ -113,7 +115,7 @@ export const Pagination = ({
 
   return (
     <nav
-      aria-label="Table pagination"
+      aria-label={ariaLabel}
       className={cn(
         "border-border flex flex-col gap-3 border-t px-4 py-4 sm:flex-row sm:items-center sm:justify-between",
         className
@@ -134,7 +136,7 @@ export const Pagination = ({
               value={safeLimit}
               disabled={disabled}
               onChange={(event) => setLimit(Number(event.target.value))}
-              className="border-input bg-background text-foreground focus-visible:ring-ring h-8 rounded-md border px-2 text-xs outline-none focus-visible:ring-2"
+              className="border-input bg-background text-foreground focus-visible:ring-ring h-11 rounded-md border px-2 text-xs outline-none focus-visible:ring-2"
             >
               {normalizedPageSizeOptions.map((option) => (
                 <option key={option} value={option}>

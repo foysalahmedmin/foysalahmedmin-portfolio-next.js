@@ -25,24 +25,27 @@ const dropdownVariants = cva("relative", {
   },
 });
 
-const dropdownContentVariants = cva("absolute z-30 shadow-lg", {
-  variants: {
-    variant: {
-      default: "border border-gray-200 bg-card rounded-lg p-1",
-      none: "",
+const dropdownContentVariants = cva(
+  "absolute z-[var(--z-sticky)] shadow-[var(--shadow-md)] transition-[opacity,transform] duration-[var(--motion-fast)] motion-reduce:transform-none",
+  {
+    variants: {
+      variant: {
+        default: "border-border bg-card rounded-lg border p-1",
+        none: "",
+      },
+      side: {
+        top: "bottom-full left-0 mb-1 origin-top",
+        bottom: "top-full left-0 mt-1 origin-bottom",
+        left: "right-full top-0 mr-1 origin-left",
+        right: "left-full top-0 ml-1 origin-right",
+      },
     },
-    side: {
-      top: "bottom-full left-0 mb-1 origin-top",
-      bottom: "top-full left-0 mt-1 origin-bottom",
-      left: "right-full top-0 mr-1 origin-left",
-      right: "left-full top-0 ml-1 origin-right",
+    defaultVariants: {
+      variant: "default",
+      side: "bottom",
     },
-  },
-  defaultVariants: {
-    variant: "default",
-    side: "bottom",
-  },
-});
+  }
+);
 
 type DropdownContextType = OverlayState &
   VariantProps<typeof dropdownVariants> &
@@ -201,7 +204,7 @@ const DropdownItem: React.FC<ComponentProps<"button">> = ({
     <button
       type={type}
       className={cn(
-        "w-full rounded-md px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+        "hover:bg-muted focus-visible:bg-muted focus-visible:ring-ring min-h-11 w-full rounded-md px-4 py-2 text-left text-sm focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       disabled={disabled}
@@ -220,7 +223,7 @@ const DropdownItem: React.FC<ComponentProps<"button">> = ({
 const DropdownSeparator: React.FC<ComponentProps<"div">> = ({
   className,
   ...props
-}) => <div className={cn("my-1 h-px bg-gray-200", className)} {...props} />;
+}) => <div className={cn("bg-border my-1 h-px", className)} {...props} />;
 
 // Dropdown Label Component
 const DropdownLabel: React.FC<ComponentProps<"div">> = ({

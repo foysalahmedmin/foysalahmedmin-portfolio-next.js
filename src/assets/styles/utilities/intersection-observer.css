@@ -1,77 +1,94 @@
-.fade-up[data-observed-fade-up=true] {
-  @apply opacity-0 translate-y-10 transition-all duration-700 ease-out;
-}
-.fade-up[data-observed-fade-up=true].active {
-  @apply opacity-100 translate-y-0;
-}
-
-.fade-down[data-observed-fade-down=true] {
-  @apply opacity-0 -translate-y-10 transition-all duration-700 ease-out;
-}
-.fade-down[data-observed-fade-down=true].active {
-  @apply opacity-100 translate-y-0;
+html[data-motion="full"] [data-reveal][data-reveal-ready="true"] {
+  transition-delay: var(--reveal-delay, 0ms);
+  transition-duration: var(--motion-slow);
+  transition-property: transform;
+  transition-timing-function: var(--ease-emphasized);
+  will-change: opacity, transform;
 }
 
-.fade-left[data-observed-fade-left=true] {
-  @apply opacity-0 -translate-x-10 transition-all duration-700 ease-out;
-}
-.fade-left[data-observed-fade-left=true].active {
-  @apply opacity-100 translate-x-0;
+html[data-motion="full"] [data-reveal="up"][data-reveal-ready="true"] {
+  transform: translate3d(0, var(--reveal-distance), 0);
 }
 
-.fade-right[data-observed-fade-right=true] {
-  @apply opacity-0 translate-x-10 transition-all duration-700 ease-out;
-}
-.fade-right[data-observed-fade-right=true].active {
-  @apply opacity-100 translate-x-0;
+html[data-motion="full"] [data-reveal="down"][data-reveal-ready="true"] {
+  transform: translate3d(0, calc(-1 * var(--reveal-distance)), 0);
 }
 
-.skew-up[data-observed-skew-up=true] {
-  @apply opacity-0 translate-y-20 skew-y-6 transition-all duration-1000 ease-out;
-}
-.skew-up[data-observed-skew-up=true].active {
-  @apply opacity-100 translate-y-0 skew-y-0;
+html[data-motion="full"] [data-reveal="left"][data-reveal-ready="true"] {
+  transform: translate3d(calc(-1 * var(--reveal-distance)), 0, 0);
 }
 
-.scale-in[data-observed-scale-in=true] {
-  @apply opacity-0 scale-90 transition-all duration-700 ease-out;
-}
-.scale-in[data-observed-scale-in=true].active {
-  @apply opacity-100 scale-100;
+html[data-motion="full"] [data-reveal="right"][data-reveal-ready="true"] {
+  transform: translate3d(var(--reveal-distance), 0, 0);
 }
 
-/* Arrow Animations */
-.arrow-slide-right {
-  @apply transition-transform duration-300;
-}
-.group:hover .arrow-slide-right {
-  @apply translate-x-2;
+html[data-motion="full"] [data-reveal="scale"][data-reveal-ready="true"] {
+  transform: scale(0.96);
 }
 
+html[data-motion="full"] [data-reveal="skew-up"][data-reveal-ready="true"] {
+  transform: translate3d(0, var(--reveal-distance), 0) skewY(2deg);
+}
+
+html[data-motion="full"]
+  [data-reveal][data-reveal-ready="true"][data-reveal-visible="true"] {
+  transform: none;
+  will-change: auto;
+}
+
+/* Legacy active classes remain visible while callers migrate to <Reveal>. */
+[data-reveal].active {
+  transform: none;
+}
+
+/* Arrow animations */
+.arrow-slide-right,
 .arrow-slide-left {
-  @apply transition-transform duration-300;
-}
-.group:hover .arrow-slide-left {
-  @apply -translate-x-2;
+  transition: transform var(--motion-standard) var(--ease-standard);
 }
 
-.arrow-bounce-right {
-  @apply transition-transform duration-300;
+.group:hover .arrow-slide-right {
+  transform: translateX(0.5rem);
 }
-.group:hover .arrow-bounce-right {
-  animation: bounce-x 1s infinite;
+
+.group:hover .arrow-slide-left {
+  transform: translateX(-0.5rem);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .arrow-bounce-right {
+    animation: bounce-x 1s var(--ease-standard) infinite;
+  }
 }
 
 @keyframes bounce-x {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(0.3125rem);
+  }
 }
 
-/* Animation Delays */
-.delay-100 { transition-delay: 100ms; }
-.delay-200 { transition-delay: 200ms; }
-.delay-300 { transition-delay: 300ms; }
-.delay-400 { transition-delay: 400ms; }
-.delay-500 { transition-delay: 500ms; }
-.delay-700 { transition-delay: 700ms; }
-.delay-1000 { transition-delay: 1000ms; }
+.delay-100 {
+  --reveal-delay: 100ms;
+}
+.delay-200 {
+  --reveal-delay: 200ms;
+}
+.delay-300 {
+  --reveal-delay: 300ms;
+}
+.delay-400 {
+  --reveal-delay: 400ms;
+}
+.delay-500 {
+  --reveal-delay: 500ms;
+}
+.delay-700 {
+  --reveal-delay: 700ms;
+}
+.delay-1000 {
+  --reveal-delay: 1000ms;
+}

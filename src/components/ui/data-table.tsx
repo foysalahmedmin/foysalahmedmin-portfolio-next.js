@@ -942,7 +942,7 @@ const DataTable = <T extends object>({
                 value={searchInput}
                 placeholder={searchPlaceholder}
                 onChange={(event) => setSearchInput(event.target.value)}
-                className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20 h-10 w-full rounded-xl border py-2 pr-10 pl-10 text-sm transition-colors outline-none focus-visible:ring-2"
+                className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20 h-11 w-full rounded-xl border py-2 pr-10 pl-10 text-sm transition-colors outline-none focus-visible:ring-2"
               />
               {searchInput && (
                 <button
@@ -973,7 +973,7 @@ const DataTable = <T extends object>({
                       [filter.id]: event.target.value,
                     })
                   }
-                  className="border-input bg-background text-foreground focus-visible:border-primary focus-visible:ring-primary/20 h-10 w-full rounded-xl border px-3 text-sm outline-none focus-visible:ring-2"
+                  className="border-input bg-background text-foreground focus-visible:border-primary focus-visible:ring-primary/20 h-11 w-full rounded-xl border px-3 text-sm outline-none focus-visible:ring-2"
                 >
                   <option value="">
                     {filter.allLabel || `All ${filter.label}`}
@@ -1006,7 +1006,7 @@ const DataTable = <T extends object>({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-10 shrink-0"
+                className="shrink-0"
                 aria-label="Choose visible columns"
                 aria-haspopup="dialog"
               >

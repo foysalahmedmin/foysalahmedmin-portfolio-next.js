@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1100" role="img" aria-labelledby="title desc">
+  <title id="title">Abstract professional identity</title>
+  <desc id="desc">A non-human layered monogram built from five colored engineering planes.</desc>
+  <rect width="900" height="1100" rx="48" fill="#11182d"/>
+  <g transform="translate(450 550)" stroke="#f3f6ff" stroke-width="8">
+    <path d="m0-390 300 170v340L0 290-300 120v-340z" fill="#536adf"/>
+    <path d="M0-270 200-155V75L0 190-200 75v-230z" fill="#2787c8"/>
+    <path d="M0-150 105-90V35L0 95-105 35V-90z" fill="#2f9c77"/>
+    <path d="m-300 120 300 170v220l-300-170z" fill="#d38a2e"/>
+    <path d="M300 120 0 290v220l300-170z" fill="#c85191"/>
+  </g>
+</svg>
+

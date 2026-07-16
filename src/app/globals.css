@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -23,9 +22,31 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-border-strong: var(--border-strong);
+  --color-overlay: var(--overlay);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-pillar-frontend: var(--pillar-frontend);
+  --color-pillar-frontend-surface: var(--pillar-frontend-surface);
+  --color-pillar-backend: var(--pillar-backend);
+  --color-pillar-backend-surface: var(--pillar-backend-surface);
+  --color-pillar-ai: var(--pillar-ai);
+  --color-pillar-ai-surface: var(--pillar-ai-surface);
+  --color-pillar-system: var(--pillar-system);
+  --color-pillar-system-surface: var(--pillar-system-surface);
+  --color-pillar-full-stack: var(--pillar-full-stack);
+  --color-pillar-full-stack-surface: var(--pillar-full-stack-surface);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -159,15 +180,6 @@
   --accent-foreground: var(--secondary-foreground);
 }
 
-@utility accent {
-  --accent: var(--accent);
-  --accent-foreground: var(--accent-foreground);
-  --primary: var(--accent);
-  --primary-foreground: var(--accent-foreground);
-  --secondary: var(--accent);
-  --secondary-foreground: var(--accent-foreground);
-}
-
 /* underline effect */
 @utility underline-effect {
   transition:
@@ -216,4 +228,67 @@
   .mask-radial {
     mask-image: radial-gradient(circle, black, transparent 80%);
   }
+}
+
+html[data-motion="full"] {
+  scroll-behavior: smooth;
+}
+
+html[data-motion="reduced"],
+html[data-motion="off"] {
+  scroll-behavior: auto;
+}
+
+html[data-document-visible="false"] *,
+html[data-document-visible="false"] *::before,
+html[data-document-visible="false"] *::after {
+  animation-play-state: paused !important;
+}
+
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation: none !important;
+  transition-duration: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.parallax-layer {
+  transform: translate3d(0, 0, 0);
+  transform-style: preserve-3d;
+  will-change: auto;
+}
+
+html[data-motion="full"] .parallax-layer[data-parallax-axis="y"] {
+  transform: translate3d(0, var(--parallax-offset), 0);
+  will-change: transform;
+}
+
+html[data-motion="full"] .parallax-layer[data-parallax-axis="x"] {
+  transform: translate3d(var(--parallax-offset), 0, 0);
+  will-change: transform;
 }
