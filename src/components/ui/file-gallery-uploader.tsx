@@ -1,8 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { appendFileUploadMetadata } from "@/lib/media/file-upload-metadata";
 import type {
+  TFileEditorialMetadataInput,
   TFilePopulated,
+  TFilePurpose,
   TFileUploadResponse,
 } from "@/types/file.type";
 import Image from "next/image";
@@ -16,6 +19,8 @@ type FileGalleryUploaderProps = {
   maxCount?: number;
   className?: string;
   disabled?: boolean;
+  purpose?: TFilePurpose;
+  metadata?: TFileEditorialMetadataInput;
 };
 
 export function FileGalleryUploader({
@@ -26,6 +31,8 @@ export function FileGalleryUploader({
   maxCount = 10,
   className,
   disabled = false,
+  purpose = "generic",
+  metadata,
 }: FileGalleryUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -35,6 +42,9 @@ export function FileGalleryUploader({
     async (files: File[]): Promise<TFilePopulated[]> => {
       const formData = new FormData();
       files.forEach((file) => formData.append("file", file));
+      formData.append("purpose", purpose);
+      formData.append("idempotency_key", crypto.randomUUID());
+      appendFileUploadMetadata(formData, metadata);
 
       const res = await fetch("/api/files/cloud", {
         method: "POST",
@@ -53,7 +63,7 @@ export function FileGalleryUploader({
       }
       return data.data;
     },
-    [],
+    [metadata, purpose]
   );
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +82,7 @@ export function FileGalleryUploader({
     const oversized = toUpload.find((file) => file.size > maxSize);
     if (oversized) {
       setError(
-        `"${oversized.name}" too large. Max ${Math.round(maxSize / 1_000_000)}MB.`,
+        `"${oversized.name}" too large. Max ${Math.round(maxSize / 1_000_000)}MB.`
       );
       return;
     }
@@ -104,19 +114,19 @@ export function FileGalleryUploader({
           {value.map((file, index) => (
             <div
               key={file._id}
-              className="group relative aspect-square rounded-md overflow-hidden border border-border bg-muted"
+              className="group border-border bg-muted relative aspect-square overflow-hidden rounded-md border"
             >
               {file.mimetype?.startsWith("image/") ? (
                 <Image
                   src={file.url}
-                  alt={file.filename}
+                  alt={file.is_decorative ? "" : file.alt_text || ""}
                   fill
                   className="object-cover"
                   sizes="120px"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center p-2">
-                  <span className="text-xs text-muted-foreground text-center break-all">
+                  <span className="text-muted-foreground text-center text-xs break-all">
                     {file.filename}
                   </span>
                 </div>
@@ -125,7 +135,7 @@ export function FileGalleryUploader({
                 <button
                   type="button"
                   onClick={() => handleRemove(index)}
-                  className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium"
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
                 >
                   Remove
                 </button>
@@ -156,26 +166,29 @@ export function FileGalleryUploader({
                   writable: false,
                 });
               }
-              handleFileChange({ target: { files: dt.files, value: "" } } as unknown as React.ChangeEvent<HTMLInputElement>);
+              handleFileChange({
+                target: { files: dt.files, value: "" },
+              } as unknown as React.ChangeEvent<HTMLInputElement>);
             }
           }}
           onDragOver={(e) => e.preventDefault()}
           className={cn(
-            "flex flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-border p-4 text-center transition-colors",
+            "border-border flex flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed p-4 text-center transition-colors",
             uploading
               ? "cursor-wait opacity-60"
-              : "cursor-pointer hover:border-accent hover:bg-accent/5",
+              : "hover:border-accent hover:bg-accent/5 cursor-pointer"
           )}
         >
           {uploading ? (
-            <span className="text-sm text-muted-foreground">Uploading…</span>
+            <span className="text-muted-foreground text-sm">Uploading…</span>
           ) : (
             <>
-              <span className="text-sm font-medium text-foreground">
+              <span className="text-foreground text-sm font-medium">
                 Add images
               </span>
-              <span className="text-xs text-muted-foreground">
-                {value.length}/{maxCount} · Max {Math.round(maxSize / 1_000_000)}MB each
+              <span className="text-muted-foreground text-xs">
+                {value.length}/{maxCount} · Max{" "}
+                {Math.round(maxSize / 1_000_000)}MB each
               </span>
             </>
           )}
@@ -192,7 +205,7 @@ export function FileGalleryUploader({
         disabled={disabled || uploading || !canAdd}
       />
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-destructive text-xs">{error}</p>}
     </div>
   );
 }

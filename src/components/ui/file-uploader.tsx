@@ -1,8 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { appendFileUploadMetadata } from "@/lib/media/file-upload-metadata";
 import type {
+  TFileEditorialMetadataInput,
   TFilePopulated,
+  TFilePurpose,
   TFileUploadResponse,
 } from "@/types/file.type";
 import Image from "next/image";
@@ -16,6 +19,8 @@ type FileUploaderProps = {
   className?: string;
   disabled?: boolean;
   label?: string;
+  purpose?: TFilePurpose;
+  metadata?: TFileEditorialMetadataInput;
 };
 
 export function FileUploader({
@@ -26,6 +31,8 @@ export function FileUploader({
   className,
   disabled = false,
   label = "Upload image",
+  purpose = "generic",
+  metadata,
 }: FileUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -44,6 +51,9 @@ export function FileUploader({
       try {
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("purpose", purpose);
+        formData.append("idempotency_key", crypto.randomUUID());
+        appendFileUploadMetadata(formData, metadata);
 
         const res = await fetch("/api/files/cloud", {
           method: "POST",
@@ -66,7 +76,7 @@ export function FileUploader({
         setUploading(false);
       }
     },
-    [maxSize, onChange],
+    [maxSize, metadata, onChange, purpose]
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,36 +102,36 @@ export function FileUploader({
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       {value ? (
-        <div className="relative w-full rounded-md border border-border overflow-hidden">
+        <div className="border-border relative w-full overflow-hidden rounded-md border">
           {isImage ? (
-            <div className="relative w-full aspect-video bg-muted">
+            <div className="bg-muted relative aspect-video w-full">
               <Image
                 src={value.url}
-                alt={value.filename}
+                alt={value.is_decorative ? "" : value.alt_text || ""}
                 fill
                 className="object-contain"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
           ) : (
-            <div className="flex items-center gap-3 p-3 bg-muted">
-              <span className="text-sm text-muted-foreground truncate flex-1">
+            <div className="bg-muted flex items-center gap-3 p-3">
+              <span className="text-muted-foreground flex-1 truncate text-sm">
                 {value.filename}
               </span>
-              <span className="text-xs text-muted-foreground shrink-0">
+              <span className="text-muted-foreground shrink-0 text-xs">
                 {(value.size / 1024).toFixed(1)} KB
               </span>
             </div>
           )}
-          <div className="flex items-center justify-between p-2 bg-background border-t border-border">
-            <span className="text-xs text-muted-foreground truncate max-w-[70%]">
+          <div className="bg-background border-border flex items-center justify-between border-t p-2">
+            <span className="text-muted-foreground max-w-[70%] truncate text-xs">
               {value.filename}
             </span>
             {!disabled && (
               <button
                 type="button"
                 onClick={handleRemove}
-                className="text-xs text-destructive hover:underline shrink-0 ml-2"
+                className="text-destructive ml-2 shrink-0 text-xs hover:underline"
               >
                 Remove
               </button>
@@ -134,28 +144,33 @@ export function FileUploader({
           tabIndex={disabled ? -1 : 0}
           onClick={() => !disabled && !uploading && inputRef.current?.click()}
           onKeyDown={(e) =>
-            e.key === "Enter" && !disabled && !uploading && inputRef.current?.click()
+            e.key === "Enter" &&
+            !disabled &&
+            !uploading &&
+            inputRef.current?.click()
           }
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
           className={cn(
-            "flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-border p-6 text-center transition-colors",
+            "border-border flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-6 text-center transition-colors",
             uploading
               ? "cursor-wait opacity-60"
               : disabled
                 ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer hover:border-accent hover:bg-accent/5",
+                : "hover:border-accent hover:bg-accent/5 cursor-pointer"
           )}
         >
           {uploading ? (
-            <span className="text-sm text-muted-foreground">Uploading…</span>
+            <span className="text-muted-foreground text-sm">Uploading…</span>
           ) : (
             <>
-              <span className="text-sm font-medium text-foreground">{label}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-foreground text-sm font-medium">
+                {label}
+              </span>
+              <span className="text-muted-foreground text-xs">
                 Drag & drop or click to browse
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 Max {Math.round(maxSize / 1_000_000)}MB
               </span>
             </>
@@ -172,7 +187,7 @@ export function FileUploader({
         disabled={disabled || uploading}
       />
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-destructive text-xs">{error}</p>}
     </div>
   );
 }

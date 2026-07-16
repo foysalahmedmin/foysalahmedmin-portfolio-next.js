@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Five engineering disciplines</title>
+  <desc id="desc">An abstract orbital diagram representing frontend, backend, AI automation, system design, and full-stack delivery.</desc>
+  <defs>
+    <radialGradient id="bg">
+      <stop stop-color="#263267"/>
+      <stop offset="1" stop-color="#0b1124"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <g transform="translate(800 500)" fill="none" stroke="#dce5ff" stroke-opacity=".32">
+    <ellipse rx="560" ry="280" stroke-width="3"/>
+    <ellipse rx="430" ry="430" stroke-width="2" transform="rotate(24)"/>
+    <ellipse rx="430" ry="430" stroke-width="2" transform="rotate(-24)"/>
+  </g>
+  <g stroke="#fff" stroke-width="10">
+    <circle cx="800" cy="500" r="140" fill="#536adf"/>
+    <circle cx="250" cy="500" r="82" fill="#7865dd"/>
+    <circle cx="1350" cy="500" r="82" fill="#2787c8"/>
+    <circle cx="610" cy="160" r="82" fill="#2f9c77"/>
+    <circle cx="990" cy="840" r="82" fill="#d38a2e"/>
+    <circle cx="1060" cy="210" r="82" fill="#c85191"/>
+  </g>
+</svg>
+

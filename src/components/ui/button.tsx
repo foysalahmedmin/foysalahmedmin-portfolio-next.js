@@ -3,10 +3,22 @@
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import type { ComponentProps, ElementType, ReactNode } from "react";
-import React from "react";
+import type {
+  ComponentProps,
+  ElementType,
+  MouseEvent as ReactMouseEvent,
+  ReactElement,
+  ReactNode,
+} from "react";
+import React, { Children, cloneElement, isValidElement } from "react";
 
-type SupportedElements = "button" | "input" | "textarea" | "select" | "div";
+type SupportedElements =
+  | "button"
+  | "a"
+  | "input"
+  | "textarea"
+  | "select"
+  | "div";
 
 type BaseProps<T extends ElementType = SupportedElements> = {
   as?: T | ElementType;
@@ -18,25 +30,28 @@ type BaseProps<T extends ElementType = SupportedElements> = {
 } & ComponentProps<T>;
 
 const buttonVariants = cva(
-  "button animate-pop relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-none border border-transparent text-base leading-tight whitespace-nowrap transition-all duration-300 ease-in-out active:scale-95 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+  "button relative inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-none border border-transparent text-base leading-tight whitespace-nowrap transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-[var(--motion-standard)] ease-[var(--ease-standard)] motion-safe:active:scale-[0.98] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "bg-accent text-accent-foreground hover:bg-foreground hover:text-background",
+          "bg-primary text-primary-foreground hover:bg-foreground hover:text-background",
         gradient:
           "bg-gradient-to-r from-primary to-secondary text-white border-transparent",
         outline:
-          "border border-accent bg-transparent text-accent hover:bg-accent hover:text-accent-foreground",
+          "border-border-strong bg-transparent text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground",
         ghost:
-          "bg-transparent text-accent hover:bg-accent/10 hover:text-accent-foreground",
-        link: "text-blue-500 hover:text-blue-700 underline",
+          "bg-transparent text-foreground hover:bg-muted hover:text-foreground",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:brightness-95",
+        success: "bg-success text-success-foreground hover:brightness-95",
+        link: "text-primary min-h-0 px-0 underline underline-offset-4 hover:decoration-2",
         none: "",
       },
       size: {
-        default: "h-10 px-4 text-sm",
-        sm: "h-8 px-3 text-xs",
-        md: "h-10 px-4 text-sm",
+        default: "h-11 px-4 text-sm",
+        sm: "h-11 px-3 text-xs",
+        md: "h-11 px-4 text-sm",
         lg: "h-12 px-6 text-base",
         none: "",
       },
@@ -55,6 +70,9 @@ const buttonVariants = cva(
 );
 
 type ButtonProps = BaseProps<"button"> &
+  Partial<
+    Pick<ComponentProps<"a">, "download" | "href" | "rel" | "target">
+  > &
   VariantProps<typeof buttonVariants> & {
     disabled?: boolean;
     isAnimation?: boolean;
@@ -62,7 +80,7 @@ type ButtonProps = BaseProps<"button"> &
 
 // Button Root Component
 const ButtonRoot: React.FC<ButtonProps> = ({
-  className = "primary",
+  className,
   loadingClassName,
   variant,
   size,
@@ -75,16 +93,75 @@ const ButtonRoot: React.FC<ButtonProps> = ({
   children,
   ...props
 }) => {
-  const Comp = asChild ? "span" : (as as ElementType);
+  const classes = cn(buttonVariants({ variant, size, shape, className }), {
+    [cn("loading", loadingClassName)]: isLoading,
+  });
+
+  if (asChild) {
+    const child = Children.only(children);
+    if (!isValidElement(child)) {
+      throw new Error("Button with asChild requires exactly one element child");
+    }
+
+    const element = child as ReactElement<{
+      className?: string;
+      "aria-disabled"?: boolean;
+      "aria-busy"?: boolean;
+      onClick?: (event: ReactMouseEvent<HTMLElement>) => void;
+    }>;
+
+    const blocked = disabled || isLoading;
+    const suppliedOnClick = props.onClick as
+      | ((event: ReactMouseEvent<HTMLElement>) => void)
+      | undefined;
+
+    return cloneElement(element, {
+      ...props,
+      className: cn(classes, element.props.className),
+      "aria-busy": isLoading || undefined,
+      "aria-disabled": blocked || undefined,
+      onClick: (event: ReactMouseEvent<HTMLElement>) => {
+        if (blocked) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        element.props.onClick?.(event);
+        if (!event.defaultPrevented) suppliedOnClick?.(event);
+      },
+    });
+  }
+
+  const Comp = as as ElementType;
+  const canUseDisabled =
+    as === "button" || as === "input" || as === "textarea" || as === "select";
+  const blocked = disabled || isLoading;
+  const suppliedOnClick = props.onClick as
+    | ((event: ReactMouseEvent<HTMLElement>) => void)
+    | undefined;
 
   return (
     <Comp
       data-as={as}
-      disabled={disabled || isLoading}
-      className={cn(buttonVariants({ variant, size, shape, className }), {
-        [cn("loading", loadingClassName)]: isLoading,
-      })}
+      data-animation={isAnimation || undefined}
+      {...(canUseDisabled ? { disabled: blocked } : {})}
+      {...(as === "button" && !props.type ? { type: "button" } : {})}
+      aria-busy={isLoading || undefined}
+      aria-disabled={!canUseDisabled && blocked ? true : undefined}
+      className={classes}
       {...props}
+      {...(!canUseDisabled
+        ? {
+            onClick: (event: ReactMouseEvent<HTMLElement>) => {
+              if (blocked) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+              }
+              suppliedOnClick?.(event);
+            },
+          }
+        : {})}
     >
       {children}
     </Comp>

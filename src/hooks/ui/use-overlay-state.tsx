@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type OverlayState = {
   isOpen: boolean;
@@ -14,26 +14,31 @@ export const useOverlayState = (
 ): OverlayState => {
   const [isOpen, setIsOpen] = useState(isOpenProp ?? false);
 
-  const onOpen = () => {
+  const onOpen = useCallback(() => {
     setIsOpen(true);
     setIsOpenProp?.(true);
-  };
+  }, [setIsOpenProp]);
 
-  const onClose = () => {
+  const onClose = useCallback(() => {
     setIsOpen(false);
     setIsOpenProp?.(false);
-  };
+  }, [setIsOpenProp]);
 
-  const onToggle = () => {
-    const newState = !isOpen;
-    setIsOpen(newState);
-    setIsOpenProp?.(newState);
-  };
+  const onToggle = useCallback(() => {
+    setIsOpen((current) => {
+      const next = !current;
+      setIsOpenProp?.(next);
+      return next;
+    });
+  }, [setIsOpenProp]);
 
-  const onOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    setIsOpenProp?.(open);
-  };
+  const onOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open);
+      setIsOpenProp?.(open);
+    },
+    [setIsOpenProp]
+  );
 
   useEffect(() => {
     if (typeof isOpenProp === "boolean") {

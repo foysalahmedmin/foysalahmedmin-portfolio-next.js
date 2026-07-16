@@ -2,18 +2,25 @@
 
 import type { OverlayState } from "@/hooks/ui/use-overlay-state";
 import { useOverlayState } from "@/hooks/ui/use-overlay-state";
+import { useDialogFocus } from "@/hooks/ui/use-dialog-focus";
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 import type { ComponentProps } from "react";
-import React, { createContext, Fragment, useContext } from "react";
+import React, {
+  createContext,
+  Fragment,
+  useContext,
+  useId,
+  useRef,
+} from "react";
 import PortalWrapper from "../wrappers/portal-wrapper";
 import type { ButtonProps } from "./button";
 import { Button } from "./button";
 
 const modalVariants = cva(
-  "fixed inset-0 z-[1000] invisible opacity-0 transition-all duration-200 ease-in-out",
+  "invisible fixed inset-0 z-[var(--z-modal)] opacity-0 transition-[opacity,visibility] duration-[var(--motion-standard)] ease-[var(--ease-standard)]",
   {
     variants: {
       variant: {
@@ -28,11 +35,11 @@ const modalVariants = cva(
 );
 
 const modalBackdropVariants = cva(
-  "fixed inset-0 z-[100] transition-all duration-200 ease-in-out",
+  "fixed inset-0 z-[var(--z-overlay)] transition-opacity duration-[var(--motion-standard)] ease-[var(--ease-standard)]",
   {
     variants: {
       variant: {
-        default: "bg-black/25",
+        default: "bg-overlay",
         none: "",
       },
       size: {
@@ -48,12 +55,12 @@ const modalBackdropVariants = cva(
 );
 
 const modalContentVariants = cva(
-  "transition-all duration-200 ease-in-out transform",
+  "transform transition-[transform,opacity] duration-[var(--motion-standard)] ease-[var(--ease-emphasized)] motion-reduce:transform-none",
   {
     variants: {
       variant: {
         default:
-          "border border-gray-200 max-h-full overflow-y-auto bg-white rounded-lg shadow-xl",
+          "border-border bg-card text-card-foreground max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[var(--radius-lg-token)] border shadow-[var(--shadow-lg)]",
         none: "",
       },
       size: {
@@ -80,7 +87,7 @@ const modalContentVariants = cva(
 
 type ModalContextType = OverlayState &
   VariantProps<typeof modalVariants> &
-  VariantProps<typeof modalContentVariants>;
+  VariantProps<typeof modalContentVariants> & { titleId: string };
 type ModalProps = ComponentProps<"div"> &
   VariantProps<typeof modalVariants> &
   VariantProps<typeof modalContentVariants> & {
@@ -122,15 +129,20 @@ const ModalRoot: React.FC<ModalProps> = ({
   ...props
 }) => {
   const overlayState = useOverlayState(isOpenProp, setIsOpenProp);
+  const titleId = useId();
   const Comp = asPortal ? PortalWrapper : Fragment;
 
   return (
-    <ModalContext.Provider value={{ ...overlayState, variant, size, side }}>
+    <ModalContext.Provider
+      value={{ ...overlayState, variant, size, side, titleId }}
+    >
       <Comp>
         <div
           className={cn(modalVariants({ variant, className }), {
             [cn("visible opacity-100", activeClassName)]: overlayState.isOpen,
           })}
+          aria-hidden={!overlayState.isOpen}
+          inert={!overlayState.isOpen}
           {...props}
         >
           {children}
@@ -178,10 +190,17 @@ const ModalContent: React.FC<ModalContentProps> = ({
   children,
   ...props
 }) => {
-  const { isOpen } = useModal();
+  const { isOpen, onClose, titleId } = useModal();
+  const ref = useRef<HTMLDivElement>(null);
+  useDialogFocus({ active: isOpen, containerRef: ref, onEscape: onClose });
 
   return (
     <div
+      ref={ref}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      tabIndex={-1}
       className={cn(modalContentVariants({ variant, size, side, className }), {
         [cn("scale-100 opacity-100", activeClassName)]: isOpen,
       })}
@@ -208,14 +227,22 @@ const ModalHeader: React.FC<ComponentProps<"div">> = ({
 
 // Modal Title Component
 const ModalTitle: React.FC<ComponentProps<"h2">> = ({
+  id,
   className,
   children,
   ...props
-}) => (
-  <h2 className={cn("text-lg font-semibold", className)} {...props}>
-    {children}
-  </h2>
-);
+}) => {
+  const { titleId } = useModal();
+  return (
+    <h2
+      id={id ?? titleId}
+      className={cn("text-lg font-semibold", className)}
+      {...props}
+    >
+      {children}
+    </h2>
+  );
+};
 
 // Modal Body Component
 const ModalBody: React.FC<ComponentProps<"div">> = ({
@@ -269,6 +296,7 @@ const ModalTrigger: React.FC<ButtonProps> = ({
 // Modal Close Trigger Component
 const ModalCloseTrigger: React.FC<ButtonProps> = ({
   onClick,
+  "aria-label": ariaLabel = "Close dialog",
   variant = "outline",
   shape = "icon",
   children = <X className="h-6 w-6" />,
@@ -278,6 +306,7 @@ const ModalCloseTrigger: React.FC<ButtonProps> = ({
 
   return (
     <Button
+      aria-label={ariaLabel}
       onClick={(e) => {
         onClose();
         onClick?.(e);
