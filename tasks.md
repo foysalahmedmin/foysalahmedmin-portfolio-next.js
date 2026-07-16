@@ -3,36 +3,36 @@
 **Master plan:** [`plan.md`](./plan.md)
 **Project:** `foysalahmedmin-portfolio-next.js`
 **Ledger version:** 2.1
-**Last updated:** 2026-07-16
+**Last updated:** 2026-07-17
 **Execution state:** Active from reviewable implementation checkpoint `7b7b2cf`; `c06ff91` remains the recovery baseline and remaining product/release tasks are tracked below
 
 ## Live progress summary
 
 This ledger is the authoritative implementation handoff. The phase table is intentionally conservative: `Complete` means every task and acceptance gate in the phase is done; `Verification` means the main implementation exists but a final health check and/or isolated commit is still required; `Partial` means meaningful work exists and named tasks remain; `Blocked input` is reserved for facts, consent, credentials, or production decisions only the owner can supply.
 
-| Phase | State | Immediate evidence | Next boundary |
-| --- | --- | --- | --- |
-| P00 | Partial | ADRs, truth schema/manifest, test harness, code baseline | Complete owner fact inventory and reproducible browser baseline |
-| P01 | Verification | Committed public DTO/visibility/contract/admin-access implementation and tests | Release-wide aggregate/soft-delete regression acceptance |
-| P02 | Verification | Committed secure contact, rich content, media, auth/session code; replica-set suite passes | End-to-end abuse/session/media acceptance |
-| P03 | Verification | Committed custom design tokens/layout/primitives and UI tests | Cross-device/a11y acceptance |
-| P04 | Verification | Custom reveal/parallax/autoplay/reduced-motion tests | Browser trace and narrative integration acceptance |
-| P05 | Partial | Route states, fallbacks, CI/browser tooling | Production-like browser/visual/Lighthouse evidence |
-| P06 | Verification | Committed migration/audit/domain/File evolution; replica-set integration passes | Production migration/rollback rehearsal |
-| P07 | Verification | Committed Site singleton/five pillars/cache/metadata; type/build gates pass | Browser/cache-invalidation acceptance |
-| P08 | Verification | Committed repeatables/Page/inbox/dashboard/resolver and tests | Admin/public cross-domain browser acceptance |
-| P09 | Partial | Guarded seed engine and draft/noindex foundation seed | Real-Mongo seed test; owner-approved production content |
-| P10 | Verification | Committed capability-aware shell and live dashboard | Browser and cross-device acceptance |
-| P11 | Verification | P11.1–P11.5 are committed through `7b7b2cf`; 118 files/684 unit tests plus type, lint, build, authority, and real-handler data-boundary gates pass | Complete authenticated admin browser acceptance in P20.2; rerun real-Mongo integration when its isolated URI is available |
-| P12 | Partial | `ba98f68` commits the 17-master direction, prompt/provenance contract, and truthful blockers; no asset is claimed generated | Clear managed seed/binding contracts, then generate and approve the System Design pilot |
-| P13 | Partial | Dynamic shell and accessible five-slide fallback hero | Managed hero media + browser/performance verification |
-| P14 | Partial | Published Page composition and evidence sections | Finish proof-driven homepage narrative |
-| P15 | Verification | Committed discovery/detail, responsive filters, role projection, and focused tests | Full browser/device acceptance |
-| P16 | Verification | Committed article discovery/detail and focused tests | Full browser/device acceptance |
-| P17 | Partial | Dynamic contact/legal and data-driven About foundations | Deep About narrative and preview parity |
-| P18 | Partial | Metadata/JSON-LD/fallback/CWV foundations | Full SEO/image/network/CWV audit |
-| P19 | Partial | CSP/request context/redaction/telemetry/a11y foundations | Complete abuse/a11y/ops acceptance matrix |
-| P20 | Pending | Release checklist defined | Run gates after P11–P19 and owner inputs are resolved |
+| Phase | State        | Immediate evidence                                                                                                                                  | Next boundary                                                                                                             |
+| ----- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| P00   | Partial      | ADRs, truth schema/manifest, test harness, code baseline                                                                                            | Complete owner fact inventory and reproducible browser baseline                                                           |
+| P01   | Verification | Committed public DTO/visibility/contract/admin-access implementation and tests                                                                      | Release-wide aggregate/soft-delete regression acceptance                                                                  |
+| P02   | Verification | Committed secure contact, rich content, media, auth/session code; replica-set suite passes                                                          | End-to-end abuse/session/media acceptance                                                                                 |
+| P03   | Verification | Committed custom design tokens/layout/primitives and UI tests                                                                                       | Cross-device/a11y acceptance                                                                                              |
+| P04   | Verification | Custom reveal/parallax/autoplay/reduced-motion tests                                                                                                | Browser trace and narrative integration acceptance                                                                        |
+| P05   | Partial      | Route states, fallbacks, CI/browser tooling                                                                                                         | Production-like browser/visual/Lighthouse evidence                                                                        |
+| P06   | Verification | Committed migration/audit/domain/File evolution; replica-set integration passes                                                                     | Production migration/rollback rehearsal                                                                                   |
+| P07   | Verification | Committed Site singleton/five pillars/cache/metadata; type/build gates pass                                                                         | Browser/cache-invalidation acceptance                                                                                     |
+| P08   | Verification | Committed repeatables/Page/inbox/dashboard/resolver and tests                                                                                       | Admin/public cross-domain browser acceptance                                                                              |
+| P09   | Partial      | Guarded seed engine and expanded draft/noindex foundation seed for services, skills, process, FAQs, legal templates, and derived capability signals | Real-Mongo seed test; owner-approved production content                                                                   |
+| P10   | Verification | Committed capability-aware shell and live dashboard                                                                                                 | Browser and cross-device acceptance                                                                                       |
+| P11   | Verification | P11.1–P11.5 are committed through `7b7b2cf`; 118 files/684 unit tests plus type, lint, build, authority, and real-handler data-boundary gates pass  | Complete authenticated admin browser acceptance in P20.2; rerun real-Mongo integration when its isolated URI is available |
+| P12   | Partial      | `ba98f68` commits the 17-master direction, prompt/provenance contract, and truthful blockers; no asset is claimed generated                         | Clear managed seed/binding contracts, then generate and approve the System Design pilot                                   |
+| P13   | Partial      | Dynamic shell and accessible five-slide fallback hero                                                                                               | Managed hero media + browser/performance verification                                                                     |
+| P14   | Partial      | Published Page composition and evidence sections                                                                                                    | Finish proof-driven homepage narrative                                                                                    |
+| P15   | Verification | Committed discovery/detail, responsive filters, role projection, and focused tests                                                                  | Full browser/device acceptance                                                                                            |
+| P16   | Verification | Committed article discovery/detail and focused tests                                                                                                | Full browser/device acceptance                                                                                            |
+| P17   | Partial      | Dynamic contact/legal and data-driven About foundations                                                                                             | Deep About narrative and preview parity                                                                                   |
+| P18   | Partial      | Metadata/JSON-LD/fallback/CWV foundations                                                                                                           | Full SEO/image/network/CWV audit                                                                                          |
+| P19   | Partial      | CSP/request context/redaction/telemetry/a11y foundations                                                                                            | Complete abuse/a11y/ops acceptance matrix                                                                                 |
+| P20   | Pending      | Release checklist defined                                                                                                                           | Run gates after P11–P19 and owner inputs are resolved                                                                     |
 
 ### Status markers and ownership
 
@@ -80,6 +80,8 @@ These apply continuously:
 - [x] P11 route/data boundary suite executes real handlers, auth middleware, validation, controllers, and services for Contact, ProjectResource, Review, Users, Audit, and Taxonomy: 28/28 tests pass.
 - [ ] Fresh real-Mongo integration rerun at the P11 head: all 6 files/26 cases were discovered but skipped because no isolated replica-set URI was supplied in this environment; the earlier `c06ff91` replica-set evidence remains valid only for that baseline.
 - [x] Focused Site/Page, media, resolver/Home, discovery, legal, and editor suites passed.
+- [x] Foundation seed expansion focused pass: `seed-foundation`, public section/metadata/rendering suites, targeted ESLint, and TypeScript completed on 2026-07-17; local Node still reports 20.20.2 while the project requires 24.x.
+- [x] Fresh unit suite completed on 2026-07-17: 123 files and 709/709 tests passed.
 - [x] Stabilize the ProjectGallery focus-restoration test by keeping the modal state callback identity stable; the full rerun passes.
 - [x] Run the real MongoDB replica-set integration suite: 6 files/26 tests passed; the combined run passed 103 files/556 tests.
 - [x] Run `pnpm build` with a valid isolated database: all 65 static pages and the route manifest completed.
@@ -964,13 +966,14 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Seed one Site singleton and default page composition.
 - [x] Seed exactly five embedded pillar entries, each owning its one hero presentation; do not create a second editable HeroSlide record.
 - [x] Seed required code-owned fallback visual keys and keep managed visual-dependent publication as draft until P12 attaches/validates generated Files.
-- [ ] Seed five to seven services.
-- [ ] Seed fifteen to twenty skills grouped by pillar.
-- [ ] Seed six process steps.
+- [x] Seed five draft services.
+- [x] Seed twenty draft skills grouped by pillar.
+- [x] Seed six process steps.
 - [x] Seed only honest/derived metrics.
 - [ ] Seed verified profile timeline, education, and credentials.
-- [ ] Seed six to eight useful FAQs.
-- [ ] Seed legal documents with effective dates after review.
+- [x] Seed six useful draft FAQs.
+- [x] Seed legal document templates with effective dates.
+- [ ] Review legal documents before production publication.
 - [x] Publish no testimonial without verification and consent.
 
 **Acceptance criteria**
