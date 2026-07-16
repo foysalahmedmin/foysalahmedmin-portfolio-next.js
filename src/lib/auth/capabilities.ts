@@ -341,6 +341,12 @@ export const getAdminPageCapability = (pathname: string): Capability | null => {
   if (pathname === "/admin/media" || pathname.startsWith("/admin/media/")) {
     return "media:manage";
   }
+  if (
+    pathname === "/admin/contacts" ||
+    pathname.startsWith("/admin/contacts/")
+  ) {
+    return "inbox:manage";
+  }
   return pathname === "/admin" || pathname.startsWith("/admin/")
     ? "admin:access"
     : null;

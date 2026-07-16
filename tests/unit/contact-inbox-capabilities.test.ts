@@ -1,8 +1,16 @@
-import { getAdminApiAuthority, hasCapability } from "@/lib/auth/capabilities";
+import {
+  getAdminApiAuthority,
+  getAdminPageCapability,
+  hasCapability,
+} from "@/lib/auth/capabilities";
 import { describe, expect, it } from "vitest";
 
 describe("contact inbox and dashboard capabilities", () => {
   it("keeps sensitive inbox operations behind explicit capabilities", () => {
+    expect(getAdminPageCapability("/admin/contacts")).toBe("inbox:manage");
+    expect(getAdminPageCapability("/admin/contacts/example")).toBe(
+      "inbox:manage"
+    );
     expect(
       getAdminApiAuthority(
         "/api/contacts/507f1f77bcf86cd799439011/admin/retention-hold",

@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   LoaderCircle,
   LogOut,
+  Mail,
   Menu,
   Settings,
   X,
@@ -81,6 +82,17 @@ const adminNavGroups: ReadonlyArray<
     ],
   },
   {
+    label: "Inbox",
+    links: [
+      {
+        name: "Contact inbox",
+        href: "/admin/contacts",
+        icon: Mail,
+        capability: "inbox:manage",
+      },
+    ],
+  },
+  {
     label: "System",
     links: [
       {
@@ -103,6 +115,7 @@ const routeLabels: Readonly<Record<string, string>> = {
   admin: "Dashboard",
   articles: "Articles",
   projects: "Projects",
+  contacts: "Contact inbox",
   site: "Site settings",
   pages: "Pages",
   settings: "Profile settings",
