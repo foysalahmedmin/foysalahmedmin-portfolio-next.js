@@ -49,6 +49,24 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
     source: "system",
     filterFields: [],
   },
+  "pillar-showcase": {
+    label: "Five-pillar capability showcase",
+    layouts: ["default", "compact", "sticky"],
+    source: "system",
+    filterFields: [],
+  },
+  "process-steps": {
+    label: "Working process steps",
+    layouts: ["default", "numbered", "compact"],
+    source: "system",
+    filterFields: [],
+  },
+  "metrics-strip": {
+    label: "Proof metrics strip",
+    layouts: ["default", "compact"],
+    source: "system",
+    filterFields: [],
+  },
   "project-collection": {
     label: "Projects",
     layouts: ["grid", "featured", "list"],
@@ -169,11 +187,15 @@ export const PAGE_EDITOR_ROUTE_KINDS: Readonly<
 > = {
   home: [
     "site-hero",
+    "metrics-strip",
+    "pillar-showcase",
     "service-collection",
     "skill-group-collection",
     "project-collection",
     "article-collection",
+    "process-steps",
     "testimonial-collection",
+    "faq-list",
     "contact-cta",
   ],
   about: [

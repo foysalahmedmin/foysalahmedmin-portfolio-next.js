@@ -32,6 +32,9 @@ export const PAGE_ROUTE_PATHS: Readonly<Record<TPageRouteKey, string>> = {
 export const PAGE_SECTION_KINDS = [
   "site-hero",
   "site-introduction",
+  "pillar-showcase",
+  "process-steps",
+  "metrics-strip",
   "project-collection",
   "article-collection",
   "service-collection",

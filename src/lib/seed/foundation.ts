@@ -194,6 +194,9 @@ const pageSectionSchema = z
     kind: z.enum([
       "site-hero",
       "site-introduction",
+      "pillar-showcase",
+      "process-steps",
+      "metrics-strip",
       "project-collection",
       "article-collection",
       "service-collection",
@@ -424,6 +427,20 @@ const pageDrafts = {
         source: system,
       },
       {
+        key: "metrics",
+        kind: "metrics-strip",
+        visible: true,
+        layout: "default",
+        source: system,
+      },
+      {
+        key: "pillars",
+        kind: "pillar-showcase",
+        visible: true,
+        layout: "default",
+        source: system,
+      },
+      {
         key: "services",
         kind: "service-collection",
         visible: true,
@@ -454,6 +471,13 @@ const pageDrafts = {
         layout: "featured",
         item_limit: 6,
         source: automatic({ featured: true }),
+      },
+      {
+        key: "process",
+        kind: "process-steps",
+        visible: true,
+        layout: "default",
+        source: system,
       },
       {
         key: "contact",

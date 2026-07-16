@@ -11,6 +11,9 @@ import ArticlesSection from "@/components/(common)/home-page/articles-section";
 import HeroSection from "@/components/(common)/home-page/hero-section";
 import ProjectsSection from "@/components/(common)/home-page/projects-section";
 import ContactCTASection from "@/components/sections/contact-cta-section";
+import MetricsStripSection from "@/components/sections/metrics-strip-section";
+import PillarShowcaseSection from "@/components/sections/pillar-showcase-section";
+import ProcessStepsSection from "@/components/sections/process-steps-section";
 import {
   CredentialsSection,
   FAQSection,
@@ -63,6 +66,30 @@ export const PublicPageSections = ({ payload }: Props) => (
             ) : (
               <AboutSection site={payload.site} />
             );
+          break;
+        case "pillar-showcase":
+          content = (
+            <PillarShowcaseSection
+              pillars={payload.site.pillars}
+              heading={section.heading}
+            />
+          );
+          break;
+        case "process-steps":
+          content = (
+            <ProcessStepsSection
+              steps={payload.site.process}
+              heading={section.heading}
+            />
+          );
+          break;
+        case "metrics-strip":
+          content = payload.site.experience.feature_flags.show_metrics ? (
+            <MetricsStripSection
+              metrics={payload.site.metrics}
+              heading={section.heading}
+            />
+          ) : null;
           break;
         case "service-collection":
           content = (

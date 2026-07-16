@@ -131,6 +131,9 @@ const systemSection = <
 export const pageSectionSchema = z.discriminatedUnion("kind", [
   systemSection("site-hero", ["default", "split", "immersive"]),
   systemSection("site-introduction", ["default", "split"]),
+  systemSection("pillar-showcase", ["default", "compact", "sticky"]),
+  systemSection("process-steps", ["default", "numbered", "compact"]),
+  systemSection("metrics-strip", ["default", "compact"]),
   collectionSection("project-collection", ["grid", "featured", "list"], {
     ...sharedContentFilter,
     project_type: z.enum(PROJECT_TYPES).optional(),
@@ -207,11 +210,15 @@ export const PAGE_ROUTE_SECTION_KINDS: Readonly<
 > = {
   home: [
     "site-hero",
+    "metrics-strip",
+    "pillar-showcase",
     "service-collection",
     "skill-group-collection",
     "project-collection",
     "article-collection",
+    "process-steps",
     "testimonial-collection",
+    "faq-list",
     "contact-cta",
   ],
   about: [
