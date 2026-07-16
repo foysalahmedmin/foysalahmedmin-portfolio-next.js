@@ -4,7 +4,8 @@
   "state": "generated_candidate_set",
   "approved": false,
   "generated_at": "2026-07-16T23:37:26Z",
-  "repository_policy": "image bytes are local ignored files under seed-assets; commit checksums and evidence only",
+  "repository_policy": "source/master assets are tracked under seed-assets; public preview copies are tracked under public/images/heroes",
+  "public_mirror_root": "public/images/heroes",
   "shared_gates": {
     "source_dimensions": "pass_candidate",
     "optimization_budget": "pass_candidate",
@@ -13,7 +14,8 @@
     "rights_license_review": "pending",
     "managed_media_ingestion": "pending",
     "site_attachment": "pending",
-    "public_publish_validation": "pending"
+    "public_publish_validation": "pending",
+    "metadata_extraction": "pass_candidate"
   },
   "assets": [
     {
@@ -57,6 +59,20 @@
           "No obvious text, UI, logo, person, robot, or code artifacts.",
           "Accent reads more violet than the current frontend cyan label; final approval should decide whether to regenerate or accept the visual family balance."
         ]
+      },
+      "editorial_metadata": {
+        "focal_point": {
+          "x": 0.72,
+          "y": 0.5
+        },
+        "dominant_color": "#e8d8c8",
+        "blur_data_url": "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAADwAQCdASoQAAkAAwBWJZQCdAD1eD1WhoAA4nK/w9qB82+9sr3M/iAIc14Uhdr84M6W+8Xyn2RMUar0GJ/HghWAAAA=",
+        "alt_text": "",
+        "is_decorative": true,
+        "extraction": {
+          "tool": "sharp",
+          "source": "seed-assets/heroes/frontend.master.png"
+        }
       }
     },
     {
@@ -99,6 +115,20 @@
           "Clear service/data flow topology with copy-safe left field.",
           "No obvious text, logo, person, robot, server-rack stock image, or cloud-provider diagram artifacts."
         ]
+      },
+      "editorial_metadata": {
+        "focal_point": {
+          "x": 0.72,
+          "y": 0.5
+        },
+        "dominant_color": "#c8c8b8",
+        "blur_data_url": "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAAAQAgCdASoQAAkAAwBWJZQCw7EC1tmYzviAAP7nQKt+RUc2JjEym5M8LmfFDqKB1qn3h1Po2AAAAA==",
+        "alt_text": "",
+        "is_decorative": true,
+        "extraction": {
+          "tool": "sharp",
+          "source": "seed-assets/heroes/backend.master.png"
+        }
       }
     },
     {
@@ -141,6 +171,20 @@
           "Readable abstract orchestration loop with review-boundary feeling.",
           "No obvious brain, robot, face, chatbot UI, text, logo, or metrics."
         ]
+      },
+      "editorial_metadata": {
+        "focal_point": {
+          "x": 0.72,
+          "y": 0.5
+        },
+        "dominant_color": "#d8c8b8",
+        "blur_data_url": "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJYwCdAEfPGWxwQAA/vPGRCUb6WFKVvOg1g5AQ8qJHxSXP1fveVeugAA=",
+        "alt_text": "",
+        "is_decorative": true,
+        "extraction": {
+          "tool": "sharp",
+          "source": "seed-assets/heroes/ai-automation.master.png"
+        }
       }
     },
     {
@@ -183,6 +227,20 @@
           "Strong resilient architecture topology with alternate paths.",
           "No obvious person, logo, readable text, UI, or brand mark."
         ]
+      },
+      "editorial_metadata": {
+        "focal_point": {
+          "x": 0.72,
+          "y": 0.5
+        },
+        "dominant_color": "#d8d8c8",
+        "blur_data_url": "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
+        "alt_text": "",
+        "is_decorative": true,
+        "extraction": {
+          "tool": "sharp",
+          "source": "seed-assets/heroes/system-design-pilot.master.png"
+        }
       }
     },
     {
@@ -225,6 +283,20 @@
           "Strong integrated vertical layer topology with copy-safe left field.",
           "No obvious text, UI, logo, person, robot, screenshot, or code artifacts."
         ]
+      },
+      "editorial_metadata": {
+        "focal_point": {
+          "x": 0.72,
+          "y": 0.5
+        },
+        "dominant_color": "#e8d8c8",
+        "blur_data_url": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADwAQCdASoQAAkAAwBWJYwCdAEKCjBG9lgA/vBdhPVpERSzaokdeH5SMC5AZKITn+83rdevzgJDdCtiF2f8KgAA",
+        "alt_text": "",
+        "is_decorative": true,
+        "extraction": {
+          "tool": "sharp",
+          "source": "seed-assets/heroes/full-stack.master.png"
+        }
       }
     }
   ],

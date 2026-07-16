@@ -24,7 +24,7 @@ This ledger is the authoritative implementation handoff. The phase table is inte
 | P09   | Partial      | Guarded seed engine and expanded draft/noindex foundation seed for services, skills, process, FAQs, legal templates, and derived capability signals | Real-Mongo seed test; owner-approved production content                                                                   |
 | P10   | Verification | Committed capability-aware shell and live dashboard                                                                                                 | Browser and cross-device acceptance                                                                                       |
 | P11   | Verification | P11.1–P11.5 are committed through `7b7b2cf`; 118 files/684 unit tests plus type, lint, build, authority, and real-handler data-boundary gates pass  | Complete authenticated admin browser acceptance in P20.2; rerun real-Mongo integration when its isolated URI is available |
-| P12   | Partial      | Generated five hero candidates are recorded with ignored local asset paths, checksums, budget evidence, and truthful remaining blockers             | Approve, ingest, attach, and verify managed media                                                                         |
+| P12   | Partial      | Generated five hero candidates are recorded with tracked seed/public asset paths, checksums, budget evidence, and truthful remaining blockers       | Approve, ingest, attach, and verify managed media                                                                         |
 | P13   | Partial      | Dynamic shell and accessible five-slide fallback hero                                                                                               | Managed hero media + browser/performance verification                                                                     |
 | P14   | Partial      | Published Page composition and evidence sections                                                                                                    | Finish proof-driven homepage narrative                                                                                    |
 | P15   | Verification | Committed discovery/detail, responsive filters, role projection, and focused tests                                                                  | Full browser/device acceptance                                                                                            |
@@ -1150,7 +1150,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Define forbidden motifs: people, logos, fake text/UI, robots, brains, stock keyboards, excessive neon.
 - [x] Store prompt/version/provenance template.
 - [x] Store the exact System Design pilot generation request and metadata checklist without claiming generated evidence.
-- [x] Generate the System Design pilot candidate and record local ignored asset paths, dimensions, checksums, and candidate review notes.
+- [x] Generate the System Design pilot candidate and record tracked asset paths, dimensions, checksums, and candidate review notes.
 - [ ] Approve one pillar pilot before managed ingestion or public attachment.
 - [ ] Test the pilot at desktop/mobile crops, 320–1920 widths, and both themes.
 - [x] Enforce pilot media budgets: mobile hero ≤ 200 KB and desktop hero ≤ 350 KB after optimization.

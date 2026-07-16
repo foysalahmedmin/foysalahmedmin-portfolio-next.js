@@ -14,7 +14,8 @@
     "raw_width": 1672,
     "raw_height": 941,
     "raw_sha256": "78940c005788982bc7bc92f17191dd5db0b0e57b498e8631bc255fc26bba2347",
-    "repository_policy": "binary ignored; commit checksum/provenance only"
+    "public_path": "public/images/heroes/system-design-pilot.master.png",
+    "repository_policy": "source/master assets are tracked under seed-assets; public preview copies are tracked under public/images/heroes"
   },
   "derivatives": {
     "desktop_webp": {
