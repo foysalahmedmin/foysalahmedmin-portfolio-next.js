@@ -2,9 +2,9 @@
 
 **Master plan:** [`plan.md`](./plan.md)
 **Project:** `foysalahmedmin-portfolio-next.js`
-**Ledger version:** 2.0
+**Ledger version:** 2.1
 **Last updated:** 2026-07-16
-**Execution state:** Active; verified foundations exist in both committed and currently uncommitted slices
+**Execution state:** Active from clean stable checkpoint `c06ff91`; remaining product and release tasks are tracked below
 
 ## Live progress summary
 
@@ -13,22 +13,22 @@ This ledger is the authoritative implementation handoff. The phase table is inte
 | Phase | State | Immediate evidence | Next boundary |
 | --- | --- | --- | --- |
 | P00 | Partial | ADRs, truth schema/manifest, test harness, code baseline | Complete owner fact inventory and reproducible browser baseline |
-| P01 | Verification | Public DTO/visibility/contract/admin-access tests and implementation | Re-run aggregate/soft-delete coverage; isolate commit |
-| P02 | Verification | Secure contact, rich content, media, auth/session implementations and tests | Real-database/integration verification; isolate commits |
-| P03 | Verification | Custom design tokens/layout/primitives and UI tests | Cross-device/a11y acceptance; isolate commit |
+| P01 | Verification | Committed public DTO/visibility/contract/admin-access implementation and tests | Release-wide aggregate/soft-delete regression acceptance |
+| P02 | Verification | Committed secure contact, rich content, media, auth/session code; replica-set suite passes | End-to-end abuse/session/media acceptance |
+| P03 | Verification | Committed custom design tokens/layout/primitives and UI tests | Cross-device/a11y acceptance |
 | P04 | Verification | Custom reveal/parallax/autoplay/reduced-motion tests | Browser trace and narrative integration acceptance |
 | P05 | Partial | Route states, fallbacks, CI/browser tooling | Production-like browser/visual/Lighthouse evidence |
-| P06 | Verification | Migration/audit/domain/File evolution and tests | Replica-set run and isolated commits |
-| P07 | Verification | Site singleton/five pillars/cache/metadata and tests | Full health check and isolated commit |
-| P08 | Verification | Repeatables/Page/inbox/dashboard/resolver and tests | Full health check and isolated commits |
+| P06 | Verification | Committed migration/audit/domain/File evolution; replica-set integration passes | Production migration/rollback rehearsal |
+| P07 | Verification | Committed Site singleton/five pillars/cache/metadata; type/build gates pass | Browser/cache-invalidation acceptance |
+| P08 | Verification | Committed repeatables/Page/inbox/dashboard/resolver and tests | Admin/public cross-domain browser acceptance |
 | P09 | Partial | Guarded seed engine and draft/noindex foundation seed | Real-Mongo seed test; owner-approved production content |
-| P10 | Verification | Capability-aware shell and live dashboard | Browser acceptance and isolated commit |
-| P11 | Partial | Shared forms, Site/Page, repeatable, and media workspaces | Audit/finish P11.2–P11.5, then integration/browser tests |
+| P10 | Verification | Committed capability-aware shell and live dashboard | Browser and cross-device acceptance |
+| P11 | Partial | Shared forms, Site/Page, repeatable, and media workspaces | Finish P11.1, the P11.3 Process editor, and P11.5; then integration/browser tests |
 | P12 | Pending | Contracts and pending media intents only | Generate and ingest approved non-human visual system |
 | P13 | Partial | Dynamic shell and accessible five-slide fallback hero | Managed hero media + browser/performance verification |
 | P14 | Partial | Published Page composition and evidence sections | Finish proof-driven homepage narrative |
-| P15 | Verification | Project discovery/detail code and focused tests exist | Current health check, browser acceptance, isolated commit |
-| P16 | Verification | Article discovery/detail code and focused tests exist | Current health check, browser acceptance, isolated commit |
+| P15 | Verification | Committed discovery/detail, responsive filters, role projection, and focused tests | Full browser/device acceptance |
+| P16 | Verification | Committed article discovery/detail and focused tests | Full browser/device acceptance |
 | P17 | Partial | Dynamic contact/legal and data-driven About foundations | Deep About narrative and preview parity |
 | P18 | Partial | Metadata/JSON-LD/fallback/CWV foundations | Full SEO/image/network/CWV audit |
 | P19 | Partial | CSP/request context/redaction/telemetry/a11y foundations | Complete abuse/a11y/ops acceptance matrix |
@@ -40,7 +40,7 @@ This ledger is the authoritative implementation handoff. The phase table is inte
 - `[-]` actively in progress or implemented but awaiting its stated verification.
 - `[ ]` not started or still materially incomplete.
 - `[!]` blocked by an explicit external/user input; the blocker must be written beside it.
-- Git may temporarily contain several uncommitted slices while recovery/audit is underway. A phase is not called release-complete until its diff is isolated and its gate evidence is recorded.
+- Recovery is isolated through stable checkpoint `c06ff91`. Future work must return to a clean tree after every logical slice; a phase is not release-complete until its gate evidence is recorded.
 - Owner-supplied verified biography, employment/education/credential facts, project outcomes, testimonial consent, resume/contact choices, production secrets, provider credentials, and deployment access remain external inputs. Engineering uses draft/noindex fallbacks until they arrive.
 
 ## How to use this ledger
@@ -62,7 +62,7 @@ These apply continuously:
 
 - [x] `pnpm typecheck` passes.
 - [x] `pnpm lint` passes.
-- [ ] `pnpm build` passes.
+- [x] `pnpm build` passes.
 - [ ] Relevant automated tests pass once introduced.
 - [ ] No public response exposes draft/private/admin-only data.
 - [ ] No visible action is inert or simulates success.
@@ -75,26 +75,26 @@ These apply continuously:
 
 - [x] `pnpm exec tsc --noEmit` completed successfully.
 - [x] `pnpm lint` completed successfully.
-- [x] Latest full unit rerun completed with 97 files and 530/530 tests passing.
+- [x] Latest full unit rerun completed with 99 files and 542/542 tests passing.
 - [x] Focused Site/Page, media, resolver/Home, discovery, legal, and editor suites passed.
-- [ ] Stabilize the ProjectGallery focus-restoration test after one earlier full-suite run failed 1/530 while isolated/latest reruns passed.
+- [x] Stabilize the ProjectGallery focus-restoration test by keeping the modal state callback identity stable; the full rerun passes.
 - [x] Run the real MongoDB replica-set integration suite: 6 files/26 tests passed; the combined run passed 103 files/556 tests.
 - [x] Run `pnpm build` with a valid isolated database: all 65 static pages and the route manifest completed.
-- [ ] Make the ordinary/CI no-database build resilient: `/privacy` and `/terms` must return the honest legal fallback, and the CI Build step currently supplies no `DATABASE_URL`.
-- [ ] Finish isolated browser tests: About, Contact page load, and motion preference pass; three contact assertions must target `#contact-form-status` instead of ambiguous global `status`/`alert` roles.
-- [ ] Disable unsafe accidental reuse of an unrelated server on port 3000 or require a verified health marker before Playwright reuses it.
+- [x] Make the ordinary/CI no-database build resilient: `/privacy` and `/terms` render the honest noindex fallback, and all 65 static pages build without `DATABASE_URL`.
+- [x] Finish the isolated Contact Chromium flow: all 3/3 assertions pass with status checks scoped to `#contact-form-status`.
+- [x] Prevent unsafe Playwright server reuse with an isolated default port and a verified portfolio readiness/contact marker.
 - [ ] Run Lighthouse/visual matrices under the pinned Node 24/browser profile; the local audit currently reports Node 20.20.2 while the project requires Node 24.x.
 
-### Current recovery commit sequence
+### Completed recovery commit sequence
 
-1. Roadmap and execution ledger migration/reconciliation (documentation-only).
-2. Build-safe legal/database fallback and current quality-gate stabilization.
-3. Public/domain/security foundations in dependency-aligned commits.
-4. Site/Page/repeatable/seed backends.
-5. Admin shell and content workspaces.
-6. Public shell, discovery, detail, and Page composition.
-7. Generated media and final narrative work.
-8. Hardening and release evidence.
+1. `d27203b` — roadmap and execution ledger migration/reconciliation.
+2. `106aee5` — duplicate case-conflicting partial cleanup.
+3. `1008baa` — secure platform, domain, storage, Site/Page, repeatable, migration, and seed foundations.
+4. `33aa9ee` — custom design and motion system.
+5. `8f19a0f` — secure admin shell and content workspaces.
+6. `c06ff91` — dynamic public shell, discovery, details, legal fallback, and Page composition.
+
+The supported stable boundary is the complete chain through `c06ff91`; `1008baa` was an intermediate dependency-layer commit, not a standalone product release. Generated media, final narrative work, and the full hardening/release matrix remain roadmap work rather than recovery debt.
 
 ---
 
@@ -1318,9 +1318,9 @@ These apply continuously:
 
 - [x] Server-render initial project grid.
 - [x] Adopt the P01.3 URL query-state/search/debounce/abort primitives for pillar, technology, type, year, and sort filters.
-- [ ] Add bounded pagination and responsive filter drawer. Pagination is complete; the responsive drawer remains.
+- [x] Add bounded pagination and an accessible responsive filter drawer.
 - [x] Add loading, empty, error/retry, stale, and no-filter-match states.
-- [ ] Build case-study cards with type, role, pillar, stack, and verified outcome. The list projection/card still needs the project role.
+- [x] Build case-study cards with type, safe public role projection, pillar, stack, and verified outcome.
 - [x] Use optimized media and pillar fallbacks.
 - [x] Add keyboard/a11y and browser-history tests.
 
@@ -1619,9 +1619,8 @@ These are not permitted to distract from the main roadmap:
 
 ## Current next action
 
-1. Finish the recovery audit: make `pnpm typecheck` green, run the affected focused suites, and classify every existing dirty feature as verified or partial.
-2. Isolate and commit the already-implemented foundations in dependency order instead of creating one giant redesign commit.
-3. Complete **P11.2–P11.5** admin workspaces and browser acceptance.
-4. Complete **P12** generated non-human media through the shared managed-media path.
-5. Finish **P14**, **P17**, **P18**, and **P19**, then run the complete **P20** release matrix.
-6. Keep production publication blocked for any claim/media/contact item that still lacks owner verification or credentials.
+1. Preserve clean checkpoint `c06ff91`; end every new logical slice with focused verification, ledger reconciliation, and a reviewable commit.
+2. Finish the two unchecked **P11.1** shared-editor primitives, then the typed **P11.3** Process editor and **P11.5** system workspaces with browser acceptance.
+3. Complete **P12** generated non-human media through the shared managed-media path.
+4. Finish **P14**, **P17**, **P18**, and **P19**, then run the complete **P20** release matrix.
+5. Keep production publication blocked for any claim/media/contact item that still lacks owner verification or credentials.
