@@ -8,6 +8,7 @@ import {
   type TResolvedPageSection,
   type TResolvedPublishedPagePayload,
 } from "@/app/api/pages/page-resolver.type";
+import type { TPublicSiteDto } from "@/app/api/site/site.type";
 import * as PageRepository from "@/app/api/pages/page.repository";
 import {
   PAGE_ROUTE_PATHS,
@@ -112,6 +113,7 @@ const resolveSection = async (
       ? section.source.ids.length
       : (section.item_limit ?? 1);
   try {
+    const sourceFilter = safeFilters(section);
     const recordLimit = Math.min(24, requested);
     const items = (
       await readPageCompositionItems(section.kind, {
@@ -142,6 +144,9 @@ const resolveSection = async (
       ...(section.heading ? { heading: section.heading } : {}),
       layout: section.layout,
       source_mode: section.source.mode,
+      ...(section.source.mode === "automatic"
+        ? { source_filter: sourceFilter }
+        : {}),
       items,
       health: {
         status,
@@ -163,6 +168,9 @@ const resolveSection = async (
       ...(section.heading ? { heading: section.heading } : {}),
       layout: section.layout,
       source_mode: section.source.mode,
+      ...(section.source.mode === "automatic"
+        ? { source_filter: safeFilters(section) }
+        : {}),
       items: [],
       health: {
         status: "unavailable",
@@ -195,14 +203,16 @@ const mapWithConcurrency = async <TInput, TOutput>(
   return results;
 };
 
-export const resolvePublishedPageUncached = async (
-  routeKey: TPageRouteKey
+export const resolvePageSnapshotUncached = async (
+  input: Readonly<{
+    route_key: TPageRouteKey;
+    revision: number;
+    resolved_at: string;
+    snapshot: TPageDraftSnapshot;
+    site: TPublicSiteDto;
+  }>
 ): Promise<TResolvedPublishedPagePayload> => {
-  const [published, site] = await Promise.all([
-    readPublishedPageSnapshot(routeKey),
-    readPublishedSite(),
-  ]);
-  const visibleSections = published.snapshot.sections.filter(
+  const visibleSections = input.snapshot.sections.filter(
     (section) => section.visible
   );
   if (visibleSections.length > PAGE_RESOLVER_MAX_SECTION_READS) {
@@ -214,7 +224,8 @@ export const resolvePublishedPageUncached = async (
   const sections = await mapWithConcurrency(
     visibleSections,
     PAGE_RESOLVER_SECTION_CONCURRENCY,
-    (section) => resolveSection(section, site.content_source !== "published")
+    (section) =>
+      resolveSection(section, input.site.content_source !== "published")
   );
   const resolvedRecords = sections.reduce(
     (total, section) => total + section.health.resolved_records,
@@ -235,21 +246,21 @@ export const resolvePublishedPageUncached = async (
   ).length;
   return {
     page: {
-      route_key: routeKey,
-      route_path: PAGE_ROUTE_PATHS[routeKey],
+      route_key: input.route_key,
+      route_path: PAGE_ROUTE_PATHS[input.route_key],
       locale: "en",
       schema_version: 1,
       contract_version: 1,
-      published_revision: published.revision,
-      published_at: published.published_at,
-      seo: published.snapshot.seo,
+      published_revision: input.revision,
+      published_at: input.resolved_at,
+      seo: input.snapshot.seo,
     },
-    site,
+    site: input.site,
     sections,
     health: {
       status:
         healthySections === sections.length &&
-        site.content_source === "published"
+        input.site.content_source === "published"
           ? "healthy"
           : "degraded",
       total_sections: sections.length,
@@ -259,4 +270,20 @@ export const resolvePublishedPageUncached = async (
       omitted_records: omittedRecords,
     },
   };
+};
+
+export const resolvePublishedPageUncached = async (
+  routeKey: TPageRouteKey
+): Promise<TResolvedPublishedPagePayload> => {
+  const [published, site] = await Promise.all([
+    readPublishedPageSnapshot(routeKey),
+    readPublishedSite(),
+  ]);
+  return await resolvePageSnapshotUncached({
+    route_key: routeKey,
+    revision: published.revision,
+    resolved_at: published.published_at,
+    snapshot: published.snapshot,
+    site,
+  });
 };

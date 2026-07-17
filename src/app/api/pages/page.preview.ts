@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { ENV } from "@/config";
-import type { NextRequest, NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
+import { getAdminPagePreviewPath } from "@/lib/pages/page-preview-path";
 import type { TPageRouteKey } from "./page.type";
 
 export const PAGE_PREVIEW_COOKIE = "page_preview" as const;
@@ -31,6 +32,20 @@ export const getPagePreviewTtlSeconds = (): number => {
     : 600;
 };
 
+export const getPagePreviewLifetime = (
+  now = new Date()
+): Readonly<{
+  expires_in_seconds: number;
+  expires_at: string;
+}> => {
+  const expiresIn = getPagePreviewTtlSeconds();
+  const expiresAtSeconds = Math.floor(now.getTime() / 1_000) + expiresIn;
+  return {
+    expires_in_seconds: expiresIn,
+    expires_at: new Date(expiresAtSeconds * 1_000).toISOString(),
+  };
+};
+
 const encode = (payload: TPreviewPayload): string =>
   Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
 
@@ -40,18 +55,19 @@ const signature = (encoded: string): string =>
     .digest("base64url");
 
 const previewCookiePath = (routeKey: TPageRouteKey): string =>
-  `/api/pages/${routeKey}/preview`;
+  getAdminPagePreviewPath(routeKey);
 
 export const setPagePreviewCookie = (
   response: NextResponse,
   input: { route_key: TPageRouteKey; page_id: string; revision: number },
   now = new Date()
 ): void => {
-  const ttl = getPagePreviewTtlSeconds();
+  const lifetime = getPagePreviewLifetime(now);
+  const expiresAt = new Date(lifetime.expires_at);
   const encoded = encode({
     v: 1,
     ...input,
-    exp: Math.floor(now.getTime() / 1_000) + ttl,
+    exp: Math.floor(expiresAt.getTime() / 1_000),
     nonce: randomBytes(16).toString("base64url"),
   });
   response.cookies.set(
@@ -62,7 +78,7 @@ export const setPagePreviewCookie = (
       secure: ENV.environment === "production",
       sameSite: "strict",
       path: previewCookiePath(input.route_key),
-      maxAge: ttl,
+      expires: expiresAt,
     }
   );
 };
@@ -80,12 +96,11 @@ export const clearPagePreviewCookie = (
   });
 };
 
-export const verifyPagePreviewCookie = (
-  request: NextRequest,
+export const verifyPagePreviewToken = (
+  token: string | undefined,
   routeKey: TPageRouteKey,
   now = new Date()
 ): TPreviewPayload | null => {
-  const token = request.cookies.get(PAGE_PREVIEW_COOKIE)?.value;
   if (!token || token.length > 2_048) return null;
   const [encoded, supplied, ...extra] = token.split(".");
   if (!encoded || !supplied || extra.length) return null;

@@ -150,6 +150,7 @@ describe("public discovery components", () => {
         initialQuery={parseProjectDiscoveryQuery({})}
         categories={[]}
         facets={{ technologies: ["Node.js", "Redis"], years: [2025] }}
+        compositionFilter={{ featured: true, project_type: "lab" }}
         fallbacks={site.fallbacks}
       />
     );
@@ -168,7 +169,11 @@ describe("public discovery components", () => {
       screen.getByRole("img", { name: "Backend managed project fallback" })
     ).toBeVisible();
     expect(getProjects).toHaveBeenCalledWith(
-      expect.objectContaining({ pillar: "backend" }),
+      expect.objectContaining({
+        pillar: "backend",
+        composition_featured: true,
+        composition_project_type: "lab",
+      }),
       expect.objectContaining({ signal: expect.any(AbortSignal) })
     );
   });
@@ -222,6 +227,74 @@ describe("public discovery components", () => {
     await waitFor(() => expect(trigger).toHaveFocus());
     expect(document.body).not.toHaveStyle({ overflow: "hidden" });
     expect(trigger).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("restores the full curated Project snapshot when an SSR filter is cleared without escaping to the public collection", async () => {
+    window.history.replaceState({}, "", "/projects?search=queue");
+    const user = userEvent.setup();
+    const designSystemProject: TProjectListItem = {
+      ...project,
+      _id: "design-system-project-id",
+      slug: "design-system",
+      name: "Design system",
+      description: "Reusable interface foundations.",
+    };
+    render(
+      <ProjectsContentSection
+        initialProjects={[project]}
+        initialMeta={{ total: 1, page: 1, limit: 1 }}
+        initialQuery={parseProjectDiscoveryQuery({ search: "queue" })}
+        snapshotProjects={[project, designSystemProject]}
+        categories={[]}
+        facets={{ technologies: ["Node.js"], years: [2025] }}
+        snapshotLocked
+      />
+    );
+
+    expect(screen.getByText("Queue platform")).toBeVisible();
+    expect(screen.queryByText("Design system")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /clear filters/i }));
+
+    expect(await screen.findByText("Design system")).toBeVisible();
+    expect(screen.getByText("Queue platform")).toBeVisible();
+    expect(getProjects).not.toHaveBeenCalled();
+  });
+
+  it("restores the full curated Article snapshot when an SSR filter is cleared without escaping to the public collection", async () => {
+    window.history.replaceState({}, "", "/articles?topic=Security");
+    const user = userEvent.setup();
+    const reactArticle: TArticleListItem = {
+      ...article,
+      _id: "react-article-id",
+      slug: "frontend-state",
+      name: "Frontend state",
+      topics: ["React"],
+    };
+    const securityArticle = {
+      ...article,
+      topics: ["Security"],
+    };
+    render(
+      <ArticlesContentSection
+        initialArticles={[securityArticle]}
+        initialMeta={{ total: 1, page: 1, limit: 1 }}
+        initialQuery={parseArticleDiscoveryQuery({ topic: "Security" })}
+        snapshotArticles={[securityArticle, reactArticle]}
+        categories={[]}
+        facets={{ topics: ["Security", "React"] }}
+        snapshotLocked
+      />
+    );
+
+    expect(screen.getByText("Safe boundaries")).toBeVisible();
+    expect(screen.queryByText("Frontend state")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /clear filters/i }));
+
+    expect(await screen.findByText("Frontend state")).toBeVisible();
+    expect(screen.getByText("Safe boundaries")).toBeVisible();
+    expect(getArticles).not.toHaveBeenCalled();
   });
 
   it("renders article provenance, dates, and reading time without a hydration fetch", async () => {

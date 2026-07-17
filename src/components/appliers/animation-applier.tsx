@@ -6,6 +6,7 @@ import { useEffect } from "react";
 
 const REVEAL_SELECTOR =
   "[data-reveal], .fade-up, .fade-down, .fade-left, .fade-right, .skew-up, .scale-in";
+const PREVIEW_MOTION_SELECTOR = "[data-preview-motion]";
 
 function getRevealElements(root: ParentNode): Element[] {
   const elements: Element[] = [];
@@ -23,10 +24,21 @@ const AnimationApplier = () => {
   useEffect(() => {
     if (!hydrated) return;
 
-    const shouldAnimate = effectiveMotion === "full" && capability !== "static";
+    const canObserve = capability !== "static";
+    const shouldAnimate = (element: Element) => {
+      const previewScope = element.closest<HTMLElement>(
+        PREVIEW_MOTION_SELECTOR
+      );
+      return (
+        canObserve &&
+        (previewScope
+          ? previewScope.dataset.previewMotion === "normal"
+          : effectiveMotion === "full")
+      );
+    };
     const observed = new WeakSet<Element>();
 
-    const observer = shouldAnimate
+    const observer = canObserve
       ? new IntersectionObserver(
           (entries) => {
             if (document.visibilityState !== "visible") return;
@@ -59,7 +71,7 @@ const AnimationApplier = () => {
         }
         htmlElement.dataset.revealReady = "true";
 
-        if (observer) {
+        if (observer && shouldAnimate(element)) {
           observer.observe(element);
         } else {
           htmlElement.dataset.revealVisible = "true";

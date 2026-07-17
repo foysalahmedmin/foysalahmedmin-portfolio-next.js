@@ -33,8 +33,11 @@ import {
   PUBLIC_DISCOVERY_PAGE_SIZE,
   getProjectDiscoveryRequestKey,
   hasProjectDiscoveryFilters,
+  projectDiscoveryCompositionQuery,
   type ProjectDiscoveryQuery,
+  type ProjectDiscoveryCompositionFilter,
 } from "@/lib/discovery/public-discovery";
+import { filterAndSortCuratedProjects } from "@/lib/discovery/curated-discovery";
 import { cn } from "@/lib/utils";
 import { getProjects } from "@/services/project.service";
 import type { TProjectCategory } from "@/types/project-category.type";
@@ -51,16 +54,27 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-type DiscoveryMeta = { total: number; page: number; limit: number };
-type ProjectFacets = { technologies: string[]; years: number[] };
+export type ProjectDiscoveryMeta = {
+  total: number;
+  page: number;
+  limit: number;
+};
+export type ProjectDiscoveryFacets = {
+  technologies: string[];
+  years: number[];
+};
 type RequestPhase = "ready" | "loading" | "refreshing" | "error" | "stale";
+const EMPTY_PROJECT_COMPOSITION_FILTER = {} as const;
 
-type ProjectsContentSectionProps = {
+export type ProjectsContentSectionProps = {
   initialProjects: TProjectListItem[];
-  initialMeta: DiscoveryMeta;
+  snapshotProjects?: TProjectListItem[];
+  initialMeta: ProjectDiscoveryMeta;
   initialQuery: ProjectDiscoveryQuery;
   categories: TProjectCategory[];
-  facets: ProjectFacets;
+  facets: ProjectDiscoveryFacets;
+  compositionFilter?: ProjectDiscoveryCompositionFilter;
+  snapshotLocked?: boolean;
   initialError?: boolean;
   fallbacks?: TPublicSiteFallbacksDto;
 };
@@ -289,10 +303,13 @@ const ProjectFilterFields = ({
 
 const ProjectsContentSection = ({
   initialProjects,
+  snapshotProjects = initialProjects,
   initialMeta,
   initialQuery,
   categories,
   facets,
+  compositionFilter = EMPTY_PROJECT_COMPOSITION_FILTER,
+  snapshotLocked = false,
   initialError = false,
   fallbacks,
 }: ProjectsContentSectionProps) => {
@@ -354,7 +371,25 @@ const ProjectsContentSection = ({
     const requestKey = getProjectDiscoveryRequestKey(requestQuery);
     if (firstRequest.current) {
       firstRequest.current = false;
-      if (requestKey === getProjectDiscoveryRequestKey(initialQuery)) return;
+      if (
+        !snapshotLocked &&
+        requestKey === getProjectDiscoveryRequestKey(initialQuery)
+      )
+        return;
+    }
+    if (snapshotLocked) {
+      const nextProjects = filterAndSortCuratedProjects(
+        snapshotProjects,
+        requestQuery
+      );
+      setProjects(nextProjects);
+      setMeta({
+        total: nextProjects.length,
+        page: 1,
+        limit: Math.max(1, nextProjects.length),
+      });
+      setPhase("ready");
+      return;
     }
 
     const fetchProjects = async () => {
@@ -363,6 +398,7 @@ const ProjectsContentSection = ({
       try {
         const response = await getProjects(
           {
+            ...projectDiscoveryCompositionQuery(compositionFilter),
             page: requestQuery.page,
             search: requestQuery.search.trim() || undefined,
             pillar:
@@ -428,13 +464,16 @@ const ProjectsContentSection = ({
     void fetchProjects();
   }, [
     abort,
+    compositionFilter,
     initialQuery,
     isCurrent,
     isReady,
     requestQuery,
     retryVersion,
     setQuery,
+    snapshotProjects,
     start,
+    snapshotLocked,
   ]);
 
   const retry = () => setRetryVersion((current) => current + 1);

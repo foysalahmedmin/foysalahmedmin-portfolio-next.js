@@ -31,6 +31,7 @@ export type TResolvedPageSection = Readonly<{
   heading?: string;
   layout: string;
   source_mode: "system" | "curated" | "automatic";
+  source_filter?: Readonly<Record<string, string | boolean>>;
   items: readonly TPageCompositionItem[];
   health: Readonly<{
     status: TPageSectionHealthStatus;

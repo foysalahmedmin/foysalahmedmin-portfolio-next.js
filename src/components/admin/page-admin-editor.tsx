@@ -21,6 +21,7 @@ import {
   type TEditorErrors,
 } from "@/components/admin/editorial-editor-primitives";
 import { Button } from "@/components/ui/button";
+import PageRendererPreview from "@/components/admin/page-renderer-preview";
 import {
   createNeutralPageDraft,
   createPageEditorSection,
@@ -33,7 +34,6 @@ import {
   createAdminPagePreviewClient,
   EditorialRequestError,
   getAdminPageClient,
-  getAdminPagePreviewClient,
   publishAdminPageClient,
   updateAdminPageClient,
 } from "@/services/site-page-admin.service";
@@ -46,7 +46,6 @@ import {
   RotateCcw,
   Send,
   Trash2,
-  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -82,60 +81,6 @@ const sectionSourceLabel = (section: TPageSection): string => {
   return `Automatic query${count ? ` · ${count} filter${count === 1 ? "" : "s"}` : ""}`;
 };
 
-function StructuralPreview({
-  page,
-  expiresIn,
-  onClose,
-}: {
-  page: TPageAdminDto;
-  expiresIn: number;
-  onClose: () => void;
-}) {
-  return (
-    <EditorialPanel
-      id="page-structural-preview"
-      title="Structural preview"
-      description="Renderer unavailable in admin: this noindex preview verifies the saved draft revision and content graph, then shows composition structure—not final typography, media, spacing or interactive behavior."
-    >
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
-          <EditorialStatus tone="warning">Not a visual preview</EditorialStatus>
-          <EditorialStatus>Saved r{page.revision}</EditorialStatus>
-          <EditorialStatus>
-            Expires in {Math.max(1, Math.round(expiresIn / 60))} min
-          </EditorialStatus>
-        </div>
-        <Button type="button" variant="ghost" onClick={onClose}>
-          <X className="size-4" />
-          End preview
-        </Button>
-      </div>
-      <ol className="space-y-3">
-        {page.draft.sections.map((section, index) => (
-          <li
-            key={section.key}
-            className="border-border bg-background grid gap-3 rounded-xl border p-4 sm:grid-cols-[3rem_1fr_auto] sm:items-center"
-          >
-            <span className="text-muted-foreground font-mono text-sm">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <div>
-              <p className="font-black">{sectionTitle(section)}</p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                {PAGE_SECTION_EDITOR_DEFINITIONS[section.kind].label} ·{" "}
-                {section.layout} · {sectionSourceLabel(section)}
-              </p>
-            </div>
-            <EditorialStatus tone={section.visible ? "success" : "neutral"}>
-              {section.visible ? "Visible" : "Hidden"}
-            </EditorialStatus>
-          </li>
-        ))}
-      </ol>
-    </EditorialPanel>
-  );
-}
-
 export default function PageAdminEditor({
   routeKey,
   initialPage,
@@ -170,8 +115,8 @@ export default function PageAdminEditor({
     PAGE_EDITOR_ROUTE_KINDS[routeKey][0]!
   );
   const [preview, setPreview] = useState<{
-    page: TPageAdminDto;
-    expiresIn: number;
+    revision: number;
+    expiresAt: string;
   } | null>(null);
   const dirty = useMemo(
     () =>
@@ -292,14 +237,16 @@ export default function PageAdminEditor({
         routeKey,
         page.revision
       );
-      const previewPage = await getAdminPagePreviewClient(routeKey);
-      setPreview({ page: previewPage, expiresIn: session.expires_in_seconds });
+      setPreview({
+        revision: page.revision,
+        expiresAt: session.expires_at,
+      });
       setNotice({
         tone: "success",
         title: "Private noindex preview session created.",
       });
       window.setTimeout(() => {
-        const previewPanel = document.getElementById("page-structural-preview");
+        const previewPanel = document.getElementById("page-renderer-preview");
         if (typeof previewPanel?.scrollIntoView === "function") {
           previewPanel.scrollIntoView({ behavior: "smooth" });
         }
@@ -980,10 +927,18 @@ export default function PageAdminEditor({
       </EditorialPanel>
 
       {preview ? (
-        <StructuralPreview
-          page={preview.page}
-          expiresIn={preview.expiresIn}
+        <PageRendererPreview
+          routeKey={routeKey}
+          revision={preview.revision}
+          expiresAt={preview.expiresAt}
           onClose={endPreview}
+          onExpired={() => {
+            setPreview(null);
+            setNotice({
+              tone: "warning",
+              title: "Preview session expired or was closed when you left.",
+            });
+          }}
         />
       ) : null}
 

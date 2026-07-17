@@ -10,7 +10,6 @@ import SiteAdminEditor from "@/components/admin/site-admin-editor";
 import {
   EditorialRequestError,
   createAdminPagePreviewClient,
-  getAdminPagePreviewClient,
   updateAdminPageClient,
   updateAdminSiteClient,
 } from "@/services/site-page-admin.service";
@@ -45,8 +44,8 @@ vi.mock("@/services/site-page-admin.service", async (importOriginal) => {
     updateAdminPageClient: vi.fn(),
     publishAdminPageClient: vi.fn(),
     createAdminPagePreviewClient: vi.fn(),
-    getAdminPagePreviewClient: vi.fn(),
     clearAdminPagePreviewClient: vi.fn().mockResolvedValue({ cleared: true }),
+    clearAdminPagePreviewBestEffort: vi.fn(),
   };
 });
 
@@ -101,7 +100,6 @@ describe("Site and Page admin editor interactions", () => {
     vi.mocked(updateAdminSiteClient).mockReset();
     vi.mocked(updateAdminPageClient).mockReset();
     vi.mocked(createAdminPagePreviewClient).mockReset();
-    vi.mocked(getAdminPagePreviewClient).mockReset();
   });
 
   afterEach(cleanup);
@@ -233,15 +231,15 @@ describe("Site and Page admin editor interactions", () => {
     expect(await screen.findByText("Site draft saved.")).toBeVisible();
   });
 
-  it("supports keyboard-equivalent ordering, revision save and structural preview", async () => {
+  it("supports keyboard-equivalent ordering, revision save and public-renderer preview", async () => {
     const user = userEvent.setup();
     vi.mocked(updateAdminPageClient).mockImplementation(
       async (_key, _revision, draft) => ({ ...pageDto(4), draft })
     );
     vi.mocked(createAdminPagePreviewClient).mockResolvedValue({
       expires_in_seconds: 600,
+      expires_at: new Date(Date.now() + 600_000).toISOString(),
     });
-    vi.mocked(getAdminPagePreviewClient).mockResolvedValue(pageDto(4));
     const { rerender } = render(
       <PageAdminEditor
         routeKey="home"
@@ -279,10 +277,30 @@ describe("Site and Page admin editor interactions", () => {
     await user.click(
       screen.getByRole("button", { name: "Start secure preview" })
     );
-    expect(await screen.findByText("Not a visual preview")).toBeVisible();
-    expect(screen.getByText(/Renderer unavailable in admin/i)).toBeVisible();
+    expect(await screen.findByText("Renderer parity")).toBeVisible();
+    const previewFrame = screen.getByTitle("home Page public renderer preview");
+    expect(previewFrame).toHaveAttribute(
+      "src",
+      "/admin/preview/pages/home?theme=light&motion=normal"
+    );
+    expect(previewFrame).toHaveAttribute("sandbox", "allow-scripts");
+    expect(previewFrame.getAttribute("sandbox")).not.toContain(
+      "allow-same-origin"
+    );
     expect(createAdminPagePreviewClient).toHaveBeenCalledWith("home", 4);
-    expect(getAdminPagePreviewClient).toHaveBeenCalledWith("home");
+
+    await user.click(screen.getByRole("button", { name: "Mobile · 390px" }));
+    await user.click(screen.getByRole("button", { name: "Dark" }));
+    await user.click(screen.getByRole("button", { name: "Reduced motion" }));
+    expect(
+      screen.getByTitle("home Page public renderer preview")
+    ).toHaveAttribute("width", "390");
+    expect(
+      screen.getByTitle("home Page public renderer preview")
+    ).toHaveAttribute(
+      "src",
+      "/admin/preview/pages/home?theme=dark&motion=reduced"
+    );
   });
 
   it("omits Page mutations for read-only capability state", () => {

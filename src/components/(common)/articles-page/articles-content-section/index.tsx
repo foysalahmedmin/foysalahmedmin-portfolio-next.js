@@ -22,8 +22,11 @@ import {
   PUBLIC_DISCOVERY_PAGE_SIZE,
   getArticleDiscoveryRequestKey,
   hasArticleDiscoveryFilters,
+  articleDiscoveryCompositionQuery,
   type ArticleDiscoveryQuery,
+  type ArticleDiscoveryCompositionFilter,
 } from "@/lib/discovery/public-discovery";
+import { filterAndSortCuratedArticles } from "@/lib/discovery/curated-discovery";
 import { cn } from "@/lib/utils";
 import { getArticles } from "@/services/article.service";
 import type { TArticleCategory } from "@/types/article-category.type";
@@ -41,16 +44,24 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-type DiscoveryMeta = { total: number; page: number; limit: number };
-type ArticleFacets = { topics: string[] };
+export type ArticleDiscoveryMeta = {
+  total: number;
+  page: number;
+  limit: number;
+};
+export type ArticleDiscoveryFacets = { topics: string[] };
 type RequestPhase = "ready" | "loading" | "refreshing" | "error" | "stale";
+const EMPTY_ARTICLE_COMPOSITION_FILTER = {} as const;
 
-type ArticlesContentSectionProps = {
+export type ArticlesContentSectionProps = {
   initialArticles: TArticleListItem[];
-  initialMeta: DiscoveryMeta;
+  snapshotArticles?: TArticleListItem[];
+  initialMeta: ArticleDiscoveryMeta;
   initialQuery: ArticleDiscoveryQuery;
   categories: TArticleCategory[];
-  facets: ArticleFacets;
+  facets: ArticleDiscoveryFacets;
+  compositionFilter?: ArticleDiscoveryCompositionFilter;
+  snapshotLocked?: boolean;
   initialError?: boolean;
   fallbacks?: TPublicSiteFallbacksDto;
 };
@@ -106,10 +117,13 @@ const FilterSelect = ({
 
 const ArticlesContentSection = ({
   initialArticles,
+  snapshotArticles = initialArticles,
   initialMeta,
   initialQuery,
   categories,
   facets,
+  compositionFilter = EMPTY_ARTICLE_COMPOSITION_FILTER,
+  snapshotLocked = false,
   initialError = false,
   fallbacks,
 }: ArticlesContentSectionProps) => {
@@ -165,7 +179,25 @@ const ArticlesContentSection = ({
     const requestKey = getArticleDiscoveryRequestKey(requestQuery);
     if (firstRequest.current) {
       firstRequest.current = false;
-      if (requestKey === getArticleDiscoveryRequestKey(initialQuery)) return;
+      if (
+        !snapshotLocked &&
+        requestKey === getArticleDiscoveryRequestKey(initialQuery)
+      )
+        return;
+    }
+    if (snapshotLocked) {
+      const nextArticles = filterAndSortCuratedArticles(
+        snapshotArticles,
+        requestQuery
+      );
+      setArticles(nextArticles);
+      setMeta({
+        total: nextArticles.length,
+        page: 1,
+        limit: Math.max(1, nextArticles.length),
+      });
+      setPhase("ready");
+      return;
     }
 
     const fetchArticles = async () => {
@@ -174,6 +206,7 @@ const ArticlesContentSection = ({
       try {
         const response = await getArticles(
           {
+            ...articleDiscoveryCompositionQuery(compositionFilter),
             page: requestQuery.page,
             search: requestQuery.search.trim() || undefined,
             pillar:
@@ -235,13 +268,16 @@ const ArticlesContentSection = ({
     void fetchArticles();
   }, [
     abort,
+    compositionFilter,
     initialQuery,
     isCurrent,
     isReady,
     requestQuery,
     retryVersion,
     setQuery,
+    snapshotArticles,
     start,
+    snapshotLocked,
   ]);
 
   const retry = () => setRetryVersion((current) => current + 1);

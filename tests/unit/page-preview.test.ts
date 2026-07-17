@@ -2,9 +2,9 @@ import {
   clearPagePreviewCookie,
   PAGE_PREVIEW_COOKIE,
   setPagePreviewCookie,
-  verifyPagePreviewCookie,
+  verifyPagePreviewToken,
 } from "@/app/api/pages/page.preview";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { describe, expect, it } from "vitest";
 
 describe("Page preview capability", () => {
@@ -23,8 +23,9 @@ describe("Page preview capability", () => {
     expect(header).toContain(`${PAGE_PREVIEW_COOKIE}=`);
     expect(header).toContain("HttpOnly");
     expect(header).toContain("SameSite=strict");
-    expect(header).toContain("Path=/api/pages/home/preview");
-    expect(header).not.toContain("/api/pages/home/preview?");
+    expect(header).toContain("Path=/admin/preview/pages/home");
+    expect(header).toContain("Expires=Wed, 15 Jul 2026 00:10:00 GMT");
+    expect(header).not.toContain("/admin/preview/pages/home?");
   });
 
   it("verifies route/revision payload integrity and rejects route replay", () => {
@@ -40,24 +41,18 @@ describe("Page preview capability", () => {
       now
     );
     const token = issued.cookies.get(PAGE_PREVIEW_COOKIE)?.value;
-    const request = new NextRequest(
-      "http://localhost:3000/api/pages/home/preview",
-      {
-        headers: { cookie: `${PAGE_PREVIEW_COOKIE}=${token}` },
-      }
-    );
-    expect(verifyPagePreviewCookie(request, "home", now)).toMatchObject({
+    expect(verifyPagePreviewToken(token, "home", now)).toMatchObject({
       route_key: "home",
       revision: 4,
     });
-    expect(verifyPagePreviewCookie(request, "about", now)).toBeNull();
+    expect(verifyPagePreviewToken(token, "about", now)).toBeNull();
   });
 
   it("clears with the same narrow cookie scope", () => {
     const response = NextResponse.json({ ok: true });
     clearPagePreviewCookie(response, "terms");
     expect(response.headers.get("set-cookie")).toContain(
-      "Path=/api/pages/terms/preview"
+      "Path=/admin/preview/pages/terms"
     );
     expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
   });

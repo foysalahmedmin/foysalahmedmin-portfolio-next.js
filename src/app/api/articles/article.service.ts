@@ -16,6 +16,7 @@ import {
 import { withPublicPagination } from "@/utils/public-query";
 import {
   buildArticleDiscoveryRepositoryQuery,
+  normalizeArticleDiscoveryCompositionFilter,
   parseArticleDiscoveryQuery,
 } from "@/lib/discovery/public-discovery";
 import type { TJwtPayload } from "@/types/jsonwebtoken.type";
@@ -126,8 +127,16 @@ export const getPublicArticleDiscovery = async (
       : await ArticleCategoryRepository.findPublicByIdentifierPopulated(
           query.category
         );
+  const composition = normalizeArticleDiscoveryCompositionFilter({
+    featured: queryParams.composition_featured,
+    pillar: queryParams.composition_pillar,
+  });
   const result = await ArticleRepository.findPublicPaginated(
-    buildArticleDiscoveryRepositoryQuery(query, category?._id?.toString())
+    buildArticleDiscoveryRepositoryQuery(
+      query,
+      category?._id?.toString(),
+      composition
+    )
   );
   return {
     ...result,

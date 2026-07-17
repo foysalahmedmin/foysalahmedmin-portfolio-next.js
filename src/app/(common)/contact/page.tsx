@@ -1,64 +1,56 @@
 import { JsonLdScript } from "@/components/content/json-ld-script";
-import ContactContentSection from "@/components/(common)/contact-page/contact-content-section";
-import PageHeaderSection from "@/components/sections/page-header-section";
+import {
+  getPublicRouteHeader,
+  PublicRoutePage,
+} from "@/components/pages/public-route-page";
 import {
   buildBreadcrumbJsonLd,
   buildWebPageJsonLd,
 } from "@/lib/metadata/json-ld";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
-import { readPublishedSite } from "@/lib/site/published-site";
+import { getPublicPagePayloadOrFallback } from "@/lib/pages/public-page-fallback";
 import type { Metadata } from "next";
 
 const CONTACT_TITLE = "Contact";
-const fallbackContactDescription =
-  "Share the goals, constraints, and context for a potential product engineering engagement.";
-
-const getContactDescription = (
-  site: Awaited<ReturnType<typeof readPublishedSite>>
-): string => {
-  return site.positioning.client_promise || fallbackContactDescription;
-};
 
 export const generateMetadata = async (): Promise<Metadata> => {
-  const site = await readPublishedSite();
-  return buildPageMetadata(site, {
+  const payload = await getPublicPagePayloadOrFallback("contact");
+  const presentation = getPublicRouteHeader(payload);
+  const metadata = buildPageMetadata(payload.site, {
     pathname: "/contact",
-    title: CONTACT_TITLE,
-    description: getContactDescription(site),
+    title: payload.page.seo.title || CONTACT_TITLE,
+    description: presentation?.description,
   });
+  return payload.page.seo.noindex
+    ? { ...metadata, robots: { index: false, follow: true } }
+    : metadata;
 };
 
 const ContactPage = async () => {
-  const site = await readPublishedSite();
-  const description = getContactDescription(site);
-  const breadcrumbItems = [
-    { index: 1, name: "Home", href: "/", icon: "house" },
-    { index: 2, name: "Contact", href: "/contact" },
-  ];
+  const payload = await getPublicPagePayloadOrFallback("contact");
+  const presentation = getPublicRouteHeader(payload);
+  const title = presentation?.title || CONTACT_TITLE;
+  const description =
+    presentation?.description ||
+    "Share the context for a potential engineering engagement.";
 
   return (
-    <main className="min-h-screen">
+    <>
       <JsonLdScript
         data={[
-          buildWebPageJsonLd(site, {
+          buildWebPageJsonLd(payload.site, {
             pathname: "/contact",
-            title: CONTACT_TITLE,
+            title,
             description,
           }),
-          buildBreadcrumbJsonLd(site, [
+          buildBreadcrumbJsonLd(payload.site, [
             { name: "Home", pathname: "/" },
             { name: CONTACT_TITLE, pathname: "/contact" },
           ]),
         ].filter((item) => item !== null)}
       />
-      <PageHeaderSection
-        title="Get in Touch"
-        description={description}
-        breadcrumbItems={breadcrumbItems}
-      />
-
-      <ContactContentSection site={site} />
-    </main>
+      <PublicRoutePage payload={payload} />
+    </>
   );
 };
 

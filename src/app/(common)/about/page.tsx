@@ -1,6 +1,8 @@
 import { JsonLdScript } from "@/components/content/json-ld-script";
-import { PublicPageSections } from "@/components/pages/public-page-sections";
-import PageHeaderSection from "@/components/sections/page-header-section";
+import {
+  getPublicRouteHeader,
+  PublicRoutePage,
+} from "@/components/pages/public-route-page";
 import {
   buildBreadcrumbJsonLd,
   buildWebPageJsonLd,
@@ -24,18 +26,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const payload = await getPublicPagePayloadOrFallback("about");
-  const title = payload.page.seo.title || "About the engineering practice";
+  const presentation = getPublicRouteHeader(payload);
+  const title = presentation?.title || "About the engineering practice";
   const description =
-    payload.page.seo.description ||
-    payload.site.positioning.short_bio ||
-    payload.site.positioning.canonical ||
+    presentation?.description ||
     "Published practice details are being prepared.";
 
   return (
-    <main
-      className="min-h-screen"
-      data-page-revision={payload.page.published_revision || undefined}
-    >
+    <>
       <JsonLdScript
         data={[
           buildWebPageJsonLd(payload.site, {
@@ -49,15 +47,7 @@ export default async function AboutPage() {
           ]),
         ].filter((item) => item !== null)}
       />
-      <PageHeaderSection
-        title={title}
-        description={description}
-        breadcrumbItems={[
-          { index: 1, name: "Home", href: "/", icon: "house" },
-          { index: 2, name: "About", href: "/about" },
-        ]}
-      />
-      <PublicPageSections payload={payload} />
-    </main>
+      <PublicRoutePage payload={payload} />
+    </>
   );
 }

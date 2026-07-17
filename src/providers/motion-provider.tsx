@@ -174,3 +174,30 @@ export function useMotion() {
 export function useReducedMotion() {
   return useMotion().reducedMotion;
 }
+
+export function MotionModeOverride({
+  mode,
+  children,
+}: {
+  mode: EffectiveMotion;
+  children: ReactNode;
+}) {
+  const inherited = useMotion();
+  const value = useMemo<MotionContextValue>(
+    () => ({
+      ...inherited,
+      effectiveMotion: mode,
+      reducedMotion: mode !== "full",
+      canAnimate:
+        inherited.hydrated &&
+        inherited.documentVisible &&
+        mode === "full" &&
+        inherited.capability !== "static",
+    }),
+    [inherited, mode]
+  );
+
+  return (
+    <MotionContext.Provider value={value}>{children}</MotionContext.Provider>
+  );
+}

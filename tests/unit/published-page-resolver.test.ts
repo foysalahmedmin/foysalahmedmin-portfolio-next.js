@@ -24,7 +24,10 @@ import {
   PAGE_RESOLVER_MAX_SECTION_READS,
   PAGE_RESOLVER_SECTION_CONCURRENCY,
 } from "@/app/api/pages/page-resolver.type";
-import { resolvePublishedPageUncached } from "@/lib/pages/published-page-resolver";
+import {
+  resolvePageSnapshotUncached,
+  resolvePublishedPageUncached,
+} from "@/lib/pages/published-page-resolver";
 import type { PublishedPageResolverError } from "@/lib/pages/published-page-resolver";
 
 const id = (suffix: string) => `507f1f77bcf86cd7994390${suffix}`;
@@ -144,6 +147,7 @@ describe("published Page resolver", () => {
       },
     });
     expect(result.sections[2]).toMatchObject({
+      source_filter: { featured: true },
       items: [],
       health: {
         status: "unavailable",
@@ -229,6 +233,46 @@ describe("published Page resolver", () => {
       reason_codes: ["site_emergency_fallback"],
     });
     expect(result.health.status).toBe("degraded");
+  });
+
+  it("gives published and authenticated preview rendering the same resolved payload for the same snapshot", async () => {
+    const sections = [
+      {
+        key: "hero",
+        kind: "site-hero",
+        visible: true,
+        layout: "immersive",
+        source: { mode: "system" },
+      },
+      {
+        key: "projects",
+        kind: "project-collection",
+        visible: true,
+        layout: "featured",
+        item_limit: 1,
+        source: { mode: "automatic", filter: { featured: true } },
+      },
+    ] as const;
+    const site = publishedSite();
+    mocks.findPublishedPage.mockResolvedValue(pageRecord(sections));
+    mocks.readPublishedSite.mockResolvedValue(site);
+    mocks.readPageCompositionItems.mockResolvedValue([
+      { slug: "same-project", title: "Same project" },
+    ]);
+
+    const published = await resolvePublishedPageUncached("home");
+    const preview = await resolvePageSnapshotUncached({
+      route_key: "home",
+      revision: 7,
+      resolved_at: "2026-07-15T05:00:00.000Z",
+      snapshot: {
+        seo: { title: "Published portfolio", noindex: false },
+        sections: [...sections],
+      },
+      site,
+    });
+
+    expect(preview).toEqual(published);
   });
 
   it("fails closed when the fixed route has no published snapshot", async () => {

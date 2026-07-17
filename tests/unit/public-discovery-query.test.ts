@@ -116,4 +116,28 @@ describe("public discovery query contracts", () => {
     expect(repositoryQuery.topics).toBe("Threat modeling");
     expect(repositoryQuery.sort).toBe("-published_at,name,_id");
   });
+
+  it("keeps Page automatic scope active across discovery filters", () => {
+    expect(
+      buildProjectDiscoveryRepositoryQuery(
+        parseProjectDiscoveryQuery({ pillar: "frontend", type: "client" }),
+        undefined,
+        { featured: true, pillar: "backend", project_type: "lab" }
+      )
+    ).toMatchObject({
+      is_featured: "true",
+      primary_pillar: "__page_scope_mismatch__",
+      project_type: "__page_scope_mismatch__",
+    });
+    expect(
+      buildArticleDiscoveryRepositoryQuery(
+        parseArticleDiscoveryQuery({}),
+        undefined,
+        { featured: false, pillar: "system_design" }
+      )
+    ).toMatchObject({
+      is_featured: "false",
+      primary_pillar: "system_design",
+    });
+  });
 });
