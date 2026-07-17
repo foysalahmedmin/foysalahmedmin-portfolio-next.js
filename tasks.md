@@ -1294,8 +1294,8 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 **Acceptance criteria**
 
 - [x] All five pillars appear once in canonical order with real linked proof when available.
-- [ ] Sticky behavior never traps scroll, overlaps the header, or fails to release at section boundaries.
-- [ ] No-JS/reduced-motion presentation is an equivalent readable linear narrative.
+- [!] Sticky behavior never traps scroll, overlaps the header, or fails to release at section boundaries. Blocked until the browser viewport matrix is run against the sticky section in the pinned Node 24/browser profile.
+- [!] No-JS/reduced-motion presentation is an equivalent readable linear narrative. Blocked until the no-JS/reduced-motion browser pass is captured; semantic DOM and reduced-motion code paths are implemented.
 
 **Suggested commit:** `Create the five-pillar homepage narrative`
 
@@ -1303,7 +1303,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 **Dependencies:** P14.1 and typed fixtures; only verified/clearly labelled records may render publicly
 
-- [ ] Show three to five strongest case studies with problem, role, architecture, and verified outcome.
+- [!] Show three to five strongest case studies with problem, role, architecture, and verified outcome. Blocked until verified production project records/content inventory are provided; demo records must not be fabricated or published to satisfy volume.
 - [x] Add one understandable system-design architecture story.
 - [x] Add one understandable AI-automation workflow story with data/human-control boundaries.
 - [x] Provide complete DOM-text alternatives and keyboard-safe controls; no canvas/image-only diagram may carry essential meaning.
