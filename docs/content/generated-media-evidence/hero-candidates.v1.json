@@ -16,7 +16,8 @@
     "site_attachment": "pending",
     "public_publish_validation": "pending",
     "metadata_extraction": "pass_candidate",
-    "owner_visual_acceptance": "pass_candidate"
+    "owner_visual_acceptance": "pass_candidate",
+    "avif_derivatives": "pass_candidate"
   },
   "owner_feedback": {
     "status": "accepted_for_continuation",
@@ -55,6 +56,24 @@
           "quality": 78,
           "bytes": 56534,
           "sha256": "ad2a17aa5e2b8e3c6464859f8c695411400e9dd83b026293ea334e6a8c43aabc",
+          "budget_gate": "pass"
+        },
+        "desktop_avif": {
+          "local_path": "seed-assets/heroes/derivatives/frontend.desktop.q55.avif",
+          "width": 1600,
+          "height": 900,
+          "quality": 55,
+          "bytes": 24489,
+          "sha256": "d5f768fbe372a15411e27fd1f9747ce065291598940620290aefa5f29918d096",
+          "budget_gate": "pass"
+        },
+        "mobile_avif": {
+          "local_path": "seed-assets/heroes/derivatives/frontend.mobile.q52.avif",
+          "width": 1080,
+          "height": 1350,
+          "quality": 52,
+          "bytes": 33718,
+          "sha256": "c28e525ef68742a116b4310b11793d6fa3a8984d8dddf293c531a4c314e42d31",
           "budget_gate": "pass"
         }
       },
@@ -113,6 +132,24 @@
           "bytes": 53700,
           "sha256": "d7f67906f324fd80f8b19cc035dae315076230f4b51e9e8c3aa76d3bfeb403b9",
           "budget_gate": "pass"
+        },
+        "desktop_avif": {
+          "local_path": "seed-assets/heroes/derivatives/backend.desktop.q55.avif",
+          "width": 1600,
+          "height": 900,
+          "quality": 55,
+          "bytes": 25001,
+          "sha256": "96710d3fbf2231ac9e6533fc9790d1b01a7df9913d7d4a322eb364adc2978094",
+          "budget_gate": "pass"
+        },
+        "mobile_avif": {
+          "local_path": "seed-assets/heroes/derivatives/backend.mobile.q52.avif",
+          "width": 1080,
+          "height": 1350,
+          "quality": 52,
+          "bytes": 35498,
+          "sha256": "7d8560bed5c724ac99f4b30f4e38324c27ca7f9d76bff5da6949cea9c4a62b46",
+          "budget_gate": "pass"
         }
       },
       "review": {
@@ -168,6 +205,24 @@
           "quality": 78,
           "bytes": 50094,
           "sha256": "888e750325994d1d7b9be7f04aac2ba57b2d2cab09846af11f727e5a2e1da8ad",
+          "budget_gate": "pass"
+        },
+        "desktop_avif": {
+          "local_path": "seed-assets/heroes/derivatives/ai-automation.desktop.q55.avif",
+          "width": 1600,
+          "height": 900,
+          "quality": 55,
+          "bytes": 22254,
+          "sha256": "e6eb714a7f187d577bd4bae44f6ac3f2ebd1d461e6f03c8a875916f153267c40",
+          "budget_gate": "pass"
+        },
+        "mobile_avif": {
+          "local_path": "seed-assets/heroes/derivatives/ai-automation.mobile.q52.avif",
+          "width": 1080,
+          "height": 1350,
+          "quality": 52,
+          "bytes": 31007,
+          "sha256": "0a855f417e3257b9ec391204675d36122656b76e8f4a25ec4c61b5a2dc241bad",
           "budget_gate": "pass"
         }
       },
@@ -225,6 +280,24 @@
           "bytes": 95428,
           "sha256": "88335d4bb61aba63bc5c2603612b5138edd5aeb7f971f048cbaa51de1038d535",
           "budget_gate": "pass"
+        },
+        "desktop_avif": {
+          "local_path": "seed-assets/heroes/derivatives/system-design-pilot.desktop.q55.avif",
+          "width": 1600,
+          "height": 900,
+          "quality": 55,
+          "bytes": 47076,
+          "sha256": "6c363c8c0a4e0594cf10eeb1111720df06fa795288ea3895c038ea2736f95e76",
+          "budget_gate": "pass"
+        },
+        "mobile_avif": {
+          "local_path": "seed-assets/heroes/derivatives/system-design-pilot.mobile.q52.avif",
+          "width": 1080,
+          "height": 1350,
+          "quality": 52,
+          "bytes": 65063,
+          "sha256": "4f59e52d776d4345291ad8ddfd8d0017065e968bcd11aaf8f6f170d9de9cffb6",
+          "budget_gate": "pass"
         }
       },
       "review": {
@@ -280,6 +353,24 @@
           "quality": 78,
           "bytes": 77526,
           "sha256": "45254fe6a2215a98ce8bbf2bbe4898a16a5fb353f9fbfe4417553a5021a057e8",
+          "budget_gate": "pass"
+        },
+        "desktop_avif": {
+          "local_path": "seed-assets/heroes/derivatives/full-stack.desktop.q55.avif",
+          "width": 1600,
+          "height": 900,
+          "quality": 55,
+          "bytes": 34621,
+          "sha256": "274f487a5c3547552eebe94ab745094e722cafd1a0bf6b07985f9b6911e56d48",
+          "budget_gate": "pass"
+        },
+        "mobile_avif": {
+          "local_path": "seed-assets/heroes/derivatives/full-stack.mobile.q52.avif",
+          "width": 1080,
+          "height": 1350,
+          "quality": 52,
+          "bytes": 52265,
+          "sha256": "f02f3537092e754ac4c15e5e387b43e09a3556b4da9766d67035c4b46713f113",
           "budget_gate": "pass"
         }
       },

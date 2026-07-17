@@ -28,6 +28,7 @@
     "db:migrate:dry-run": "tsx scripts/migrate.ts --dry-run",
     "db:migrate": "tsx scripts/migrate.ts --apply",
     "auth:bootstrap-super-admin": "tsx scripts/bootstrap-super-admin.ts",
+    "media:export-generated-heroes": "tsx scripts/export-generated-hero-derivatives.ts",
     "media:extract-generated-metadata": "tsx scripts/extract-generated-media-metadata.ts",
     "seed": "tsx scripts/seed.ts --apply",
     "seed:dry-run": "tsx scripts/seed.ts --dry-run",
