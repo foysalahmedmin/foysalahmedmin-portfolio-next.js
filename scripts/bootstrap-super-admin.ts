@@ -75,6 +75,7 @@ try {
         email,
         password: passwordHash,
         password_changed_at: now,
+        mfa_version: 0,
         role: "super-admin",
         status: "in-progress",
         is_verified: true,

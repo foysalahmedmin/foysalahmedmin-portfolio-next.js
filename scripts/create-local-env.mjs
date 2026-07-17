@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
@@ -30,6 +30,8 @@ const values = {
   // Local admin development has no enrolled MFA provider. Production must use
   // `required` unless the admin is protected by a separate private boundary.
   AUTH_ADMIN_MFA_MODE: "disabled",
+  AUTH_MFA_ENCRYPTION_KEY: secret(),
+  AUTH_MFA_ISSUER: "Foysalahmedmin Portfolio",
   AUTH_ABUSE_SECRET: secret(),
   AUTH_CLIENT_IP_HEADER: "x-forwarded-for",
   AUTH_TRUSTED_PROXY_HOPS: "0",
@@ -92,14 +94,38 @@ const serialize = (entries) =>
     .concat("\n");
 
 try {
-  await writeFile(outputPath, serialize(values), {
-    encoding: "utf8",
-    flag: "wx",
-    mode: 0o600,
-  });
-  process.stdout.write(
-    "Created ignored .env with generated local secrets. Fill the blank owner-provided values before using their features.\n"
-  );
+  if (process.argv.includes("--sync")) {
+    const current = await readFile(outputPath, "utf8");
+    const existing = new Set(
+      current
+        .split(/\r?\n/)
+        .map((line) => line.match(/^([A-Z][A-Z0-9_]*)=/)?.[1])
+        .filter(Boolean)
+    );
+    const additions = Object.fromEntries(
+      Object.entries(values).filter(([key]) => !existing.has(key))
+    );
+    if (Object.keys(additions).length) {
+      const separator = current.endsWith("\n") ? "" : "\n";
+      await writeFile(
+        outputPath,
+        `${current}${separator}${serialize(additions)}`,
+        { encoding: "utf8", mode: 0o600 }
+      );
+    }
+    process.stdout.write(
+      `Synchronized .env without changing existing values (${Object.keys(additions).length} added).\n`
+    );
+  } else {
+    await writeFile(outputPath, serialize(values), {
+      encoding: "utf8",
+      flag: "wx",
+      mode: 0o600,
+    });
+    process.stdout.write(
+      "Created ignored .env with generated local secrets. Fill the blank owner-provided values before using their features.\n"
+    );
+  }
 } catch (error) {
   if (error?.code === "EEXIST") {
     process.stderr.write(

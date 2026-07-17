@@ -19,6 +19,40 @@ export const signinValidationSchema = z.object({
     .strict(),
 });
 
+export const mfaEnrollmentValidationSchema = z.object({
+  body: z
+    .object({
+      code: z
+        .string()
+        .trim()
+        .regex(/^\d{6}$/),
+    })
+    .strict(),
+});
+
+export const mfaVerificationValidationSchema = z.object({
+  body: z
+    .object({
+      code: z
+        .string()
+        .trim()
+        .regex(/^\d{6}$/)
+        .optional(),
+      recovery_code: z
+        .string()
+        .trim()
+        .regex(/^[A-Za-z2-7]{8}-?[A-Za-z2-7]{8}$/)
+        .optional(),
+    })
+    .refine(
+      (value) =>
+        Number(Boolean(value.code)) + Number(Boolean(value.recovery_code)) ===
+        1,
+      { message: "Provide exactly one verification method" }
+    )
+    .strict(),
+});
+
 const optionalIdSchema = z
   .string()
   .refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {

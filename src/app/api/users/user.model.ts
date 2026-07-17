@@ -36,6 +36,13 @@ const userSchema = new Schema<TUserDocument>(
       select: false,
     },
     password_changed_at: { type: Date, default: Date.now, select: false },
+    mfa_version: {
+      type: Number,
+      min: 0,
+      default: 0,
+      required: true,
+      select: false,
+    },
     role: {
       type: String,
       enum: [
@@ -82,6 +89,7 @@ userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
   delete user.password_changed_at;
+  delete user.mfa_version;
   return user;
 };
 

@@ -19,6 +19,8 @@ describe("environment contract", () => {
     expect(variableNames.has("JWT_ACCESS_SECRET")).toBe(true);
     expect(variableNames.has("JWT_REFRESH_SECRET")).toBe(true);
     expect(variableNames.has("RESET_PASSWORD_UI_LINK")).toBe(true);
+    expect(variableNames.has("AUTH_MFA_ENCRYPTION_KEY")).toBe(true);
+    expect(variableNames.has("AUTH_MFA_ISSUER")).toBe(true);
     expect(variableNames.has("MIGRATION_RELEASE")).toBe(true);
     expect(variableNames.has("MIGRATION_BACKUP_REFERENCE")).toBe(true);
   });

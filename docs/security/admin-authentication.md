@@ -43,18 +43,64 @@ confirmation variables immediately after use.
 
 ## MFA launch gate
 
-A publicly reachable production admin requires phishing-resistant MFA/TOTP plus
-tested recovery. No enrollment/provider is currently integrated, so the default
-`AUTH_ADMIN_MFA_MODE=required` deliberately blocks every privileged production
-sign-in. This is a launch gate, not a bypass. `disabled` is permitted only when
-the admin is private behind separately reviewed identity-aware access; changing
-that deployment assumption requires a threat-model review and an ADR update.
+A publicly reachable production admin requires TOTP plus tested recovery.
+TOTP is a shared-secret factor and is susceptible to real-time phishing; it is
+not phishing-resistant. The server issues no access or refresh session until a
+valid second factor is completed, rejects TOTP counter replay, and consumes each
+recovery code once.
+
+`AUTH_ADMIN_MFA_MODE` accepts only `required` or `disabled`. Missing or invalid
+production values fail closed to `required`; `.env.example` sets that value
+explicitly. `disabled` is allowed for local development. In production it is
+permitted only while the admin is unreachable from the public internet and is
+behind a separately reviewed identity-aware boundary.
+
+On first password-authenticated privileged sign-in, register the displayed
+manual secret in an authenticator, enter the current six-digit code, then store
+the ten displayed recovery codes in an offline password vault. They are shown
+once. A later sign-in accepts either a current TOTP or one unused recovery code.
+Password changes and resets invalidate pending MFA challenges and all sessions.
+Role, status, deletion, password timestamp, and MFA-version changes also make a
+previously issued challenge unusable.
+
+### Recovery and break-glass
+
+Use an unused recovery code when the authenticator is unavailable. If both the
+authenticator and recovery codes are lost, do not delete MFA records, change
+`AUTH_MFA_ENCRYPTION_KEY`, or disable production MFA ad hoc.
+
+For a genuine operator lockout:
+
+1. Run from a restricted operator environment with an independently
+   authenticated database connection, preserve a database backup, and record
+   the incident/change ticket.
+2. Keep `AUTH_ADMIN_MFA_MODE=required`. Run the target-specific command (replace
+   the email in both arguments):
+
+   ```sh
+   pnpm auth:reset-admin-mfa -- \
+     --email=admin@example.com \
+     --confirm=RESET_MFA_FOR:admin@example.com
+   ```
+
+3. The command refuses non-admin, blocked, deleted, unknown, or unenrolled
+   accounts. In one Mongo transaction it deletes only the named credential,
+   invalidates pending challenges, increments the account MFA version, revokes
+   every session, and appends `auth.mfa.reset` audit evidence. Any failed step
+   rolls the transaction back.
+4. The named admin signs in with the existing password, enrolls a new TOTP
+   secret, and stores the new show-once recovery codes offline. Verify a later
+   normal sign-in and review the reset/enrollment audit events before closing
+   the incident.
 
 ## Abuse control
 
-Sign-in uses HMAC identifiers: five attempts per IP/account pair per ten minutes
-and 30 per IP per hour. Refresh uses 20 per family per minute and 60 per IP per
-ten minutes. Recovery is also bounded. Production uses the configured Upstash
-REST store and fails closed on missing credentials, untrusted client IP, timeout,
-or malformed provider response. Raw email, IP, token, and session identifiers
-are never Redis keys.
+Sign-in uses HMAC identifiers: five attempts per IP/account pair per ten
+minutes, ten per account per hour, and 30 per IP per hour. MFA verification is
+bounded per challenge, per IP, and—after the opaque challenge is resolved
+server-side—per user across renewed challenges and changing IPs. Refresh uses
+20 per family per minute and 60 per IP per ten minutes. Recovery is also
+bounded. Production uses the configured Upstash REST store and fails closed on
+missing credentials, untrusted client IP, timeout, or malformed provider
+response. Raw email, user ID, IP, token, and session identifiers are never
+Redis keys.

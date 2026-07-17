@@ -117,6 +117,11 @@ export const enforceSignInRateLimit = async (
       windowSeconds: 10 * 60,
     },
     {
+      key: `auth:signin:account:${accountHash}`,
+      limit: 10,
+      windowSeconds: 60 * 60,
+    },
+    {
       key: `auth:signin:ip:${ipHash}`,
       limit: 30,
       windowSeconds: 60 * 60,
@@ -162,6 +167,43 @@ export const enforceRecoveryRateLimit = async (
       key: `auth:recovery:ip:${ipHash}`,
       limit: 15,
       windowSeconds: 60 * 60,
+    },
+  ]);
+};
+
+export const enforceMfaRateLimit = async (
+  request: Request,
+  challengeToken: string
+): Promise<void> => {
+  const ip = getTrustedAuthClientIp(request);
+  const ipHash = hashAbuseIdentifier("auth-ip", ip);
+  const challengeHash = hashAbuseIdentifier(
+    "auth-mfa-challenge",
+    challengeToken || "missing"
+  );
+  await consume([
+    {
+      key: `auth:mfa:challenge:${challengeHash}`,
+      limit: 8,
+      windowSeconds: 10 * 60,
+    },
+    {
+      key: `auth:mfa:ip:${ipHash}`,
+      limit: 30,
+      windowSeconds: 10 * 60,
+    },
+  ]);
+};
+
+export const enforceMfaUserRateLimit = async (
+  serverResolvedUserId: string
+): Promise<void> => {
+  const userHash = hashAbuseIdentifier("auth-mfa-user", serverResolvedUserId);
+  await consume([
+    {
+      key: `auth:mfa:user:${userHash}`,
+      limit: 10,
+      windowSeconds: 15 * 60,
     },
   ]);
 };

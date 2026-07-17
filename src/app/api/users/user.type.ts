@@ -1,7 +1,7 @@
-import type { Document, Model, Types } from 'mongoose';
-import type { TRole } from '@/types/jsonwebtoken.type';
+import type { Document, Model, Types } from "mongoose";
+import type { TRole } from "@/types/jsonwebtoken.type";
 
-export type TStatus = 'in-progress' | 'blocked';
+export type TStatus = "in-progress" | "blocked";
 
 export type TUser = {
   image?: Types.ObjectId | null;
@@ -9,6 +9,7 @@ export type TUser = {
   email: string;
   password: string;
   password_changed_at?: Date;
+  mfa_version?: number;
   role: TRole;
   status: TStatus;
   is_verified: boolean;
