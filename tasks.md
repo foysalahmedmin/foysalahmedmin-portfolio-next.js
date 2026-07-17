@@ -1460,7 +1460,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 **Dependencies:** P07.4, public page parity
 
 - [ ] Audit every indexable page consumes the P07.4 metadata/canonical foundation.
-- [ ] Complete unique page-specific title/description/canonical/social inputs. Home, About, discovery, details, and legal use the shared builder; Contact and Page-renderer parity remain.
+- [ ] Complete unique page-specific title/description/canonical/social inputs. Home, About, Contact, discovery, details, and legal use the shared builder; Page-renderer parity remains.
 - [ ] Add dynamic project/article 1200×630 OG routes and valid default social image.
 - [x] Add Twitter metadata parity through the shared metadata builder; generated route-specific social images remain pending.
 - [ ] Add `robots.ts`, `sitemap.ts`, manifest, icon, and apple icon. Robots, sitemap, and manifest exist; final icon/apple-icon assets remain.
