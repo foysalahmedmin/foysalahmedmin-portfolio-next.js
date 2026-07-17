@@ -1283,12 +1283,12 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 **Dependencies:** P14.1, P04.3
 
 - [ ] Build verified proof/availability strip from derived/verified metrics.
-- [ ] Build sticky five-pillar capability section.
-- [ ] Keep its purpose distinct from the hero: hero communicates positioning/outcomes; this section communicates technical depth, relationships, and evidence.
-- [ ] Use shared parallax to explain depth/relationships without excessive travel.
+- [x] Build sticky five-pillar capability section.
+- [x] Keep its purpose distinct from the hero: hero communicates positioning/outcomes; this section communicates technical depth, relationships, and evidence.
+- [x] Use shared parallax to explain depth/relationships without excessive travel.
 - [ ] Link every pillar to relevant projects/articles/services.
 - [ ] Replace hardcoded generic service/skill repetition.
-- [ ] Provide reduced-motion linear presentation.
+- [x] Provide reduced-motion linear presentation.
 
 **Acceptance criteria**
 
@@ -1303,8 +1303,8 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 **Dependencies:** P14.1 and typed fixtures; only verified/clearly labelled records may render publicly
 
 - [ ] Show three to five strongest case studies with problem, role, architecture, and verified outcome.
-- [ ] Add one understandable system-design architecture story.
-- [ ] Add one understandable AI-automation workflow story with data/human-control boundaries.
+- [x] Add one understandable system-design architecture story.
+- [x] Add one understandable AI-automation workflow story with data/human-control boundaries.
 - [ ] Provide complete DOM-text alternatives and keyboard-safe controls; no canvas/image-only diagram may carry essential meaning.
 - [ ] Add purposeful case-study media parallax.
 - [ ] Never show live/source controls without valid visible URLs.
@@ -1316,7 +1316,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 **Dependencies:** P14.1
 
-- [ ] Render concise dynamic process steps.
+- [x] Render concise dynamic process steps.
 - [x] Render selected articles with meaningful metadata and optimized media.
 - [ ] Render verified testimonials only; otherwise use evidence-based proof alternative.
 - [ ] Render useful FAQs from published records.

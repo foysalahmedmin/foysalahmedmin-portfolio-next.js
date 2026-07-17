@@ -55,6 +55,12 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
     source: "system",
     filterFields: [],
   },
+  "architecture-workflow": {
+    label: "Architecture and AI workflow",
+    layouts: ["default", "bento", "compact"],
+    source: "system",
+    filterFields: [],
+  },
   "process-steps": {
     label: "Working process steps",
     layouts: ["default", "numbered", "compact"],
@@ -189,6 +195,7 @@ export const PAGE_EDITOR_ROUTE_KINDS: Readonly<
     "site-hero",
     "metrics-strip",
     "pillar-showcase",
+    "architecture-workflow",
     "service-collection",
     "skill-group-collection",
     "project-collection",
