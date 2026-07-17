@@ -1614,6 +1614,10 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [ ] No known critical/high security issue remains.
 - [ ] Backup and migration rollback/forward-fix plan is rehearsed.
 - [ ] Environment variables, storage, database, mail, CSP, monitoring, and alerting are configured.
+  - [-] The active env contract is deduplicated and `.env` can be created with
+    distinct 384-bit local secrets through `pnpm env:init`; production database,
+    mail, Upstash, storage-provider, monitoring, and deployment values remain
+    owner/platform inputs.
 - [ ] Smoke test production after deployment.
 - [ ] Confirm rollback path before announcing launch.
 

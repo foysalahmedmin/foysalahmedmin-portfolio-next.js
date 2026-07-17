@@ -25,6 +25,7 @@
     "test:visual": "playwright test tests/e2e/visual.spec.ts --project=chromium-desktop",
     "test:visual:update": "playwright test tests/e2e/visual.spec.ts --project=chromium-desktop --update-snapshots",
     "test:performance": "pnpm build && lhci autorun",
+    "env:init": "node scripts/create-local-env.mjs",
     "db:migrate:dry-run": "tsx scripts/migrate.ts --dry-run",
     "db:migrate": "tsx scripts/migrate.ts --apply",
     "auth:bootstrap-super-admin": "tsx scripts/bootstrap-super-admin.ts",
