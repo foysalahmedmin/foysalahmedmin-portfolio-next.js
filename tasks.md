@@ -1282,7 +1282,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 **Dependencies:** P14.1, P04.3
 
-- [ ] Build verified proof/availability strip from derived/verified metrics.
+- [x] Build verified proof/availability strip from derived/verified metrics.
 - [x] Build sticky five-pillar capability section.
 - [x] Keep its purpose distinct from the hero: hero communicates positioning/outcomes; this section communicates technical depth, relationships, and evidence.
 - [x] Use shared parallax to explain depth/relationships without excessive travel.
