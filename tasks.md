@@ -1403,7 +1403,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 **Dependencies:** P08.2, P07.4, typed fixtures; verified P09 content and the selected P12.2 identity asset are launch dependencies
 
-- [ ] Source positioning, bio, identity media, principles, timeline, education, and credentials dynamically. All listed data except the principles/process narrative is wired.
+- [x] Source positioning, bio, identity media, principles, timeline, education, and credentials dynamically.
 - [x] Build evidence-led five-pillar skill map.
 - [x] Remove generic “PART OF NATURE,” template phrasing, and duplicated Home sections.
 - [x] Use a genuine portrait only if approved; otherwise use the abstract identity visual.
