@@ -108,6 +108,7 @@ export const PublicPageSections = ({ payload }: Props) => (
               pillars={payload.site.pillars}
               services={asItems<TPublicServiceDto>(section.items)}
               heading={section.heading}
+              layout={section.layout}
             />
           );
           break;
