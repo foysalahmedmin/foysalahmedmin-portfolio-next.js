@@ -7,6 +7,7 @@ import {
   Title,
 } from "@/components/ui/section-title";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import type { CSSProperties } from "react";
 
 const PILLAR_ACCENT_TOKENS: Record<
@@ -140,6 +141,32 @@ const PillarCard = ({
                 {tech}
               </span>
             ))}
+          </div>
+        )}
+
+        {sticky && (
+          <div
+            className="border-border mt-7 flex flex-wrap gap-2 border-t pt-5"
+            aria-label={`${pillar.label} proof links`}
+          >
+            <Link
+              href={`/projects?pillar=${pillar.key}`}
+              className="focus-visible:ring-primary hover:text-primary-foreground rounded-full border border-[color:var(--pillar-card-accent)] px-3 py-1.5 text-xs font-black text-[color:var(--pillar-card-accent)] transition-colors hover:bg-[color:var(--pillar-card-accent)] focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Projects
+            </Link>
+            <Link
+              href={`/articles?pillar=${pillar.key}`}
+              className="border-border text-muted-foreground hover:border-primary hover:text-foreground focus-visible:ring-primary rounded-full border px-3 py-1.5 text-xs font-black transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Articles
+            </Link>
+            <Link
+              href="#services"
+              className="border-border text-muted-foreground hover:border-primary hover:text-foreground focus-visible:ring-primary rounded-full border px-3 py-1.5 text-xs font-black transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Services
+            </Link>
           </div>
         )}
       </div>

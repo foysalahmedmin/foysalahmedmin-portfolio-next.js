@@ -1287,7 +1287,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Build sticky five-pillar capability section.
 - [x] Keep its purpose distinct from the hero: hero communicates positioning/outcomes; this section communicates technical depth, relationships, and evidence.
 - [x] Use shared parallax to explain depth/relationships without excessive travel.
-- [ ] Link every pillar to relevant projects/articles/services.
+- [x] Link every pillar to relevant projects/articles/services.
 - [ ] Replace hardcoded generic service/skill repetition.
 - [x] Provide reduced-motion linear presentation.
 

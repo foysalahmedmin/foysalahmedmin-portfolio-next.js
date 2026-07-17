@@ -47,7 +47,10 @@ export default function ServicesSection({
       }));
 
   return (
-    <section className={cn("py-[var(--space-section)]", className)}>
+    <section
+      id="services"
+      className={cn("py-[var(--space-section)]", className)}
+    >
       <div className="container">
         <SectionTitle className={cn(useCardsLayout ? "lg:mb-12" : "lg:mb-20")}>
           <Subtitle>Five disciplines, one system</Subtitle>
