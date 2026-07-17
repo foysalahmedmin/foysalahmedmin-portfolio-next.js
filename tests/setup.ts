@@ -13,6 +13,9 @@ const TEST_DEFAULTS: Readonly<Record<string, string>> = {
   AUTH_TRUSTED_PROXY_HOPS: "0",
   AUTH_PUBLIC_SIGNUP_ENABLED: "false",
   AUTH_ADMIN_MFA_MODE: "disabled",
+  AUTH_MFA_ENCRYPTION_KEY:
+    "q7X9mN2pK4vR8sT1uW3yZ5aC6dE0fG2hJ7kL9nP4rS8vX1zB3cD5eF7gH9jK2mN4",
+  AUTH_MFA_ISSUER: "Portfolio Test",
   AUDIT_HMAC_SECRET: "test-audit-hmac-secret-at-least-32-characters",
   PAGE_PREVIEW_SECRET: "test-page-preview-secret-at-least-32-characters",
   PAGE_PREVIEW_TTL_SECONDS: "600",

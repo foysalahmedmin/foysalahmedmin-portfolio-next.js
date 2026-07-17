@@ -7,6 +7,7 @@ import connectDB from "@/lib/db";
 import { setSoftDeleteScope } from "@/lib/db/soft-delete";
 import type { TJwtPayload, TRole } from "@/types/jsonwebtoken.type";
 import httpStatus from "http-status";
+import type { ClientSession } from "mongoose";
 import {
   createSessionFamilyId,
   createSessionId,
@@ -18,6 +19,7 @@ import {
   verifyAccessTokenStrict,
   verifyRefreshTokenStrict,
 } from "./session-security";
+import { isMfaSessionAccepted } from "./mfa-policy";
 
 export type SessionPrincipal = Required<
   Pick<TJwtPayload, "_id" | "name" | "email" | "role">
@@ -45,6 +47,7 @@ type AuthUserRecord = Pick<
   | "is_verified"
   | "is_deleted"
   | "password_changed_at"
+  | "mfa_version"
 > & { _id: { toString(): string } };
 
 const unauthorized = (): AppError =>
@@ -58,7 +61,7 @@ const loadSessionUser = async (
 ): Promise<AuthUserRecord | null> =>
   (await setSoftDeleteScope(User.findById(userId), "with_deleted")
     .select(
-      "name email image role status is_verified +password_changed_at +is_deleted"
+      "name email image role status is_verified +mfa_version +password_changed_at +is_deleted"
     )
     .lean()) as AuthUserRecord | null;
 
@@ -92,29 +95,40 @@ const buildPrincipal = (
 
 export const createAuthSession = async (
   user: AuthUserRecord,
-  options: { mfaVerifiedAt?: Date | null } = {}
+  options: {
+    mfaVerifiedAt?: Date | null;
+    session?: ClientSession;
+    now?: Date;
+  } = {}
 ): Promise<AuthTokenPair> => {
   await connectDB();
   if (!isEligible(user)) throw unauthorized();
+  if (!isMfaSessionAccepted(user.role, options.mfaVerifiedAt)) {
+    throw unauthorized();
+  }
 
   const sid = createSessionId();
   const familyId = createSessionFamilyId();
   const jwtPrincipal = buildJwtPrincipal(user);
   const access = signAccessToken(jwtPrincipal._id, sid);
   const refresh = signRefreshToken(user._id.toString(), sid, familyId, 0);
+  const now = options.now ?? new Date();
 
-  await SessionRepository.create({
-    sid,
-    family_id: familyId,
-    user: user._id.toString(),
-    refresh_token_hash: hashRefreshToken(refresh.token),
-    user_state_hash: getUserStateHash(user),
-    role_snapshot: user.role,
-    rotation_count: 0,
-    last_used_at: new Date(),
-    expires_at: refresh.expiresAt,
-    mfa_verified_at: options.mfaVerifiedAt,
-  });
+  await SessionRepository.create(
+    {
+      sid,
+      family_id: familyId,
+      user: user._id.toString(),
+      refresh_token_hash: hashRefreshToken(refresh.token),
+      user_state_hash: getUserStateHash(user),
+      role_snapshot: user.role,
+      rotation_count: 0,
+      last_used_at: now,
+      expires_at: refresh.expiresAt,
+      mfa_verified_at: options.mfaVerifiedAt,
+    },
+    options.session
+  );
 
   return {
     access_token: access.token,
@@ -152,6 +166,14 @@ export const verifyAccessSessionToken = async (
     await SessionRepository.revokeBySid(
       claims.sid,
       user?.is_deleted ? "user-deleted" : "status-changed"
+    );
+    throw unauthorized();
+  }
+  if (!isMfaSessionAccepted(user.role, session.mfa_verified_at)) {
+    await SessionRepository.revokeFamily(
+      session.family_id,
+      "user-state-changed",
+      now
     );
     throw unauthorized();
   }
@@ -218,6 +240,14 @@ export const rotateRefreshSession = async (
     await SessionRepository.revokeFamily(
       session.family_id,
       user?.is_deleted ? "user-deleted" : "status-changed",
+      now
+    );
+    throw unauthorized();
+  }
+  if (!isMfaSessionAccepted(user.role, session.mfa_verified_at)) {
+    await SessionRepository.revokeFamily(
+      session.family_id,
+      "user-state-changed",
       now
     );
     throw unauthorized();
@@ -295,10 +325,12 @@ export const revokeTokenSession = async (
 
 export const revokeUserSessions = async (
   userId: string,
-  reason: SessionRevocationReason
+  reason: SessionRevocationReason,
+  session?: ClientSession,
+  now = new Date()
 ): Promise<number> => {
   await connectDB();
-  return await SessionRepository.revokeForUser(userId, reason);
+  return await SessionRepository.revokeForUser(userId, reason, now, session);
 };
 
 export const deleteUserSessions = async (userId: string): Promise<number> => {

@@ -37,6 +37,22 @@ export type SessionInfo = {
   access_expires_at: string;
 };
 
+export type MfaResponseState =
+  | {
+      required: true;
+      stage: "enroll" | "verify";
+      expires_at: string;
+      issuer?: string;
+      account_name?: string;
+      manual_secret?: string;
+    }
+  | {
+      required: false;
+      stage: "recovery";
+      recovery_codes: readonly string[];
+    };
+
 export type AuthResponse = TResponse<{
   info?: SessionInfo;
+  mfa?: MfaResponseState;
 }>;

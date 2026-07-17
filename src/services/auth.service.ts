@@ -32,6 +32,30 @@ export async function signIn(payload: SignInPayload): Promise<AuthResponse> {
   return handleResponse(res);
 }
 
+export async function completeMfaEnrollment(
+  code: string
+): Promise<AuthResponse> {
+  const res = await fetch(`${getBaseUrl()}/api/auth/mfa/enroll`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ code }),
+  });
+  return handleResponse(res);
+}
+
+export async function verifyMfa(
+  payload: { code: string } | { recovery_code: string }
+): Promise<AuthResponse> {
+  const res = await fetch(`${getBaseUrl()}/api/auth/mfa/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
 // POST - Sign Up
 export async function signUp(payload: SignUpPayload): Promise<AuthResponse> {
   const res = await fetch(`${getBaseUrl()}/api/auth/signup`, {

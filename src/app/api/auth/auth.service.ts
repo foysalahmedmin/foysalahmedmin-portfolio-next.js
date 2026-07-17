@@ -1,6 +1,7 @@
 import AppError from "@/builder/app-error";
 import { ENV } from "@/config";
-import { getCapabilitiesForRole, hasCapability } from "@/lib/auth/capabilities";
+import { getCapabilitiesForRole } from "@/lib/auth/capabilities";
+import { getAdminMfaGate, isAdminMfaRequired } from "@/lib/auth/mfa-policy";
 import { escapeHtml } from "@/lib/security/escape-html";
 import {
   createAuthSession,
@@ -16,6 +17,8 @@ import { createHash, randomBytes } from "node:crypto";
 import httpStatus from "http-status";
 import type { JwtPayload } from "jsonwebtoken";
 import * as AuthRepository from "./auth.repository";
+import { startMfaChallenge, type MfaChallengeStart } from "./mfa.service";
+import * as MfaRepository from "./mfa.repository";
 import type { TChangePassword, TSignin, TSignup } from "./auth.type";
 import type { TForgetPassword, TResetPassword } from "./auth.type";
 import PasswordReset from "./password-reset.model";
@@ -51,38 +54,11 @@ export const isPublicSignupEnabled = (
   configuredValue = ENV.auth_public_signup_enabled
 ): boolean => configuredValue?.trim().toLowerCase() === "true";
 
-export const getAdminMfaGate = (
-  role: NonNullable<TJwtPayload["role"]>,
-  environment = ENV.environment,
-  configuredMode = ENV.auth_admin_mfa_mode
-): "not-required" | "configuration-required" => {
-  if (!hasCapability(role, "admin:access") || environment !== "production") {
-    return "not-required";
-  }
-  return configuredMode?.trim().toLowerCase() === "disabled"
-    ? "not-required"
-    : "configuration-required";
-};
+export { getAdminMfaGate };
 
-const assertAdminMfaReady = (role: NonNullable<TJwtPayload["role"]>): void => {
-  if (getAdminMfaGate(role) === "configuration-required") {
-    throw new AppError(
-      httpStatus.SERVICE_UNAVAILABLE,
-      "Admin sign-in is unavailable until MFA enrollment is configured."
-    );
-  }
-};
-
-export const signin = async (payload: TSignin): Promise<AuthTokenPair> => {
-  if (
-    ENV.environment === "production" &&
-    ENV.auth_admin_mfa_mode?.trim().toLowerCase() !== "disabled"
-  ) {
-    throw new AppError(
-      httpStatus.SERVICE_UNAVAILABLE,
-      "Admin sign-in is unavailable until MFA enrollment is configured."
-    );
-  }
+export const signin = async (
+  payload: TSignin
+): Promise<AuthTokenPair | MfaChallengeStart> => {
   await connectDB();
   const email = payload.email.trim().toLowerCase();
   const user = await AuthRepository.findByEmail(email);
@@ -99,7 +75,9 @@ export const signin = async (payload: TSignin): Promise<AuthTokenPair> => {
     throw new AppError(httpStatus.UNAUTHORIZED, INVALID_CREDENTIALS);
   }
 
-  assertAdminMfaReady(user.role);
+  if (isAdminMfaRequired(user.role)) {
+    return await startMfaChallenge(user);
+  }
   return await createAuthSession(user);
 };
 
@@ -144,7 +122,7 @@ export const changePassword = async (
   user: JwtPayload,
   payload: TChangePassword
 ) => {
-  await connectDB();
+  const db = await connectDB();
   const userData = await AuthRepository.findByIdWithSecrets(user._id);
   if (!userData || userData.is_deleted || userData.status === "blocked") {
     throw new AppError(httpStatus.UNAUTHORIZED, "Authentication required.");
@@ -157,12 +135,33 @@ export const changePassword = async (
     payload.new_password,
     Number(ENV.bcrypt_salt_rounds)
   );
-  const result = await AuthRepository.updateById(user._id, {
-    password: hashedNewPassword,
-    password_changed_at: new Date(),
-  });
-  if (!result) throw new AppError(httpStatus.NOT_FOUND, "User not found.");
-  await revokeUserSessions(user._id, "password-changed");
+  const now = new Date();
+  const session = await db.startSession();
+  let changed = false;
+  try {
+    await session.withTransaction(async () => {
+      const result = await AuthRepository.updateById(
+        user._id,
+        {
+          password: hashedNewPassword,
+          password_changed_at: now,
+        },
+        session
+      );
+      if (!result) throw new AppError(httpStatus.NOT_FOUND, "User not found.");
+      await MfaRepository.invalidateActiveChallenges(user._id, now, session);
+      await revokeUserSessions(user._id, "password-changed", session, now);
+      changed = true;
+    });
+  } finally {
+    await session.endSession();
+  }
+  if (!changed) {
+    throw new AppError(
+      httpStatus.SERVICE_UNAVAILABLE,
+      "Password change could not be completed."
+    );
+  }
   return { changed: true } as const;
 };
 
@@ -230,7 +229,7 @@ export const requestPasswordReset = async (
 export const resetPassword = async (
   payload: TResetPassword
 ): Promise<{ changed: true }> => {
-  await connectDB();
+  const db = await connectDB();
   const now = new Date();
   const reset = await PasswordReset.findOneAndUpdate(
     {
@@ -253,21 +252,38 @@ export const resetPassword = async (
       payload.password,
       Number(ENV.bcrypt_salt_rounds)
     );
-    const user = await AuthRepository.updateEligiblePasswordById(
-      reset.user.toString(),
-      {
-        password: hashedPassword,
-        password_changed_at: now,
-      }
-    );
-    if (!user) {
-      throw new Error("ineligible_user");
+    const userId = reset.user.toString();
+    const session = await db.startSession();
+    let changed = false;
+    try {
+      await session.withTransaction(async () => {
+        const user = await AuthRepository.updateEligiblePasswordById(
+          userId,
+          {
+            password: hashedPassword,
+            password_changed_at: now,
+          },
+          session
+        );
+        if (!user) {
+          throw new Error("ineligible_user");
+        }
+        const consumed = await PasswordReset.updateOne(
+          { _id: reset._id, status: "processing" },
+          { $set: { status: "used", used_at: now } },
+          { session }
+        );
+        if (consumed.modifiedCount !== 1) {
+          throw new Error("reset_claim_lost");
+        }
+        await MfaRepository.invalidateActiveChallenges(userId, now, session);
+        await revokeUserSessions(userId, "password-changed", session, now);
+        changed = true;
+      });
+    } finally {
+      await session.endSession();
     }
-    await PasswordReset.updateOne(
-      { _id: reset._id, status: "processing" },
-      { $set: { status: "used", used_at: now } }
-    );
-    await revokeUserSessions(reset.user.toString(), "password-changed");
+    if (!changed) throw new Error("password_transaction_incomplete");
     return { changed: true };
   } catch {
     await PasswordReset.updateOne(

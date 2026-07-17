@@ -3,6 +3,7 @@ import AuthSession, {
   type TAuthSessionDocument,
 } from "./session.model";
 import type { TRole } from "@/types/jsonwebtoken.type";
+import type { ClientSession } from "mongoose";
 
 export type CreateSessionInput = {
   sid: string;
@@ -18,8 +19,15 @@ export type CreateSessionInput = {
 };
 
 export const create = async (
-  input: CreateSessionInput
-): Promise<TAuthSessionDocument> => await AuthSession.create(input);
+  input: CreateSessionInput,
+  session?: ClientSession
+): Promise<TAuthSessionDocument> => {
+  const [created] = await AuthSession.create(
+    [input],
+    session ? { session } : {}
+  );
+  return created!;
+};
 
 export const findBySid = async (
   sid: string
@@ -95,11 +103,13 @@ export const revokeBySid = async (
 export const revokeForUser = async (
   userId: string,
   reason: SessionRevocationReason,
-  now = new Date()
+  now = new Date(),
+  session?: ClientSession
 ): Promise<number> => {
   const result = await AuthSession.updateMany(
     { user: userId, revoked_at: null },
-    { $set: { revoked_at: now, revocation_reason: reason } }
+    { $set: { revoked_at: now, revocation_reason: reason } },
+    { session }
   );
   return result.modifiedCount;
 };

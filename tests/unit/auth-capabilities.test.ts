@@ -110,16 +110,21 @@ describe("signup and MFA launch gates", () => {
   });
 
   it("fails privileged production sign-in closed until MFA is ready", () => {
-    expect(getAdminMfaGate("admin", "production", "required")).toBe(
-      "configuration-required"
+    expect(getAdminMfaGate("admin", "production", "required")).toBe("required");
+    expect(getAdminMfaGate("editor", "production", "")).toBe("required");
+    expect(getAdminMfaGate("author", "production", "required")).toBe(
+      "required"
     );
-    expect(getAdminMfaGate("editor", "production", "")).toBe(
-      "configuration-required"
+    expect(getAdminMfaGate("contributor", "production", "required")).toBe(
+      "required"
     );
     expect(getAdminMfaGate("user", "production", "required")).toBe(
       "not-required"
     );
     expect(getAdminMfaGate("admin", "development", "required")).toBe(
+      "required"
+    );
+    expect(getAdminMfaGate("admin", "development", "disabled")).toBe(
       "not-required"
     );
   });

@@ -28,7 +28,7 @@ export type RefreshTokenClaims = JwtPayload & {
 
 type SessionUserState = Pick<
   TUser,
-  "role" | "status" | "is_deleted" | "password_changed_at"
+  "role" | "status" | "is_deleted" | "password_changed_at" | "mfa_version"
 >;
 
 const isMongoId = (value: unknown): value is string =>
@@ -73,16 +73,15 @@ export const getUserStateHash = (user: SessionUserState): string => {
       : passwordChangedAt
         ? "invalid"
         : "none";
+  const state: Array<string | boolean | number> = [
+    user.role,
+    user.status,
+    Boolean(user.is_deleted),
+    changedAt,
+  ];
+  if ((user.mfa_version ?? 0) > 0) state.push(user.mfa_version!);
   return createHash("sha256")
-    .update(
-      JSON.stringify([
-        user.role,
-        user.status,
-        Boolean(user.is_deleted),
-        changedAt,
-      ]),
-      "utf8"
-    )
+    .update(JSON.stringify(state), "utf8")
     .digest("hex");
 };
 

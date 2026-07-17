@@ -4,6 +4,7 @@ import {
   enforceRefreshRateLimit,
   enforceRecoveryRateLimit,
   enforceSignInRateLimit,
+  enforceMfaRateLimit,
   assertTrustedAuthRequest,
 } from "@/lib/auth/auth-request-security";
 import {
@@ -12,12 +13,26 @@ import {
   clearAuthCookies,
   setAuthCookies,
 } from "@/lib/auth/auth-cookies";
+import {
+  clearMfaChallengeCookie,
+  MFA_CHALLENGE_COOKIE,
+  setMfaChallengeCookie,
+} from "@/lib/auth/mfa-cookies";
 import { revokeTokenSession } from "@/lib/auth/session-manager";
 import catchAsync from "@/utils/catch-async";
 import sendResponse from "@/utils/send-response";
 import httpStatus from "http-status";
 import { cookies } from "next/headers";
+import type { NextResponse } from "next/server";
 import * as AuthService from "./auth.service";
+import * as MfaService from "./mfa.service";
+
+const protectAuthResponse = <T extends NextResponse>(response: T): T => {
+  response.headers.set("Cache-Control", "no-store, max-age=0");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Referrer-Policy", "no-referrer");
+  return response;
+};
 
 export const signin = catchAsync(
   async (req: Request & { parsedBody?: Record<string, unknown> }) => {
@@ -27,16 +42,92 @@ export const signin = catchAsync(
       password: string;
     };
     await enforceSignInRateLimit(req, body.email.trim().toLowerCase());
-    const tokens = await AuthService.signin(body);
     const cookieStore = await cookies();
-    setAuthCookies(cookieStore, tokens);
+    clearMfaChallengeCookie(cookieStore);
+    const result = await AuthService.signin(body);
+    if ("challenge_token" in result) {
+      clearAuthCookies(cookieStore);
+      setMfaChallengeCookie(
+        cookieStore,
+        result.challenge_token,
+        result.expires_at
+      );
+      return protectAuthResponse(
+        sendResponse({
+          status: httpStatus.ACCEPTED,
+          success: true,
+          message: "Complete multi-factor authentication.",
+          data: { mfa: result.prompt },
+        })
+      );
+    }
+
+    clearMfaChallengeCookie(cookieStore);
+    setAuthCookies(cookieStore, result);
 
     return sendResponse({
       status: httpStatus.OK,
       success: true,
       message: "Signed in successfully.",
-      data: { info: AuthService.toSafeSessionDTO(tokens.principal) },
+      data: { info: AuthService.toSafeSessionDTO(result.principal) },
     });
+  }
+);
+
+export const completeMfaEnrollment = catchAsync(
+  async (req: Request & { parsedBody?: Record<string, unknown> }) => {
+    assertTrustedAuthRequest(req);
+    const cookieStore = await cookies();
+    const challengeToken = cookieStore.get(MFA_CHALLENGE_COOKIE)?.value ?? "";
+    await enforceMfaRateLimit(req, challengeToken);
+    const body = (req.parsedBody || (await req.json())) as { code: string };
+    const result = await MfaService.completeEnrollment(
+      challengeToken,
+      body.code
+    );
+    setAuthCookies(cookieStore, result.tokens);
+    clearMfaChallengeCookie(cookieStore);
+
+    return protectAuthResponse(
+      sendResponse({
+        status: httpStatus.OK,
+        success: true,
+        message: "Multi-factor authentication enabled.",
+        data: {
+          info: AuthService.toSafeSessionDTO(result.tokens.principal),
+          mfa: {
+            required: false,
+            stage: "recovery" as const,
+            recovery_codes: result.recovery_codes ?? [],
+          },
+        },
+      })
+    );
+  }
+);
+
+export const verifyMfa = catchAsync(
+  async (req: Request & { parsedBody?: Record<string, unknown> }) => {
+    assertTrustedAuthRequest(req);
+    const cookieStore = await cookies();
+    const challengeToken = cookieStore.get(MFA_CHALLENGE_COOKIE)?.value ?? "";
+    await enforceMfaRateLimit(req, challengeToken);
+    const body = (req.parsedBody || (await req.json())) as {
+      code?: string;
+      recovery_code?: string;
+    };
+    const result = await MfaService.verifyChallenge(challengeToken, body);
+    setAuthCookies(cookieStore, result.tokens);
+    clearMfaChallengeCookie(cookieStore);
+
+    return protectAuthResponse(
+      sendResponse({
+        status: httpStatus.OK,
+        success: true,
+        message: "Signed in successfully.",
+        data: { info: AuthService.toSafeSessionDTO(result.tokens.principal) },
+      })
+    );
   }
 );
 
@@ -98,6 +189,7 @@ export const signout = catchAsync(async (req: Request) => {
     await revokeTokenSession({ refreshToken, accessToken });
   } finally {
     clearAuthCookies(cookieStore);
+    clearMfaChallengeCookie(cookieStore);
   }
   return sendResponse({
     status: httpStatus.OK,

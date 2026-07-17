@@ -30,7 +30,12 @@ export const ENV = {
   auth_client_ip_header: process.env.AUTH_CLIENT_IP_HEADER,
   auth_trusted_proxy_hops: process.env.AUTH_TRUSTED_PROXY_HOPS,
   auth_public_signup_enabled: process.env.AUTH_PUBLIC_SIGNUP_ENABLED,
-  auth_admin_mfa_mode: process.env.AUTH_ADMIN_MFA_MODE,
+  auth_admin_mfa_mode: process.env.AUTH_ADMIN_MFA_MODE as
+    | "required"
+    | "disabled"
+    | undefined,
+  auth_mfa_encryption_key: process.env.AUTH_MFA_ENCRYPTION_KEY,
+  auth_mfa_issuer: process.env.AUTH_MFA_ISSUER,
 
   // Administrative audit integrity
   audit_hmac_secret: process.env.AUDIT_HMAC_SECRET,

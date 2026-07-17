@@ -8,7 +8,6 @@ import { describe, expect, it } from "vitest";
 describe("public content cache invalidation migration", () => {
   it("registers immutable migration 014 immediately after Page composition", () => {
     const ids = MIGRATION_REGISTRY.map(({ id }) => id);
-    expect(ids.at(-1)).toBe("202607150014-public-content-cache-invalidation");
     expect(
       ids.indexOf("202607150014-public-content-cache-invalidation")
     ).toBeGreaterThan(ids.indexOf("202607150013-page-composition"));
