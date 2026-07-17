@@ -28,5 +28,14 @@ describe("PillarShowcaseSection", () => {
         screen.getByRole("heading", { name: pillar.label })
       ).toBeInTheDocument();
     }
+    expect(
+      screen.getAllByRole("link", { name: "Projects" })[0]
+    ).toHaveAttribute("href", "/projects?pillar=frontend");
+    expect(
+      screen.getAllByRole("link", { name: "Articles" })[3]
+    ).toHaveAttribute("href", "/articles?pillar=system_design");
+    expect(
+      screen.getAllByRole("link", { name: "Services" })[0]
+    ).toHaveAttribute("href", "#services");
   });
 });
