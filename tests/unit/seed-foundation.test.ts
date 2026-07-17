@@ -180,6 +180,13 @@ describe("truthful foundation seed", () => {
         }
       ).sections.find((section) => section.key === "pillars")?.layout
     ).toBe("sticky");
+    expect(
+      (
+        home.payload.draft as {
+          sections: Array<{ key: string; kind: string }>;
+        }
+      ).sections.find((section) => section.key === "faqs")?.kind
+    ).toBe("faq-list");
   });
 
   it("omits every unverified claim collection and records pending media truthfully", () => {
