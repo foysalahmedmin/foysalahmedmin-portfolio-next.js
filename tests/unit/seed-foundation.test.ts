@@ -183,10 +183,24 @@ describe("truthful foundation seed", () => {
     expect(
       (
         home.payload.draft as {
-          sections: Array<{ key: string; kind: string }>;
+          sections: Array<{ key: string; kind: string; layout: string }>;
         }
       ).sections.find((section) => section.key === "faqs")?.kind
     ).toBe("faq-list");
+    expect(
+      (
+        home.payload.draft as {
+          sections: Array<{ key: string; layout: string }>;
+        }
+      ).sections.find((section) => section.key === "faqs")?.layout
+    ).toBe("list");
+    expect(
+      (
+        home.payload.draft as {
+          sections: Array<{ key: string; layout: string }>;
+        }
+      ).sections.find((section) => section.key === "process")?.layout
+    ).toBe("numbered");
   });
 
   it("omits every unverified claim collection and records pending media truthfully", () => {

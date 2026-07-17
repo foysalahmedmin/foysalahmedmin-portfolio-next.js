@@ -91,6 +91,7 @@ export const PublicPageSections = ({ payload }: Props) => (
             <ProcessStepsSection
               steps={payload.site.process}
               heading={section.heading}
+              layout={section.layout}
             />
           );
           break;
@@ -166,6 +167,7 @@ export const PublicPageSections = ({ payload }: Props) => (
               faqs={asItems<TPublicFAQDto>(section.items)}
               unavailable={unavailable}
               heading={section.heading}
+              layout={section.layout}
             />
           );
           break;
