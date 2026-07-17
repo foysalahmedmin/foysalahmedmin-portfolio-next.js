@@ -16,6 +16,9 @@ describe("public discovery browser history", () => {
 
   afterEach(() => {
     cleanup();
+    document.documentElement
+      .querySelector("[data-page-preview-runtime]")
+      ?.remove();
     vi.restoreAllMocks();
   });
 
@@ -62,5 +65,31 @@ describe("public discovery browser history", () => {
     await waitFor(() => expect(result.current.query.pillar).toBe("frontend"));
     expect(result.current.query.page).toBe(2);
     expect(result.current.query.technology).toBe("all");
+  });
+
+  it("keeps opaque Page preview filters in memory without calling History", async () => {
+    const previewMarker = document.createElement("div");
+    previewMarker.dataset.pagePreviewRuntime = "";
+    document.documentElement.append(previewMarker);
+    const pushSpy = vi.spyOn(window.history, "pushState");
+    const replaceSpy = vi.spyOn(window.history, "replaceState");
+    const { result } = renderHook(() =>
+      useUrlListQueryState(
+        "projects",
+        parseProjectDiscoveryQuery({ pillar: "backend" })
+      )
+    );
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+
+    act(() => {
+      result.current.setQuery(
+        { technology: "Redis", page: 1 },
+        { history: "push" }
+      );
+    });
+    expect(result.current.query.technology).toBe("Redis");
+    expect(pushSpy).not.toHaveBeenCalled();
+    expect(replaceSpy).not.toHaveBeenCalled();
+    expect(window.location.search).not.toContain("technology=Redis");
   });
 });

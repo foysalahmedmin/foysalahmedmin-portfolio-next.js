@@ -48,6 +48,17 @@ export type ArticleDiscoveryQuery = {
   page: number;
 };
 
+export type ProjectDiscoveryCompositionFilter = Readonly<{
+  featured?: boolean;
+  pillar?: PillarKey;
+  project_type?: ProjectType;
+}>;
+
+export type ArticleDiscoveryCompositionFilter = Readonly<{
+  featured?: boolean;
+  pillar?: PillarKey;
+}>;
+
 export type DiscoveryKind = "projects" | "articles";
 export type DiscoveryQueryFor<TKind extends DiscoveryKind> =
   TKind extends "projects" ? ProjectDiscoveryQuery : ArticleDiscoveryQuery;
@@ -152,6 +163,65 @@ const normalizeYear = (value: unknown, fallback: number | null = null) => {
 
 const isPillar = (value: string): value is PillarKey =>
   PILLAR_KEYS.includes(value as PillarKey);
+
+const readBoolean = (value: unknown): boolean | undefined =>
+  value === true || value === "true"
+    ? true
+    : value === false || value === "false"
+      ? false
+      : undefined;
+
+export const normalizeProjectDiscoveryCompositionFilter = (
+  value: Readonly<Record<string, unknown>>
+): ProjectDiscoveryCompositionFilter => {
+  const featured = readBoolean(value.composition_featured ?? value.featured);
+  const pillarValue = value.composition_pillar ?? value.pillar;
+  const projectTypeValue = value.composition_project_type ?? value.project_type;
+  return {
+    ...(featured === undefined ? {} : { featured }),
+    ...(typeof pillarValue === "string" && isPillar(pillarValue)
+      ? { pillar: pillarValue }
+      : {}),
+    ...(typeof projectTypeValue === "string" &&
+    PROJECT_TYPES.includes(projectTypeValue as ProjectType)
+      ? { project_type: projectTypeValue as ProjectType }
+      : {}),
+  };
+};
+
+export const normalizeArticleDiscoveryCompositionFilter = (
+  value: Readonly<Record<string, unknown>>
+): ArticleDiscoveryCompositionFilter => {
+  const featured = readBoolean(value.composition_featured ?? value.featured);
+  const pillarValue = value.composition_pillar ?? value.pillar;
+  return {
+    ...(featured === undefined ? {} : { featured }),
+    ...(typeof pillarValue === "string" && isPillar(pillarValue)
+      ? { pillar: pillarValue }
+      : {}),
+  };
+};
+
+export const projectDiscoveryCompositionQuery = (
+  filter: ProjectDiscoveryCompositionFilter
+): Readonly<Record<string, string | boolean>> => ({
+  ...(filter.featured === undefined
+    ? {}
+    : { composition_featured: filter.featured }),
+  ...(filter.pillar ? { composition_pillar: filter.pillar } : {}),
+  ...(filter.project_type
+    ? { composition_project_type: filter.project_type }
+    : {}),
+});
+
+export const articleDiscoveryCompositionQuery = (
+  filter: ArticleDiscoveryCompositionFilter
+): Readonly<Record<string, string | boolean>> => ({
+  ...(filter.featured === undefined
+    ? {}
+    : { composition_featured: filter.featured }),
+  ...(filter.pillar ? { composition_pillar: filter.pillar } : {}),
+});
 
 const normalizePillar = (
   value: unknown,
@@ -332,37 +402,73 @@ const ARTICLE_SORT_FIELDS: Record<ArticleDiscoverySort, string> = {
 
 export const buildProjectDiscoveryRepositoryQuery = (
   query: ProjectDiscoveryQuery,
-  categoryId?: string
-): Record<string, string> => ({
-  page: String(query.page),
-  limit: String(PUBLIC_DISCOVERY_PAGE_SIZE),
-  sort: PROJECT_SORT_FIELDS[query.sort],
-  ...(query.search.trim() ? { search: query.search.trim() } : {}),
-  ...(query.pillar !== "all" ? { primary_pillar: query.pillar } : {}),
-  ...(query.category !== "all" && categoryId ? { category: categoryId } : {}),
-  ...(query.category !== "all" && !categoryId
-    ? { category: "000000000000000000000000" }
-    : {}),
-  ...(query.technology !== "all" ? { tags: query.technology } : {}),
-  ...(query.type !== "all" ? { project_type: query.type } : {}),
-  ...(query.year ? { year: String(query.year) } : {}),
-});
+  categoryId?: string,
+  composition: ProjectDiscoveryCompositionFilter = {}
+): Record<string, string> => {
+  const pillar =
+    query.pillar !== "all" &&
+    composition.pillar &&
+    query.pillar !== composition.pillar
+      ? "__page_scope_mismatch__"
+      : query.pillar !== "all"
+        ? query.pillar
+        : composition.pillar;
+  const projectType =
+    query.type !== "all" &&
+    composition.project_type &&
+    query.type !== composition.project_type
+      ? "__page_scope_mismatch__"
+      : query.type !== "all"
+        ? query.type
+        : composition.project_type;
+  return {
+    page: String(query.page),
+    limit: String(PUBLIC_DISCOVERY_PAGE_SIZE),
+    sort: PROJECT_SORT_FIELDS[query.sort],
+    ...(query.search.trim() ? { search: query.search.trim() } : {}),
+    ...(pillar ? { primary_pillar: pillar } : {}),
+    ...(query.category !== "all" && categoryId ? { category: categoryId } : {}),
+    ...(query.category !== "all" && !categoryId
+      ? { category: "000000000000000000000000" }
+      : {}),
+    ...(query.technology !== "all" ? { tags: query.technology } : {}),
+    ...(projectType ? { project_type: projectType } : {}),
+    ...(composition.featured === undefined
+      ? {}
+      : { is_featured: String(composition.featured) }),
+    ...(query.year ? { year: String(query.year) } : {}),
+  };
+};
 
 export const buildArticleDiscoveryRepositoryQuery = (
   query: ArticleDiscoveryQuery,
-  categoryId?: string
-): Record<string, string> => ({
-  page: String(query.page),
-  limit: String(PUBLIC_DISCOVERY_PAGE_SIZE),
-  sort: ARTICLE_SORT_FIELDS[query.sort],
-  ...(query.search.trim() ? { search: query.search.trim() } : {}),
-  ...(query.pillar !== "all" ? { primary_pillar: query.pillar } : {}),
-  ...(query.category !== "all" && categoryId ? { category: categoryId } : {}),
-  ...(query.category !== "all" && !categoryId
-    ? { category: "000000000000000000000000" }
-    : {}),
-  ...(query.topic !== "all" ? { topics: query.topic } : {}),
-});
+  categoryId?: string,
+  composition: ArticleDiscoveryCompositionFilter = {}
+): Record<string, string> => {
+  const pillar =
+    query.pillar !== "all" &&
+    composition.pillar &&
+    query.pillar !== composition.pillar
+      ? "__page_scope_mismatch__"
+      : query.pillar !== "all"
+        ? query.pillar
+        : composition.pillar;
+  return {
+    page: String(query.page),
+    limit: String(PUBLIC_DISCOVERY_PAGE_SIZE),
+    sort: ARTICLE_SORT_FIELDS[query.sort],
+    ...(query.search.trim() ? { search: query.search.trim() } : {}),
+    ...(pillar ? { primary_pillar: pillar } : {}),
+    ...(query.category !== "all" && categoryId ? { category: categoryId } : {}),
+    ...(query.category !== "all" && !categoryId
+      ? { category: "000000000000000000000000" }
+      : {}),
+    ...(query.topic !== "all" ? { topics: query.topic } : {}),
+    ...(composition.featured === undefined
+      ? {}
+      : { is_featured: String(composition.featured) }),
+  };
+};
 
 const toStringValue = (value: unknown): string | undefined => {
   if (typeof value === "string") return value;

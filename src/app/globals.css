@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant motion-safe (&:is(html[data-motion="full"] *));
+@custom-variant motion-reduce (&:is(html:not([data-motion="full"]) *));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -254,6 +256,20 @@ html[data-motion="reduced"] *::after {
   scroll-behavior: auto !important;
 }
 
+html[data-preview-motion="reduced"] .parallax-layer {
+  transform: translate3d(0, 0, 0) !important;
+  will-change: auto !important;
+}
+
+[data-preview-motion="reduced"] *,
+[data-preview-motion="reduced"] *::before,
+[data-preview-motion="reduced"] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+  scroll-behavior: auto !important;
+}
+
 html[data-motion="off"] *,
 html[data-motion="off"] *::before,
 html[data-motion="off"] *::after {
@@ -263,13 +279,13 @@ html[data-motion="off"] *::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
+  html:not([data-preview-motion="normal"]) {
     scroll-behavior: auto;
   }
 
-  *,
-  *::before,
-  *::after {
+  html:not([data-preview-motion="normal"]) *,
+  html:not([data-preview-motion="normal"]) *::before,
+  html:not([data-preview-motion="normal"]) *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;

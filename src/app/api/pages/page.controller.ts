@@ -3,20 +3,17 @@ import { hasCapability, type Capability } from "@/lib/auth/capabilities";
 import { assertTrustedAuthRequest } from "@/lib/auth/auth-request-security";
 import type { AuthRequest } from "@/middleware/auth.middleware";
 import httpStatus from "http-status";
-import type { NextRequest } from "next/server";
 import { pageSuccessResponse, readPageJsonBody } from "./page.http";
 import {
   clearPagePreviewCookie,
-  getPagePreviewTtlSeconds,
+  getPagePreviewLifetime,
   setPagePreviewCookie,
-  verifyPagePreviewCookie,
 } from "./page.preview";
 import {
   auditPagePreviewCreated,
   createPage,
   getAdminPage,
   publishPage,
-  readDraftPreview,
   readPublishedPage,
   reorderPageDraft,
   updatePageDraft,
@@ -166,18 +163,23 @@ export const createPreviewSessionResponse = async (
   const page = await getAdminPage(routeKey);
   if (page.revision !== body.expected_revision)
     throw new AppError(409, "The Page changed. Refresh before previewing.");
+  const issuedAt = new Date();
   const response = pageSuccessResponse({
-    data: { expires_in_seconds: getPagePreviewTtlSeconds() },
+    data: getPagePreviewLifetime(issuedAt),
     status: 201,
     message: "Preview session created successfully.",
     request_id: requestId,
     cache: "preview",
   });
-  setPagePreviewCookie(response, {
-    route_key: routeKey,
-    page_id: page.id,
-    revision: page.revision,
-  });
+  setPagePreviewCookie(
+    response,
+    {
+      route_key: routeKey,
+      page_id: page.id,
+      revision: page.revision,
+    },
+    issuedAt
+  );
   await auditPagePreviewCreated(page, context);
   return response;
 };
@@ -198,21 +200,4 @@ export const clearPreviewSessionResponse = async (
   });
   clearPagePreviewCookie(response, routeKey);
   return response;
-};
-
-export const previewPageResponse = async (
-  request: NextRequest & AuthRequest,
-  routeKey: TPageRouteKey,
-  requestId: string
-) => {
-  mutationContext(request, requestId, "site:read");
-  const preview = verifyPagePreviewCookie(request, routeKey);
-  if (!preview) throw new AppError(401, "A valid preview session is required.");
-  return pageSuccessResponse({
-    data: await readDraftPreview(routeKey, preview.page_id, preview.revision),
-    status: 200,
-    message: "Page preview retrieved successfully.",
-    request_id: requestId,
-    cache: "preview",
-  });
 };

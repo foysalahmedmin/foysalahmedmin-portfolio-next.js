@@ -19,6 +19,7 @@ import {
 import { withPublicPagination } from "@/utils/public-query";
 import {
   buildProjectDiscoveryRepositoryQuery,
+  normalizeProjectDiscoveryCompositionFilter,
   parseProjectDiscoveryQuery,
 } from "@/lib/discovery/public-discovery";
 import type { TJwtPayload } from "@/types/jsonwebtoken.type";
@@ -127,8 +128,17 @@ export const getPublicProjectDiscovery = async (
       : await ProjectCategoryRepository.findPublicByIdentifierPopulated(
           query.category
         );
+  const composition = normalizeProjectDiscoveryCompositionFilter({
+    featured: queryParams.composition_featured,
+    pillar: queryParams.composition_pillar,
+    project_type: queryParams.composition_project_type,
+  });
   const result = await ProjectRepository.findPublicPaginated(
-    buildProjectDiscoveryRepositoryQuery(query, category?._id?.toString())
+    buildProjectDiscoveryRepositoryQuery(
+      query,
+      category?._id?.toString(),
+      composition
+    )
   );
   return {
     ...result,

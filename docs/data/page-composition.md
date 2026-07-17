@@ -21,13 +21,15 @@ The snapshot budget is 64 KiB, with at most 20 sections and 24 records per colle
 - `POST /api/pages/:routeKey/admin/reorder` requires an exact section-key permutation and `site:edit`.
 - `POST /api/pages/:routeKey/admin/publish` requires `site:publish`.
 - `POST|DELETE /api/pages/:routeKey/admin/preview-session` creates or clears a preview capability and requires `site:read`.
-- `GET /api/pages/:routeKey/preview` requires both an authenticated `site:read` principal and the valid preview cookie.
+- `GET /admin/preview/pages/:routeKey` is the private renderer document and requires both an authenticated `site:read` principal and the route-scoped preview cookie. There is no separate draft-data preview API.
 
 All browser mutations require a trusted same-origin request. Admin and preview responses are private `no-store`; preview responses also send `X-Robots-Tag: noindex, nofollow, noarchive` and `Referrer-Policy: no-referrer`.
 
 ## Preview and caching
 
-Preview capability data is HMAC-authenticated, expires within 60–900 seconds (600 by default), is scoped to one route/revision, and is delivered only in an `httpOnly`, `SameSite=Strict`, production-`Secure` cookie whose path is the matching preview endpoint. No preview token appears in a URL, response body, audit metadata, or referrer.
+Preview capability data is HMAC-authenticated, expires within 60–900 seconds (600 by default), is scoped to one route/revision, and is delivered only in an `httpOnly`, `SameSite=Strict`, production-`Secure` cookie whose path is the matching private renderer document. No preview token appears in a URL, response body, audit metadata, or referrer.
+
+The live routes and private preview share one route-aware renderer for all seven fixed Page keys. Page composition owns section visibility and order. Projects and Articles preserve their interactive discovery interface through a typed collection-section override; at the default query, both live and preview initialize from the same resolved Page snapshot. Contact and Legal routes also resolve through Page, including bounded no-database fallbacks.
 
 Publishing writes a durable cache-invalidation intent in the same transaction as the snapshot and audit event. Delivery invalidates global and route-specific tags plus only the fixed route/API paths. Failed delivery leaves a bounded retry intent; delivered intents expire after seven days.
 

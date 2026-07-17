@@ -1,10 +1,19 @@
 import type { TPublicCredentialDto } from "@/app/api/credentials/credential.type";
 import type { TPublicFAQDto } from "@/app/api/faqs/faq.type";
-import type { TResolvedPublishedPagePayload } from "@/app/api/pages/page-resolver.type";
+import type {
+  TResolvedPageSection,
+  TResolvedPublishedPagePayload,
+} from "@/app/api/pages/page-resolver.type";
+import type { TPageSectionKind } from "@/app/api/pages/page.type";
 import type { TPublicServiceDto } from "@/app/api/services/service.type";
 import type { TPublicTestimonialDto } from "@/app/api/testimonials/testimonial.type";
 import type { TPublicTimelineEntryDto } from "@/app/api/timeline/timeline-entry.type";
+import type { TPublicLegalDocumentDto } from "@/app/api/legal-documents/legal-document.type";
 import AboutDetailsSection from "@/components/(common)/about-page/about-details-section";
+import {
+  LegalDocumentUnavailable,
+  LegalDocumentView,
+} from "@/components/content/legal-document-view";
 import ContactContentSection from "@/components/(common)/contact-page/contact-content-section";
 import AboutSection from "@/components/(common)/home-page/about-section";
 import ArticlesSection from "@/components/(common)/home-page/articles-section";
@@ -31,7 +40,19 @@ import { Fragment, type ReactNode } from "react";
 
 type Props = Readonly<{
   payload: TResolvedPublishedPagePayload;
+  sectionOverrides?: TPublicPageSectionOverrides;
 }>;
+
+export type TPublicPageSectionOverride = (
+  input: Readonly<{
+    payload: TResolvedPublishedPagePayload;
+    section: TResolvedPageSection;
+  }>
+) => ReactNode;
+
+export type TPublicPageSectionOverrides = Readonly<
+  Partial<Record<TPageSectionKind, TPublicPageSectionOverride>>
+>;
 
 const asItems = <T,>(items: readonly Readonly<Record<string, unknown>>[]) =>
   items as unknown as readonly T[];
@@ -50,145 +71,160 @@ const asSkillGroups = (
       : []
   );
 
-export const PublicPageSections = ({ payload }: Props) => (
+export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
   <>
     {payload.sections.map((section) => {
       const unavailable = section.health.status === "unavailable";
       let content: ReactNode = null;
+      const override = sectionOverrides?.[section.kind];
 
-      switch (section.kind) {
-        case "site-hero":
-          content = <HeroSection site={payload.site} />;
-          break;
-        case "site-introduction":
-          content =
-            payload.page.route_key === "about" ? (
-              <AboutDetailsSection site={payload.site} />
-            ) : (
-              <AboutSection site={payload.site} />
+      if (override) {
+        content = override({ payload, section });
+      } else
+        switch (section.kind) {
+          case "site-hero":
+            content = <HeroSection site={payload.site} />;
+            break;
+          case "site-introduction":
+            content =
+              payload.page.route_key === "about" ? (
+                <AboutDetailsSection site={payload.site} />
+              ) : (
+                <AboutSection site={payload.site} />
+              );
+            break;
+          case "pillar-showcase":
+            content = (
+              <PillarShowcaseSection
+                pillars={payload.site.pillars}
+                heading={section.heading}
+                layout={section.layout}
+              />
             );
-          break;
-        case "pillar-showcase":
-          content = (
-            <PillarShowcaseSection
-              pillars={payload.site.pillars}
-              heading={section.heading}
-              layout={section.layout}
-            />
-          );
-          break;
-        case "architecture-workflow":
-          content = (
-            <ArchitectureWorkflowSection
-              site={payload.site}
-              heading={section.heading}
-              layout={section.layout}
-            />
-          );
-          break;
-        case "process-steps":
-          content = (
-            <ProcessStepsSection
-              steps={payload.site.process}
-              heading={section.heading}
-              layout={section.layout}
-            />
-          );
-          break;
-        case "metrics-strip":
-          content = payload.site.experience.feature_flags.show_metrics ? (
-            <MetricsStripSection
-              metrics={payload.site.metrics}
-              heading={section.heading}
-            />
-          ) : null;
-          break;
-        case "service-collection":
-          content = (
-            <ServicesSection
-              pillars={payload.site.pillars}
-              services={asItems<TPublicServiceDto>(section.items)}
-              heading={section.heading}
-              layout={section.layout}
-            />
-          );
-          break;
-        case "skill-group-collection":
-          content = (
-            <SkillsSection
-              pillars={payload.site.pillars}
-              groups={asSkillGroups(section.items)}
-              heading={section.heading}
-              layout={section.layout}
-            />
-          );
-          break;
-        case "project-collection":
-          content = (
-            <ProjectsSection
-              projects={asItems<TProjectListItem>(section.items)}
-              fallbacks={payload.site.fallbacks}
-              unavailable={unavailable}
-              heading={section.heading}
-            />
-          );
-          break;
-        case "article-collection":
-          content = (
-            <ArticlesSection
-              articles={asItems<TArticleListItem>(section.items)}
-              fallbacks={payload.site.fallbacks}
-              unavailable={unavailable}
-              heading={section.heading}
-            />
-          );
-          break;
-        case "timeline":
-          content = (
-            <TimelineSection
-              entries={asItems<TPublicTimelineEntryDto>(section.items)}
-              unavailable={unavailable}
-              heading={section.heading}
-            />
-          );
-          break;
-        case "credential-collection":
-          content = (
-            <CredentialsSection
-              credentials={asItems<TPublicCredentialDto>(section.items)}
-              unavailable={unavailable}
-              heading={section.heading}
-            />
-          );
-          break;
-        case "faq-list":
-          content = (
-            <FAQSection
-              faqs={asItems<TPublicFAQDto>(section.items)}
-              unavailable={unavailable}
-              heading={section.heading}
-              layout={section.layout}
-            />
-          );
-          break;
-        case "testimonial-collection":
-          content = (
-            <TestimonialsSection
-              testimonials={asItems<TPublicTestimonialDto>(section.items)}
-              unavailable={unavailable}
-              heading={section.heading}
-            />
-          );
-          break;
-        case "contact-form":
-          content = <ContactContentSection site={payload.site} />;
-          break;
-        case "contact-cta":
-          content = <ContactCTASection site={payload.site} />;
-          break;
-        default:
-          content = null;
-      }
+            break;
+          case "architecture-workflow":
+            content = (
+              <ArchitectureWorkflowSection
+                site={payload.site}
+                heading={section.heading}
+                layout={section.layout}
+              />
+            );
+            break;
+          case "process-steps":
+            content = (
+              <ProcessStepsSection
+                steps={payload.site.process}
+                heading={section.heading}
+                layout={section.layout}
+              />
+            );
+            break;
+          case "metrics-strip":
+            content = payload.site.experience.feature_flags.show_metrics ? (
+              <MetricsStripSection
+                metrics={payload.site.metrics}
+                heading={section.heading}
+              />
+            ) : null;
+            break;
+          case "service-collection":
+            content = (
+              <ServicesSection
+                pillars={payload.site.pillars}
+                services={asItems<TPublicServiceDto>(section.items)}
+                heading={section.heading}
+                layout={section.layout}
+              />
+            );
+            break;
+          case "skill-group-collection":
+            content = (
+              <SkillsSection
+                pillars={payload.site.pillars}
+                groups={asSkillGroups(section.items)}
+                heading={section.heading}
+                layout={section.layout}
+              />
+            );
+            break;
+          case "project-collection":
+            content = (
+              <ProjectsSection
+                projects={asItems<TProjectListItem>(section.items)}
+                fallbacks={payload.site.fallbacks}
+                unavailable={unavailable}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "article-collection":
+            content = (
+              <ArticlesSection
+                articles={asItems<TArticleListItem>(section.items)}
+                fallbacks={payload.site.fallbacks}
+                unavailable={unavailable}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "timeline":
+            content = (
+              <TimelineSection
+                entries={asItems<TPublicTimelineEntryDto>(section.items)}
+                unavailable={unavailable}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "credential-collection":
+            content = (
+              <CredentialsSection
+                credentials={asItems<TPublicCredentialDto>(section.items)}
+                unavailable={unavailable}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "faq-list":
+            content = (
+              <FAQSection
+                faqs={asItems<TPublicFAQDto>(section.items)}
+                unavailable={unavailable}
+                heading={section.heading}
+                layout={section.layout}
+              />
+            );
+            break;
+          case "testimonial-collection":
+            content = (
+              <TestimonialsSection
+                testimonials={asItems<TPublicTestimonialDto>(section.items)}
+                unavailable={unavailable}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "contact-form":
+            content = <ContactContentSection site={payload.site} />;
+            break;
+          case "legal-document": {
+            const document = asItems<TPublicLegalDocumentDto>(section.items)[0];
+            const type =
+              payload.page.route_key === "terms" ? "terms" : "privacy";
+            content = document ? (
+              <LegalDocumentView document={document} site={payload.site} />
+            ) : (
+              <LegalDocumentUnavailable type={type} />
+            );
+            break;
+          }
+          case "contact-cta":
+            content = <ContactCTASection site={payload.site} />;
+            break;
+          default:
+            content = null;
+        }
 
       return content ? <Fragment key={section.key}>{content}</Fragment> : null;
     })}

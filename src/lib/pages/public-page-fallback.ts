@@ -53,6 +53,20 @@ const FALLBACK_SECTIONS: Readonly<
     emptySection("faqs", "faq-list", "accordion"),
     emptySection("contact", "contact-cta", "banner"),
   ],
+  projects: [
+    emptySection("projects", "project-collection", "grid"),
+    emptySection("contact", "contact-cta", "banner"),
+  ],
+  articles: [
+    emptySection("articles", "article-collection", "grid"),
+    emptySection("contact", "contact-cta", "banner"),
+  ],
+  contact: [
+    emptySection("contact", "contact-form", "split"),
+    emptySection("faqs", "faq-list", "accordion"),
+  ],
+  privacy: [emptySection("privacy", "legal-document", "document")],
+  terms: [emptySection("terms", "legal-document", "document")],
 });
 
 const buildFallbackPayload = async (

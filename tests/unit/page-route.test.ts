@@ -9,7 +9,6 @@ const mocks = vi.hoisted(() => ({
   updatePageDraft: vi.fn(),
   reorderPageDraft: vi.fn(),
   publishPage: vi.fn(),
-  readDraftPreview: vi.fn(),
   auditPagePreviewCreated: vi.fn(),
 }));
 
@@ -37,7 +36,6 @@ import {
   GET as getAdminPageRoute,
   PATCH as patchAdminPage,
 } from "@/app/api/pages/[routeKey]/admin/route";
-import { GET as getPreviewPage } from "@/app/api/pages/[routeKey]/preview/route";
 
 const context = (routeKey = "home") => ({
   params: Promise.resolve({ routeKey }),
@@ -147,17 +145,5 @@ describe("Page routes", () => {
       current_revision: 4,
     });
     expect(payload).not.toHaveProperty("stack");
-  });
-
-  it("fails preview closed without a cookie and always sends noindex/no-referrer", async () => {
-    const response = await getPreviewPage(
-      new NextRequest("http://localhost:3000/api/pages/home/preview"),
-      context()
-    );
-    expect(response.status).toBe(401);
-    expect(response.headers.get("cache-control")).toContain("no-store");
-    expect(response.headers.get("x-robots-tag")).toContain("noindex");
-    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
-    expect(mocks.readDraftPreview).not.toHaveBeenCalled();
   });
 });

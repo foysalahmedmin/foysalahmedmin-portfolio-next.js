@@ -161,17 +161,23 @@ export const publishAdminPageClient = async (
 export const createAdminPagePreviewClient = async (
   routeKey: TPageRouteKey,
   expectedRevision: number
-): Promise<{ expires_in_seconds: number }> =>
+): Promise<{ expires_in_seconds: number; expires_at: string }> =>
   await request(pageEndpoint(routeKey, "/preview-session"), "POST", {
     expected_revision: expectedRevision,
   });
-
-export const getAdminPagePreviewClient = async (
-  routeKey: TPageRouteKey
-): Promise<TPageAdminDto> =>
-  await request<TPageAdminDto>(`/api/pages/${routeKey}/preview`, "GET");
 
 export const clearAdminPagePreviewClient = async (
   routeKey: TPageRouteKey
 ): Promise<{ cleared: true }> =>
   await request(pageEndpoint(routeKey, "/preview-session"), "DELETE");
+
+export const clearAdminPagePreviewBestEffort = (
+  routeKey: TPageRouteKey
+): void => {
+  void fetch(pageEndpoint(routeKey, "/preview-session"), {
+    method: "DELETE",
+    cache: "no-store",
+    credentials: "include",
+    keepalive: true,
+  }).catch(() => undefined);
+};

@@ -125,7 +125,10 @@ export const useUrlListQueryState = <TKind extends DiscoveryKind>(
       );
       const nextUrl = `${window.location.pathname}${nextSearch}${window.location.hash}`;
       const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-      if (nextUrl !== currentUrl) {
+      const opaquePagePreview = document.querySelector(
+        "[data-page-preview-runtime]"
+      );
+      if (nextUrl !== currentUrl && !opaquePagePreview) {
         if (history === "replace") {
           window.history.replaceState(window.history.state, "", nextUrl);
         } else {

@@ -1,5 +1,5 @@
 import { JsonLdScript } from "@/components/content/json-ld-script";
-import { PublicPageSections } from "@/components/pages/public-page-sections";
+import { PublicRoutePage } from "@/components/pages/public-route-page";
 import { buildWebPageJsonLd } from "@/lib/metadata/json-ld";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
 import { getHomePagePayloadOrFallback } from "@/lib/pages/public-page-fallback";
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const payload = await getHomePagePayloadOrFallback();
   return (
-    <main data-page-revision={payload.page.published_revision || undefined}>
+    <>
       <JsonLdScript
         data={buildWebPageJsonLd(payload.site, {
           pathname: "/",
@@ -29,7 +29,7 @@ export default async function HomePage() {
           description: payload.page.seo.description,
         })}
       />
-      <PublicPageSections payload={payload} />
-    </main>
+      <PublicRoutePage payload={payload} />
+    </>
   );
 }
