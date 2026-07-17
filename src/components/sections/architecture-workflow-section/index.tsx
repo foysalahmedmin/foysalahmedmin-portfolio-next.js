@@ -5,6 +5,7 @@ import {
   Subtitle,
   Title,
 } from "@/components/ui/section-title";
+import { PILLAR_KEYS } from "@/lib/content/pillars";
 import { cn } from "@/lib/utils";
 
 type ArchitectureWorkflowLayout = "default" | "bento" | "compact" | string;
@@ -43,9 +44,19 @@ export default function ArchitectureWorkflowSection({
   heading?: string;
   layout?: ArchitectureWorkflowLayout;
 }) {
-  const pillars = site.pillars
-    .filter((pillar) => pillar.enabled)
-    .sort((a, b) => a.order - b.order);
+  const pillarsByKey = new Map<
+    TPublicSiteDto["pillars"][number]["key"],
+    TPublicSiteDto["pillars"][number]
+  >();
+  for (const pillar of site.pillars) {
+    if (pillar.enabled && !pillarsByKey.has(pillar.key)) {
+      pillarsByKey.set(pillar.key, pillar);
+    }
+  }
+  const pillars = PILLAR_KEYS.flatMap((key) => {
+    const pillar = pillarsByKey.get(key);
+    return pillar ? [pillar] : [];
+  });
   const processSteps = site.process.filter((step) => step.enabled).slice(0, 4);
   const compact = layout === "compact";
 
@@ -77,14 +88,20 @@ export default function ArchitectureWorkflowSection({
               : "lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]"
           )}
         >
-          <div className="border-border bg-card relative overflow-hidden rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-sm)] lg:p-8">
+          <section
+            className="border-border bg-card relative overflow-hidden rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-sm)] lg:p-8"
+            aria-labelledby="architecture-system-map-heading"
+          >
             <div
               className="bg-primary/10 absolute -top-24 -right-20 size-72 rounded-full blur-[110px]"
               aria-hidden="true"
             />
             <div className="relative">
               <p className="type-label text-primary">System map</p>
-              <h3 className="mt-4 text-2xl leading-tight font-black">
+              <h3
+                id="architecture-system-map-heading"
+                className="mt-4 text-2xl leading-tight font-black"
+              >
                 Five capability lanes feeding one delivery loop.
               </h3>
               <p className="text-muted-foreground mt-4 max-w-2xl text-sm leading-7">
@@ -93,7 +110,10 @@ export default function ArchitectureWorkflowSection({
                 experience are not solved in separate silos.
               </p>
 
-              <ol className="mt-8 grid gap-3 sm:grid-cols-2">
+              <ol
+                className="mt-8 grid gap-3 sm:grid-cols-2"
+                aria-label="Five-pillar system map in canonical order"
+              >
                 {pillars.map((pillar, index) => (
                   <li
                     key={pillar.key}
@@ -112,15 +132,24 @@ export default function ArchitectureWorkflowSection({
                 ))}
               </ol>
             </div>
-          </div>
+          </section>
 
           <div className="grid gap-5">
-            <div className="border-border bg-surface-raised rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-xs)]">
+            <section
+              className="border-border bg-surface-raised rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-xs)]"
+              aria-labelledby="architecture-ai-lane-heading"
+            >
               <p className="type-label text-primary">AI automation lane</p>
-              <h3 className="mt-4 text-xl leading-tight font-black">
+              <h3
+                id="architecture-ai-lane-heading"
+                className="mt-4 text-xl leading-tight font-black"
+              >
                 Helpful automation stays inside a reviewable system.
               </h3>
-              <ol className="mt-6 space-y-3">
+              <ol
+                className="mt-6 space-y-3"
+                aria-label="AI automation workflow with human review boundaries"
+              >
                 {AUTOMATION_STEPS.map((step, index) => (
                   <li key={step} className="flex gap-3 text-sm leading-6">
                     <span className="bg-primary text-primary-foreground mt-0.5 inline-grid size-6 shrink-0 place-items-center rounded-full text-[0.65rem] font-black">
@@ -130,15 +159,22 @@ export default function ArchitectureWorkflowSection({
                   </li>
                 ))}
               </ol>
-            </div>
+            </section>
 
-            <div className="border-border bg-background rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-xs)]">
+            <section
+              className="border-border bg-background rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-xs)]"
+              aria-labelledby="architecture-guardrails-heading"
+            >
               <p className="type-label text-primary">Delivery guardrails</p>
-              <div className="mt-5 grid gap-3">
+              <div id="architecture-guardrails-heading" className="sr-only">
+                Delivery guardrails
+              </div>
+              <div className="mt-5 grid gap-3" role="list">
                 {GUARDRAILS.map((guardrail) => (
                   <article
                     key={guardrail.key}
                     className="border-border rounded-2xl border p-4"
+                    role="listitem"
                   >
                     <h3 className="text-sm font-black">{guardrail.title}</h3>
                     <p className="text-muted-foreground mt-2 text-xs leading-5">
@@ -147,7 +183,7 @@ export default function ArchitectureWorkflowSection({
                   </article>
                 ))}
               </div>
-            </div>
+            </section>
           </div>
         </div>
 

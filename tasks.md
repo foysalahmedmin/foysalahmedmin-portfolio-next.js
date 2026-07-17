@@ -1306,7 +1306,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [ ] Show three to five strongest case studies with problem, role, architecture, and verified outcome.
 - [x] Add one understandable system-design architecture story.
 - [x] Add one understandable AI-automation workflow story with data/human-control boundaries.
-- [ ] Provide complete DOM-text alternatives and keyboard-safe controls; no canvas/image-only diagram may carry essential meaning.
+- [x] Provide complete DOM-text alternatives and keyboard-safe controls; no canvas/image-only diagram may carry essential meaning.
 - [ ] Add purposeful case-study media parallax.
 - [ ] Never show live/source controls without valid visible URLs.
 - [ ] Add related insight links.
