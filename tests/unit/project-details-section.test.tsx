@@ -9,7 +9,9 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/motion/parallax-layer", () => ({
-  default: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  default: ({ children, depth }: { children?: ReactNode; depth?: string }) => (
+    <div data-parallax-layer={depth}>{children}</div>
+  ),
 }));
 
 vi.mock("@/components/ui/optimized-media", () => ({
@@ -94,7 +96,7 @@ describe("ProjectDetailsSection", () => {
   });
 
   it("renders only validated HTTPS public project links", () => {
-    render(
+    const { container } = render(
       <ProjectDetailsSection
         project={project({
           live_url: "https://example.com/product",
@@ -128,5 +130,8 @@ describe("ProjectDetailsSection", () => {
       screen.getByRole("link", { name: /public architecture note/i })
     ).toHaveAttribute("href", "https://docs.example.com/architecture");
     expect(screen.queryByText("Private source mirror")).not.toBeInTheDocument();
+    expect(
+      container.querySelector("[data-parallax-layer='subtle']")
+    ).toBeInTheDocument();
   });
 });
