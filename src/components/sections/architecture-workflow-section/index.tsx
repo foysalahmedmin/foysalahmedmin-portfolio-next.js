@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/section-title";
 import { PILLAR_KEYS } from "@/lib/content/pillars";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type ArchitectureWorkflowLayout = "default" | "bento" | "compact" | string;
 
@@ -33,6 +34,24 @@ const AUTOMATION_STEPS = [
   "Generate bounded drafts, data transforms, or operational assists.",
   "Validate outputs through typed contracts, logs, and review gates.",
   "Ship only the part that remains useful when automation is unavailable.",
+] as const;
+
+const RELATED_INSIGHT_LINKS = [
+  {
+    label: "System design writing",
+    href: "/articles?pillar=system_design",
+    summary: "Architecture boundaries, trade-offs, and operational thinking.",
+  },
+  {
+    label: "AI automation writing",
+    href: "/articles?pillar=ai_automation",
+    summary: "Automation patterns with validation and human control.",
+  },
+  {
+    label: "Full-stack delivery writing",
+    href: "/articles?pillar=full_stack",
+    summary: "How frontend, backend, data, and release quality connect.",
+  },
 ] as const;
 
 export default function ArchitectureWorkflowSection({
@@ -204,6 +223,37 @@ export default function ArchitectureWorkflowSection({
             </ol>
           </div>
         )}
+
+        <nav
+          className="border-border mt-5 rounded-[var(--radius-xl-token)] border p-5"
+          aria-label="Related technical insight paths"
+        >
+          <p className="type-label text-muted-foreground">
+            Continue into related insights
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {RELATED_INSIGHT_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="border-border bg-card hover:border-primary focus-visible:ring-primary group rounded-2xl border p-4 focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <span className="flex items-center justify-between gap-3 text-sm font-black">
+                  {link.label}
+                  <span
+                    className="text-primary transition-transform group-hover:translate-x-1"
+                    aria-hidden
+                  >
+                    →
+                  </span>
+                </span>
+                <span className="text-muted-foreground mt-2 block text-xs leading-5">
+                  {link.summary}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </nav>
       </div>
     </section>
   );

@@ -51,10 +51,23 @@ describe("ArchitectureWorkflowSection", () => {
         name: "AI automation workflow with human review boundaries",
       })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", {
+        name: "Related technical insight paths",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /system design writing/i })
+    ).toHaveAttribute("href", "/articles?pillar=system_design");
+    expect(
+      screen.getByRole("link", { name: /ai automation writing/i })
+    ).toHaveAttribute("href", "/articles?pillar=ai_automation");
+    expect(
+      screen.getByRole("link", { name: /full-stack delivery writing/i })
+    ).toHaveAttribute("href", "/articles?pillar=full_stack");
     expect(container.querySelector("canvas")).not.toBeInTheDocument();
     expect(container.querySelector("img")).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("keeps the text-based system map canonical when Site pillar order changes", () => {
