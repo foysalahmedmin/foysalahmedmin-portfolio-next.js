@@ -727,6 +727,15 @@ const pageDrafts = {
         source: automatic({ featured: true }),
       },
       {
+        key: "faqs",
+        kind: "faq-list",
+        visible: true,
+        heading: "Practical questions before a project starts",
+        layout: "accordion",
+        item_limit: 6,
+        source: automatic({ featured: true }),
+      },
+      {
         key: "process",
         kind: "process-steps",
         visible: true,
