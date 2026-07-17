@@ -1293,7 +1293,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 **Acceptance criteria**
 
-- [ ] All five pillars appear once in canonical order with real linked proof when available.
+- [x] All five pillars appear once in canonical order with real linked proof when available.
 - [ ] Sticky behavior never traps scroll, overlaps the header, or fails to release at section boundaries.
 - [ ] No-JS/reduced-motion presentation is an equivalent readable linear narrative.
 

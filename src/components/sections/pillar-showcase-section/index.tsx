@@ -6,6 +6,7 @@ import {
   Subtitle,
   Title,
 } from "@/components/ui/section-title";
+import { PILLAR_KEYS } from "@/lib/content/pillars";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { CSSProperties } from "react";
@@ -185,9 +186,19 @@ export default function PillarShowcaseSection({
   heading?: string;
   layout?: PillarShowcaseLayout;
 }) {
-  const visible = pillars
-    .filter((p) => p.enabled)
-    .sort((a, b) => a.order - b.order);
+  const pillarsByKey = new Map<
+    TPublicSitePillarDto["key"],
+    TPublicSitePillarDto
+  >();
+  for (const pillar of pillars) {
+    if (pillar.enabled && !pillarsByKey.has(pillar.key)) {
+      pillarsByKey.set(pillar.key, pillar);
+    }
+  }
+  const visible = PILLAR_KEYS.flatMap((key) => {
+    const pillar = pillarsByKey.get(key);
+    return pillar ? [pillar] : [];
+  });
   const sticky = layout === "sticky";
 
   if (!visible.length) return null;
