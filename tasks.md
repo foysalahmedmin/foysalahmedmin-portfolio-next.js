@@ -1463,7 +1463,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [ ] Complete unique page-specific title/description/canonical/social inputs. Home, About, Contact, discovery, details, and legal use the shared builder; Page-renderer parity remains.
 - [ ] Add dynamic project/article 1200×630 OG routes and valid default social image.
 - [x] Add Twitter metadata parity through the shared metadata builder; generated route-specific social images remain pending.
-- [ ] Add `robots.ts`, `sitemap.ts`, manifest, icon, and apple icon. Robots, sitemap, and manifest exist; final icon/apple-icon assets remain.
+- [x] Add `robots.ts`, `sitemap.ts`, manifest, icon, and apple icon.
 - [x] Verify the central `noindex` policy on admin/auth/preview/error-only surfaces.
 - [ ] Add truthful `Person`, `WebSite`, `ProfessionalService`, `BreadcrumbList`, `Article`, and `CreativeWork` data where supported. WebSite, breadcrumbs, Article, CreativeWork, and scoped Person are complete; standalone ProfessionalService awaits a supported truthful contract.
 - [x] Validate schema builders against rendered content and remove unsupported claims.
