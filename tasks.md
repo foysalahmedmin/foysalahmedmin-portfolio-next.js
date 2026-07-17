@@ -1235,7 +1235,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 - [x] Render exactly five canonical slides from published Site/Pillar data.
 - [x] Implement copy-safe responsive composition and stable height.
-- [x] Use optimized managed media when available and deterministic code-owned fallbacks otherwise; priority only the active LCP image.
+- [x] Use optimized managed media when available and deterministic generated public hero previews/code-owned emergency fallbacks otherwise; priority only the active LCP image.
 - [ ] Verify the initial network requests only the active hero image; prefetch at most one next image after idle.
 - [x] Add labelled direct controls, previous/next, keyboard, and touch behavior.
 - [x] Add visible pause/play, hover/focus/visibility pause, and timer cleanup.

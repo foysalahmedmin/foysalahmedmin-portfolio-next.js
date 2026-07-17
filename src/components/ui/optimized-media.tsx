@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  getFallbackMedia,
+  getFallbackMediaPresentation,
   type FallbackMediaKind,
 } from "@/lib/content/fallback-media";
 import type { PillarKey } from "@/lib/content/pillars";
@@ -43,10 +43,11 @@ export default function OptimizedMedia({
   style,
   ...props
 }: OptimizedMediaProps) {
-  const fallbackSource = useMemo(
-    () => getFallbackMedia(fallback, pillar),
+  const fallbackPresentation = useMemo(
+    () => getFallbackMediaPresentation(fallback, pillar),
     [fallback, pillar]
   );
+  const fallbackSource = fallbackPresentation.src;
   const requestedSource = src?.trim() || undefined;
   const initialSource = requestedSource || fallbackSource;
   const [source, setSource] = useState(initialSource);
@@ -54,15 +55,22 @@ export default function OptimizedMedia({
   const usingRequestedSource = Boolean(
     requestedSource && source === requestedSource
   );
+  const usingFallbackSource = source === fallbackSource;
   const safeFocalPoint = usingRequestedSource
     ? normalizeMediaFocalPoint(focalPoint)
-    : undefined;
+    : usingFallbackSource
+      ? normalizeMediaFocalPoint(fallbackPresentation.focal_point)
+      : undefined;
   const safeDominantColor = usingRequestedSource
     ? normalizeMediaDominantColor(dominantColor)
-    : undefined;
+    : usingFallbackSource
+      ? normalizeMediaDominantColor(fallbackPresentation.dominant_color)
+      : undefined;
   const safeBlurDataUrl = usingRequestedSource
     ? normalizeMediaBlurDataUrl(blurDataUrl)
-    : undefined;
+    : usingFallbackSource
+      ? normalizeMediaBlurDataUrl(fallbackPresentation.blur_data_url)
+      : undefined;
   const presentationStyle = {
     ...(safeDominantColor ? { backgroundColor: safeDominantColor } : {}),
     ...(safeFocalPoint
