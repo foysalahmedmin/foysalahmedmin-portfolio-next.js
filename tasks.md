@@ -1307,7 +1307,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Add one understandable system-design architecture story.
 - [x] Add one understandable AI-automation workflow story with data/human-control boundaries.
 - [x] Provide complete DOM-text alternatives and keyboard-safe controls; no canvas/image-only diagram may carry essential meaning.
-- [ ] Add purposeful case-study media parallax.
+- [x] Add purposeful case-study media parallax.
 - [x] Never show live/source controls without valid visible URLs.
 - [ ] Add related insight links.
 
