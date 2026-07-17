@@ -79,6 +79,8 @@
     "lifecycle_state": null
   },
   "approval": {
+    "owner_visual_acceptance": "pass_candidate",
+    "owner_feedback_at": "2026-07-17",
     "approved_at": null,
     "approved_by": null
   }

@@ -15,7 +15,13 @@
     "managed_media_ingestion": "pending",
     "site_attachment": "pending",
     "public_publish_validation": "pending",
-    "metadata_extraction": "pass_candidate"
+    "metadata_extraction": "pass_candidate",
+    "owner_visual_acceptance": "pass_candidate"
+  },
+  "owner_feedback": {
+    "status": "accepted_for_continuation",
+    "received_at": "2026-07-17",
+    "summary": "Owner liked the generated hero images and requested both seed-assets and public preview copies remain tracked in Git."
   },
   "assets": [
     {

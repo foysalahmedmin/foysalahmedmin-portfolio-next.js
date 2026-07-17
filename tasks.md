@@ -1151,7 +1151,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Store prompt/version/provenance template.
 - [x] Store the exact System Design pilot generation request and metadata checklist without claiming generated evidence.
 - [x] Generate the System Design pilot candidate and record tracked asset paths, dimensions, checksums, and candidate review notes.
-- [ ] Approve one pillar pilot before managed ingestion or public attachment.
+- [x] Approve one pillar pilot before managed ingestion or public attachment.
 - [ ] Test the pilot at desktop/mobile crops, 320–1920 widths, and both themes.
 - [x] Enforce pilot media budgets: mobile hero ≤ 200 KB and desktop hero ≤ 350 KB after optimization.
 - [x] Resolve seed/media engineering prerequisites for generated hero/social media: managed seed gateway construction, metadata/provenance pass-through, optional Site media bindings, and seed reference reconciliation are implemented.
@@ -1175,6 +1175,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [ ] Review all visuals for consistency, text-like artifacts, unintended logos, and accessibility purpose.
 - [ ] Classify each visual as informative or decorative; informative media gets purposeful alt text and decorative atmosphere gets empty alt.
 - [ ] Export bounded AVIF/WebP variants and blur/dominant-color metadata.
+- [x] Record owner visual acceptance for the generated five-hero candidate set while keeping rights, responsive, managed-ingestion, and publication gates pending.
 - [x] Export bounded WebP desktop/mobile candidate variants under the documented budgets.
 - [ ] Ingest through the shared ManagedMediaService path used by File API/storage middleware.
 - [ ] Attach alt/focal/provenance/license fields and Site/Pillar references.
