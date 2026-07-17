@@ -27,6 +27,18 @@ type GeneratedHeroAsset = Readonly<{
       sha256: string;
       budget_gate: string;
     };
+    desktop_avif: {
+      local_path: string;
+      bytes: number;
+      sha256: string;
+      budget_gate: string;
+    };
+    mobile_avif: {
+      local_path: string;
+      bytes: number;
+      sha256: string;
+      budget_gate: string;
+    };
   };
   review: {
     status: string;
@@ -74,6 +86,7 @@ describe("generated hero media evidence", () => {
     expect(evidence.shared_gates.owner_visual_acceptance).toBe(
       "pass_candidate"
     );
+    expect(evidence.shared_gates.avif_derivatives).toBe("pass_candidate");
     expect(evidence.shared_gates.manual_negative_prompt_review).toBe(
       "pass_candidate"
     );
@@ -115,6 +128,14 @@ describe("generated hero media evidence", () => {
           path: asset.derivatives.mobile_webp.local_path,
           checksum: asset.derivatives.mobile_webp.sha256,
         },
+        {
+          path: asset.derivatives.desktop_avif.local_path,
+          checksum: asset.derivatives.desktop_avif.sha256,
+        },
+        {
+          path: asset.derivatives.mobile_avif.local_path,
+          checksum: asset.derivatives.mobile_avif.sha256,
+        },
       ];
 
       for (const file of trackedFiles) {
@@ -128,8 +149,12 @@ describe("generated hero media evidence", () => {
 
       expect(asset.derivatives.desktop_webp.budget_gate).toBe("pass");
       expect(asset.derivatives.mobile_webp.budget_gate).toBe("pass");
+      expect(asset.derivatives.desktop_avif.budget_gate).toBe("pass");
+      expect(asset.derivatives.mobile_avif.budget_gate).toBe("pass");
       expect(asset.derivatives.desktop_webp.bytes).toBeLessThanOrEqual(350_000);
       expect(asset.derivatives.mobile_webp.bytes).toBeLessThanOrEqual(200_000);
+      expect(asset.derivatives.desktop_avif.bytes).toBeLessThanOrEqual(350_000);
+      expect(asset.derivatives.mobile_avif.bytes).toBeLessThanOrEqual(200_000);
     }
   });
 });
