@@ -118,6 +118,7 @@ export const PublicPageSections = ({ payload }: Props) => (
               pillars={payload.site.pillars}
               groups={asSkillGroups(section.items)}
               heading={section.heading}
+              layout={section.layout}
             />
           );
           break;
