@@ -10,6 +10,7 @@ import AboutSection from "@/components/(common)/home-page/about-section";
 import ArticlesSection from "@/components/(common)/home-page/articles-section";
 import HeroSection from "@/components/(common)/home-page/hero-section";
 import ProjectsSection from "@/components/(common)/home-page/projects-section";
+import ArchitectureWorkflowSection from "@/components/sections/architecture-workflow-section";
 import ContactCTASection from "@/components/sections/contact-cta-section";
 import MetricsStripSection from "@/components/sections/metrics-strip-section";
 import PillarShowcaseSection from "@/components/sections/pillar-showcase-section";
@@ -71,6 +72,15 @@ export const PublicPageSections = ({ payload }: Props) => (
           content = (
             <PillarShowcaseSection
               pillars={payload.site.pillars}
+              heading={section.heading}
+              layout={section.layout}
+            />
+          );
+          break;
+        case "architecture-workflow":
+          content = (
+            <ArchitectureWorkflowSection
+              site={payload.site}
               heading={section.heading}
               layout={section.layout}
             />

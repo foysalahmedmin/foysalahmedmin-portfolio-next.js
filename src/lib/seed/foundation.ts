@@ -232,6 +232,7 @@ const pageSectionSchema = z
       "site-hero",
       "site-introduction",
       "pillar-showcase",
+      "architecture-workflow",
       "process-steps",
       "metrics-strip",
       "project-collection",
@@ -667,6 +668,14 @@ const pageDrafts = {
         kind: "pillar-showcase",
         visible: true,
         layout: "sticky",
+        source: system,
+      },
+      {
+        key: "architecture-workflow",
+        kind: "architecture-workflow",
+        visible: true,
+        heading: "Architecture, AI automation, and delivery guardrails",
+        layout: "bento",
         source: system,
       },
       {

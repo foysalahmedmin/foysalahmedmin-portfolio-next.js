@@ -44,9 +44,7 @@ vi.mock("@/components/(common)/home-page/articles-section", () => ({
     };
   }) => (
     <section
-      data-article-fallback={
-        fallbacks?.article_by_pillar?.system_design?.url
-      }
+      data-article-fallback={fallbacks?.article_by_pillar?.system_design?.url}
     >
       articles:{articles.map(({ name }) => name).join(",")}
     </section>
@@ -57,6 +55,9 @@ vi.mock("@/components/sections/services-section", () => ({
 }));
 vi.mock("@/components/sections/skills-section", () => ({
   default: () => <section>skills</section>,
+}));
+vi.mock("@/components/sections/architecture-workflow-section", () => ({
+  default: () => <section>architecture</section>,
 }));
 vi.mock("@/components/sections/contact-cta-section", () => ({
   default: () => <section>contact</section>,
@@ -119,6 +120,7 @@ describe("PublicPageSections", () => {
           { _id: "project-1", name: "First case study" },
         ]),
         section("hero", "site-hero"),
+        section("architecture", "architecture-workflow"),
         section("articles", "article-collection", [
           { _id: "article-1", name: "First insight" },
         ]),
@@ -136,17 +138,13 @@ describe("PublicPageSections", () => {
 
     const { container } = render(<PublicPageSections payload={payload} />);
     expect(container.textContent).toBe(
-      "projects:First case studyheroarticles:First insightcontact"
+      "projects:First case studyheroarchitecturearticles:First insightcontact"
     );
-    expect(
-      container.querySelector("[data-project-fallback]")
-    ).toHaveAttribute(
+    expect(container.querySelector("[data-project-fallback]")).toHaveAttribute(
       "data-project-fallback",
       "https://cdn.example.com/project-backend.webp"
     );
-    expect(
-      container.querySelector("[data-article-fallback]")
-    ).toHaveAttribute(
+    expect(container.querySelector("[data-article-fallback]")).toHaveAttribute(
       "data-article-fallback",
       "https://cdn.example.com/article-system-design.webp"
     );

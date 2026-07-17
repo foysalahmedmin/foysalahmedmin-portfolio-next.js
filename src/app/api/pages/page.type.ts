@@ -33,6 +33,7 @@ export const PAGE_SECTION_KINDS = [
   "site-hero",
   "site-introduction",
   "pillar-showcase",
+  "architecture-workflow",
   "process-steps",
   "metrics-strip",
   "project-collection",
