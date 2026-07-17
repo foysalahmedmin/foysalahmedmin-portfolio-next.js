@@ -1443,11 +1443,17 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 **Dependencies:** P11.2 and completed public renderers from P13–P17
 
-- [ ] Reuse the real public section renderers in authenticated preview rather than maintaining visual duplicates.
-- [ ] Support desktop/mobile widths, light/dark themes, and normal/reduced motion.
-- [ ] Keep preview sessions scoped, short-lived, httpOnly, no-store, and `noindex`.
-- [ ] Show draft reference/validation errors without exposing private data to public routes.
-- [ ] Add parity tests comparing published and preview rendering for the same snapshot.
+- [x] Reuse the real public section renderers in authenticated preview rather than maintaining visual duplicates.
+- [x] Support desktop/mobile widths, light/dark themes, and normal/reduced motion.
+- [x] Keep preview sessions scoped, short-lived, httpOnly, no-store, and `noindex`.
+- [x] Show draft reference/validation errors without exposing private data to public routes.
+- [x] Add parity tests comparing published and preview rendering for the same snapshot.
+
+**Verification**
+
+- [x] Pass the focused renderer-parity, opaque-sandbox, expiry, motion, discovery, and curated-snapshot regression suites.
+- [x] Pass the full unit suite, typecheck, lint, and diff checks.
+- [ ] Run the Node 24 production build and authenticated real-browser preview smoke as part of P20.2.
 
 **Suggested commit:** `Complete public-renderer admin preview parity`
 
