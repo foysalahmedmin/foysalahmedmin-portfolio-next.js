@@ -3,13 +3,25 @@ import { PublicSiteLink } from "@/components/content/public-site-link";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import { getPrimaryPublicCta } from "@/lib/site/public-shell";
 import { resolveMediaAlt } from "@/lib/media/presentation";
+import { PILLAR_KEYS } from "@/lib/content/pillars";
 import { ArrowRight, Layers3 } from "lucide-react";
 import Link from "next/link";
 
 const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
   const profile = site.brand.profile ?? site.fallbacks.profile;
   const cta = getPrimaryPublicCta(site);
-  const enabledPillars = site.pillars.filter((pillar) => pillar.enabled);
+  const pillarsByKey = new Map(
+    site.pillars
+      .filter((pillar) => pillar.enabled)
+      .map((pillar) => [pillar.key, pillar])
+  );
+  const enabledPillars = PILLAR_KEYS.flatMap((key) => {
+    const pillar = pillarsByKey.get(key);
+    return pillar ? [pillar] : [];
+  });
+  const operatingPrinciples = site.process
+    .filter((step) => step.enabled)
+    .slice(0, 3);
 
   return (
     <section
@@ -71,18 +83,60 @@ const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
               className="mt-8 grid gap-3 sm:grid-cols-2"
               aria-label="Engineering disciplines"
             >
-              {enabledPillars.map((pillar) => (
+              {enabledPillars.map((pillar, index) => (
                 <li
                   key={pillar.key}
                   className="border-border bg-card flex min-h-14 items-center gap-3 rounded-xl border px-4 text-sm font-bold"
                 >
                   <span className="text-primary text-xs tabular-nums">
-                    {String(pillar.order).padStart(2, "0")}
+                    {String(index + 1).padStart(2, "0")}
                   </span>
                   {pillar.label}
                 </li>
               ))}
             </ol>
+
+            {operatingPrinciples.length > 0 && (
+              <section
+                className="border-border bg-surface-subtle mt-8 rounded-[var(--radius-xl-token)] border p-5"
+                aria-labelledby="about-operating-principles-title"
+              >
+                <p className="type-label text-primary">Operating principles</p>
+                <h3
+                  id="about-operating-principles-title"
+                  className="mt-3 text-xl font-black"
+                >
+                  Process is part of the professional evidence, not a generic
+                  promise.
+                </h3>
+                <ol className="mt-5 grid gap-3">
+                  {operatingPrinciples.map((step, index) => (
+                    <li
+                      key={step.key}
+                      className="border-border bg-card rounded-2xl border p-4"
+                    >
+                      <span className="text-primary text-xs font-black tabular-nums">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <h4 className="mt-2 text-sm font-black">{step.title}</h4>
+                      {step.summary && (
+                        <p className="text-muted-foreground mt-2 text-xs leading-5">
+                          {step.summary}
+                        </p>
+                      )}
+                      {step.deliverable && (
+                        <p className="border-l-primary/50 text-muted-foreground mt-3 border-l-2 pl-3 text-xs leading-5">
+                          <span className="text-foreground font-black">
+                            Evidence output:{" "}
+                          </span>
+                          {step.deliverable}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
             <div className="mt-9 flex flex-wrap gap-3">
               {cta && (
