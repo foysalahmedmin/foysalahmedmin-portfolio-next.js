@@ -307,10 +307,10 @@
     }
   ],
   "remaining_gates": [
-    "final owner/creative approval",
+    "production approval after responsive, accessibility, rights, provenance, ingestion, and attachment gates",
     "browser responsive composed review at 320, 375, 768, 1024, 1440, and 1920 CSS pixels in light/dark themes",
     "accessibility intent confirmation in composed hero",
-    "dominant color and blur placeholder extraction",
+    "exact effective prompt provenance for frontend, backend, ai_automation, and full_stack assets, or regenerate those four assets from committed prompts",
     "rights/license review",
     "managed-media ingestion",
     "Site draft attachment",

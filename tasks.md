@@ -1179,7 +1179,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Export bounded WebP desktop/mobile candidate variants under the documented budgets.
 - [ ] Ingest through the shared ManagedMediaService path used by File API/storage middleware.
 - [ ] Attach alt/focal/provenance/license fields and Site/Pillar references.
-- [ ] Commit a provider-neutral prompt/version/checksum/seed manifest without provider credentials or signed URLs.
+- [ ] Commit a provider-neutral prompt/version/checksum/seed manifest without provider credentials or signed URLs; exact effective prompts are still missing for frontend, backend, AI automation, and full-stack unless those four assets are regenerated from committed prompts.
 - [ ] Attach generated Files to all five draft pillars, validate the publish graph, publish atomically, and invalidate/recheck the public Site.
 
 **Suggested commit:** `Add the five-pillar generated hero media`
