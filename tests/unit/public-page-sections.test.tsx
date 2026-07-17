@@ -124,12 +124,13 @@ describe("PublicPageSections", () => {
         section("articles", "article-collection", [
           { _id: "article-1", name: "First insight" },
         ]),
+        section("trust", "testimonial-collection"),
         section("contact", "contact-cta"),
       ],
       health: {
         status: "healthy",
-        total_sections: 4,
-        healthy_sections: 4,
+        total_sections: 5,
+        healthy_sections: 5,
         degraded_sections: 0,
         resolved_records: 2,
         omitted_records: 0,
@@ -138,7 +139,7 @@ describe("PublicPageSections", () => {
 
     const { container } = render(<PublicPageSections payload={payload} />);
     expect(container.textContent).toBe(
-      "projects:First case studyheroarchitecturearticles:First insightcontact"
+      "projects:First case studyheroarchitecturearticles:First insighttestimonialscontact"
     );
     expect(container.querySelector("[data-project-fallback]")).toHaveAttribute(
       "data-project-fallback",
