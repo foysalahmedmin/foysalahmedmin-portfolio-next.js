@@ -72,6 +72,7 @@ export const PublicPageSections = ({ payload }: Props) => (
             <PillarShowcaseSection
               pillars={payload.site.pillars}
               heading={section.heading}
+              layout={section.layout}
             />
           );
           break;

@@ -172,6 +172,14 @@ describe("truthful foundation seed", () => {
         (page.payload.draft as { seo: { noindex: boolean } }).seo.noindex
       ).toBe(true);
     }
+    const home = pages.find((page) => page.payload.route_key === "home")!;
+    expect(
+      (
+        home.payload.draft as {
+          sections: Array<{ key: string; layout: string }>;
+        }
+      ).sections.find((section) => section.key === "pillars")?.layout
+    ).toBe("sticky");
   });
 
   it("omits every unverified claim collection and records pending media truthfully", () => {

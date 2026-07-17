@@ -666,7 +666,7 @@ const pageDrafts = {
         key: "pillars",
         kind: "pillar-showcase",
         visible: true,
-        layout: "default",
+        layout: "sticky",
         source: system,
       },
       {
