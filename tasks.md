@@ -1158,7 +1158,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 **Acceptance criteria**
 
-- [ ] One coherent direction can produce all five pillars without looking repetitive.
+- [x] One coherent direction can produce all five pillars without looking repetitive.
 
 **Suggested commit:** `Define generated portfolio media direction`
 
@@ -1172,8 +1172,8 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Generate System Design hero master candidate and mobile-aware crop.
 - [x] Generate Full-Stack hero master candidate and mobile-aware crop.
 - [ ] Generate the abstract About identity visual only after the portrait decision; this does not block the five hero assets.
-- [ ] Review all visuals for consistency, text-like artifacts, unintended logos, and accessibility purpose.
-- [ ] Classify each visual as informative or decorative; informative media gets purposeful alt text and decorative atmosphere gets empty alt.
+- [x] Review all visuals for consistency, text-like artifacts, unintended logos, and accessibility purpose.
+- [x] Classify each visual as informative or decorative; informative media gets purposeful alt text and decorative atmosphere gets empty alt.
 - [ ] Export bounded AVIF/WebP variants and blur/dominant-color metadata.
 - [x] Record owner visual acceptance for the generated five-hero candidate set while keeping rights, responsive, managed-ingestion, and publication gates pending.
 - [x] Export bounded WebP desktop/mobile candidate variants under the documented budgets.
