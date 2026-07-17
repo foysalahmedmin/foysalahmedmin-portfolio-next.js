@@ -173,6 +173,7 @@ export const PublicPageSections = ({ payload }: Props) => (
           content = (
             <TestimonialsSection
               testimonials={asItems<TPublicTestimonialDto>(section.items)}
+              unavailable={unavailable}
               heading={section.heading}
             />
           );

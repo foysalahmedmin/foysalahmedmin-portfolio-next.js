@@ -1319,7 +1319,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 
 - [x] Render concise dynamic process steps.
 - [x] Render selected articles with meaningful metadata and optimized media.
-- [ ] Render verified testimonials only; otherwise use evidence-based proof alternative.
+- [x] Render verified testimonials only; otherwise use evidence-based proof alternative.
 - [ ] Render useful FAQs from published records.
 - [x] Build qualification-focused CTA using dynamic availability/contact data.
 - [x] Remove contradictory hardcoded metrics and generic testimonial data.

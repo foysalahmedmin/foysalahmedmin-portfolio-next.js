@@ -248,12 +248,13 @@ export const FAQSection = ({
 
 export const TestimonialsSection = ({
   testimonials,
+  unavailable,
   heading,
 }: {
   testimonials: readonly TPublicTestimonialDto[];
+  unavailable?: boolean;
   heading?: string;
 }) => {
-  if (!testimonials.length) return null;
   return (
     <section
       className="bg-surface-subtle py-[var(--space-section)]"
@@ -269,41 +270,75 @@ export const TestimonialsSection = ({
             Only verified statements with active public-site consent are shown.
           </Description>
         </SectionTitle>
-        <ul className="grid gap-6 lg:grid-cols-3">
-          {testimonials.map((testimonial) => (
-            <li
-              key={testimonial.slug}
-              className="border-border bg-card rounded-2xl border p-7"
-            >
-              <Quote className="text-primary size-7" aria-hidden />
-              <blockquote className="mt-5 text-lg leading-8 font-semibold">
-                “{testimonial.quote}”
-              </blockquote>
-              <div className="mt-6 flex items-center gap-3">
-                {testimonial.avatar && (
-                  <div className="relative size-11 overflow-hidden rounded-full">
-                    <OptimizedMedia
-                      src={testimonial.avatar.url}
-                      alt={testimonial.avatar.alt_text || ""}
-                      fallback="profile"
-                      sizes="44px"
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <p className="text-sm">
-                  <strong className="block">{testimonial.person_name}</strong>
-                  <span className="text-muted-foreground">
-                    {[testimonial.person_role, testimonial.organization]
-                      .filter(Boolean)
-                      .join(" · ") ||
-                      testimonial.relationship.replaceAll("_", " ")}
-                  </span>
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        {testimonials.length ? (
+          <ul className="grid gap-6 lg:grid-cols-3">
+            {testimonials.map((testimonial) => (
+              <li
+                key={testimonial.slug}
+                className="border-border bg-card rounded-2xl border p-7"
+              >
+                <Quote className="text-primary size-7" aria-hidden />
+                <blockquote className="mt-5 text-lg leading-8 font-semibold">
+                  “{testimonial.quote}”
+                </blockquote>
+                <div className="mt-6 flex items-center gap-3">
+                  {testimonial.avatar && (
+                    <div className="relative size-11 overflow-hidden rounded-full">
+                      <OptimizedMedia
+                        src={testimonial.avatar.url}
+                        alt={testimonial.avatar.alt_text || ""}
+                        fallback="profile"
+                        sizes="44px"
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <p className="text-sm">
+                    <strong className="block">{testimonial.person_name}</strong>
+                    <span className="text-muted-foreground">
+                      {[testimonial.person_role, testimonial.organization]
+                        .filter(Boolean)
+                        .join(" · ") ||
+                        testimonial.relationship.replaceAll("_", " ")}
+                    </span>
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="border-border bg-card mx-auto max-w-5xl rounded-[var(--radius-xl-token)] border p-8 shadow-[var(--shadow-xs)]">
+            <p className="type-label text-primary">
+              {unavailable
+                ? "Feedback reader unavailable"
+                : "No public testimonials yet"}
+            </p>
+            <h3 className="mt-4 text-2xl leading-tight font-black">
+              Trust is represented by review gates until consent-backed quotes
+              exist.
+            </h3>
+            <p className="text-muted-foreground mt-4 max-w-3xl text-sm leading-7">
+              Unverified quotes, private client names, and informal praise stay
+              out of the public site. The stronger launch proof is the visible
+              system: typed content, capability-scoped publishing, managed-media
+              provenance, accessibility boundaries, and safe fallback states.
+            </p>
+            <ul className="mt-6 grid gap-3 md:grid-cols-3">
+              {[
+                "Verified records only",
+                "Consent before attribution",
+                "No placeholder client proof",
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="border-border text-muted-foreground rounded-2xl border p-4 text-sm font-semibold"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   );

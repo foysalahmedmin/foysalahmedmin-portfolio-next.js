@@ -718,6 +718,15 @@ const pageDrafts = {
         source: automatic({ featured: true }),
       },
       {
+        key: "trust",
+        kind: "testimonial-collection",
+        visible: true,
+        heading: "Trust without invented testimonials",
+        layout: "grid",
+        item_limit: 3,
+        source: automatic({ featured: true }),
+      },
+      {
         key: "process",
         kind: "process-steps",
         visible: true,
