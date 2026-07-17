@@ -11,14 +11,99 @@ export default function ProcessStepsSection({
   className,
   steps,
   heading,
+  layout = "default",
 }: {
   className?: string;
   steps: readonly TSiteProcessStep[];
   heading?: string;
+  layout?: string;
 }) {
   const visible = steps.filter((s) => s.enabled);
 
   if (!visible.length) return null;
+
+  const isNumberedJourney = layout === "numbered";
+
+  if (isNumberedJourney) {
+    return (
+      <section
+        id="working-process"
+        aria-labelledby="process-heading"
+        className={cn("bg-surface-subtle py-[var(--space-section)]", className)}
+      >
+        <div className="container">
+          <div className="grid gap-10 lg:grid-cols-[0.85fr_1.35fr] lg:items-start">
+            <div className="lg:sticky lg:top-28">
+              <SectionTitle variant="start" className="mb-8">
+                <Subtitle>How I work</Subtitle>
+                <Title id="process-heading">
+                  {heading || "A deliberate path from problem to production"}
+                </Title>
+                <Description className="mx-0">
+                  A project should feel calm because the risk has somewhere to
+                  go: discovery, decisions, implementation, verification, and
+                  handoff all have visible outputs.
+                </Description>
+              </SectionTitle>
+
+              <div className="border-border bg-card rounded-[var(--radius-xl-token)] border p-5 shadow-[var(--shadow-xs)]">
+                <p className="type-label text-primary">Delivery rhythm</p>
+                <ul className="text-muted-foreground mt-4 space-y-3 text-sm leading-6">
+                  {[
+                    "Decision trail stays visible",
+                    "Security and accessibility are checked early",
+                    "Launch handoff includes the operating context",
+                  ].map((item) => (
+                    <li key={item} className="flex gap-3">
+                      <span
+                        className="bg-primary mt-2 size-1.5 rounded-full"
+                        aria-hidden
+                      />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <ol
+              className="relative space-y-5 before:absolute before:top-5 before:bottom-5 before:left-6 before:w-px before:bg-[var(--border)]"
+              aria-label="Working process steps"
+            >
+              {visible.map((step, index) => (
+                <li key={step.key} className="relative flex gap-5">
+                  <span className="bg-primary text-primary-foreground ring-surface-subtle z-10 grid size-12 shrink-0 place-items-center rounded-2xl text-sm font-black ring-8">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+
+                  <article className="border-border bg-background flex-1 rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-xs)]">
+                    <h3 className="text-lg leading-snug font-black">
+                      {step.title}
+                    </h3>
+
+                    {step.summary && (
+                      <p className="text-muted-foreground mt-3 text-sm leading-7">
+                        {step.summary}
+                      </p>
+                    )}
+
+                    {step.deliverable && (
+                      <p className="border-l-primary/50 text-muted-foreground mt-5 border-l-2 pl-4 text-xs leading-6">
+                        <span className="text-foreground font-black">
+                          Deliverable:{" "}
+                        </span>
+                        {step.deliverable}
+                      </p>
+                    )}
+                  </article>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -47,7 +132,7 @@ export default function ProcessStepsSection({
               {/* Step number */}
               <div
                 className={cn(
-                  "text-primary/20 font-display select-none text-6xl font-bold leading-none",
+                  "text-primary/20 font-display text-6xl leading-none font-bold select-none",
                   "transition-colors duration-[var(--motion-standard)]"
                 )}
                 aria-hidden="true"

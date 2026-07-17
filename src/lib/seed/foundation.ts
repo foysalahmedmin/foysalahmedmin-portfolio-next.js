@@ -731,7 +731,7 @@ const pageDrafts = {
         kind: "faq-list",
         visible: true,
         heading: "Practical questions before a project starts",
-        layout: "accordion",
+        layout: "list",
         item_limit: 6,
         source: automatic({ featured: true }),
       },
@@ -739,7 +739,7 @@ const pageDrafts = {
         key: "process",
         kind: "process-steps",
         visible: true,
-        layout: "default",
+        layout: "numbered",
         source: system,
       },
       {

@@ -59,6 +59,11 @@ vi.mock("@/components/sections/skills-section", () => ({
 vi.mock("@/components/sections/architecture-workflow-section", () => ({
   default: () => <section>architecture</section>,
 }));
+vi.mock("@/components/sections/process-steps-section", () => ({
+  default: ({ layout }: { layout?: string }) => (
+    <section data-process-layout={layout}>process</section>
+  ),
+}));
 vi.mock("@/components/sections/contact-cta-section", () => ({
   default: () => <section>contact</section>,
 }));
@@ -68,7 +73,9 @@ vi.mock("@/components/(common)/contact-page/contact-content-section", () => ({
 vi.mock("@/components/sections/evidence-sections", () => ({
   TimelineSection: () => <section>timeline</section>,
   CredentialsSection: () => <section>credentials</section>,
-  FAQSection: () => <section>faqs</section>,
+  FAQSection: ({ layout }: { layout?: string }) => (
+    <section data-faq-layout={layout}>faqs</section>
+  ),
   TestimonialsSection: () => <section>testimonials</section>,
 }));
 const section = (
@@ -124,6 +131,8 @@ describe("PublicPageSections", () => {
         section("articles", "article-collection", [
           { _id: "article-1", name: "First insight" },
         ]),
+        { ...section("faqs", "faq-list"), layout: "list" },
+        { ...section("process", "process-steps"), layout: "numbered" },
         section("trust", "testimonial-collection"),
         section("contact", "contact-cta"),
       ],
@@ -139,7 +148,7 @@ describe("PublicPageSections", () => {
 
     const { container } = render(<PublicPageSections payload={payload} />);
     expect(container.textContent).toBe(
-      "projects:First case studyheroarchitecturearticles:First insighttestimonialscontact"
+      "projects:First case studyheroarchitecturearticles:First insightfaqsprocesstestimonialscontact"
     );
     expect(container.querySelector("[data-project-fallback]")).toHaveAttribute(
       "data-project-fallback",
@@ -148,6 +157,14 @@ describe("PublicPageSections", () => {
     expect(container.querySelector("[data-article-fallback]")).toHaveAttribute(
       "data-article-fallback",
       "https://cdn.example.com/article-system-design.webp"
+    );
+    expect(container.querySelector("[data-faq-layout]")).toHaveAttribute(
+      "data-faq-layout",
+      "list"
+    );
+    expect(container.querySelector("[data-process-layout]")).toHaveAttribute(
+      "data-process-layout",
+      "numbered"
     );
   });
 });

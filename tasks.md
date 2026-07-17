@@ -1323,7 +1323,7 @@ The recovery boundary remains the complete chain through `c06ff91`; `1008baa` wa
 - [x] Render useful FAQs from published records.
 - [x] Build qualification-focused CTA using dynamic availability/contact data.
 - [x] Remove contradictory hardcoded metrics and generic testimonial data.
-- [ ] Verify the final section rhythm is intentional, not a repeated card-grid chain.
+- [x] Verify the final section rhythm is intentional, not a repeated card-grid chain.
 
 **Suggested commit:** `Complete the proof-driven homepage journey`
 
