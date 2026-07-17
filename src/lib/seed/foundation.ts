@@ -572,6 +572,13 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
           verification: "derived",
           enabled: true,
         },
+        {
+          key: "guardrail_tracks",
+          label: "Guardrail tracks",
+          value: "3",
+          verification: "derived",
+          enabled: true,
+        },
       ],
     },
     published: null,
