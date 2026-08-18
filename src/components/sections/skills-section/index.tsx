@@ -53,7 +53,7 @@ export default function SkillsSection({
       <div className="container">
         <SectionTitle className={matrix ? "lg:mb-12" : undefined}>
           <Subtitle>Evidence, not decorative ratings</Subtitle>
-          <Title>{heading || "A connected five-discipline skill map"}</Title>
+          <Title>{heading || "A connected six-discipline skill map"}</Title>
           <Description>
             Published skills appear only after their supporting project,
             credential, writing, or reviewed work-history reference passes the

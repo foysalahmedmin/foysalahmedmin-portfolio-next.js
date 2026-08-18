@@ -117,7 +117,7 @@ describe("Site-derived title and description foundation", () => {
     );
   });
 
-  it("uses neutral five-pillar fallbacks without inventing an owner", () => {
+  it("uses neutral six-pillar fallbacks without inventing an owner", () => {
     const site = createEmergencyPublicSite();
 
     expect(getSiteDefaultTitle(site)).toBe(FALLBACK_SITE_TITLE);

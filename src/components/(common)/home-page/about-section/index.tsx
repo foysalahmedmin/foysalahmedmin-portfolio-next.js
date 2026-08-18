@@ -53,7 +53,7 @@ const AboutSection = ({ site }: { site: TPublicSiteDto }) => {
             </p>
             <ol
               className="mt-8 grid gap-3 sm:grid-cols-2"
-              aria-label="Five-discipline practice"
+              aria-label="Six-discipline practice"
             >
               {pillars.map((pillar) => (
                 <li

@@ -88,7 +88,8 @@ export const ProjectResource =
   (mongoose.models.ProjectResource as TProjectResourceModel) ||
   mongoose.model<TProjectResourceDocument, TProjectResourceModel>(
     "ProjectResource",
-    projectResourceSchema
+    projectResourceSchema,
+    "project_resources"
   );
 
 export default ProjectResource;

@@ -43,7 +43,7 @@ describe("ArchitectureWorkflowSection", () => {
     }
     expect(
       screen.getByRole("list", {
-        name: "Five-pillar system map in canonical order",
+        name: "Six-pillar system map in canonical order",
       })
     ).toBeInTheDocument();
     expect(
@@ -84,7 +84,7 @@ describe("ArchitectureWorkflowSection", () => {
     render(<ArchitectureWorkflowSection site={site} layout="bento" />);
 
     const systemMap = screen.getByRole("list", {
-      name: "Five-pillar system map in canonical order",
+      name: "Six-pillar system map in canonical order",
     });
     const labels = Array.from(systemMap.querySelectorAll("h4")).map(
       (heading) => heading.textContent

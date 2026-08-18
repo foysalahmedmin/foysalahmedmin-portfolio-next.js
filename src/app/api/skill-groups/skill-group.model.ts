@@ -20,6 +20,6 @@ configureRepeatableRecordSchema(schema, {
 
 const SkillGroup =
   (mongoose.models.SkillGroup as Model<TSkillGroup>) ||
-  mongoose.model<TSkillGroup>("SkillGroup", schema);
+  mongoose.model<TSkillGroup>("SkillGroup", schema, "skill_groups");
 
 export default SkillGroup;

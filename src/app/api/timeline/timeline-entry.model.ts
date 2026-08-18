@@ -73,6 +73,6 @@ configureRepeatableRecordSchema(schema, {
 
 const TimelineEntry =
   (mongoose.models.TimelineEntry as Model<TTimelineEntry>) ||
-  mongoose.model<TTimelineEntry>("TimelineEntry", schema);
+  mongoose.model<TTimelineEntry>("TimelineEntry", schema, "timeline_entries");
 
 export default TimelineEntry;

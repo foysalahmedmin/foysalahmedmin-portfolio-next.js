@@ -40,7 +40,7 @@ export default function DesignSystemPage() {
           <section aria-labelledby="pillar-token-title">
             <Stack gap="md">
               <h2 id="pillar-token-title" className="type-heading-2">
-                Five-pillar accents
+                Six-pillar accents
               </h2>
               <Grid columns={3}>
                 {pillars.map(([label, accent, surface]) => (
