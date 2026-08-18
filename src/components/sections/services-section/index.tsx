@@ -53,7 +53,7 @@ export default function ServicesSection({
     >
       <div className="container">
         <SectionTitle className={cn(useCardsLayout ? "lg:mb-12" : "lg:mb-20")}>
-          <Subtitle>Five disciplines, one system</Subtitle>
+          <Subtitle>Six disciplines, one system</Subtitle>
           <Title>
             {heading || "Product engineering without disconnected hand-offs"}
           </Title>

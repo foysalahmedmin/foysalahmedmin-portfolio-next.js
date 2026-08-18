@@ -365,7 +365,7 @@ const ArticlesContentSection = ({
                 })
               }
             >
-              <option value="all">All five disciplines</option>
+              <option value="all">All disciplines</option>
               {PILLAR_RELATIONSHIP_OPTIONS.map(({ key, label }) => (
                 <option key={key} value={key}>
                   {label}

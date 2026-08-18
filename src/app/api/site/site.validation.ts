@@ -1,6 +1,7 @@
 import { isAllowedPublicProjectUrl } from "@/lib/content/portfolio-contract";
 import {
   PILLAR_ACCENTS,
+  PILLAR_CONTRACT,
   PILLAR_ICON_KEYS,
   PILLAR_KEYS,
 } from "@/lib/content/pillars";
@@ -156,7 +157,7 @@ const pillarSchema = z
   .object({
     key: z.enum(PILLAR_KEYS),
     label: requiredText(1, 80),
-    order: z.number().int().min(1).max(5),
+    order: z.number().int().min(1).max(PILLAR_CONTRACT.length),
     enabled: z.boolean(),
     headline: optionalText(2, 140),
     summary: optionalText(2, 600),
@@ -259,7 +260,7 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
       .strict(),
     pillars: z
       .array(pillarSchema)
-      .length(5)
+      .length(PILLAR_CONTRACT.length)
       .superRefine((pillars, context) => {
         for (const issue of getPillarInvariantIssues(pillars)) {
           context.addIssue({

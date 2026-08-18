@@ -46,6 +46,11 @@ const heroFallbackByPillar: Record<PillarKey, FallbackMediaPresentation> = {
     blur_data_url:
       "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
   },
+  // No generated hero has been produced or reviewed for this pillar yet, so it
+  // uses the neutral fallback until one passes the media evidence gate.
+  devops_cloud: {
+    src: "/images/fallback-hero.svg",
+  },
   full_stack: {
     src: "/images/heroes/full-stack.master.png",
     focal_point: { x: 0.72, y: 0.5 },

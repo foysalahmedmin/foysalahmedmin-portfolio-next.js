@@ -2,7 +2,7 @@ import type {
   TPublicSiteDto,
   TPublicSiteMediaDto,
 } from "@/app/api/site/site.type";
-import type { PillarKey } from "@/lib/content/pillars";
+import { PILLAR_CONTRACT, type PillarKey } from "@/lib/content/pillars";
 import {
   getPrimaryPublicCta,
   resolvePublicSiteLink,
@@ -52,8 +52,10 @@ export const buildPublicHero = (site: TPublicSiteDto): TPublicHero => {
     cta: pillar.cta ? resolvePublicSiteLink(pillar.cta, site) : null,
   }));
 
-  if (slides.length !== 5) {
-    throw new Error("The public hero requires exactly five Site pillars");
+  if (slides.length !== PILLAR_CONTRACT.length) {
+    throw new Error(
+      `The public hero requires exactly ${PILLAR_CONTRACT.length} Site pillars`
+    );
   }
 
   return {

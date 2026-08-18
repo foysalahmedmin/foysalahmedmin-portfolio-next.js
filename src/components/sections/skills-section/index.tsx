@@ -65,7 +65,7 @@ export default function SkillsSection({
           <div className="border-border bg-surface-subtle/70 mb-6 rounded-[var(--radius-xl-token)] border p-5">
             <p className="type-label text-primary">Evidence model</p>
             <p className="text-muted-foreground mt-3 max-w-4xl text-sm leading-7">
-              Skill records are grouped by the same five-pillar architecture as
+              Skill records are grouped by the same six-pillar architecture as
               the public narrative. Published skills can describe proficiency
               only after they carry a derived or verified evidence state.
             </p>

@@ -1,18 +1,15 @@
 import { createEmergencyPublicSite } from "@/app/api/site/site.policy";
 import { resolveMediaAlt } from "@/lib/media/presentation";
 import { buildPublicHero } from "@/lib/site/public-hero";
+import { PILLAR_CONTRACT } from "@/lib/content/pillars";
 import { describe, expect, it } from "vitest";
 
 describe("public hero projection", () => {
-  it("always follows the exact canonical five-pillar order", () => {
+  it("always follows the exact canonical pillar order", () => {
     const hero = buildPublicHero(createEmergencyPublicSite());
-    expect(hero.slides.map((slide) => slide.key)).toEqual([
-      "frontend",
-      "backend",
-      "ai_automation",
-      "system_design",
-      "full_stack",
-    ]);
+    expect(hero.slides.map((slide) => slide.key)).toEqual(
+      PILLAR_CONTRACT.map(({ key }) => key)
+    );
     expect(hero.slides.filter((slide) => slide.priority)).toHaveLength(1);
   });
 

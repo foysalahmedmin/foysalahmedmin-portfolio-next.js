@@ -24,7 +24,7 @@ intents, dry-run reports the counts and apply stops with
 3. Run `pnpm db:migrate` before enabling Site admin mutations.
 4. Verify all five indexes and create the singleton through the protected admin
    endpoint.
-5. Complete and publish the canonical five-pillar snapshot. Until then, public
+5. Complete and publish the canonical six-pillar snapshot. Until then, public
    readers render only the neutral code-owned emergency contract.
 
 Rollback may stop using the new domain while leaving its collections and indexes

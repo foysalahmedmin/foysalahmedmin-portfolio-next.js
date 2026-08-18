@@ -5,6 +5,7 @@ export const CONTENT_ICON_KEYS = [
   "server-stack",
   "automation-node",
   "system-blueprint",
+  "pipeline-stages",
   "full-stack-layers",
   "layers",
   "shield",
