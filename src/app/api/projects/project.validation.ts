@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pillarKeySchema } from "@/lib/content/pillars";
+import { PILLAR_KEYS, pillarKeySchema } from "@/lib/content/pillars";
 import {
   isAllowedPublicProjectUrl,
   LINK_VISIBILITIES,
@@ -56,7 +56,7 @@ const outcomeSchema = z
 const contractFields = {
   slug: z.string().trim().min(1).max(96).optional(),
   primary_pillar: pillarKeySchema.optional(),
-  secondary_pillars: z.array(pillarKeySchema).max(4).optional(),
+  secondary_pillars: z.array(pillarKeySchema).max(PILLAR_KEYS.length - 1).optional(),
   delivery_status: z.enum(PROJECT_DELIVERY_STATUSES).optional(),
   publication_status: z.enum(PROJECT_PUBLICATION_STATUSES).optional(),
   project_type: z.enum(PROJECT_TYPES).optional(),

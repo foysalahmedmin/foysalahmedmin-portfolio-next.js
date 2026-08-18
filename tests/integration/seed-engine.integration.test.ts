@@ -114,7 +114,9 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
     });
     expect(await db.collection("sites").countDocuments()).toBe(1);
     expect(await db.collection("pages").countDocuments()).toBe(7);
-    expect(await db.collection("seed_media_intents").countDocuments()).toBe(6);
+    expect(await db.collection("seed_media_intents").countDocuments()).toBe(
+      manifest.media.length
+    );
     expect(await db.collection("seed_records").countDocuments()).toBe(
       manifest.records.length
     );
@@ -133,7 +135,9 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
     });
     expect(await db.collection("sites").countDocuments()).toBe(1);
     expect(await db.collection("pages").countDocuments()).toBe(7);
-    expect(await db.collection("seed_media_intents").countDocuments()).toBe(6);
+    expect(await db.collection("seed_media_intents").countDocuments()).toBe(
+      manifest.media.length
+    );
   });
 
   it("safely adopts an identical target from a partial prior run", async () => {

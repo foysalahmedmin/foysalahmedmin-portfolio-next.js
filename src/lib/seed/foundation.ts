@@ -2,7 +2,13 @@ import { ObjectId, type Document } from "mongodb";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { PAGE_SECTION_KINDS } from "../../app/api/pages/page.type.ts";
-import { PILLAR_CONTRACT } from "../content/pillars.ts";
+import {
+  PILLAR_ACCENTS,
+  PILLAR_CONTRACT,
+  PILLAR_ICON_KEYS,
+  PILLAR_KEYS,
+  pillarKeySchema,
+} from "../content/pillars.ts";
 import { SeedError } from "./errors.ts";
 import type {
   SeedActor,
@@ -11,7 +17,7 @@ import type {
   SeedTruthMarker,
 } from "./types.ts";
 
-export const FOUNDATION_SEED_VERSION = 3 as const;
+export const FOUNDATION_SEED_VERSION = 4 as const;
 
 const foundationTruth = Object.freeze({
   content_tier: "foundation",
@@ -59,28 +65,16 @@ const siteLinkSchema = z
 
 const pillarSchema = z
   .object({
-    key: z.enum([
-      "frontend",
-      "backend",
-      "ai_automation",
-      "system_design",
-      "full_stack",
-    ]),
+    key: pillarKeySchema,
     label: z.string().min(1).max(80),
-    order: z.number().int().min(1).max(5),
+    order: z.number().int().min(1).max(PILLAR_CONTRACT.length),
     enabled: z.literal(false),
     headline: z.string().min(2).max(140),
     summary: z.string().min(2).max(600),
     capabilities: z.array(z.string()).max(12),
     technologies: z.array(z.string()).max(20),
-    icon_key: z.enum([
-      "code-window",
-      "server-stack",
-      "automation-node",
-      "system-blueprint",
-      "full-stack-layers",
-    ]),
-    accent: z.enum(["cyan", "blue", "violet", "amber", "emerald"]),
+    icon_key: z.enum(PILLAR_ICON_KEYS),
+    accent: z.enum(PILLAR_ACCENTS),
     fallback_visual_key: z.string().min(1).max(64),
     visual_file: objectIdStringSchema.optional(),
   })
@@ -105,7 +99,7 @@ const sitePayloadSchema = z
             canonical: z.string().min(2).max(240),
           })
           .strict(),
-        pillars: z.array(pillarSchema).length(5),
+        pillars: z.array(pillarSchema).length(PILLAR_CONTRACT.length),
         brand: z.object({}).strict(),
         contact: z
           .object({
@@ -285,26 +279,8 @@ const baseRepeatableSchema = z
     slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
     title: z.string().min(1).max(160),
     summary: z.string().min(1).max(600).optional(),
-    primary_pillar: z
-      .enum([
-        "frontend",
-        "backend",
-        "ai_automation",
-        "system_design",
-        "full_stack",
-      ])
-      .optional(),
-    secondary_pillars: z
-      .array(
-        z.enum([
-          "frontend",
-          "backend",
-          "ai_automation",
-          "system_design",
-          "full_stack",
-        ])
-      )
-      .max(4),
+    primary_pillar: pillarKeySchema.optional(),
+    secondary_pillars: z.array(pillarKeySchema).max(PILLAR_KEYS.length - 1),
     sequence: z.number().int().min(0).max(1_000_000),
     status: z.literal("draft"),
     is_featured: z.boolean(),
@@ -477,7 +453,7 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
       seo: {
         default_title: "Engineering Portfolio",
         default_description:
-          "A five-pillar engineering portfolio with evidence-gated content.",
+          "A six-pillar engineering portfolio with evidence-gated content.",
         allow_indexing: false,
       },
       experience: {
@@ -879,6 +855,7 @@ const serviceIds = {
   backend: new ObjectId("507f1f77bcf86cd799439002"),
   ai_automation: new ObjectId("507f1f77bcf86cd799439003"),
   system_design: new ObjectId("507f1f77bcf86cd799439004"),
+  devops_cloud: new ObjectId("507f1f77bcf86cd799439006"),
   full_stack: new ObjectId("507f1f77bcf86cd799439005"),
 };
 
@@ -887,6 +864,7 @@ const skillGroupIds = {
   backend: new ObjectId("607f1f77bcf86cd799439012"),
   ai_automation: new ObjectId("607f1f77bcf86cd799439013"),
   system_design: new ObjectId("607f1f77bcf86cd799439014"),
+  devops_cloud: new ObjectId("607f1f77bcf86cd799439016"),
   full_stack: new ObjectId("607f1f77bcf86cd799439015"),
 };
 
@@ -953,6 +931,21 @@ const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
       sequence: 3,
     },
     {
+      id: serviceIds.devops_cloud,
+      slug: "devops-cloud",
+      title: "DevOps & Cloud Operations",
+      outcome:
+        "Ship and run services with reproducible builds, automated releases, and observable runtime.",
+      capabilities: [
+        "Containerised build & runtime images",
+        "Automated release and rollback pipelines",
+        "Server hardening & reverse-proxy routing",
+      ],
+      technologies: ["Docker", "GitHub Actions", "Linux", "Nginx", "Vercel"],
+      primary_pillar: "devops_cloud" as const,
+      sequence: 4,
+    },
+    {
       id: serviceIds.full_stack,
       slug: "full-stack-delivery",
       title: "Full-Stack Product Delivery",
@@ -965,7 +958,7 @@ const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
       ],
       technologies: ["Next.js", "TypeScript", "Vitest", "Playwright", "pnpm"],
       primary_pillar: "full_stack" as const,
-      sequence: 4,
+      sequence: 5,
     },
   ];
 
@@ -1041,13 +1034,22 @@ const createSkillGroupRecords = (actor: SeedActor): SeedRecordDefinition[] => {
       sequence: 3,
     },
     {
+      id: skillGroupIds.devops_cloud,
+      slug: "devops-cloud-operations",
+      title: "DevOps & Cloud Operations",
+      description:
+        "Packaging, releasing, and operating applications on cloud and Linux hosts.",
+      primary_pillar: "devops_cloud" as const,
+      sequence: 4,
+    },
+    {
       id: skillGroupIds.full_stack,
       slug: "full-stack-engineering",
       title: "Full-Stack Software Engineering",
       description:
         "Combining end-to-end tooling, clean testing architectures, and deployment stability.",
       primary_pillar: "full_stack" as const,
-      sequence: 4,
+      sequence: 5,
     },
   ];
 
@@ -1194,38 +1196,74 @@ const createSkillRecords = (actor: SeedActor): SeedRecordDefinition[] => {
     {
       slug: "docker",
       title: "Docker Containerization",
-      group: skillGroupIds.system_design,
+      group: skillGroupIds.devops_cloud,
       level: "advanced" as const,
       seq: 0,
-      p: "system_design" as const,
+      p: "devops_cloud" as const,
       kw: ["containers", "devops"],
-    },
-    {
-      slug: "cloud-services",
-      title: "AWS & GCP Cloud",
-      group: skillGroupIds.system_design,
-      level: "advanced" as const,
-      seq: 1,
-      p: "system_design" as const,
-      kw: ["aws", "gcp", "serverless"],
     },
     {
       slug: "github-actions",
       title: "CI/CD GitHub Actions",
-      group: skillGroupIds.system_design,
+      group: skillGroupIds.devops_cloud,
+      level: "advanced" as const,
+      seq: 1,
+      p: "devops_cloud" as const,
+      kw: ["cicd", "automation"],
+    },
+    {
+      slug: "cloud-services",
+      title: "AWS & GCP Cloud",
+      group: skillGroupIds.devops_cloud,
       level: "advanced" as const,
       seq: 2,
-      p: "system_design" as const,
-      kw: ["cicd", "automation"],
+      p: "devops_cloud" as const,
+      kw: ["aws", "gcp", "serverless"],
+    },
+    {
+      slug: "linux-nginx",
+      title: "Linux & Nginx",
+      group: skillGroupIds.devops_cloud,
+      level: "advanced" as const,
+      seq: 3,
+      p: "devops_cloud" as const,
+      kw: ["linux", "nginx", "reverse-proxy"],
     },
     {
       slug: "perf-tuning",
       title: "Query Optimization",
       group: skillGroupIds.system_design,
       level: "intermediate" as const,
-      seq: 3,
+      seq: 0,
       p: "system_design" as const,
       kw: ["mongodb-indexing", "postgres-profiling"],
+    },
+    {
+      slug: "schema-data-modeling",
+      title: "Schema & Data Modeling",
+      group: skillGroupIds.system_design,
+      level: "advanced" as const,
+      seq: 1,
+      p: "system_design" as const,
+      kw: ["schema", "migrations", "indexing"],
+    },
+    {
+      slug: "caching-strategy",
+      title: "Caching & Rate-Limit Strategy",
+      group: skillGroupIds.system_design,
+      level: "advanced" as const,
+      seq: 2,
+      p: "system_design" as const,
+      kw: ["caching", "redis", "invalidation"],
+    },
+    {
+      slug: "scalability-patterns",
+      title: "Scalability & Consistency Patterns",
+      group: skillGroupIds.system_design,
+      level: "advanced" as const,
+      seq: 3,
+      p: "system_design" as const,
+      kw: ["transactions", "idempotency", "outbox"],
     },
     {
       slug: "testing-vitest",
@@ -1498,7 +1536,7 @@ export const createFoundationSeedManifest = (
   seed_version: FOUNDATION_SEED_VERSION,
   mode: "foundation",
   description:
-    "Draft-only five-pillar Site, managed-media intents, navigation, fallback policy, and fixed Page composition.",
+    "Draft-only six-pillar Site, managed-media intents, navigation, fallback policy, and fixed Page composition.",
   truth: foundationTruth,
   media: [
     ...PILLAR_CONTRACT.map((pillar) => ({
@@ -1519,7 +1557,7 @@ export const createFoundationSeedManifest = (
       source: {
         kind: "pending_generated" as const,
         requirement:
-          "Non-human editorial social preview aligned with the five-pillar system.",
+          "Non-human editorial social preview aligned with the six-pillar system.",
       },
       metadata: {
         name: "Default social preview",

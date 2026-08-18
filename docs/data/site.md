@@ -1,4 +1,4 @@
-# Site settings and five-pillar contract
+# Site settings and six-pillar contract
 
 The `Site` domain is the singleton authority for public identity, positioning,
 navigation, contact visibility, social links, SEO defaults, experience defaults,
@@ -49,7 +49,7 @@ publication with field paths; partial publication is impossible.
 Files carry separate `draft` and `published` references to the Site. Replacing a
 draft asset cannot remove the protection held by the last publication.
 
-Project and article fallbacks support sparse, canonical five-pillar maps through
+Project and article fallbacks support sparse, canonical six-pillar maps through
 `project_files_by_pillar` and `article_files_by_pillar`. Only `frontend`,
 `backend`, `ai_automation`, `system_design`, and `full_stack` are valid keys.
 The legacy generic `project_file` and `article_file` fields remain supported for

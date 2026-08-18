@@ -21,6 +21,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import { PILLAR_CONTRACT } from "@/lib/content/pillars";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildPublishableSiteDraft } from "../helpers/site-fixture";
@@ -113,8 +114,10 @@ describe("Site and Page admin editor interactions", () => {
       <SiteAdminEditor initialSite={siteDto()} canEdit canPublish={false} />
     );
 
-    expect(screen.getByText("Exact five-pillar system")).toBeVisible();
-    expect(screen.getAllByText("Immutable key")).toHaveLength(5);
+    expect(screen.getByText("Exact six-pillar system")).toBeVisible();
+    expect(screen.getAllByText("Immutable key")).toHaveLength(
+      PILLAR_CONTRACT.length
+    );
     const publicName = screen.getByLabelText("Public name");
     await user.clear(publicName);
     await user.type(publicName, "Verified Portfolio Owner");

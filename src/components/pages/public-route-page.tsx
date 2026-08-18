@@ -21,7 +21,7 @@ const ROUTE_HEADER_FALLBACKS = {
   projects: {
     title: "Engineering case studies",
     description:
-      "Explore decisions, constraints, implementation details, and verified outcomes across the five disciplines that define my work.",
+      "Explore decisions, constraints, implementation details, and verified outcomes across the six disciplines that define my work.",
     label: "Projects",
   },
   articles: {

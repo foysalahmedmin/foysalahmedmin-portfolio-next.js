@@ -52,3 +52,19 @@ Drafts may be temporarily incomplete. Publish must reject unless all five unique
 ## Rollback implication
 
 The UI can roll back to a prior published Site snapshot without changing keys. Rolling back the contract itself requires a compensating migration and readers that understand every still-stored contract version; never delete or repurpose an existing key in place.
+
+## Amendment — 2026-08-19: sixth pillar
+
+The contract now carries six pillars. `devops_cloud` ("DevOps & Cloud") was
+added at order 5 and `full_stack` moved to order 6. No existing key was renamed,
+repurposed, or removed, so stored snapshots stay readable.
+
+Three DevOps-subject skills (`docker`, `github-actions`, `cloud-services`) moved
+from the System Design group to the new one rather than being duplicated, and
+System Design gained architecture-level replacements.
+
+The pillar count is no longer written by hand anywhere: schemas, validation
+limits, and tests derive it from `PILLAR_CONTRACT`, so a further pillar needs no
+edits outside `src/lib/content/pillars.ts` and the seed manifest. No generated
+hero art exists for the new pillar yet, so it renders the neutral fallback until
+one passes the media evidence gate.

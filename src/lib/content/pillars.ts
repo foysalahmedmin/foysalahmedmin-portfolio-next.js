@@ -36,9 +36,17 @@ export const PILLAR_CONTRACT = Object.freeze([
     default_accent: "amber",
   }),
   Object.freeze({
+    key: "devops_cloud",
+    label: "DevOps & Cloud",
+    order: 5,
+    fallback_visual_key: "pipeline-stages",
+    default_icon_key: "pipeline-stages",
+    default_accent: "rose",
+  }),
+  Object.freeze({
     key: "full_stack",
     label: "Full-Stack Development",
-    order: 5,
+    order: 6,
     fallback_visual_key: "full-stack-layers",
     default_icon_key: "full-stack-layers",
     default_accent: "emerald",
@@ -52,6 +60,7 @@ export const PILLAR_KEYS = Object.freeze(
   "backend",
   "ai_automation",
   "system_design",
+  "devops_cloud",
   "full_stack",
 ];
 
@@ -64,6 +73,7 @@ export const PILLAR_ICON_KEYS = Object.freeze(
   "server-stack",
   "automation-node",
   "system-blueprint",
+  "pipeline-stages",
   "full-stack-layers",
 ];
 
@@ -72,6 +82,7 @@ export const PILLAR_ACCENTS = [
   "blue",
   "violet",
   "amber",
+  "rose",
   "emerald",
 ] as const;
 

@@ -234,7 +234,7 @@ export default function PillarShowcaseSection({
           <div className="grid gap-12 lg:grid-cols-[minmax(18rem,0.82fr)_minmax(0,1.18fr)] lg:items-start">
             <div className="lg:sticky lg:top-24">
               <SectionTitle className="text-left lg:mb-0">
-                <Subtitle>Five disciplines · one operating system</Subtitle>
+                <Subtitle>Six disciplines · one operating system</Subtitle>
                 <Title id="pillar-showcase-heading">
                   {heading || "A full-stack practice with one consistent spine"}
                 </Title>
@@ -271,7 +271,7 @@ export default function PillarShowcaseSection({
         ) : (
           <>
             <SectionTitle className="lg:mb-20">
-              <Subtitle>Five disciplines · one engineer</Subtitle>
+              <Subtitle>Six disciplines · one engineer</Subtitle>
               <Title id="pillar-showcase-heading">
                 {heading || "What I design, build, and ship"}
               </Title>

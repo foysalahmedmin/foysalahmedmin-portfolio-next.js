@@ -34,17 +34,18 @@ import { describe, expect, it } from "vitest";
 import { Types } from "mongoose";
 
 describe("canonical portfolio contracts", () => {
-  it("owns exactly the ordered five stable pillar keys", () => {
+  it("owns exactly the ordered stable pillar keys", () => {
     expect(PILLAR_CONTRACT_VERSION).toBe(1);
     expect(PILLAR_KEYS).toEqual([
       "frontend",
       "backend",
       "ai_automation",
       "system_design",
+      "devops_cloud",
       "full_stack",
     ]);
     expect(PILLAR_CONTRACT.map(({ key }) => key)).toEqual(PILLAR_KEYS);
-    expect(new Set(PILLAR_KEYS).size).toBe(5);
+    expect(new Set(PILLAR_KEYS).size).toBe(PILLAR_KEYS.length);
     expect(pillarKeySchema.safeParse("mobile").success).toBe(false);
   });
 

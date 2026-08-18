@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pillarKeySchema } from "@/lib/content/pillars";
+import { PILLAR_KEYS, pillarKeySchema } from "@/lib/content/pillars";
 
 const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
   message: "Invalid ID format",
@@ -18,7 +18,7 @@ const contractFields = {
   slug: z.string().trim().min(1).max(96).optional(),
   excerpt: z.string().trim().max(500).optional(),
   primary_pillar: pillarKeySchema.optional(),
-  secondary_pillars: z.array(pillarKeySchema).max(4).optional(),
+  secondary_pillars: z.array(pillarKeySchema).max(PILLAR_KEYS.length - 1).optional(),
   topics: z.array(z.string().trim().min(1).max(80)).max(30).optional(),
   reading_time_minutes: z.number().int().min(1).max(600).optional(),
   reading_time_source: z.enum(["derived", "manual"]).optional(),

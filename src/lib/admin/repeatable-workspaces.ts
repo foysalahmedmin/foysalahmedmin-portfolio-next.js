@@ -120,6 +120,7 @@ const ICON_OPTIONS = [
   "server-stack",
   "automation-node",
   "system-blueprint",
+  "pipeline-stages",
   "full-stack-layers",
   "layers",
   "shield",

@@ -7,6 +7,7 @@ import {
   resolveSeedMediaBindings,
   validateSeedManifest,
 } from "@/lib/seed";
+import { PILLAR_CONTRACT } from "@/lib/content/pillars";
 import { ObjectId } from "mongodb";
 import { describe, expect, it } from "vitest";
 
@@ -22,24 +23,22 @@ describe("truthful foundation seed", () => {
     expect(getSeedManifestChecksum(manifest)).toBe(
       getSeedManifestChecksum(otherActorManifest)
     );
-    expect(manifest.records).toHaveLength(52);
-    expect(manifest.media).toHaveLength(6);
+    expect(manifest.records).toHaveLength(59);
+    expect(manifest.media).toHaveLength(PILLAR_CONTRACT.length + 1);
   });
 
-  it("seeds exactly five canonical embedded hero owners without publishing them", () => {
+  it("seeds every canonical embedded hero owner without publishing them", () => {
     const manifest = createFoundationSeedManifest(actor);
     const site = manifest.records.find(
       (record) => record.seed_key === "site.primary"
     )!;
     const draft = site.payload.draft;
     expect(siteDraftSnapshotSchema.parse(draft).pillars).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ key: "frontend", order: 1 }),
-        expect.objectContaining({ key: "backend", order: 2 }),
-        expect.objectContaining({ key: "ai_automation", order: 3 }),
-        expect.objectContaining({ key: "system_design", order: 4 }),
-        expect.objectContaining({ key: "full_stack", order: 5 }),
-      ])
+      expect.arrayContaining(
+        PILLAR_CONTRACT.map(({ key, order }) =>
+          expect.objectContaining({ key, order })
+        )
+      )
     );
     expect(
       (draft as { pillars: { enabled: boolean }[] }).pillars.every(
@@ -49,31 +48,13 @@ describe("truthful foundation seed", () => {
     expect(siteDraftSnapshotSchema.parse(draft).process).toHaveLength(6);
     expect(site.media_bindings).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          media_key: "hero.frontend",
-          field_path: "draft.pillars.0.visual_file",
-          required: false,
-        }),
-        expect.objectContaining({
-          media_key: "hero.backend",
-          field_path: "draft.pillars.1.visual_file",
-          required: false,
-        }),
-        expect.objectContaining({
-          media_key: "hero.ai_automation",
-          field_path: "draft.pillars.2.visual_file",
-          required: false,
-        }),
-        expect.objectContaining({
-          media_key: "hero.system_design",
-          field_path: "draft.pillars.3.visual_file",
-          required: false,
-        }),
-        expect.objectContaining({
-          media_key: "hero.full_stack",
-          field_path: "draft.pillars.4.visual_file",
-          required: false,
-        }),
+        ...PILLAR_CONTRACT.map(({ key }, index) =>
+          expect.objectContaining({
+            media_key: `hero.${key}`,
+            field_path: `draft.pillars.${index}.visual_file`,
+            required: false,
+          })
+        ),
         expect.objectContaining({
           media_key: "site.default-social",
           field_path: "draft.seo.default_og_file",
@@ -89,14 +70,10 @@ describe("truthful foundation seed", () => {
 
   it("binds ready managed media to the Site draft through provider-neutral seed references", () => {
     const manifest = createFoundationSeedManifest(actor);
-    const fileIds = [
-      "64b000000000000000000001",
-      "64b000000000000000000002",
-      "64b000000000000000000003",
-      "64b000000000000000000004",
-      "64b000000000000000000005",
-      "64b000000000000000000006",
-    ];
+    const fileIds = Array.from(
+      { length: PILLAR_CONTRACT.length + 1 },
+      (_unused, index) => `64b${String(index + 1).padStart(21, "0")}`
+    );
 
     const resolved = resolveSeedMediaBindings({
       records: manifest.records,
@@ -116,10 +93,10 @@ describe("truthful foundation seed", () => {
     };
 
     expect(draft.pillars.map((pillar) => pillar.visual_file)).toEqual(
-      fileIds.slice(0, 5)
+      fileIds.slice(0, PILLAR_CONTRACT.length)
     );
-    expect(draft.seo.default_og_file).toBe(fileIds[5]);
-    expect(resolved.references).toHaveLength(6);
+    expect(draft.seo.default_og_file).toBe(fileIds[PILLAR_CONTRACT.length]);
+    expect(resolved.references).toHaveLength(PILLAR_CONTRACT.length + 1);
     expect(resolved.references).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -129,7 +106,7 @@ describe("truthful foundation seed", () => {
         }),
         expect.objectContaining({
           field: "draft.seo.default_og_file",
-          file_id: fileIds[5],
+          file_id: fileIds[PILLAR_CONTRACT.length],
           target_collection: "sites",
         }),
       ])

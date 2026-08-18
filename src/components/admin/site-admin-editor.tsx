@@ -1061,7 +1061,7 @@ export default function SiteAdminEditor({
         <EditorialWorkspaceHeader
           eyebrow="Site authority"
           title="Site settings"
-          description="The revisioned Site singleton owns portfolio identity, positioning, five pillars, delivery process, public navigation, contact policy and metadata defaults."
+          description="The revisioned Site singleton owns portfolio identity, positioning, six pillars, delivery process, public navigation, contact policy and metadata defaults."
           status={
             <EditorialStatus tone="warning">Not configured</EditorialStatus>
           }
@@ -1093,7 +1093,7 @@ export default function SiteAdminEditor({
       <EditorialWorkspaceHeader
         eyebrow="Site authority"
         title="Site settings"
-        description="One revisioned source for public identity, positioning, contact policy, process, navigation, brand media, metadata and the exact five-pillar narrative."
+        description="One revisioned source for public identity, positioning, contact policy, process, navigation, brand media, metadata and the exact six-pillar narrative."
         status={
           <>
             <EditorialStatus>Draft r{site.revision}</EditorialStatus>
@@ -1246,7 +1246,7 @@ export default function SiteAdminEditor({
 
       <EditorialPanel
         id="site-pillars"
-        title="Exact five-pillar system"
+        title="Exact six-pillar system"
         description="Key, label, order and fallback visual are contract-owned and intentionally immutable. Narrative, capabilities, technologies, CTA and managed File references remain editorial."
       >
         <div className="space-y-5">
