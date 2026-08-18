@@ -82,6 +82,28 @@ describe("repeatable-content foundation migration", () => {
     ).toBe(false);
   });
 
+  it("accepts a text index in the shape MongoDB actually reports", () => {
+    const target = REPEATABLE_CONTENT_INDEX_TARGETS.find(
+      ({ options }) => options.name === "service_search_text"
+    );
+    if (!isTextIndexTarget(target))
+      throw new Error("Text index target missing");
+
+    // listIndexes never echoes { search_text: "text" }; a text index is always
+    // reported with the internal full-text key and the field list in weights.
+    expect(
+      isRepeatableContentIndexReady(
+        {
+          name: target.options.name,
+          key: { _fts: "text", _ftsx: 1 },
+          weights: target.options.weights,
+          default_language: target.options.default_language,
+        },
+        target
+      )
+    ).toBe(true);
+  });
+
   it("rejects text indexes that omit the code-owned language behavior", () => {
     const target = REPEATABLE_CONTENT_INDEX_TARGETS.find(
       ({ options }) => options.name === "service_search_text"
@@ -94,7 +116,7 @@ describe("repeatable-content foundation migration", () => {
       isRepeatableContentIndexReady(
         {
           name: target.options.name,
-          key: target.key,
+          key: { _fts: "text", _ftsx: 1 },
           weights: target.options.weights,
           default_language: target.options.default_language,
         },
@@ -105,7 +127,7 @@ describe("repeatable-content foundation migration", () => {
       isRepeatableContentIndexReady(
         {
           name: target.options.name,
-          key: target.key,
+          key: { _fts: "text", _ftsx: 1 },
           weights: target.options.weights,
         },
         target
