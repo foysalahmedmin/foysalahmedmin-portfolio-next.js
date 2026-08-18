@@ -100,7 +100,10 @@ minutes, ten per account per hour, and 30 per IP per hour. MFA verification is
 bounded per challenge, per IP, and—after the opaque challenge is resolved
 server-side—per user across renewed challenges and changing IPs. Refresh uses
 20 per family per minute and 60 per IP per ten minutes. Recovery is also
-bounded. Production uses the configured Upstash REST store and fails closed on
-missing credentials, untrusted client IP, timeout, or malformed provider
-response. Raw email, user ID, IP, token, and session identifiers are never
-Redis keys.
+bounded. The configured Upstash REST store is the authority when present; on
+missing credentials, timeout, or a malformed provider response, limiting falls
+back to the in-process store so authentication stays reachable, while an
+untrusted client IP still fails closed. Multi-instance deployments must
+configure Upstash: without it each instance counts its own buckets, so the
+effective limit multiplies by instance count. Raw email, user ID, IP, token,
+and session identifiers are never Redis keys.
