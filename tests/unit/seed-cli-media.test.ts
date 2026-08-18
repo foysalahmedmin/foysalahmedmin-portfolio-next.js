@@ -14,7 +14,10 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 const actor = { _id: new ObjectId(), role: "super-admin" as const };
-const pendingManifest = createDemoSeedManifest();
+const pendingManifest = createDemoSeedManifest({
+    _id: new ObjectId(),
+    role: "super-admin",
+  });
 const repositoryRequest: SeedMediaRequest = {
   media_key: "hero.system_design",
   purpose: "hero",

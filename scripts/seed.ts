@@ -117,7 +117,7 @@ const main = async (): Promise<void> => {
     const db = client.db(databaseName);
     const actor = await resolveSeedActor(db, process.env.SEED_ACTOR_EMAIL);
     const manifest = cli.demo
-      ? createDemoSeedManifest()
+      ? createDemoSeedManifest(actor)
       : createFoundationSeedManifest(actor);
     if (cli.operation === "reset") {
       const result = await resetSeedManifest({
