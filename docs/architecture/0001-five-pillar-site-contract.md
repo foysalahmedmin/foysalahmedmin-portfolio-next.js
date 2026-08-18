@@ -65,6 +65,11 @@ System Design gained architecture-level replacements.
 
 The pillar count is no longer written by hand anywhere: schemas, validation
 limits, and tests derive it from `PILLAR_CONTRACT`, so a further pillar needs no
-edits outside `src/lib/content/pillars.ts` and the seed manifest. No generated
-hero art exists for the new pillar yet, so it renders the neutral fallback until
-one passes the media evidence gate.
+edits outside `src/lib/content/pillars.ts` and the seed manifest.
+
+No generated hero art exists for the new pillar yet. `devops-cloud.*` in
+`seed-assets/heroes` and `public/images/heroes` is a byte-identical copy of the
+system design visual, kept under its own name so a dedicated asset can replace
+it without touching System Design. It is deliberately absent from
+`docs/content/generated-media-evidence/hero-candidates.v1.json`, which records
+only independently generated and reviewed candidates.

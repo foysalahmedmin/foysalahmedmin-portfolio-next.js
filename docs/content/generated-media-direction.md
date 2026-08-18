@@ -370,3 +370,11 @@ not part of this provider-neutral manifest.
 - Production publication remains blocked until required Files are ready,
   correctly attached, accessibility-reviewed, truth-compatible, and validated
   by the Site publish graph. A documentation checkbox never lifts that gate.
+
+## Placeholder: DevOps & Cloud hero
+
+`devops-cloud.master.png` and its derivatives are a byte-identical copy of the
+system design pilot visual. They exist so the sixth pillar renders a hero rather
+than the neutral fallback, and they carry no independent prompt, review, or
+evidence entry. Replace them with a generated candidate that passes the shared
+gates, then add its entry to `hero-candidates.v1.json`.

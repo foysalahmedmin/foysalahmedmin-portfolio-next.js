@@ -46,10 +46,14 @@ const heroFallbackByPillar: Record<PillarKey, FallbackMediaPresentation> = {
     blur_data_url:
       "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
   },
-  // No generated hero has been produced or reviewed for this pillar yet, so it
-  // uses the neutral fallback until one passes the media evidence gate.
+  // Placeholder: byte-identical copy of the system design visual until a
+  // dedicated DevOps & Cloud hero is generated and passes the evidence gate.
   devops_cloud: {
-    src: "/images/fallback-hero.svg",
+    src: "/images/heroes/devops-cloud.master.png",
+    focal_point: { x: 0.72, y: 0.5 },
+    dominant_color: "#d8d8c8",
+    blur_data_url:
+      "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
   },
   full_stack: {
     src: "/images/heroes/full-stack.master.png",
