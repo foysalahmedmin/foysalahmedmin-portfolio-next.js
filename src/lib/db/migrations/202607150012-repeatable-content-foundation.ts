@@ -1,4 +1,9 @@
-import type { CreateIndexesOptions, Db, IndexDescriptionInfo } from "mongodb";
+import type {
+  CreateIndexesOptions,
+  Db,
+  Document,
+  IndexDescriptionInfo,
+} from "mongodb";
 import { MigrationError } from "./errors.ts";
 import type {
   MigrationContext,
@@ -194,12 +199,20 @@ const canonical = (value: unknown): string => {
   return JSON.stringify(normalize(value));
 };
 
+// listIndexes reports a text index with MongoDB's internal full-text key rather
+// than the declared field, so the declared key is normalized before comparison.
+// The indexed fields still have to match through `weights`.
+const TEXT_INDEX_REPORTED_KEY = Object.freeze({ _fts: "text", _ftsx: 1 });
+
+const reportedIndexKey = (key: IndexTarget["key"]): Document =>
+  Object.values(key).includes("text") ? TEXT_INDEX_REPORTED_KEY : key;
+
 export const isRepeatableContentIndexReady = (
   index: IndexDescriptionInfo,
   target: IndexTarget
 ): boolean =>
   index.name === target.options.name &&
-  canonical(index.key) === canonical(target.key) &&
+  canonical(index.key) === canonical(reportedIndexKey(target.key)) &&
   Boolean(index.unique) === Boolean(target.options.unique) &&
   Boolean(index.sparse) === Boolean(target.options.sparse) &&
   Number(index.expireAfterSeconds ?? -1) ===
