@@ -368,6 +368,63 @@ const legalDocumentPayloadSchema = baseRepeatableSchema.extend({
   document_file: objectIdSchema.nullable().optional(),
 });
 
+const demoCategorySchema = z
+  .object({
+    _id: objectIdSchema,
+    name: z.string().min(2).max(50),
+    slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    description: z.string().min(1).max(500),
+    sequence: z.number().int().min(1).max(100),
+    status: z.literal("active"),
+    is_deleted: z.literal(false),
+    created_by: objectIdSchema,
+    updated_by: objectIdSchema,
+    created_at: dateSchema,
+    updated_at: dateSchema,
+  })
+  .strict();
+
+const demoContentBase = {
+  _id: objectIdSchema,
+  name: z.string().min(2).max(160).startsWith("Demo"),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  content: z.string().min(1),
+  category: objectIdSchema,
+  author: objectIdSchema,
+  primary_pillar: pillarKeySchema,
+  secondary_pillars: z.array(pillarKeySchema).max(PILLAR_KEYS.length - 1),
+  is_featured: z.boolean(),
+  is_deleted: z.literal(false),
+  created_by: objectIdSchema,
+  updated_by: objectIdSchema,
+  created_at: dateSchema,
+  updated_at: dateSchema,
+};
+
+const demoProjectSchema = z
+  .object({
+    ...demoContentBase,
+    description: z.string().min(1).max(300),
+    tags: z.array(z.string()).max(12),
+    delivery_status: z.string().min(1),
+    publication_status: z.literal("draft"),
+    project_type: z.string().min(1),
+    sequence: z.number().int().min(1),
+  })
+  .strict();
+
+const demoArticleSchema = z
+  .object({
+    ...demoContentBase,
+    excerpt: z.string().min(1).max(500),
+    topics: z.array(z.string()).max(12),
+    status: z.literal("draft"),
+    is_premium: z.literal(false),
+    reading_time_minutes: z.number().int().min(1).max(600),
+    reading_time_source: z.literal("manual"),
+  })
+  .strict();
+
 const assertSchema = (schema: z.ZodType, value: Readonly<Document>): void => {
   const parsed = schema.safeParse(value);
   if (!parsed.success) {
@@ -1577,13 +1634,127 @@ export const createFoundationSeedManifest = (
   ],
 });
 
-export const createDemoSeedManifest = (): SeedManifest => ({
+const DEMO_SEED_VERSION = 2 as const;
+
+const demoProjectCategoryId = foundationObjectId("demo:project-category");
+const demoArticleCategoryId = foundationObjectId("demo:article-category");
+
+const demoCategoryRecords = (actor: SeedActor): SeedRecordDefinition[] => [
+  {
+    stage: "categories",
+    collection: "project_categories",
+    seed_key: "demo.project-category",
+    seed_version: DEMO_SEED_VERSION,
+    lookup: { slug: "demo-projects" },
+    payload: {
+      _id: demoProjectCategoryId,
+      name: "Demo Projects",
+      slug: "demo-projects",
+      description: "Synthetic category used only outside production.",
+      sequence: 1,
+      status: "active",
+      is_deleted: false,
+    },
+    insert_only: { created_by: actor._id, updated_by: actor._id },
+    update_only: { updated_by: actor._id },
+    truth: demoTruth,
+    validate: (document) => assertSchema(demoCategorySchema, document),
+  },
+  {
+    stage: "categories",
+    collection: "article_categories",
+    seed_key: "demo.article-category",
+    seed_version: DEMO_SEED_VERSION,
+    lookup: { slug: "demo-articles" },
+    payload: {
+      _id: demoArticleCategoryId,
+      name: "Demo Articles",
+      slug: "demo-articles",
+      description: "Synthetic category used only outside production.",
+      sequence: 1,
+      status: "active",
+      is_deleted: false,
+    },
+    insert_only: { created_by: actor._id, updated_by: actor._id },
+    update_only: { updated_by: actor._id },
+    truth: demoTruth,
+    validate: (document) => assertSchema(demoCategorySchema, document),
+  },
+];
+
+const demoProjectRecords = (actor: SeedActor): SeedRecordDefinition[] =>
+  PILLAR_CONTRACT.map((pillar, index) => ({
+    stage: "projects_resources" as const,
+    collection: "projects" as const,
+    seed_key: `demo.project.${pillar.key.replace(/_/g, "-")}`,
+    seed_version: DEMO_SEED_VERSION,
+    lookup: { slug: `demo-${pillar.key.replace(/_/g, "-")}-project` },
+    payload: {
+      _id: foundationObjectId(`demo:project:${pillar.key}`),
+      name: `Demo ${pillar.label} Project`,
+      slug: `demo-${pillar.key.replace(/_/g, "-")}-project`,
+      description: `Placeholder ${pillar.label} case study used to preview layout outside production.`,
+      content: `This is synthetic demo content for the ${pillar.label} pillar. It exists only to exercise listing, filtering and detail layouts outside production, and describes no real client, engagement or outcome.`,
+      category: demoProjectCategoryId,
+      author: actor._id,
+      tags: ["demo", "placeholder"],
+      primary_pillar: pillar.key,
+      secondary_pillars: [],
+      delivery_status: "delivered",
+      publication_status: "draft",
+      project_type: "personal",
+      sequence: index + 1,
+      is_featured: index < 2,
+      is_deleted: false,
+    },
+    insert_only: { created_by: actor._id, updated_by: actor._id },
+    update_only: { updated_by: actor._id },
+    truth: demoTruth,
+    validate: (document) => assertSchema(demoProjectSchema, document),
+  }));
+
+const demoArticleRecords = (actor: SeedActor): SeedRecordDefinition[] =>
+  PILLAR_CONTRACT.map((pillar, index) => ({
+    stage: "articles" as const,
+    collection: "articles" as const,
+    seed_key: `demo.article.${pillar.key.replace(/_/g, "-")}`,
+    seed_version: DEMO_SEED_VERSION,
+    lookup: { slug: `demo-${pillar.key.replace(/_/g, "-")}-article` },
+    payload: {
+      _id: foundationObjectId(`demo:article:${pillar.key}`),
+      name: `Demo ${pillar.label} Article`,
+      slug: `demo-${pillar.key.replace(/_/g, "-")}-article`,
+      excerpt: `Placeholder ${pillar.label} field note used to preview layout outside production.`,
+      content: `This is synthetic demo content for the ${pillar.label} pillar. It exists only to exercise listing, filtering and reading layouts outside production, and states no real technical claim.`,
+      category: demoArticleCategoryId,
+      author: actor._id,
+      topics: ["demo", "placeholder"],
+      primary_pillar: pillar.key,
+      secondary_pillars: [],
+      status: "draft",
+      is_featured: index < 2,
+      is_premium: false,
+      reading_time_minutes: 3,
+      reading_time_source: "manual",
+      is_deleted: false,
+    },
+    insert_only: { created_by: actor._id, updated_by: actor._id },
+    update_only: { updated_by: actor._id },
+    truth: demoTruth,
+    validate: (document) => assertSchema(demoArticleSchema, document),
+  }));
+
+export const createDemoSeedManifest = (actor: SeedActor): SeedManifest => ({
   manifest_key: "portfolio-demo-fixtures",
-  seed_version: 1,
+  seed_version: DEMO_SEED_VERSION,
   mode: "demo",
   description:
-    "Reserved, non-production-only demo seed manifest; P09.3 may add visibly synthetic unpublished fixtures in a later version.",
+    "Visibly synthetic, non-production-only draft fixtures: one project and one article per pillar, published from the admin when reviewing layout.",
   truth: demoTruth,
   media: [],
-  records: [],
+  records: [
+    ...demoCategoryRecords(actor),
+    ...demoProjectRecords(actor),
+    ...demoArticleRecords(actor),
+  ],
 });
