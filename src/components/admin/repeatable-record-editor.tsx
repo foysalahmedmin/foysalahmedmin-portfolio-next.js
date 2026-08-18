@@ -834,7 +834,7 @@ const RepeatableRecordEditor = ({
         <EditorialPanel
           id="content-identity-heading"
           title="Content identity"
-          description="Stable identity, summary, and five-discipline relationships."
+          description="Stable identity, summary, and six-discipline relationships."
         >
           <div className="space-y-5">
             <div className="grid gap-5 md:grid-cols-2">

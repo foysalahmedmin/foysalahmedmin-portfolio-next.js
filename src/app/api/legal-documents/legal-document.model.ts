@@ -83,6 +83,6 @@ configureRepeatableRecordSchema(schema, {
 
 const LegalDocument =
   (mongoose.models.LegalDocument as Model<TLegalDocument>) ||
-  mongoose.model<TLegalDocument>("LegalDocument", schema);
+  mongoose.model<TLegalDocument>("LegalDocument", schema, "legal_documents");
 
 export default LegalDocument;

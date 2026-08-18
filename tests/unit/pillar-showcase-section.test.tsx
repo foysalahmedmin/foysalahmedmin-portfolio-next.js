@@ -14,7 +14,7 @@ vi.mock("@/components/motion/parallax-layer", () => ({
 describe("PillarShowcaseSection", () => {
   afterEach(cleanup);
 
-  it("renders the sticky five-pillar operating-system narrative", () => {
+  it("renders the sticky six-pillar operating-system narrative", () => {
     const site = createEmergencyPublicSite();
     render(<PillarShowcaseSection pillars={site.pillars} layout="sticky" />);
 

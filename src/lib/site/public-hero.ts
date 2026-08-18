@@ -63,7 +63,7 @@ export const buildPublicHero = (site: TPublicSiteDto): TPublicHero => {
       site.positioning.mobile?.trim() ||
       site.positioning.compact?.trim() ||
       site.positioning.canonical?.trim() ||
-      "Five-discipline product engineering",
+      `${PILLAR_CONTRACT.length}-discipline product engineering`,
     slides: slides as unknown as TPublicHero["slides"],
     primary_cta: getPrimaryPublicCta(site),
   };

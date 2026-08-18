@@ -249,7 +249,7 @@ const Dashboard = ({ snapshot }: { snapshot: DashboardSnapshot }) => {
                 id="pillar-coverage-heading"
                 className="mt-1 text-xl font-bold"
               >
-                Five-pillar coverage
+                Six-pillar coverage
               </h2>
             </div>
             <Gauge className="text-primary size-6" aria-hidden="true" />

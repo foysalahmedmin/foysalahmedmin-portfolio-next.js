@@ -1154,7 +1154,7 @@ export default function SiteAdminEditor({
       <EditorialPanel
         id="site-identity"
         title="Identity & positioning"
-        description="Canonical names and a consistent five-discipline positioning system used throughout the portfolio."
+        description="Canonical names and a consistent six-discipline positioning system used throughout the portfolio."
       >
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <TextField

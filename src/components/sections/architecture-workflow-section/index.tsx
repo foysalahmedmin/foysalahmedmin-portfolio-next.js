@@ -131,7 +131,7 @@ export default function ArchitectureWorkflowSection({
 
               <ol
                 className="mt-8 grid gap-3 sm:grid-cols-2"
-                aria-label="Five-pillar system map in canonical order"
+                aria-label="Six-pillar system map in canonical order"
               >
                 {pillars.map((pillar, index) => (
                   <li

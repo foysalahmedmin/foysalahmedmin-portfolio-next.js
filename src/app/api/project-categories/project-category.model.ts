@@ -124,7 +124,8 @@ export const ProjectCategory =
   (mongoose.models.ProjectCategory as TProjectCategoryModel) ||
   mongoose.model<TProjectCategoryDocument, TProjectCategoryModel>(
     "ProjectCategory",
-    projectCategorySchema
+    projectCategorySchema,
+    "project_categories"
   );
 
 export default ProjectCategory;

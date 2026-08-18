@@ -45,7 +45,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
     site.footer.tagline ||
     site.positioning.compact ||
     site.positioning.canonical ||
-    "Five-discipline product engineering";
+    "Six-discipline product engineering";
 
   return (
     <footer className="bg-card border-border border-t pt-20 pb-10">

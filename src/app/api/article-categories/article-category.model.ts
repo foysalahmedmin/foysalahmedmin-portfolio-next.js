@@ -124,7 +124,8 @@ export const ArticleCategory =
   (mongoose.models.ArticleCategory as TArticleCategoryModel) ||
   mongoose.model<TArticleCategoryDocument, TArticleCategoryModel>(
     "ArticleCategory",
-    articleCategorySchema
+    articleCategorySchema,
+    "article_categories"
   );
 
 export default ArticleCategory;
