@@ -200,8 +200,8 @@ export const inspectContactIntakeFoundation = async (
             $or: [
               { status: { $nin: CONTACT_STATUSES } },
               { delivery_status: { $nin: DELIVERY_STATUSES } },
-              { retention_expires_at: { $type: "missing" } },
-              { anonymized_at: { $type: "missing" } },
+              { retention_expires_at: { $exists: false } },
+              { anonymized_at: { $exists: false } },
             ],
           })
         : Promise.resolve(0),
@@ -250,8 +250,8 @@ const up = async (context: MigrationContext): Promise<MigrationSummary> => {
       $or: [
         { status: { $nin: CONTACT_STATUSES } },
         { delivery_status: { $nin: DELIVERY_STATUSES } },
-        { retention_expires_at: { $type: "missing" } },
-        { anonymized_at: { $type: "missing" } },
+        { retention_expires_at: { $exists: false } },
+        { anonymized_at: { $exists: false } },
       ],
     },
     [
