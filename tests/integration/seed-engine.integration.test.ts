@@ -108,11 +108,16 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
       dry_run: false,
       force: false,
     });
-    expect(first.counts).toMatchObject({ create: 14, conflict: 0 });
+    expect(first.counts).toMatchObject({
+      create: manifest.records.length,
+      conflict: 0,
+    });
     expect(await db.collection("sites").countDocuments()).toBe(1);
     expect(await db.collection("pages").countDocuments()).toBe(7);
     expect(await db.collection("seed_media_intents").countDocuments()).toBe(6);
-    expect(await db.collection("seed_records").countDocuments()).toBe(14);
+    expect(await db.collection("seed_records").countDocuments()).toBe(
+      manifest.records.length
+    );
 
     const second = await runSeedManifest({
       client,
@@ -122,7 +127,10 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
       dry_run: false,
       force: false,
     });
-    expect(second.counts).toMatchObject({ unchanged: 14, conflict: 0 });
+    expect(second.counts).toMatchObject({
+      unchanged: manifest.records.length,
+      conflict: 0,
+    });
     expect(await db.collection("sites").countDocuments()).toBe(1);
     expect(await db.collection("pages").countDocuments()).toBe(7);
     expect(await db.collection("seed_media_intents").countDocuments()).toBe(6);
@@ -166,7 +174,9 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
       force: false,
     });
     expect(await db.collection("pages").countDocuments()).toBe(7);
-    expect(await db.collection("seed_records").countDocuments()).toBe(14);
+    expect(await db.collection("seed_records").countDocuments()).toBe(
+      manifest.records.length
+    );
   });
 
   it("preserves an edited target on apply and reset unless force is explicit", async () => {
@@ -226,7 +236,7 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
       force: true,
       reset_confirmation: SEED_RESET_CONFIRMATION,
     });
-    expect(reset).toEqual({ deleted: 14, missing: 0 });
+    expect(reset).toEqual({ deleted: manifest.records.length, missing: 0 });
     expect(await db.collection("sites").countDocuments()).toBe(0);
     expect(await db.collection("pages").countDocuments()).toBe(0);
   });
