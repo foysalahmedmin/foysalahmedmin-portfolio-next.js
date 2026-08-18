@@ -1,6 +1,7 @@
 import { ObjectId, type Document } from "mongodb";
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import { PAGE_SECTION_KINDS } from "../../app/api/pages/page.type.ts";
 import { PILLAR_CONTRACT } from "../content/pillars.ts";
 import { SeedError } from "./errors.ts";
 import type {
@@ -228,24 +229,7 @@ const mediaIntentSchema = z
 const pageSectionSchema = z
   .object({
     key: z.string().regex(/^[a-z][a-z0-9-]*$/),
-    kind: z.enum([
-      "site-hero",
-      "site-introduction",
-      "pillar-showcase",
-      "architecture-workflow",
-      "process-steps",
-      "metrics-strip",
-      "project-collection",
-      "article-collection",
-      "service-collection",
-      "skill-group-collection",
-      "timeline",
-      "credential-collection",
-      "faq-list",
-      "legal-document",
-      "contact-form",
-      "contact-cta",
-    ]),
+    kind: z.enum(PAGE_SECTION_KINDS),
     visible: z.boolean(),
     heading: z.string().min(1).max(100).optional(),
     layout: z.string().min(1).max(32),
@@ -1394,6 +1378,7 @@ const createFAQRecords = (actor: SeedActor): SeedRecordDefinition[] => {
         is_featured: false,
         enabled: true,
         claim_verification: "unverified" as const,
+        secondary_pillars: [],
         answer: faq.answer,
         category: faq.category,
         keywords: faq.keywords,
@@ -1467,6 +1452,7 @@ const createLegalDocumentRecords = (
         is_featured: false,
         enabled: true,
         claim_verification: "not_applicable" as const,
+        secondary_pillars: [],
         type: doc.type,
         document_version: doc.document_version,
         effective_at: doc.effective_at,
