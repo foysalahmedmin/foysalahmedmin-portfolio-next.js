@@ -22,9 +22,12 @@ against the real production header chain before launch.
 
 ## Rate limiting and database consistency
 
-Production uses Upstash Redis REST for both HMAC-hashed IP and browser-session
-buckets. Missing credentials and provider errors fail closed with a generic
-503; the local/test in-process store is deliberately never used in production.
+Upstash Redis REST is the shared authority for both HMAC-hashed IP and
+browser-session buckets whenever its credentials are configured. When they are
+absent, or when the provider errors or times out, limiting degrades to the
+in-process store instead of failing closed, so contact intake stays available.
+Multi-instance deployments must configure Upstash: without it each instance
+counts its own buckets, so the effective limit multiplies by instance count.
 
 Contact, ContactSubmissionKey, AuditEvent, and OutboxEvent are written in one
 MongoDB transaction. Production defaults to requiring replica-set transaction

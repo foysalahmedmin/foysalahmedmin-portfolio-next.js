@@ -328,6 +328,29 @@ const consumeLocalBucket = (
   };
 };
 
+const hasDistributedRateLimitStore = (): boolean =>
+  Boolean(
+    ENV.upstash_redis_rest_url?.trim() && ENV.upstash_redis_rest_token?.trim()
+  );
+
+// The distributed store is the authority whenever it is configured. Without it,
+// or when it is unreachable, limits degrade to this process rather than taking
+// the contact endpoints offline.
+const consumeRateLimitBucket = async (
+  key: string,
+  limit: number,
+  windowSeconds: number
+): Promise<RateLimitResult> => {
+  if (!hasDistributedRateLimitStore()) {
+    return consumeLocalBucket(key, limit, windowSeconds);
+  }
+  try {
+    return await consumeUpstashBucket(key, limit, windowSeconds);
+  } catch {
+    return consumeLocalBucket(key, limit, windowSeconds);
+  }
+};
+
 const consumeUpstashBucket = async (
   key: string,
   limit: number,
@@ -409,12 +432,9 @@ export const enforceContactRateLimit = async (
     `contact:ip:${hmacContactValue("contact-ip", clientIp)}`,
     `contact:session:${hmacContactValue("contact-session", sessionKey)}`,
   ];
-  const useDistributedStore = ENV.environment === "production";
   const results = await Promise.all(
     bucketKeys.map((key) =>
-      useDistributedStore
-        ? consumeUpstashBucket(key, rateLimit, rateWindowSeconds)
-        : Promise.resolve(consumeLocalBucket(key, rateLimit, rateWindowSeconds))
+      consumeRateLimitBucket(key, rateLimit, rateWindowSeconds)
     )
   );
 
@@ -459,9 +479,7 @@ export const enforceContactPrivacyRateLimit = async (
   ];
   const results = await Promise.all(
     bucketInputs.map(({ key, limit }) =>
-      ENV.environment === "production"
-        ? consumeUpstashBucket(key, limit, windowSeconds)
-        : Promise.resolve(consumeLocalBucket(key, limit, windowSeconds))
+      consumeRateLimitBucket(key, limit, windowSeconds)
     )
   );
   const blocked = results.find((result) => !result.allowed);

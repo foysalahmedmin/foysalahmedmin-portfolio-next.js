@@ -13,7 +13,7 @@ import {
   readContactJsonBody,
 } from "@/app/api/contacts/contact-security";
 import { ENV } from "@/config";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const ORIGIN = "http://localhost:3000";
 
@@ -94,6 +94,7 @@ describe("contact request security", () => {
 
   beforeEach(() => clearLocalContactRateLimitsForTests());
   afterEach(() => {
+    vi.unstubAllGlobals();
     ENV.environment = originalEnvironment;
     ENV.upstash_redis_rest_url = originalUpstashUrl;
     ENV.upstash_redis_rest_token = originalUpstashToken;
@@ -156,16 +157,59 @@ describe("contact request security", () => {
     ).rejects.toMatchObject({ status: 429, code: "rate_limited" });
   });
 
-  it("fails closed in production when the distributed authority is unavailable", async () => {
+  it("keeps enforcing in-process limits in production when no distributed authority is configured", async () => {
     ENV.environment = "production";
     ENV.upstash_redis_rest_url = "";
     ENV.upstash_redis_rest_token = "";
 
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await expect(
+        enforceContactRateLimit(request(validSubmission()))
+      ).resolves.toBeUndefined();
+    }
     await expect(
       enforceContactRateLimit(request(validSubmission()))
-    ).rejects.toMatchObject({
-      status: 503,
-      code: "temporarily_unavailable",
-    });
+    ).rejects.toMatchObject({ status: 429, code: "rate_limited" });
+  });
+
+  it("uses the distributed authority in production when Upstash is configured", async () => {
+    ENV.environment = "production";
+    ENV.upstash_redis_rest_url = "https://upstash.test";
+    ENV.upstash_redis_rest_token = "upstash-token";
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        calls.push(String(url));
+        return new Response(
+          JSON.stringify([{ result: 1 }, { result: 1 }, { result: 600 }]),
+          { status: 200, headers: { "content-type": "application/json" } }
+        );
+      })
+    );
+
+    await expect(
+      enforceContactRateLimit(request(validSubmission()))
+    ).resolves.toBeUndefined();
+    expect(calls).toEqual([
+      "https://upstash.test/pipeline",
+      "https://upstash.test/pipeline",
+    ]);
+  });
+
+  it("falls back to in-process limits in production when the distributed authority errors", async () => {
+    ENV.environment = "production";
+    ENV.upstash_redis_rest_url = "https://upstash.test";
+    ENV.upstash_redis_rest_token = "upstash-token";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("network down");
+      })
+    );
+
+    await expect(
+      enforceContactRateLimit(request(validSubmission()))
+    ).resolves.toBeUndefined();
   });
 });

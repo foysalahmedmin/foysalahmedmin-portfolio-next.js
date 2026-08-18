@@ -114,6 +114,11 @@ const consumeLocal = (
   };
 };
 
+const hasDistributedStore = (): boolean =>
+  Boolean(
+    ENV.upstash_redis_rest_url?.trim() && ENV.upstash_redis_rest_token?.trim()
+  );
+
 const consumeDistributed = async (
   key: string,
   limit: number,
@@ -169,14 +174,27 @@ const consumeDistributed = async (
   }
 };
 
+// The distributed store is the authority whenever it is configured. Without it,
+// or when it is unreachable, limits degrade to this process rather than taking
+// authentication offline; a single instance still bounds credential stuffing.
 export const consumeAbuseBucket = async (input: {
   key: string;
   limit: number;
   windowSeconds: number;
-}): Promise<BucketResult> =>
-  ENV.environment === "production"
-    ? await consumeDistributed(input.key, input.limit, input.windowSeconds)
-    : consumeLocal(input.key, input.limit, input.windowSeconds);
+}): Promise<BucketResult> => {
+  if (!hasDistributedStore()) {
+    return consumeLocal(input.key, input.limit, input.windowSeconds);
+  }
+  try {
+    return await consumeDistributed(
+      input.key,
+      input.limit,
+      input.windowSeconds
+    );
+  } catch {
+    return consumeLocal(input.key, input.limit, input.windowSeconds);
+  }
+};
 
 export const clearLocalAbuseBucketsForTests = (): void => {
   if (ENV.environment !== "production") localBuckets.clear();
