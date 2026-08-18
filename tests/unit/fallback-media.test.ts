@@ -13,9 +13,20 @@ describe("emergency media resolver", () => {
     expect(getFallbackMedia("hero", "system_design")).toBe(
       "/images/heroes/system-design-pilot.master.png"
     );
+    expect(getFallbackMedia("hero", "devops_cloud")).toBe(
+      "/images/heroes/devops-cloud.master.png"
+    );
     expect(getFallbackMedia("hero", PILLAR_KEYS[0])).not.toBe(
       getFallbackMedia("hero", PILLAR_KEYS[4])
     );
+
+    // Every pillar must resolve to its own hero file, never the generic
+    // fallback and never a path borrowed from another pillar.
+    const heroes = PILLAR_KEYS.map((key) => getFallbackMedia("hero", key));
+    expect(new Set(heroes).size).toBe(PILLAR_KEYS.length);
+    for (const src of heroes) {
+      expect(src.startsWith("/images/heroes/")).toBe(true);
+    }
 
     const presentation = getFallbackMediaPresentation("hero", "frontend");
     expect(presentation).toMatchObject({
