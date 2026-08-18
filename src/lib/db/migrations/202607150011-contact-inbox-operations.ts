@@ -119,7 +119,7 @@ export const inspectContactInboxOperations = async (db: Db) => {
         $or: [
           { revision: { $not: { $type: "number" } } },
           { status_changed_at: { $not: { $type: "date" } } },
-          { retention_hold: { $type: "missing" } },
+          { retention_hold: { $exists: false } },
           {
             anonymized_at: { $type: "date" },
             purge_after: { $not: { $type: "date" } },
