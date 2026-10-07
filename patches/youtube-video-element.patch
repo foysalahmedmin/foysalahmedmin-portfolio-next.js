@@ -1,0 +1,82 @@
+diff --git a/dist/cjs/youtube-video-element.js b/dist/cjs/youtube-video-element.js
+index 5b53c2b4b6aff9659744208c9dffa3ef054f475c..62c36219e29d314facbe768947fdb67b64adb865 100644
+--- a/dist/cjs/youtube-video-element.js
++++ b/dist/cjs/youtube-video-element.js
+@@ -48,12 +48,18 @@ function parseStartTime(url) {
+   return hasValue ? totalSeconds : void 0;
+ }
+ function getTemplateHTML(attrs, props = {}) {
+-  var _a;
++  var _a, _b;
+   const iframeAttrs = {
+     src: serializeIframeUrl(attrs, props),
+     frameborder: 0,
+-    width: "100%",
+-    height: "100%",
++    // Real pixel numbers, not "100%": the embedded player uses these
++    // attributes to decide its own internal aspect ratio, independent of the
++    // iframe's actual CSS-rendered box. Left as "100%" it silently assumes a
++    // landscape ratio no matter what shape the iframe is actually laid out
++    // as, so a portrait video renders pillarboxed. `props.config` carries
++    // {width, height} in real pixels from the host app.
++    width: ((_a = props.config) == null ? void 0 : _a.width) || "100%",
++    height: ((_b = props.config) == null ? void 0 : _b.height) || "100%",
+     allow: "accelerometer; fullscreen; autoplay; encrypted-media; gyroscope; picture-in-picture"
+   };
+   if ((_a = props.config) == null ? void 0 : _a.referrerpolicy) {
+diff --git a/dist/youtube-video-element.d.ts b/dist/youtube-video-element.d.ts
+index b4d98ec9ef9e21413b46a7f7c09afe01b98fd9df..81dc51e17c9fa58cc8d1c798d587cb9795f56a75 100644
+--- a/dist/youtube-video-element.d.ts
++++ b/dist/youtube-video-element.d.ts
+@@ -23,6 +23,10 @@ declare class CustomVideoElement extends HTMLVideoElement {
+     start?: number;
+     widget_referrer?: string;
+     referrerpolicy?: string;
++    /** Patched addition: real pixel size for the embedded iframe's own
++     * width/height attributes — see patches/youtube-video-element.patch. */
++    width?: number;
++    height?: number;
+   }
+ }
+ 
+diff --git a/dist/youtube-video-element.js b/dist/youtube-video-element.js
+index 4d1370170e9d3c03d397d60007375c1adb00db42..886d0623ca34252a3c98c27b10fb9f2f1529263c 100644
+--- a/dist/youtube-video-element.js
++++ b/dist/youtube-video-element.js
+@@ -26,12 +26,19 @@ function parseStartTime(url) {
+   return hasValue ? totalSeconds : void 0;
+ }
+ function getTemplateHTML(attrs, props = {}) {
+-  var _a;
++  var _a, _b;
+   const iframeAttrs = {
+     src: serializeIframeUrl(attrs, props),
+     frameborder: 0,
+-    width: "100%",
+-    height: "100%",
++    // Real pixel numbers, not "100%": the embedded player (verified against
++    // real portrait/Shorts embeds) uses these attributes to decide its own
++    // internal aspect ratio, independent of the iframe's actual CSS-rendered
++    // box. Left as "100%" it silently assumes a landscape ratio no matter
++    // what shape the iframe is actually laid out as, so a portrait video
++    // renders pillarboxed. `props.config` carries {width, height} in real
++    // pixels from the host app (see InlineVideoPlayer/VideoDialog).
++    width: ((_a = props.config) == null ? void 0 : _a.width) || "100%",
++    height: ((_b = props.config) == null ? void 0 : _b.height) || "100%",
+     allow: "accelerometer; fullscreen; autoplay; encrypted-media; gyroscope; picture-in-picture"
+   };
+   if ((_a = props.config) == null ? void 0 : _a.referrerpolicy) {
+diff --git a/youtube-video-element.d.ts b/youtube-video-element.d.ts
+index ee8df908cf59b7b8f7a9388e7972ee5f3a7dc312..0614e381a33b5b2efb1c28f25d2ba1716fe3d777 100644
+--- a/youtube-video-element.d.ts
++++ b/youtube-video-element.d.ts
+@@ -23,5 +23,9 @@ export default class CustomVideoElement extends HTMLVideoElement {
+     start?: number;
+     widget_referrer?: string;
+     referrerpolicy?: string;
++    /** Patched addition: real pixel size for the embedded iframe's own
++     * width/height attributes — see patches/youtube-video-element.patch. */
++    width?: number;
++    height?: number;
+   }
+ }

@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  youtube-video-element:
+    hash: 832bff9f0ad8de6b328749aca5477eb1171dc314bff1ff83a1192f074791f41e
+    path: patches/youtube-video-element.patch
+
 importers:
 
   .:
@@ -8911,7 +8916,7 @@ snapshots:
       twitch-video-element: 0.1.6
       vimeo-video-element: 1.7.3
       wistia-video-element: 1.4.0
-      youtube-video-element: 1.9.0
+      youtube-video-element: 1.9.0(patch_hash=832bff9f0ad8de6b328749aca5477eb1171dc314bff1ff83a1192f074791f41e)
     transitivePeerDependencies:
       - '@svta/cml-cta'
       - '@svta/cml-structured-field-values'
@@ -9944,7 +9949,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtube-video-element@1.9.0:
+  youtube-video-element@1.9.0(patch_hash=832bff9f0ad8de6b328749aca5477eb1171dc314bff1ff83a1192f074791f41e):
     dependencies:
       media-played-ranges-mixin: 0.1.0
 

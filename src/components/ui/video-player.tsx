@@ -382,13 +382,15 @@ export function VideoPlayerCore({
               // given" and defaults its internal layout to landscape,
               // rendering a portrait (Shorts) video pillarboxed regardless
               // of the iframe's actual CSS-rendered shape.
-              // `width`/`height` only exist on the YouTube config type once the
-              // patched youtube-video-element from the source project is
-              // installed. Without it they are ignored, so the cast keeps this
-              // call type-safe in both setups.
-              config={{
-                youtube: { width: size.width, height: size.height } as never,
-              }}
+              // Real pixel numbers reach the YouTube provider's own iframe
+              // via a patched dependency (patches/youtube-video-element.patch)
+              // — see that patch for why. CSS width/height alone leaves the
+              // iframe's own width/height *attributes* at the library's
+              // hardcoded "100%", which YouTube reads as "no real size
+              // given" and defaults its internal layout to landscape,
+              // rendering a portrait (Shorts) video pillarboxed regardless
+              // of the iframe's actual CSS-rendered shape.
+              config={{ youtube: { width: size.width, height: size.height } }}
               style={{
                 position: "absolute",
                 top: 0,
