@@ -35,7 +35,7 @@ const project = (overrides: Partial<TProject> = {}): TProject => ({
   status: "completed",
   is_featured: true,
   is_premium: false,
-  primary_pillar: "backend",
+  primary_pillar: "software_developer",
   project_type: "internal",
   delivery_status: "completed",
   role: "Full-stack engineer",
@@ -93,6 +93,37 @@ describe("ProjectDetailsSection", () => {
     expect(screen.queryByText("Public resources")).not.toBeInTheDocument();
     expect(screen.queryByText("Internal runbook")).not.toBeInTheDocument();
     expect(screen.queryByText("Local design file")).not.toBeInTheDocument();
+  });
+
+  it("tells the case study from the client's side, ending on business impact", () => {
+    const { container } = render(
+      <ProjectDetailsSection
+        project={project({
+          problem: "Orders were re-typed by hand and often went wrong.",
+          constraints: ["A two-person team"],
+          decisions: ["Automate the slowest hand-off first"],
+          learnings: ["Small releases kept the team confident"],
+        })}
+        resources={[]}
+        related={[]}
+      />
+    );
+
+    const titles = Array.from(
+      container.querySelectorAll("article section h2")
+    ).map((heading) => heading.textContent);
+    expect(titles).toEqual([
+      "The problem",
+      "What made it hard",
+      "How I approached it",
+      "What I built",
+      "What changed for the business",
+      "Why it holds up",
+      "What I would carry forward",
+    ]);
+    expect(
+      screen.getByRole("heading", { name: "Facing a similar problem?" })
+    ).toBeInTheDocument();
   });
 
   it("renders only validated HTTPS public project links", () => {

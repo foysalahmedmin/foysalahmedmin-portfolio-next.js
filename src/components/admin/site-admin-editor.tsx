@@ -1061,7 +1061,7 @@ export default function SiteAdminEditor({
         <EditorialWorkspaceHeader
           eyebrow="Site authority"
           title="Site settings"
-          description="The revisioned Site singleton owns portfolio identity, positioning, six pillars, delivery process, public navigation, contact policy and metadata defaults."
+          description="The revisioned Site singleton owns portfolio identity, positioning, core roles, delivery process, public navigation, contact policy and metadata defaults."
           status={
             <EditorialStatus tone="warning">Not configured</EditorialStatus>
           }
@@ -1093,7 +1093,7 @@ export default function SiteAdminEditor({
       <EditorialWorkspaceHeader
         eyebrow="Site authority"
         title="Site settings"
-        description="One revisioned source for public identity, positioning, contact policy, process, navigation, brand media, metadata and the exact six-pillar narrative."
+        description="One revisioned source for public identity, positioning, contact policy, process, navigation, brand media, metadata and the fixed role narrative."
         status={
           <>
             <EditorialStatus>Draft r{site.revision}</EditorialStatus>
@@ -1154,7 +1154,7 @@ export default function SiteAdminEditor({
       <EditorialPanel
         id="site-identity"
         title="Identity & positioning"
-        description="Canonical names and a consistent six-discipline positioning system used throughout the portfolio."
+        description="Canonical names and a consistent role-based positioning system used throughout the portfolio."
       >
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <TextField
@@ -1246,7 +1246,7 @@ export default function SiteAdminEditor({
 
       <EditorialPanel
         id="site-pillars"
-        title="Exact six-pillar system"
+        title="Core roles"
         description="Key, label, order and fallback visual are contract-owned and intentionally immutable. Narrative, capabilities, technologies, CTA and managed File references remain editorial."
       >
         <div className="space-y-5">

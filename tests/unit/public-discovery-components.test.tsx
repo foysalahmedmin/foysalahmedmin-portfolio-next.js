@@ -33,7 +33,7 @@ const project: TProjectListItem = {
   delivery_status: "completed",
   project_type: "internal",
   role: "Lead engineer and systems architect",
-  primary_pillar: "backend",
+  primary_pillar: "software_developer",
   tags: ["Node.js", "Redis"],
   outcomes: [
     {
@@ -53,7 +53,7 @@ const article: TArticleListItem = {
   name: "Safe boundaries",
   excerpt: "A practical guide to explicit trust boundaries.",
   author: { _id: "author-id", name: "Foysal Ahmed" },
-  primary_pillar: "system_design",
+  primary_pillar: "system_architect",
   topics: ["Threat modeling"],
   reading_time_minutes: 8,
   published_at: "2025-01-01T00:00:00.000Z",
@@ -63,7 +63,7 @@ const article: TArticleListItem = {
 };
 
 const site = createEmergencyPublicSite();
-site.fallbacks.project_by_pillar.backend = {
+site.fallbacks.project_by_pillar.software_developer = {
   id: "507f1f77bcf86cd799439041",
   url: "https://cdn.example.com/project-backend.webp",
   alt_text: "Backend managed project fallback",
@@ -72,7 +72,7 @@ site.fallbacks.project_by_pillar.backend = {
   dominant_color: "#102a43",
   blur_data_url: "data:image/webp;base64,UklGRg==",
 };
-site.fallbacks.article_by_pillar.system_design = {
+site.fallbacks.article_by_pillar.system_architect = {
   id: "507f1f77bcf86cd799439042",
   url: "https://cdn.example.com/article-system-design.webp",
   alt_text: "System design managed article fallback",
@@ -156,8 +156,8 @@ describe("public discovery components", () => {
     );
 
     await user.selectOptions(
-      screen.getByRole("combobox", { name: "Discipline" }),
-      "backend"
+      screen.getByRole("combobox", { name: "Role" }),
+      "software_developer"
     );
 
     expect(
@@ -170,7 +170,7 @@ describe("public discovery components", () => {
     ).toBeVisible();
     expect(getProjects).toHaveBeenCalledWith(
       expect.objectContaining({
-        pillar: "backend",
+        pillar: "software_developer",
         composition_featured: true,
         composition_project_type: "lab",
       }),
@@ -208,10 +208,10 @@ describe("public discovery components", () => {
     expect(trigger).toHaveAttribute("aria-expanded", "true");
 
     await user.selectOptions(
-      within(dialog).getByRole("combobox", { name: "Discipline" }),
-      "backend"
+      within(dialog).getByRole("combobox", { name: "Role" }),
+      "software_developer"
     );
-    expect(window.location.search).toContain("pillar=backend");
+    expect(window.location.search).toContain("pillar=software_developer");
     expect(
       screen.getByRole("button", {
         name: "Open project filters, 1 active",
@@ -327,12 +327,12 @@ describe("public discovery components", () => {
   });
 
   it("distinguishes a filtered no-match state from an empty portfolio", () => {
-    window.history.replaceState({}, "", "/projects?pillar=backend");
+    window.history.replaceState({}, "", "/projects?pillar=software_developer");
     render(
       <ProjectsContentSection
         initialProjects={[]}
         initialMeta={{ total: 0, page: 1, limit: 9 }}
-        initialQuery={parseProjectDiscoveryQuery({ pillar: "backend" })}
+        initialQuery={parseProjectDiscoveryQuery({ pillar: "software_developer" })}
         categories={[]}
         facets={{ technologies: [], years: [] }}
       />

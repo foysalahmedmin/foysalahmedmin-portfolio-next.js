@@ -13,13 +13,13 @@ describe("public discovery query contracts", () => {
   it("normalizes a project URL into bounded, allowlisted filters", () => {
     const query = parseProjectDiscoveryQuery(
       new URLSearchParams(
-        "search=%20event+systems%20&pillar=backend&category=Platform-Work&technology=Node.js&type=client&year=2025&sort=newest&page=999999"
+        "search=%20event+systems%20&pillar=software_developer&category=Platform-Work&technology=Node.js&type=client&year=2025&sort=newest&page=999999"
       )
     );
 
     expect(query).toEqual({
       search: "event systems",
-      pillar: "backend",
+      pillar: "software_developer",
       category: "platform-work",
       technology: "Node.js",
       type: "client",
@@ -55,7 +55,7 @@ describe("public discovery query contracts", () => {
 
   it("uses stable category slugs in URLs while preserving campaign context", () => {
     const query = parseArticleDiscoveryQuery({
-      pillar: "system_design",
+      pillar: "system_architect",
       category: "architecture",
       topic: "Event sourcing",
       sort: "featured",
@@ -63,14 +63,14 @@ describe("public discovery query contracts", () => {
     });
 
     expect(mergeArticleDiscoveryQueryString("?utm_source=profile", query)).toBe(
-      "?utm_source=profile&pillar=system_design&category=architecture&topic=Event+sourcing&sort=featured&page=2"
+      "?utm_source=profile&pillar=system_architect&category=architecture&topic=Event+sourcing&sort=featured&page=2"
     );
   });
 
   it("removes project defaults instead of leaving ambiguous URL state", () => {
     expect(
       mergeProjectDiscoveryQueryString(
-        "?pillar=backend&type=client&page=4&utm_medium=referral",
+        "?pillar=software_developer&type=client&page=4&utm_medium=referral",
         parseProjectDiscoveryQuery({})
       )
     ).toBe("?utm_medium=referral");
@@ -80,7 +80,7 @@ describe("public discovery query contracts", () => {
     const repositoryQuery = buildProjectDiscoveryRepositoryQuery(
       parseProjectDiscoveryQuery({
         search: "queues",
-        pillar: "backend",
+        pillar: "software_developer",
         category: "platform",
         technology: "Redis",
         type: "internal",
@@ -96,7 +96,7 @@ describe("public discovery query contracts", () => {
       limit: "9",
       sort: "started_at,name,_id",
       search: "queues",
-      primary_pillar: "backend",
+      primary_pillar: "software_developer",
       category: "507f1f77bcf86cd799439011",
       tags: "Redis",
       project_type: "internal",
@@ -120,9 +120,9 @@ describe("public discovery query contracts", () => {
   it("keeps Page automatic scope active across discovery filters", () => {
     expect(
       buildProjectDiscoveryRepositoryQuery(
-        parseProjectDiscoveryQuery({ pillar: "frontend", type: "client" }),
+        parseProjectDiscoveryQuery({ pillar: "software_developer", type: "client" }),
         undefined,
-        { featured: true, pillar: "backend", project_type: "lab" }
+        { featured: true, pillar: "system_architect", project_type: "lab" }
       )
     ).toMatchObject({
       is_featured: "true",
@@ -133,11 +133,11 @@ describe("public discovery query contracts", () => {
       buildArticleDiscoveryRepositoryQuery(
         parseArticleDiscoveryQuery({}),
         undefined,
-        { featured: false, pillar: "system_design" }
+        { featured: false, pillar: "system_architect" }
       )
     ).toMatchObject({
       is_featured: "false",
-      primary_pillar: "system_design",
+      primary_pillar: "system_architect",
     });
   });
 });

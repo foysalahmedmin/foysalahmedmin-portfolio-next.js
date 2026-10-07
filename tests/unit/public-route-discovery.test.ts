@@ -126,7 +126,7 @@ describe("public route discovery bridge", () => {
         mode: "automatic",
         filter: {
           featured: true,
-          pillar: "backend",
+          pillar: "software_developer",
           project_type: "lab",
         },
       }
@@ -143,7 +143,7 @@ describe("public route discovery bridge", () => {
     expect(mocks.getPublicProjectDiscovery).toHaveBeenCalledWith(
       expect.objectContaining({
         composition_featured: true,
-        composition_pillar: "backend",
+        composition_pillar: "software_developer",
         composition_project_type: "lab",
       })
     );
@@ -154,7 +154,7 @@ describe("public route discovery bridge", () => {
         initialMeta: { total: 37, page: 1, limit: 9 },
         compositionFilter: {
           featured: true,
-          pillar: "backend",
+          pillar: "software_developer",
           project_type: "lab",
         },
         initialError: false,

@@ -176,8 +176,8 @@ const DELETION_FILTER: RepeatableAdminFilter = {
 
 const PILLAR_FILTER: RepeatableAdminFilter = {
   id: "pillar",
-  label: "Primary discipline",
-  allLabel: "All disciplines",
+  label: "Primary role",
+  allLabel: "All roles",
   options: PILLAR_OPTIONS,
 };
 
@@ -281,7 +281,7 @@ const WORKSPACES = {
     label: "Skill groups",
     singular: "skill group",
     description:
-      "Organize skills into evidence-aligned groups mapped to the five engineering disciplines.",
+      "Organize skills into evidence-aligned groups mapped to the three client-facing roles.",
     apiPath: "skill-groups",
     defaultSort: "sequence",
     searchPlaceholder: "Search skill groups…",

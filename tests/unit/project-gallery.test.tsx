@@ -32,7 +32,7 @@ describe("ProjectGallery", () => {
       <ProjectGallery
         images={[image("one", "Architecture"), image("two", "Operations")]}
         projectName="Platform"
-        pillar="system_design"
+        pillar="system_architect"
       />
     );
 

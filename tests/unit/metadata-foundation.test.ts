@@ -117,12 +117,12 @@ describe("Site-derived title and description foundation", () => {
     );
   });
 
-  it("uses neutral six-pillar fallbacks without inventing an owner", () => {
+  it("uses neutral role fallbacks without inventing an owner", () => {
     const site = createEmergencyPublicSite();
 
     expect(getSiteDefaultTitle(site)).toBe(FALLBACK_SITE_TITLE);
     expect(getSiteDefaultDescription(site)).toBe(FALLBACK_SITE_DESCRIPTION);
-    expect(FALLBACK_SITE_DESCRIPTION).toContain("Frontend Engineering");
+    expect(FALLBACK_SITE_DESCRIPTION).toContain("System Architect");
     expect(buildSiteMetadata(site)).toMatchObject({
       title: {
         default: FALLBACK_SITE_TITLE,
@@ -230,7 +230,7 @@ describe("typed JSON-LD foundation", () => {
       updated_at: "2026-07-12T00:00:00.000Z",
       author_name: "Portfolio Owner",
       image_url: "https://media.example.com/article.png",
-      keywords: ["security", "security", "backend"],
+      keywords: ["security", "security", "software_developer"],
     });
     const project = buildCreativeWorkJsonLd(site, {
       pathname: "/projects/provider-storage",
@@ -249,7 +249,7 @@ describe("typed JSON-LD foundation", () => {
       url: "https://portfolio.example.com/base/articles/safe-boundaries",
       dateModified: "2026-07-12T00:00:00.000Z",
       author: { "@type": "Person", name: "Portfolio Owner" },
-      keywords: ["security", "backend"],
+      keywords: ["security", "software_developer"],
     });
     expect(project).toMatchObject({
       "@type": "CreativeWork",
@@ -312,19 +312,19 @@ describe("dynamic Open Graph contract", () => {
     const site = buildPublishedSite();
     site.seo.default_og = media("site-default");
     site.fallbacks.project = media("project-fallback");
-    site.fallbacks.project_by_pillar.backend = media(
-      "project-backend-fallback"
+    site.fallbacks.project_by_pillar.software_developer = media(
+      "project-software-developer-fallback"
     );
 
     const project = buildDynamicOgInput(site, {
       kind: "project",
       title: "Project",
       canonical_path: "/projects/example",
-      pillar: "backend",
+      pillar: "software_developer",
     });
     expect(project?.visual).toMatchObject({
       source: "managed_media",
-      media_id: "project-backend-fallback",
+      media_id: "project-software-developer-fallback",
     });
 
     const genericProject = buildDynamicOgInput(site, {
@@ -341,7 +341,7 @@ describe("dynamic Open Graph contract", () => {
       kind: "project",
       title: "Project",
       canonical_path: "/projects/example",
-      pillar: "backend",
+      pillar: "software_developer",
       image: media("explicit"),
     });
     expect(explicit?.visual).toMatchObject({

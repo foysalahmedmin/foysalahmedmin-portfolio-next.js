@@ -8,6 +8,7 @@ import {
   Title,
 } from "@/components/ui/section-title";
 import { getPillarLabel } from "@/lib/content/pillars";
+import { getBalancedGridClass } from "@/lib/layout/balanced-grid";
 import { cn } from "@/lib/utils";
 
 export type TPublicSkillGroupWithSkills = TPublicSkillGroupDto & {
@@ -42,7 +43,7 @@ export default function SkillsSection({
       title: pillar.label,
       summary:
         pillar.summary ||
-        "Published evidence records for this discipline are being prepared.",
+        "Published evidence records for this role are being prepared.",
       primary_pillar: pillar.key,
       capabilities: pillar.capabilities,
       technologies: pillar.technologies,
@@ -53,7 +54,7 @@ export default function SkillsSection({
       <div className="container">
         <SectionTitle className={matrix ? "lg:mb-12" : undefined}>
           <Subtitle>Evidence, not decorative ratings</Subtitle>
-          <Title>{heading || "A connected six-discipline skill map"}</Title>
+          <Title>{heading || "The toolkit behind the solutions"}</Title>
           <Description>
             Published skills appear only after their supporting project,
             credential, writing, or reviewed work-history reference passes the
@@ -65,9 +66,9 @@ export default function SkillsSection({
           <div className="border-border bg-surface-subtle/70 mb-6 rounded-[var(--radius-xl-token)] border p-5">
             <p className="type-label text-primary">Evidence model</p>
             <p className="text-muted-foreground mt-3 max-w-4xl text-sm leading-7">
-              Skill records are grouped by the same six-pillar architecture as
-              the public narrative. Published skills can describe proficiency
-              only after they carry a derived or verified evidence state.
+              Skills are grouped by the same three roles as the rest of the
+              site. A proficiency level is shown only once it is backed by a
+              derived or verified evidence record.
             </p>
           </div>
         )}
@@ -75,7 +76,10 @@ export default function SkillsSection({
         <ol
           className={cn(
             "grid gap-6",
-            matrix ? "lg:grid-cols-2 xl:grid-cols-3" : "lg:grid-cols-5"
+            getBalancedGridClass(
+              groups.length || fallbackGroups.length,
+              matrix ? "roomy" : "compact"
+            )
           )}
         >
           {groups.length

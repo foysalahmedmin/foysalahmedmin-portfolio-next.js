@@ -180,7 +180,7 @@ const ProjectDetailsSection = ({
           {project.problem && (
             <DetailSection
               id="problem"
-              eyebrow="01 · Context"
+              eyebrow="01 · The challenge"
               title="The problem"
             >
               <p>{project.problem}</p>
@@ -189,8 +189,8 @@ const ProjectDetailsSection = ({
           {(project.role || project.constraints?.length) && (
             <DetailSection
               id="role-constraints"
-              eyebrow="02 · Boundaries"
-              title="Role and constraints"
+              eyebrow="02 · Context"
+              title="What made it hard"
             >
               {project.role && <p>{project.role}</p>}
               {project.constraints && project.constraints.length > 0 && (
@@ -210,8 +210,8 @@ const ProjectDetailsSection = ({
           {(project.architecture || project.decisions?.length) && (
             <DetailSection
               id="architecture"
-              eyebrow="03 · System"
-              title="Architecture and decisions"
+              eyebrow="03 · Approach"
+              title="How I approached it"
             >
               {project.architecture && <p>{project.architecture}</p>}
               {project.decisions && project.decisions.length > 0 && (
@@ -231,17 +231,47 @@ const ProjectDetailsSection = ({
           {project.implementation && (
             <DetailSection
               id="implementation"
-              eyebrow="04 · Delivery"
-              title="Implementation"
+              eyebrow="04 · Solution"
+              title="What I built"
             >
               <p>{project.implementation}</p>
+            </DetailSection>
+          )}
+          {project.outcomes && project.outcomes.length > 0 && (
+            <DetailSection
+              id="outcomes"
+              eyebrow="05 · Impact"
+              title="What changed for the business"
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                {project.outcomes.map((outcome) => (
+                  <div
+                    key={`${outcome.label}-${outcome.value}`}
+                    className="border-border bg-card rounded-2xl border p-5"
+                  >
+                    <CheckCircle2
+                      className="text-success size-5"
+                      aria-hidden="true"
+                    />
+                    <p className="text-foreground mt-3 text-lg font-black">
+                      {outcome.value}
+                    </p>
+                    <p className="mt-1 text-sm">{outcome.label}</p>
+                    <p className="mt-3 text-[0.65rem] font-black tracking-wide uppercase">
+                      {outcome.verification_state === "verified"
+                        ? "Evidence verified"
+                        : "Derived from approved data"}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </DetailSection>
           )}
           {(project.security || project.performance_reliability) && (
             <DetailSection
               id="quality"
-              eyebrow="05 · Quality"
-              title="Security and reliability"
+              eyebrow="06 · Dependability"
+              title="Why it holds up"
             >
               <div className="grid gap-4 md:grid-cols-2">
                 {project.security && (
@@ -273,41 +303,11 @@ const ProjectDetailsSection = ({
               </div>
             </DetailSection>
           )}
-          {project.outcomes && project.outcomes.length > 0 && (
-            <DetailSection
-              id="outcomes"
-              eyebrow="06 · Evidence"
-              title="Measured outcomes"
-            >
-              <div className="grid gap-4 sm:grid-cols-2">
-                {project.outcomes.map((outcome) => (
-                  <div
-                    key={`${outcome.label}-${outcome.value}`}
-                    className="border-border bg-card rounded-2xl border p-5"
-                  >
-                    <CheckCircle2
-                      className="text-success size-5"
-                      aria-hidden="true"
-                    />
-                    <p className="text-foreground mt-3 text-lg font-black">
-                      {outcome.value}
-                    </p>
-                    <p className="mt-1 text-sm">{outcome.label}</p>
-                    <p className="mt-3 text-[0.65rem] font-black tracking-wide uppercase">
-                      {outcome.verification_state === "verified"
-                        ? "Evidence verified"
-                        : "Derived from approved data"}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </DetailSection>
-          )}
           {project.learnings && project.learnings.length > 0 && (
             <DetailSection
               id="learnings"
               eyebrow="07 · Reflection"
-              title="Learnings"
+              title="What I would carry forward"
             >
               <ul className="space-y-3">
                 {project.learnings.map((learning) => (
@@ -344,7 +344,7 @@ const ProjectDetailsSection = ({
             <dl className="mt-5 space-y-4 text-sm">
               {pillar && (
                 <div>
-                  <dt className="text-muted-foreground">Primary pillar</dt>
+                  <dt className="text-muted-foreground">Focus area</dt>
                   <dd className="mt-1 font-bold">{pillar}</dd>
                 </div>
               )}
@@ -358,7 +358,7 @@ const ProjectDetailsSection = ({
               )}
               {project.tags && project.tags.length > 0 && (
                 <div>
-                  <dt className="text-muted-foreground">Stack and topics</dt>
+                  <dt className="text-muted-foreground">Tools used</dt>
                   <dd className="mt-2 flex flex-wrap gap-1.5">
                     {project.tags.map((tag) => (
                       <span
@@ -397,10 +397,10 @@ const ProjectDetailsSection = ({
             </div>
           )}
           <div className="bg-primary text-primary-foreground rounded-2xl p-6">
-            <h2 className="text-xl font-black">A related product challenge?</h2>
+            <h2 className="text-xl font-black">Facing a similar problem?</h2>
             <p className="mt-3 text-sm leading-6 opacity-85">
-              Share the desired outcome and system constraints through the
-              protected intake.
+              Tell me what you are trying to achieve and what is getting in the
+              way. I will reply with how I would approach it.
             </p>
             <Link
               href="/contact"
@@ -423,7 +423,7 @@ const ProjectDetailsSection = ({
               id="related-projects-title"
               className="text-3xl font-black tracking-tight"
             >
-              Related work
+              Similar problems solved
             </h2>
             <div className="mt-8 grid gap-4 md:grid-cols-3">
               {related.map((item) => (

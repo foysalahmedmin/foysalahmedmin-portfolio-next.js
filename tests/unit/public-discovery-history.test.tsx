@@ -10,7 +10,7 @@ describe("public discovery browser history", () => {
     window.history.replaceState(
       { source: "test" },
       "",
-      "/projects?utm_source=profile&pillar=backend"
+      "/projects?utm_source=profile&pillar=system_architect"
     );
   });
 
@@ -28,12 +28,12 @@ describe("public discovery browser history", () => {
     const { result } = renderHook(() =>
       useUrlListQueryState(
         "projects",
-        parseProjectDiscoveryQuery({ pillar: "backend" })
+        parseProjectDiscoveryQuery({ pillar: "system_architect" })
       )
     );
 
     await waitFor(() => expect(result.current.isReady).toBe(true));
-    expect(result.current.query.pillar).toBe("backend");
+    expect(result.current.query.pillar).toBe("system_architect");
 
     act(() => {
       result.current.setQuery(
@@ -58,11 +58,11 @@ describe("public discovery browser history", () => {
       window.history.replaceState(
         { source: "test" },
         "",
-        "/projects?pillar=frontend&page=2"
+        "/projects?pillar=software_developer&page=2"
       );
       window.dispatchEvent(new PopStateEvent("popstate"));
     });
-    await waitFor(() => expect(result.current.query.pillar).toBe("frontend"));
+    await waitFor(() => expect(result.current.query.pillar).toBe("software_developer"));
     expect(result.current.query.page).toBe(2);
     expect(result.current.query.technology).toBe("all");
   });
@@ -76,7 +76,7 @@ describe("public discovery browser history", () => {
     const { result } = renderHook(() =>
       useUrlListQueryState(
         "projects",
-        parseProjectDiscoveryQuery({ pillar: "backend" })
+        parseProjectDiscoveryQuery({ pillar: "system_architect" })
       )
     );
     await waitFor(() => expect(result.current.isReady).toBe(true));

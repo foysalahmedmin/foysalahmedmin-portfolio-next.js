@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: payload.page.seo.title || "Projects",
     description:
       payload.page.seo.description ||
-      "Evidence-led case studies across frontend, backend, AI automation, system design, and full-stack engineering.",
+      "Case studies that start with a business problem and show the approach, the solution, and the result.",
     kind: "page",
   });
   return payload.page.seo.noindex

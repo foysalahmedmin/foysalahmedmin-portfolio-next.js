@@ -37,12 +37,9 @@ describe("canonical portfolio contracts", () => {
   it("owns exactly the ordered stable pillar keys", () => {
     expect(PILLAR_CONTRACT_VERSION).toBe(1);
     expect(PILLAR_KEYS).toEqual([
-      "frontend",
-      "backend",
+      "system_architect",
+      "software_developer",
       "ai_automation",
-      "system_design",
-      "devops_cloud",
-      "full_stack",
     ]);
     expect(PILLAR_CONTRACT.map(({ key }) => key)).toEqual(PILLAR_KEYS);
     expect(new Set(PILLAR_KEYS).size).toBe(PILLAR_KEYS.length);
@@ -51,13 +48,13 @@ describe("canonical portfolio contracts", () => {
 
   it("deduplicates secondary pillars and excludes the primary pillar", () => {
     expect(
-      normalizePillarRelationships("backend", [
-        "backend",
-        "frontend",
-        "frontend",
-        "system_design",
+      normalizePillarRelationships("software_developer", [
+        "ai_automation",
+        "ai_automation",
+        "software_developer",
+        "system_architect",
       ])
-    ).toEqual(["frontend", "system_design"]);
+    ).toEqual(["ai_automation", "system_architect"]);
   });
 
   it("normalizes human slugs and preserves deterministic suffixes", () => {
@@ -151,7 +148,7 @@ describe("canonical portfolio contracts", () => {
     expect(
       getArticlePublishReadiness({
         excerpt: "A concise, human-authored summary.",
-        primary_pillar: "backend",
+        primary_pillar: "software_developer",
       })
     ).toEqual([]);
   });

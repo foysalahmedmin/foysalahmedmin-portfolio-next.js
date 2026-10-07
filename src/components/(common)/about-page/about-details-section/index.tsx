@@ -50,8 +50,8 @@ const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
             <div className="border-border bg-card absolute -right-4 -bottom-8 max-w-64 rounded-2xl border p-5 shadow-[var(--shadow-md)] sm:right-8">
               <Layers3 className="text-primary size-6" aria-hidden="true" />
               <p className="mt-3 text-sm leading-6 font-semibold">
-                {enabledPillars.length} connected engineering disciplines, one
-                accountable delivery practice.
+                Architecture, software, and automation, with one accountable
+                owner from first idea to running system.
               </p>
             </div>
           </div>
@@ -81,7 +81,7 @@ const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
 
             <ol
               className="mt-8 grid gap-3 sm:grid-cols-2"
-              aria-label="Engineering disciplines"
+              aria-label="Practice areas"
             >
               {enabledPillars.map((pillar, index) => (
                 <li

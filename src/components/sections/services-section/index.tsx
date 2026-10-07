@@ -7,6 +7,7 @@ import {
 import type { TPublicSitePillarDto } from "@/app/api/site/site.type";
 import type { TPublicServiceDto } from "@/app/api/services/service.type";
 import { getPillarLabel } from "@/lib/content/pillars";
+import { getBalancedGridClass } from "@/lib/layout/balanced-grid";
 import { cn } from "@/lib/utils";
 
 export default function ServicesSection({
@@ -53,24 +54,24 @@ export default function ServicesSection({
     >
       <div className="container">
         <SectionTitle className={cn(useCardsLayout ? "lg:mb-12" : "lg:mb-20")}>
-          <Subtitle>Six disciplines, one system</Subtitle>
+          <Subtitle>How I can help</Subtitle>
           <Title>
-            {heading || "Product engineering without disconnected hand-offs"}
+            {heading || "Solutions built around your problem, not a stack"}
           </Title>
           <Description>
-            Each discipline has a distinct job. Together they create products
-            that are usable, secure, maintainable, and ready to operate.
+            Every service starts from a business outcome and works backwards to
+            the simplest system that delivers it: clear scope, working
+            software, and honest trade-offs.
           </Description>
         </SectionTitle>
 
         <ol
           className={cn(
             "grid gap-5",
-            useCardsLayout
-              ? "lg:grid-cols-2"
-              : services.length
-                ? "md:grid-cols-2 xl:grid-cols-3"
-                : "md:grid-cols-2 xl:grid-cols-5"
+            getBalancedGridClass(
+              items.length,
+              useCardsLayout ? "roomy" : "compact"
+            )
           )}
         >
           {items.map((item) => (
@@ -109,7 +110,7 @@ export default function ServicesSection({
                 {item.capabilities.length > 0 && (
                   <div>
                     <p className="type-label text-muted-foreground">
-                      Capability shape
+                      What is included
                     </p>
                     <ul
                       className="mt-3 space-y-2"
@@ -130,7 +131,7 @@ export default function ServicesSection({
                 {item.deliverables.length > 0 && (
                   <div>
                     <p className="type-label text-muted-foreground">
-                      Deliverables
+                      What you receive
                     </p>
                     <ul
                       className="mt-3 space-y-2"

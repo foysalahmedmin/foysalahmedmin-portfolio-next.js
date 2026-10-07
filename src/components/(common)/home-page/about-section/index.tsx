@@ -34,7 +34,7 @@ const AboutSection = ({ site }: { site: TPublicSiteDto }) => {
               <Layers3 className="text-primary size-7" aria-hidden="true" />
               <p className="mt-3 text-sm leading-6 font-semibold">
                 {site.positioning.client_promise ||
-                  `${pillars.length} disciplines connected around one product outcome.`}
+                  "Architecture, software, and automation connected around one outcome."}
               </p>
             </div>
           </div>
@@ -53,7 +53,7 @@ const AboutSection = ({ site }: { site: TPublicSiteDto }) => {
             </p>
             <ol
               className="mt-8 grid gap-3 sm:grid-cols-2"
-              aria-label="Six-discipline practice"
+              aria-label="Practice areas"
             >
               {pillars.map((pillar) => (
                 <li

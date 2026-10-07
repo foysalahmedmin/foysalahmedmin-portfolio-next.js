@@ -321,7 +321,7 @@ const RepeatableContentWorkspace = ({
         ? ([
             {
               id: "primary_pillar",
-              name: "Discipline",
+              name: "Role",
               accessor: (record: AdminRepeatableRecord) =>
                 record.primary_pillar,
               minWidth: "150px",

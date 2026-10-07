@@ -51,7 +51,7 @@ describe("RichContentRenderer media ownership", () => {
         document={document}
         legacyHtml=""
         fallback="project"
-        pillar="backend"
+        pillar="software_developer"
       />
     );
 
@@ -61,7 +61,7 @@ describe("RichContentRenderer media ownership", () => {
     );
     expect(screen.getByRole("img", { name: "Architecture flow" })).toHaveAttribute(
       "data-pillar",
-      "backend"
+      "software_developer"
     );
   });
 });

@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: payload.page.seo.title || "Articles",
     description:
       payload.page.seo.description ||
-      "Practical engineering notes on frontend, backend, AI automation, system design, and full-stack delivery.",
+      "Practical notes on solving real problems with architecture, software, and automation.",
     kind: "page",
   });
   return payload.page.seo.noindex

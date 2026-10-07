@@ -50,7 +50,7 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
     filterFields: [],
   },
   "pillar-showcase": {
-    label: "Six-pillar capability showcase",
+    label: "Role showcase",
     layouts: ["default", "compact", "sticky"],
     source: "system",
     filterFields: [],
