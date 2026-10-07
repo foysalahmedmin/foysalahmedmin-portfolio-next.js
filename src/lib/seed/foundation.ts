@@ -17,7 +17,7 @@ import type {
   SeedTruthMarker,
 } from "./types.ts";
 
-export const FOUNDATION_SEED_VERSION = 5 as const;
+export const FOUNDATION_SEED_VERSION = 6 as const;
 
 const foundationTruth = Object.freeze({
   content_tier: "foundation",
@@ -824,6 +824,14 @@ const pageDrafts = {
         layout: "featured",
         item_limit: 6,
         source: automatic({ featured: true }),
+      },
+      {
+        key: "github",
+        kind: "github-profile",
+        visible: true,
+        heading: "See how I build, in the open",
+        layout: "default",
+        source: system,
       },
       {
         key: "trust",

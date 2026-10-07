@@ -169,6 +169,7 @@ export const pageSectionSchema = z.discriminatedUnion("kind", [
   }),
   systemSection("contact-form", ["default", "split"]),
   systemSection("contact-cta", ["default", "banner", "compact"]),
+  systemSection("github-profile", ["default"]),
 ]);
 
 export const pageDraftSnapshotSchema: z.ZodType<TPageDraftSnapshot> = z
@@ -220,6 +221,7 @@ export const PAGE_ROUTE_SECTION_KINDS: Readonly<
     "article-collection",
     "process-steps",
     "testimonial-collection",
+    "github-profile",
     "faq-list",
     "contact-cta",
   ],
