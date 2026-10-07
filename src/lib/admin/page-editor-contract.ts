@@ -67,6 +67,12 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
     source: "system",
     filterFields: [],
   },
+  "github-profile": {
+    label: "GitHub profile",
+    layouts: ["default"],
+    source: "system",
+    filterFields: [],
+  },
   "metrics-strip": {
     label: "Proof metrics strip",
     layouts: ["default", "compact"],
@@ -202,6 +208,7 @@ export const PAGE_EDITOR_ROUTE_KINDS: Readonly<
     "article-collection",
     "process-steps",
     "testimonial-collection",
+    "github-profile",
     "faq-list",
     "contact-cta",
   ],

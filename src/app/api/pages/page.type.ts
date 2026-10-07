@@ -47,6 +47,7 @@ export const PAGE_SECTION_KINDS = [
   "legal-document",
   "contact-form",
   "contact-cta",
+  "github-profile",
 ] as const;
 export type TPageSectionKind = (typeof PAGE_SECTION_KINDS)[number];
 

@@ -21,6 +21,7 @@ import HeroSection from "@/components/(common)/home-page/hero-section";
 import ProjectsSection from "@/components/(common)/home-page/projects-section";
 import ArchitectureWorkflowSection from "@/components/sections/architecture-workflow-section";
 import ContactCTASection from "@/components/sections/contact-cta-section";
+import GithubProfileSection from "@/components/sections/github-profile-section";
 import MetricsStripSection from "@/components/sections/metrics-strip-section";
 import PillarShowcaseSection from "@/components/sections/pillar-showcase-section";
 import ProcessStepsSection from "@/components/sections/process-steps-section";
@@ -118,6 +119,11 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
                 heading={section.heading}
                 layout={section.layout}
               />
+            );
+            break;
+          case "github-profile":
+            content = (
+              <GithubProfileSection site={payload.site} heading={section.heading} />
             );
             break;
           case "metrics-strip":
