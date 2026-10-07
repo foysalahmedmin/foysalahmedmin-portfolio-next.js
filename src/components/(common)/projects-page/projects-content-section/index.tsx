@@ -198,7 +198,7 @@ const ProjectFilterFields = ({
       </label>
       <FilterSelect
         id={idFor("project-pillar")}
-        label="Discipline"
+        label="Role"
         value={query.pillar}
         onChange={(pillar) =>
           updateQuery({
@@ -207,7 +207,7 @@ const ProjectFilterFields = ({
           })
         }
       >
-        <option value="all">All disciplines</option>
+        <option value="all">All roles</option>
         {PILLAR_RELATIONSHIP_OPTIONS.map(({ key, label }) => (
           <option key={key} value={key}>
             {label}
@@ -681,7 +681,7 @@ const ProjectsContentSection = ({
               }
               description={
                 filtersActive
-                  ? "Try a broader discipline, technology, or search phrase."
+                  ? "Try a broader role, technology, or search phrase."
                   : "Published case studies will appear here when they are ready."
               }
               action={

@@ -17,7 +17,7 @@ import type {
   SeedTruthMarker,
 } from "./types.ts";
 
-export const FOUNDATION_SEED_VERSION = 4 as const;
+export const FOUNDATION_SEED_VERSION = 5 as const;
 
 const foundationTruth = Object.freeze({
   content_tier: "foundation",
@@ -97,6 +97,10 @@ const sitePayloadSchema = z
         positioning: z
           .object({
             canonical: z.string().min(2).max(240),
+            compact: z.string().min(2).max(160),
+            mobile: z.string().min(2).max(120),
+            long: z.string().min(2).max(500),
+            client_promise: z.string().min(2).max(400),
           })
           .strict(),
         pillars: z.array(pillarSchema).length(PILLAR_CONTRACT.length),
@@ -405,6 +409,11 @@ const demoProjectSchema = z
   .object({
     ...demoContentBase,
     description: z.string().min(1).max(300),
+    problem: z.string().min(1).max(5000),
+    role: z.string().min(1).max(1000),
+    constraints: z.array(z.string()).max(12),
+    decisions: z.array(z.string()).max(12),
+    learnings: z.array(z.string()).max(12),
     tags: z.array(z.string()).max(12),
     delivery_status: z.string().min(1),
     publication_status: z.literal("draft"),
@@ -444,6 +453,77 @@ const internalLink = (key: string, label: string, href: string) => ({
   enabled: true,
 });
 
+// Role copy is written from the client's side: the problem taken off their
+// plate first, the tools second. It stays a draft until the owner publishes it.
+const PILLAR_COPY: Record<
+  (typeof PILLAR_KEYS)[number],
+  Readonly<{
+    headline: string;
+    summary: string;
+    capabilities: readonly string[];
+    technologies: readonly string[];
+  }>
+> = {
+  system_architect: {
+    headline: "Get the design right before it gets expensive",
+    summary:
+      "I turn unclear requirements and growing complexity into an architecture that is secure, scalable, and affordable to run, with every trade-off explained in plain language.",
+    capabilities: [
+      "Architecture and technical decision records",
+      "Database and data-model design",
+      "Cloud, CI/CD, and release strategy",
+      "Security, reliability, and cost reviews",
+    ],
+    technologies: [
+      "MongoDB",
+      "PostgreSQL",
+      "Redis",
+      "Docker",
+      "GitHub Actions",
+      "Vercel",
+    ],
+  },
+  software_developer: {
+    headline: "Turn the idea into a product people can use",
+    summary:
+      "I build fast, accessible web products end to end (interface, API, and data) and deliver code your team can read, test, and extend.",
+    capabilities: [
+      "Web applications and dashboards",
+      "APIs, authentication, and data layers",
+      "Admin panels and internal tools",
+      "Testing, accessibility, and performance",
+    ],
+    technologies: [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "Tailwind CSS",
+    ],
+  },
+  ai_automation: {
+    headline: "Hand repetitive work to automation you can trust",
+    summary:
+      "I find the manual, error-prone steps in a workflow and replace them with automation that is monitored, reviewable, and easy to switch off.",
+    capabilities: [
+      "Workflow and integration automation",
+      "LLM-assisted features with human review",
+      "Background jobs and data pipelines",
+      "Monitoring, logging, and safe fallbacks",
+    ],
+    technologies: [
+      "Node.js",
+      "TypeScript",
+      "Python",
+      "Redis",
+      "RabbitMQ",
+      "LLM APIs",
+    ],
+  },
+};
+
 const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
   stage: "site",
   collection: "sites",
@@ -459,17 +539,23 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
       identity: { locale: "en", timezone: "Asia/Dhaka" },
       positioning: {
         canonical: PILLAR_CONTRACT.map((pillar) => pillar.label).join(" · "),
+        compact:
+          "I turn business problems into clear architectures, working software, and dependable automation.",
+        mobile:
+          "Business problems, solved with architecture, software, and automation.",
+        long: "Start with the problem, not the technology. I work with founders and teams to understand what is slowing the business down, then design, build, and automate the simplest solution that fixes it, explaining every trade-off in plain language along the way.",
+        client_promise:
+          "Bring me the problem. You will get a clear plan, working software in small reviewable steps, and honest advice on what is not worth building.",
       },
       pillars: PILLAR_CONTRACT.map((pillar) => ({
         key: pillar.key,
         label: pillar.label,
         order: pillar.order,
         enabled: false,
-        headline: pillar.label,
-        summary:
-          "Evidence-backed work for this pillar remains unavailable until editorial verification is complete.",
-        capabilities: [],
-        technologies: [],
+        headline: PILLAR_COPY[pillar.key].headline,
+        summary: PILLAR_COPY[pillar.key].summary,
+        capabilities: [...PILLAR_COPY[pillar.key].capabilities],
+        technologies: [...PILLAR_COPY[pillar.key].technologies],
         icon_key: pillar.default_icon_key,
         accent: pillar.default_accent,
         fallback_visual_key: pillar.fallback_visual_key,
@@ -510,7 +596,7 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
       seo: {
         default_title: "Engineering Portfolio",
         default_description:
-          "A six-pillar engineering portfolio with evidence-gated content.",
+          "A solutions-focused portfolio: system architecture, software development, and AI automation that solve real business problems.",
         allow_indexing: false,
       },
       experience: {
@@ -527,58 +613,58 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
       process: [
         {
           key: "discovery",
-          title: "1. Discovery & Analysis",
+          title: "1. Understand the problem",
           summary:
-            "Define business goals, target audience, technical constraints, and security requirements.",
-          deliverable: "PRD & Threat Model",
+            "Start from the business goal, the people affected, and the constraint that hurts most, before choosing any technology.",
+          deliverable: "Problem brief and success measures",
           enabled: true,
         },
         {
           key: "design",
-          title: "2. System Architecture",
+          title: "2. Shape the solution",
           summary:
-            "Choose the technology stack, model the database schemas, and map workflow integrations.",
-          deliverable: "RFC Document & Architecture Diagram",
+            "Compare realistic options, pick the simplest one that works, and write down why.",
+          deliverable: "Solution outline and decision record",
           enabled: true,
         },
         {
           key: "development",
-          title: "3. Iterative Engineering",
+          title: "3. Build in small steps",
           summary:
-            "Write clean, type-safe code with modular boundaries, thorough tests, and performance profiles.",
-          deliverable: "Pull Requests & Test Coverage Reports",
+            "Ship working increments you can review early, instead of one big reveal at the end.",
+          deliverable: "Reviewable releases and automated tests",
           enabled: true,
         },
         {
           key: "hardening",
-          title: "4. Hardening & Security",
+          title: "4. Make it dependable",
           summary:
-            "Run static analysis, dependency vulnerability checks, and accessibility validation.",
-          deliverable: "Security Audit & Lighthouse Score Reports",
+            "Check security, accessibility, and performance so the solution holds up under real use.",
+          deliverable: "Quality and security review notes",
           enabled: true,
         },
         {
           key: "delivery",
-          title: "5. Continuous Delivery",
+          title: "5. Launch and hand over",
           summary:
-            "Configure automated CI/CD pipelines, containerized deployments, and error/log tracking.",
-          deliverable: "Production Release & Telemetry Dashboard",
+            "Release through automated pipelines with monitoring in place, and hand over documentation your team can run with.",
+          deliverable: "Production release and handover notes",
           enabled: true,
         },
         {
           key: "evolution",
-          title: "6. Monitoring & Evolution",
+          title: "6. Measure and improve",
           summary:
-            "Monitor system health, analyze database query performance, and upgrade library versions.",
-          deliverable: "Operational Review & Refactoring Plan",
+            "Watch the numbers that mattered at the start and keep improving what moves them.",
+          deliverable: "Outcome review and next-step plan",
           enabled: true,
         },
       ],
       metrics: [
         {
-          key: "core_disciplines",
-          label: "Core disciplines",
-          value: "5",
+          key: "core_roles",
+          label: "Core roles",
+          value: String(PILLAR_CONTRACT.length),
           verification: "derived",
           enabled: true,
         },
@@ -691,6 +777,7 @@ const pageDrafts = {
         key: "pillars",
         kind: "pillar-showcase",
         visible: true,
+        heading: "Three ways I help you move forward",
         layout: "sticky",
         source: system,
       },
@@ -698,7 +785,7 @@ const pageDrafts = {
         key: "architecture-workflow",
         kind: "architecture-workflow",
         visible: true,
-        heading: "Architecture, AI automation, and delivery guardrails",
+        heading: "How every solution stays reliable, reviewable, and safe",
         layout: "bento",
         source: system,
       },
@@ -706,22 +793,25 @@ const pageDrafts = {
         key: "services",
         kind: "service-collection",
         visible: true,
+        heading: "How I can help",
         layout: "cards",
-        item_limit: 5,
+        item_limit: PILLAR_CONTRACT.length,
         source: automatic({ featured: true }),
       },
       {
         key: "skills",
         kind: "skill-group-collection",
         visible: true,
+        heading: "The toolkit behind the solutions",
         layout: "matrix",
-        item_limit: 5,
+        item_limit: PILLAR_CONTRACT.length,
         source: automatic({ featured: true }),
       },
       {
         key: "projects",
         kind: "project-collection",
         visible: true,
+        heading: "Problems solved",
         layout: "featured",
         item_limit: 6,
         source: automatic({ featured: true }),
@@ -730,6 +820,7 @@ const pageDrafts = {
         key: "articles",
         kind: "article-collection",
         visible: true,
+        heading: "Notes on solving real problems",
         layout: "featured",
         item_limit: 6,
         source: automatic({ featured: true }),
@@ -738,7 +829,7 @@ const pageDrafts = {
         key: "trust",
         kind: "testimonial-collection",
         visible: true,
-        heading: "Trust without invented testimonials",
+        heading: "What clients say",
         layout: "grid",
         item_limit: 3,
         source: automatic({ featured: true }),
@@ -747,7 +838,7 @@ const pageDrafts = {
         key: "faqs",
         kind: "faq-list",
         visible: true,
-        heading: "Practical questions before a project starts",
+        heading: "Questions before we start",
         layout: "list",
         item_limit: 6,
         source: automatic({ featured: true }),
@@ -756,6 +847,7 @@ const pageDrafts = {
         key: "process",
         kind: "process-steps",
         visible: true,
+        heading: "How we work together",
         layout: "numbered",
         source: system,
       },
@@ -783,7 +875,7 @@ const pageDrafts = {
         kind: "skill-group-collection",
         visible: true,
         layout: "matrix",
-        item_limit: 5,
+        item_limit: PILLAR_CONTRACT.length,
         source: automatic(),
       },
       {
@@ -908,114 +1000,87 @@ const pageDrafts = {
 } as const;
 
 const serviceIds = {
-  frontend: new ObjectId("507f1f77bcf86cd799439001"),
-  backend: new ObjectId("507f1f77bcf86cd799439002"),
+  system_architect: new ObjectId("507f1f77bcf86cd799439001"),
+  software_developer: new ObjectId("507f1f77bcf86cd799439002"),
   ai_automation: new ObjectId("507f1f77bcf86cd799439003"),
-  system_design: new ObjectId("507f1f77bcf86cd799439004"),
-  devops_cloud: new ObjectId("507f1f77bcf86cd799439006"),
-  full_stack: new ObjectId("507f1f77bcf86cd799439005"),
 };
 
 const skillGroupIds = {
-  frontend: new ObjectId("607f1f77bcf86cd799439011"),
-  backend: new ObjectId("607f1f77bcf86cd799439012"),
+  system_architect: new ObjectId("607f1f77bcf86cd799439011"),
+  software_developer: new ObjectId("607f1f77bcf86cd799439012"),
   ai_automation: new ObjectId("607f1f77bcf86cd799439013"),
-  system_design: new ObjectId("607f1f77bcf86cd799439014"),
-  devops_cloud: new ObjectId("607f1f77bcf86cd799439016"),
-  full_stack: new ObjectId("607f1f77bcf86cd799439015"),
 };
 
 const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
   const services = [
     {
-      id: serviceIds.frontend,
-      slug: "frontend-engineering",
-      title: "Frontend Engineering",
+      id: serviceIds.system_architect,
+      slug: "architecture-system-design",
+      title: "Architecture & System Design",
       outcome:
-        "Develop keyboard-navigable, accessible, and responsive web interfaces.",
+        "A clear technical blueprint that reduces risk, rework, and running cost before the build begins.",
       capabilities: [
-        "Accessible UI/UX implementation",
-        "State machine workflow logic",
-        "Modern responsive styling",
+        "Architecture and technical decision records",
+        "Database and data-model design",
+        "Cloud, CI/CD, and release strategy",
+        "Security, reliability, and cost reviews",
       ],
-      technologies: ["React", "Next.js", "TypeScript", "Vanilla CSS"],
-      primary_pillar: "frontend" as const,
+      deliverables: [
+        "Solution architecture overview",
+        "Decision record with trade-offs",
+        "Delivery roadmap with milestones",
+      ],
+      technologies: [
+        "MongoDB",
+        "PostgreSQL",
+        "Redis",
+        "Docker",
+        "GitHub Actions",
+      ],
+      primary_pillar: "system_architect" as const,
       sequence: 0,
     },
     {
-      id: serviceIds.backend,
-      slug: "backend-services",
-      title: "Backend Services",
+      id: serviceIds.software_developer,
+      slug: "product-software-development",
+      title: "Product & Software Development",
       outcome:
-        "Build robust transactional APIs, secure databases, and background queue workers.",
+        "A working, maintainable product (interface, API, and data) delivered in small steps you can review.",
       capabilities: [
-        "Transactional API design",
-        "Schema migration pipelines",
-        "Caching & session layer management",
+        "Web applications and dashboards",
+        "APIs, authentication, and data layers",
+        "Admin panels and internal tools",
+        "Testing, accessibility, and performance",
       ],
-      technologies: ["Node.js", "Express", "PostgreSQL", "MongoDB", "Redis"],
-      primary_pillar: "backend" as const,
+      deliverables: [
+        "Working software in reviewable releases",
+        "Automated tests for the critical flows",
+        "Handover documentation for your team",
+      ],
+      technologies: ["Next.js", "React", "TypeScript", "Node.js", "MongoDB"],
+      primary_pillar: "software_developer" as const,
       sequence: 1,
     },
     {
       id: serviceIds.ai_automation,
-      slug: "ai-automation",
-      title: "AI Integration & Automation",
+      slug: "ai-workflow-automation",
+      title: "AI & Workflow Automation",
       outcome:
-        "Orchestrate agentic workflows and LLM APIs with human-in-the-loop control.",
+        "Repetitive manual work replaced by automation your team can trust, audit, and switch off.",
       capabilities: [
-        "LLM API orchestration",
-        "Vector search & RAG workflows",
-        "Background agent processing",
+        "Workflow and integration automation",
+        "LLM-assisted features with human review",
+        "Background jobs and data pipelines",
+        "Monitoring, logging, and safe fallbacks",
       ],
-      technologies: ["OpenAI API", "LangChain", "Pinecone", "BullMQ"],
+      deliverables: [
+        "Automated workflow running in production",
+        "Monitoring and failure alerts",
+        "Runbook for your team",
+      ],
+      technologies: ["Node.js", "TypeScript", "Python", "Redis", "RabbitMQ"],
       primary_pillar: "ai_automation" as const,
       sequence: 2,
-    },
-    {
-      id: serviceIds.system_design,
-      slug: "system-design",
-      title: "Infrastructure & System Design",
-      outcome:
-        "Architect highly available, secure, and performant cloud infrastructures.",
-      capabilities: [
-        "Cloud infrastructure provisioning",
-        "CI/CD automation pipelines",
-        "Query profiling & optimization",
-      ],
-      technologies: ["AWS", "GCP", "Docker", "GitHub Actions"],
-      primary_pillar: "system_design" as const,
-      sequence: 3,
-    },
-    {
-      id: serviceIds.devops_cloud,
-      slug: "devops-cloud",
-      title: "DevOps & Cloud Operations",
-      outcome:
-        "Ship and run services with reproducible builds, automated releases, and observable runtime.",
-      capabilities: [
-        "Containerised build & runtime images",
-        "Automated release and rollback pipelines",
-        "Server hardening & reverse-proxy routing",
-      ],
-      technologies: ["Docker", "GitHub Actions", "Linux", "Nginx", "Vercel"],
-      primary_pillar: "devops_cloud" as const,
-      sequence: 4,
-    },
-    {
-      id: serviceIds.full_stack,
-      slug: "full-stack-delivery",
-      title: "Full-Stack Product Delivery",
-      outcome:
-        "Deliver end-to-end products from conception to production with automated tests.",
-      capabilities: [
-        "End-to-end product delivery",
-        "Monorepos & development tooling",
-        "Production telemetry & monitoring",
-      ],
-      technologies: ["Next.js", "TypeScript", "Vitest", "Playwright", "pnpm"],
-      primary_pillar: "full_stack" as const,
-      sequence: 5,
     },
   ];
 
@@ -1033,7 +1098,7 @@ const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
       title: service.title,
       outcome: service.outcome,
       capabilities: service.capabilities,
-      deliverables: [],
+      deliverables: service.deliverables,
       technologies: service.technologies,
       primary_pillar: service.primary_pillar,
       secondary_pillars: [],
@@ -1055,58 +1120,31 @@ const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
 const createSkillGroupRecords = (actor: SeedActor): SeedRecordDefinition[] => {
   const groups = [
     {
-      id: skillGroupIds.frontend,
-      slug: "ui-experience",
-      title: "User Interface & Experience",
+      id: skillGroupIds.system_architect,
+      slug: "architecture-infrastructure",
+      title: "Architecture & Infrastructure",
       description:
-        "Building responsive, modern, and screen-reader accessible web applications.",
-      primary_pillar: "frontend" as const,
+        "The decisions that keep a product secure, scalable, and affordable to run.",
+      primary_pillar: "system_architect" as const,
       sequence: 0,
     },
     {
-      id: skillGroupIds.backend,
-      slug: "systems-api",
-      title: "Systems & API Engineering",
+      id: skillGroupIds.software_developer,
+      slug: "product-engineering",
+      title: "Product Engineering",
       description:
-        "Developing fast, scalable, and secure backend servers and database structures.",
-      primary_pillar: "backend" as const,
+        "Building the interface, the API, and the data layer of products people rely on.",
+      primary_pillar: "software_developer" as const,
       sequence: 1,
     },
     {
       id: skillGroupIds.ai_automation,
       slug: "ai-workflows",
-      title: "AI Integration & Workflows",
+      title: "AI & Workflow Automation",
       description:
-        "Wiring agentic tools, vector search, and LLM providers safely.",
+        "Removing repetitive work with automation that stays observable and under human control.",
       primary_pillar: "ai_automation" as const,
       sequence: 2,
-    },
-    {
-      id: skillGroupIds.system_design,
-      slug: "infrastructure-design",
-      title: "Infrastructure & Systems Architecture",
-      description:
-        "Designing cloud topologies, deployment pipelines, and database optimization.",
-      primary_pillar: "system_design" as const,
-      sequence: 3,
-    },
-    {
-      id: skillGroupIds.devops_cloud,
-      slug: "devops-cloud-operations",
-      title: "DevOps & Cloud Operations",
-      description:
-        "Packaging, releasing, and operating applications on cloud and Linux hosts.",
-      primary_pillar: "devops_cloud" as const,
-      sequence: 4,
-    },
-    {
-      id: skillGroupIds.full_stack,
-      slug: "full-stack-engineering",
-      title: "Full-Stack Software Engineering",
-      description:
-        "Combining end-to-end tooling, clean testing architectures, and deployment stability.",
-      primary_pillar: "full_stack" as const,
-      sequence: 5,
     },
   ];
 
@@ -1143,220 +1181,139 @@ const createSkillGroupRecords = (actor: SeedActor): SeedRecordDefinition[] => {
 const createSkillRecords = (actor: SeedActor): SeedRecordDefinition[] => {
   const skills = [
     {
-      slug: "nextjs",
-      title: "Next.js & React",
-      group: skillGroupIds.frontend,
-      level: "expert" as const,
+      slug: "system-architecture",
+      title: "System & Solution Architecture",
+      group: skillGroupIds.system_architect,
+      level: "advanced" as const,
       seq: 0,
-      p: "frontend" as const,
-      kw: ["frontend", "ssr", "react"],
+      p: "system_architect" as const,
+      kw: ["architecture", "trade-offs", "decision-records"],
+    },
+    {
+      slug: "data-modeling",
+      title: "Database & Data Modeling",
+      group: skillGroupIds.system_architect,
+      level: "advanced" as const,
+      seq: 1,
+      p: "system_architect" as const,
+      kw: ["mongodb", "postgresql", "schema"],
+    },
+    {
+      slug: "caching-messaging",
+      title: "Caching & Messaging",
+      group: skillGroupIds.system_architect,
+      level: "intermediate" as const,
+      seq: 2,
+      p: "system_architect" as const,
+      kw: ["redis", "rabbitmq", "kafka"],
+    },
+    {
+      slug: "security-by-design",
+      title: "Security by Design",
+      group: skillGroupIds.system_architect,
+      level: "advanced" as const,
+      seq: 3,
+      p: "system_architect" as const,
+      kw: ["authentication", "sessions", "threat-modeling"],
+    },
+    {
+      slug: "ci-cd-deployment",
+      title: "CI/CD & Deployment",
+      group: skillGroupIds.system_architect,
+      level: "intermediate" as const,
+      seq: 4,
+      p: "system_architect" as const,
+      kw: ["github-actions", "docker", "vercel"],
+    },
+    {
+      slug: "nextjs-react",
+      title: "Next.js & React",
+      group: skillGroupIds.software_developer,
+      level: "advanced" as const,
+      seq: 0,
+      p: "software_developer" as const,
+      kw: ["nextjs", "react", "ssr"],
     },
     {
       slug: "typescript",
-      title: "TypeScript",
-      group: skillGroupIds.frontend,
-      level: "expert" as const,
+      title: "TypeScript & JavaScript",
+      group: skillGroupIds.software_developer,
+      level: "advanced" as const,
       seq: 1,
-      p: "frontend" as const,
-      kw: ["type-safety", "javascript"],
+      p: "software_developer" as const,
+      kw: ["typescript", "javascript", "type-safety"],
     },
     {
-      slug: "accessibility",
-      title: "Web Accessibility (WCAG)",
-      group: skillGroupIds.frontend,
+      slug: "nodejs-apis",
+      title: "Node.js & Express APIs",
+      group: skillGroupIds.software_developer,
       level: "advanced" as const,
       seq: 2,
-      p: "frontend" as const,
-      kw: ["a11y", "aria", "screen-readers"],
+      p: "software_developer" as const,
+      kw: ["nodejs", "express", "rest"],
     },
     {
-      slug: "vanillacss",
-      title: "Vanilla CSS & Tailwind",
-      group: skillGroupIds.frontend,
+      slug: "mongodb-mongoose",
+      title: "MongoDB & Mongoose",
+      group: skillGroupIds.software_developer,
       level: "advanced" as const,
       seq: 3,
-      p: "frontend" as const,
-      kw: ["styling", "responsive"],
+      p: "software_developer" as const,
+      kw: ["mongodb", "mongoose", "prisma"],
     },
     {
-      slug: "nodejs",
-      title: "Node.js & Express",
-      group: skillGroupIds.backend,
-      level: "expert" as const,
-      seq: 0,
-      p: "backend" as const,
-      kw: ["backend", "runtime", "javascript"],
-    },
-    {
-      slug: "databases",
-      title: "SQL & NoSQL Databases",
-      group: skillGroupIds.backend,
-      level: "expert" as const,
-      seq: 1,
-      p: "backend" as const,
-      kw: ["postgresql", "mongodb", "schema"],
-    },
-    {
-      slug: "redis",
-      title: "Redis Caching",
-      group: skillGroupIds.backend,
-      level: "intermediate" as const,
-      seq: 2,
-      p: "backend" as const,
-      kw: ["caching", "performance"],
-    },
-    {
-      slug: "api-design",
-      title: "Secure API Design",
-      group: skillGroupIds.backend,
+      slug: "accessible-ui",
+      title: "Accessible, Responsive UI",
+      group: skillGroupIds.software_developer,
       level: "advanced" as const,
-      seq: 3,
-      p: "backend" as const,
-      kw: ["rest", "graphql", "auth"],
+      seq: 4,
+      p: "software_developer" as const,
+      kw: ["tailwind", "accessibility", "responsive"],
     },
     {
-      slug: "openai-api",
-      title: "OpenAI API Integration",
+      slug: "workflow-automation",
+      title: "Workflow Automation",
       group: skillGroupIds.ai_automation,
-      level: "advanced" as const,
+      level: "intermediate" as const,
       seq: 0,
       p: "ai_automation" as const,
-      kw: ["llm", "ai", "openai"],
+      kw: ["workflows", "integrations", "automation"],
     },
     {
-      slug: "rag-vector",
-      title: "RAG & Vector Search",
+      slug: "llm-integration",
+      title: "LLM Integration",
       group: skillGroupIds.ai_automation,
       level: "intermediate" as const,
       seq: 1,
       p: "ai_automation" as const,
-      kw: ["pinecone", "embeddings"],
+      kw: ["llm", "prompting", "apis"],
     },
     {
-      slug: "bullmq",
-      title: "BullMQ Job Queues",
-      group: skillGroupIds.ai_automation,
-      level: "advanced" as const,
-      seq: 2,
-      p: "ai_automation" as const,
-      kw: ["queues", "background-jobs"],
-    },
-    {
-      slug: "agentic-flows",
-      title: "Agentic Workflows",
+      slug: "background-jobs",
+      title: "Background Jobs & Queues",
       group: skillGroupIds.ai_automation,
       level: "intermediate" as const,
+      seq: 2,
+      p: "ai_automation" as const,
+      kw: ["queues", "rabbitmq", "jobs"],
+    },
+    {
+      slug: "python-automation",
+      title: "Python for Automation",
+      group: skillGroupIds.ai_automation,
+      level: "novice" as const,
       seq: 3,
       p: "ai_automation" as const,
-      kw: ["agents", "automation"],
+      kw: ["python", "scripting", "data"],
     },
     {
-      slug: "docker",
-      title: "Docker Containerization",
-      group: skillGroupIds.devops_cloud,
-      level: "advanced" as const,
-      seq: 0,
-      p: "devops_cloud" as const,
-      kw: ["containers", "devops"],
-    },
-    {
-      slug: "github-actions",
-      title: "CI/CD GitHub Actions",
-      group: skillGroupIds.devops_cloud,
-      level: "advanced" as const,
-      seq: 1,
-      p: "devops_cloud" as const,
-      kw: ["cicd", "automation"],
-    },
-    {
-      slug: "cloud-services",
-      title: "AWS & GCP Cloud",
-      group: skillGroupIds.devops_cloud,
-      level: "advanced" as const,
-      seq: 2,
-      p: "devops_cloud" as const,
-      kw: ["aws", "gcp", "serverless"],
-    },
-    {
-      slug: "linux-nginx",
-      title: "Linux & Nginx",
-      group: skillGroupIds.devops_cloud,
-      level: "advanced" as const,
-      seq: 3,
-      p: "devops_cloud" as const,
-      kw: ["linux", "nginx", "reverse-proxy"],
-    },
-    {
-      slug: "perf-tuning",
-      title: "Query Optimization",
-      group: skillGroupIds.system_design,
+      slug: "human-in-the-loop",
+      title: "Human-in-the-Loop Review",
+      group: skillGroupIds.ai_automation,
       level: "intermediate" as const,
-      seq: 0,
-      p: "system_design" as const,
-      kw: ["mongodb-indexing", "postgres-profiling"],
-    },
-    {
-      slug: "schema-data-modeling",
-      title: "Schema & Data Modeling",
-      group: skillGroupIds.system_design,
-      level: "advanced" as const,
-      seq: 1,
-      p: "system_design" as const,
-      kw: ["schema", "migrations", "indexing"],
-    },
-    {
-      slug: "caching-strategy",
-      title: "Caching & Rate-Limit Strategy",
-      group: skillGroupIds.system_design,
-      level: "advanced" as const,
-      seq: 2,
-      p: "system_design" as const,
-      kw: ["caching", "redis", "invalidation"],
-    },
-    {
-      slug: "scalability-patterns",
-      title: "Scalability & Consistency Patterns",
-      group: skillGroupIds.system_design,
-      level: "advanced" as const,
-      seq: 3,
-      p: "system_design" as const,
-      kw: ["transactions", "idempotency", "outbox"],
-    },
-    {
-      slug: "testing-vitest",
-      title: "Vitest & Playwright Testing",
-      group: skillGroupIds.full_stack,
-      level: "advanced" as const,
-      seq: 0,
-      p: "full_stack" as const,
-      kw: ["testing", "unit", "e2e"],
-    },
-    {
-      slug: "monorepos",
-      title: "Monorepos & pnpm Workspaces",
-      group: skillGroupIds.full_stack,
-      level: "advanced" as const,
-      seq: 1,
-      p: "full_stack" as const,
-      kw: ["tooling", "pnpm", "turborepo"],
-    },
-    {
-      slug: "auth-session",
-      title: "Authentication & Cryptography",
-      group: skillGroupIds.full_stack,
-      level: "advanced" as const,
-      seq: 2,
-      p: "full_stack" as const,
-      kw: ["jwt", "cookies", "security"],
-    },
-    {
-      slug: "observability",
-      title: "Telemetry & Observability",
-      group: skillGroupIds.full_stack,
-      level: "intermediate" as const,
-      seq: 3,
-      p: "full_stack" as const,
-      kw: ["logging", "monitoring"],
+      seq: 4,
+      p: "ai_automation" as const,
+      kw: ["review", "validation", "guardrails"],
     },
   ];
 
@@ -1383,7 +1340,6 @@ const createSkillRecords = (actor: SeedActor): SeedRecordDefinition[] => {
         claim_verification: "unverified" as const,
         group: skill.group,
         proficiency_level: skill.level,
-        years_experience: 3,
         keywords: skill.kw,
         version: 1,
         is_deleted: false,
@@ -1399,57 +1355,57 @@ const createSkillRecords = (actor: SeedActor): SeedRecordDefinition[] => {
 const createFAQRecords = (actor: SeedActor): SeedRecordDefinition[] => {
   const faqs = [
     {
-      slug: "main-stack",
-      title: "What is your main technology stack?",
+      slug: "problems-i-solve",
+      title: "What kinds of problems can you help with?",
       answer:
-        "My stack centers on TypeScript, Next.js, Node.js, PostgreSQL, MongoDB, and AWS/GCP services.",
-      category: "technical" as const,
-      keywords: ["stack", "languages", "tools"],
+        "Usually one of three: a system whose design is unclear or fragile, a product that needs to be built or rescued, or repetitive manual work that automation could take over. If your problem is something else, describe it and I will tell you honestly whether I can help.",
+      category: "services" as const,
+      keywords: ["problems", "services", "fit"],
       sequence: 0,
     },
     {
-      slug: "remote-work",
-      title: "Do you work with remote teams?",
+      slug: "getting-started",
+      title: "How does a project start?",
       answer:
-        "Yes, I regularly collaborate with remote, distributed teams across multiple time zones.",
-      category: "general" as const,
-      keywords: ["remote", "collaboration", "team"],
+        "With a short conversation about the problem, the people affected, and what success looks like. From that I propose a simple plan with milestones, so you know what happens next before you commit to anything.",
+      category: "process" as const,
+      keywords: ["start", "discovery", "plan"],
       sequence: 1,
     },
     {
-      slug: "application-security",
-      title: "How do you ensure application security?",
+      slug: "non-technical-clients",
+      title: "Do I need a technical background to work with you?",
       answer:
-        "I apply robust threat modeling, secure cookie-based auth, static code analysis, and package vulnerability scanning.",
-      category: "technical" as const,
-      keywords: ["security", "auth", "hardening"],
+        "No. I explain decisions and trade-offs in plain language and ask for business context first. The technical choices follow from your goals, not the other way around.",
+      category: "engagement" as const,
+      keywords: ["non-technical", "communication", "clarity"],
       sequence: 2,
     },
     {
-      slug: "delivery-timeline",
-      title: "What is your typical project delivery timeline?",
+      slug: "what-you-receive",
+      title: "What will I actually receive?",
       answer:
-        "Most production-ready products take between 4 to 12 weeks, depending on requirements complexity.",
-      category: "process" as const,
-      keywords: ["timeline", "delivery", "duration"],
+        "Working software or a written architecture you can act on, plus the reasoning behind it, so your team can understand and extend the result without depending on me.",
+      category: "services" as const,
+      keywords: ["deliverables", "handover", "documentation"],
       sequence: 3,
     },
     {
-      slug: "post-delivery-support",
-      title: "Do you provide post-delivery support?",
+      slug: "application-security",
+      title: "How do you keep solutions secure?",
       answer:
-        "Yes, I offer monthly maintenance agreements for operations, query profiling, and dependency updates.",
-      category: "engagement" as const,
-      keywords: ["maintenance", "support", "operations"],
+        "Security is part of the design rather than a final check: authenticated access, validated input, least-privilege administration, and regular dependency review.",
+      category: "technical" as const,
+      keywords: ["security", "auth", "hardening"],
       sequence: 4,
     },
     {
-      slug: "project-pricing",
-      title: "How do you handle project pricing and billing?",
+      slug: "ongoing-support",
+      title: "Can you support the solution after launch?",
       answer:
-        "I structure pricing around defined deliverables and milestones rather than vague hourly billing.",
+        "Ongoing support can be agreed separately from the build, so you can choose the level that fits your team.",
       category: "engagement" as const,
-      keywords: ["pricing", "billing", "contracts"],
+      keywords: ["support", "maintenance", "operations"],
       sequence: 5,
     },
   ];
@@ -1593,7 +1549,7 @@ export const createFoundationSeedManifest = (
   seed_version: FOUNDATION_SEED_VERSION,
   mode: "foundation",
   description:
-    "Draft-only six-pillar Site, managed-media intents, navigation, fallback policy, and fixed Page composition.",
+    "Draft-only three-role Site, managed-media intents, navigation, fallback policy, and fixed Page composition.",
   truth: foundationTruth,
   media: [
     ...PILLAR_CONTRACT.map((pillar) => ({
@@ -1614,7 +1570,7 @@ export const createFoundationSeedManifest = (
       source: {
         kind: "pending_generated" as const,
         requirement:
-          "Non-human editorial social preview aligned with the six-pillar system.",
+          "Non-human editorial social preview aligned with the three-role system.",
       },
       metadata: {
         name: "Default social preview",
@@ -1634,7 +1590,7 @@ export const createFoundationSeedManifest = (
   ],
 });
 
-const DEMO_SEED_VERSION = 2 as const;
+const DEMO_SEED_VERSION = 3 as const;
 
 const demoProjectCategoryId = foundationObjectId("demo:project-category");
 const demoArticleCategoryId = foundationObjectId("demo:article-category");
@@ -1682,74 +1638,185 @@ const demoCategoryRecords = (actor: SeedActor): SeedRecordDefinition[] => [
   },
 ];
 
-const demoProjectRecords = (actor: SeedActor): SeedRecordDefinition[] =>
-  PILLAR_CONTRACT.map((pillar, index) => ({
-    stage: "projects_resources" as const,
-    collection: "projects" as const,
-    seed_key: `demo.project.${pillar.key.replace(/_/g, "-")}`,
-    seed_version: DEMO_SEED_VERSION,
-    lookup: { slug: `demo-${pillar.key.replace(/_/g, "-")}-project` },
-    payload: {
-      _id: foundationObjectId(`demo:project:${pillar.key}`),
-      name: `Demo ${pillar.label} Project`,
-      slug: `demo-${pillar.key.replace(/_/g, "-")}-project`,
-      description: `Placeholder ${pillar.label} case study used to preview layout outside production.`,
-      content: `This is synthetic demo content for the ${pillar.label} pillar. It exists only to exercise listing, filtering and detail layouts outside production, and describes no real client, engagement or outcome.`,
-      category: demoProjectCategoryId,
-      author: actor._id,
-      tags: ["demo", "placeholder"],
-      primary_pillar: pillar.key,
-      secondary_pillars: [],
-      delivery_status: "delivered",
-      publication_status: "draft",
-      project_type: "personal",
-      sequence: index + 1,
-      is_featured: index < 2,
-      is_deleted: false,
+// Visibly synthetic case studies that show how a problem-first project reads:
+// the client's problem, the approach, then what changed. Every string is a
+// placeholder, so none of it can pass for a real client, engagement or result.
+const DEMO_FIXTURES: Record<
+  (typeof PILLAR_KEYS)[number],
+  Readonly<{
+    project: Readonly<{
+      name: string;
+      description: string;
+      problem: string;
+      role: string;
+      constraints: readonly string[];
+      decisions: readonly string[];
+      learnings: readonly string[];
+    }>;
+    article: Readonly<{
+      name: string;
+      excerpt: string;
+      topics: readonly string[];
+    }>;
+  }>
+> = {
+  system_architect: {
+    project: {
+      name: "Demo: Untangling a slow, fragile system",
+      description:
+        "Placeholder case study showing how a problem-first project reads.",
+      problem:
+        "[Placeholder] The client's system had grown slow and hard to change, and nobody could say what was safe to touch.",
+      role: "[Placeholder] Led the architecture review and the migration plan.",
+      constraints: ["[Placeholder] A small team with no time for a rewrite"],
+      decisions: [
+        "[Placeholder] Fix the slowest bottleneck first",
+        "[Placeholder] Write down every trade-off",
+      ],
+      learnings: [
+        "[Placeholder] Small, reversible steps beat big-bang rewrites",
+      ],
     },
-    insert_only: { created_by: actor._id, updated_by: actor._id },
-    update_only: { updated_by: actor._id },
-    truth: demoTruth,
-    validate: (document) => assertSchema(demoProjectSchema, document),
-  }));
+    article: {
+      name: "Demo: How to choose between two good options",
+      excerpt: "Placeholder note showing how a decision article reads.",
+      topics: ["demo", "architecture"],
+    },
+  },
+  software_developer: {
+    project: {
+      name: "Demo: Replacing a spreadsheet with a real product",
+      description:
+        "Placeholder case study showing how a problem-first project reads.",
+      problem:
+        "[Placeholder] The team tracked its work in spreadsheets and lost hours every week reconciling them.",
+      role: "[Placeholder] Designed and built the web product end to end.",
+      constraints: [
+        "[Placeholder] Staff had to keep working during the switch",
+      ],
+      decisions: [
+        "[Placeholder] Ship the smallest useful version first",
+        "[Placeholder] Keep the admin simple enough to hand over",
+      ],
+      learnings: [
+        "[Placeholder] Early feedback changed the plan for the better",
+      ],
+    },
+    article: {
+      name: "Demo: Shipping the smallest useful version",
+      excerpt: "Placeholder note showing how a delivery article reads.",
+      topics: ["demo", "software"],
+    },
+  },
+  ai_automation: {
+    project: {
+      name: "Demo: Automating a repetitive weekly task",
+      description:
+        "Placeholder case study showing how a problem-first project reads.",
+      problem:
+        "[Placeholder] A weekly manual report took hours to prepare and was easy to get wrong.",
+      role: "[Placeholder] Built the automation and its review step.",
+      constraints: [
+        "[Placeholder] A person had to approve anything customer-facing",
+      ],
+      decisions: [
+        "[Placeholder] Keep a human review step",
+        "[Placeholder] Make the automation easy to switch off",
+      ],
+      learnings: ["[Placeholder] Visible failure alerts built trust"],
+    },
+    article: {
+      name: "Demo: Automation that stays under human control",
+      excerpt: "Placeholder note showing how an automation article reads.",
+      topics: ["demo", "automation"],
+    },
+  },
+};
+
+const DEMO_BODY =
+  "Synthetic demo content. It exists only to preview how a problem-first page is laid out outside production, and it describes no real client, engagement, or result.";
+
+const demoProjectRecords = (actor: SeedActor): SeedRecordDefinition[] =>
+  PILLAR_CONTRACT.map((pillar, index) => {
+    const fixture = DEMO_FIXTURES[pillar.key].project;
+    const slug = `demo-${pillar.key.replace(/_/g, "-")}-project`;
+    return {
+      stage: "projects_resources" as const,
+      collection: "projects" as const,
+      seed_key: `demo.project.${pillar.key.replace(/_/g, "-")}`,
+      seed_version: DEMO_SEED_VERSION,
+      lookup: { slug },
+      payload: {
+        _id: foundationObjectId(`demo:project:${pillar.key}`),
+        name: fixture.name,
+        slug,
+        description: fixture.description,
+        problem: fixture.problem,
+        role: fixture.role,
+        constraints: [...fixture.constraints],
+        decisions: [...fixture.decisions],
+        learnings: [...fixture.learnings],
+        content: DEMO_BODY,
+        category: demoProjectCategoryId,
+        author: actor._id,
+        tags: ["demo", "placeholder"],
+        primary_pillar: pillar.key,
+        secondary_pillars: [],
+        delivery_status: "delivered",
+        publication_status: "draft",
+        project_type: "personal",
+        sequence: index + 1,
+        is_featured: true,
+        is_deleted: false,
+      },
+      insert_only: { created_by: actor._id, updated_by: actor._id },
+      update_only: { updated_by: actor._id },
+      truth: demoTruth,
+      validate: (document) => assertSchema(demoProjectSchema, document),
+    };
+  });
 
 const demoArticleRecords = (actor: SeedActor): SeedRecordDefinition[] =>
-  PILLAR_CONTRACT.map((pillar, index) => ({
-    stage: "articles" as const,
-    collection: "articles" as const,
-    seed_key: `demo.article.${pillar.key.replace(/_/g, "-")}`,
-    seed_version: DEMO_SEED_VERSION,
-    lookup: { slug: `demo-${pillar.key.replace(/_/g, "-")}-article` },
-    payload: {
-      _id: foundationObjectId(`demo:article:${pillar.key}`),
-      name: `Demo ${pillar.label} Article`,
-      slug: `demo-${pillar.key.replace(/_/g, "-")}-article`,
-      excerpt: `Placeholder ${pillar.label} field note used to preview layout outside production.`,
-      content: `This is synthetic demo content for the ${pillar.label} pillar. It exists only to exercise listing, filtering and reading layouts outside production, and states no real technical claim.`,
-      category: demoArticleCategoryId,
-      author: actor._id,
-      topics: ["demo", "placeholder"],
-      primary_pillar: pillar.key,
-      secondary_pillars: [],
-      status: "draft",
-      is_featured: index < 2,
-      is_premium: false,
-      reading_time_minutes: 3,
-      reading_time_source: "manual",
-      is_deleted: false,
-    },
-    insert_only: { created_by: actor._id, updated_by: actor._id },
-    update_only: { updated_by: actor._id },
-    truth: demoTruth,
-    validate: (document) => assertSchema(demoArticleSchema, document),
-  }));
+  PILLAR_CONTRACT.map((pillar, index) => {
+    const fixture = DEMO_FIXTURES[pillar.key].article;
+    const slug = `demo-${pillar.key.replace(/_/g, "-")}-article`;
+    return {
+      stage: "articles" as const,
+      collection: "articles" as const,
+      seed_key: `demo.article.${pillar.key.replace(/_/g, "-")}`,
+      seed_version: DEMO_SEED_VERSION,
+      lookup: { slug },
+      payload: {
+        _id: foundationObjectId(`demo:article:${pillar.key}`),
+        name: fixture.name,
+        slug,
+        excerpt: fixture.excerpt,
+        content: DEMO_BODY,
+        category: demoArticleCategoryId,
+        author: actor._id,
+        topics: [...fixture.topics],
+        primary_pillar: pillar.key,
+        secondary_pillars: [],
+        status: "draft",
+        is_featured: true,
+        is_premium: false,
+        reading_time_minutes: 3,
+        reading_time_source: "manual",
+        is_deleted: false,
+      },
+      insert_only: { created_by: actor._id, updated_by: actor._id },
+      update_only: { updated_by: actor._id },
+      truth: demoTruth,
+      validate: (document) => assertSchema(demoArticleSchema, document),
+    };
+  });
 
 export const createDemoSeedManifest = (actor: SeedActor): SeedManifest => ({
   manifest_key: "portfolio-demo-fixtures",
   seed_version: DEMO_SEED_VERSION,
   mode: "demo",
   description:
-    "Visibly synthetic, non-production-only draft fixtures: one project and one article per pillar, published from the admin when reviewing layout.",
+    "Visibly synthetic, non-production-only draft fixtures: one problem-first project and one article per role, published from the admin when reviewing layout.",
   truth: demoTruth,
   media: [],
   records: [

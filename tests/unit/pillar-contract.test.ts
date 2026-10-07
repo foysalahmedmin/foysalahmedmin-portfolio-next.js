@@ -25,32 +25,30 @@ const recordsIn = (collection: string): Record_[] =>
   );
 
 describe("pillar contract", () => {
-  it("publishes six disciplines with DevOps & Cloud before Full-Stack", () => {
-    expect(PILLAR_CONTRACT).toHaveLength(6);
-    expect(PILLAR_CONTRACT.map(({ key }) => key)).toEqual([
-      "frontend",
-      "backend",
-      "ai_automation",
-      "system_design",
-      "devops_cloud",
-      "full_stack",
+  it("presents three client-facing roles in a fixed order", () => {
+    expect(PILLAR_CONTRACT.map(({ key, label }) => [key, label])).toEqual([
+      ["system_architect", "System Architect"],
+      ["software_developer", "Software Developer"],
+      ["ai_automation", "AI Automation Developer"],
     ]);
-    expect(PILLAR_CONTRACT.map(({ order }) => order)).toEqual([
-      1, 2, 3, 4, 5, 6,
-    ]);
+    expect(PILLAR_CONTRACT.map(({ order }) => order)).toEqual([1, 2, 3]);
   });
 
   it("keeps every derived list aligned and free of duplicates", () => {
     const size = PILLAR_CONTRACT.length;
     expect(PILLAR_KEYS).toHaveLength(size);
     expect(PILLAR_ICON_KEYS).toHaveLength(size);
-    expect(PILLAR_ACCENTS).toHaveLength(size);
     expect(new Set(PILLAR_KEYS).size).toBe(size);
     expect(new Set(PILLAR_ICON_KEYS).size).toBe(size);
-    expect(new Set(PILLAR_ACCENTS).size).toBe(size);
     expect(
       new Set(PILLAR_CONTRACT.map(({ fallback_visual_key: key }) => key)).size
     ).toBe(size);
+
+    // Accents are a shared palette with a design token each, so a pillar must
+    // use a known one and no two pillars may share it.
+    const accents = PILLAR_CONTRACT.map(({ default_accent: accent }) => accent);
+    expect(new Set(accents).size).toBe(size);
+    for (const accent of accents) expect(PILLAR_ACCENTS).toContain(accent);
   });
 
   it("gives every pillar a seeded service, skill group, skills and hero", () => {

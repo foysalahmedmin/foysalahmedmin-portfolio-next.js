@@ -2,6 +2,7 @@ import type {
   RepeatableAdminField,
   RepeatableAdminWorkspace,
 } from "./repeatable-workspaces";
+import { PILLAR_KEYS } from "@/lib/content/pillars";
 import { getDefaultClaimVerification } from "./repeatable-workspaces";
 import type { AdminRepeatableRecord } from "@/services/repeatable-admin.service";
 
@@ -129,11 +130,11 @@ export const validateRepeatableForm = (
     errors.sequence = "Use a whole number from 0 to 1,000,000.";
   }
   const secondary = asStringArray(values.secondary_pillars);
-  if (secondary.length > 4)
-    errors.secondary_pillars = "Choose at most four disciplines.";
+  const maxSecondary = PILLAR_KEYS.length - 1;
+  if (secondary.length > maxSecondary)
+    errors.secondary_pillars = `Choose at most ${maxSecondary} ${maxSecondary === 1 ? "role" : "roles"}.`;
   if (secondary.includes(asString(values.primary_pillar))) {
-    errors.secondary_pillars =
-      "The primary discipline cannot also be secondary.";
+    errors.secondary_pillars = "The primary role cannot also be secondary.";
   }
 
   for (const field of workspace.fields) {

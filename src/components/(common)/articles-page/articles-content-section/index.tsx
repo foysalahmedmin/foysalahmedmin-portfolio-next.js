@@ -356,7 +356,7 @@ const ArticlesContentSection = ({
             </label>
             <FilterSelect
               id="article-pillar"
-              label="Discipline"
+              label="Role"
               value={query.pillar}
               onChange={(pillar) =>
                 updateQuery({
@@ -365,7 +365,7 @@ const ArticlesContentSection = ({
                 })
               }
             >
-              <option value="all">All disciplines</option>
+              <option value="all">All roles</option>
               {PILLAR_RELATIONSHIP_OPTIONS.map(({ key, label }) => (
                 <option key={key} value={key}>
                   {label}
@@ -485,7 +485,7 @@ const ArticlesContentSection = ({
               }
               description={
                 filtersActive
-                  ? "Try a broader discipline, category, topic, or search phrase."
+                  ? "Try a broader role, category, topic, or search phrase."
                   : "Published engineering notes will appear here when they are ready."
               }
               action={

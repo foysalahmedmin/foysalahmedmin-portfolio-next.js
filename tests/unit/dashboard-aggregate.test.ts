@@ -25,10 +25,10 @@ describe("dashboard aggregate", () => {
         ],
         project_statuses: [{ _id: "published", count: 3 }],
         article_pillars: [
-          { _id: "frontend", count: 2 },
-          { _id: "backend", count: 2 },
+          { _id: "software_developer", count: 2 },
+          { _id: "system_architect", count: 2 },
         ],
-        project_pillars: [{ _id: "frontend", count: 1 }],
+        project_pillars: [{ _id: "software_developer", count: 1 }],
         article_health: {
           incomplete: 1,
           stale_drafts: 1,
@@ -99,7 +99,7 @@ describe("dashboard aggregate", () => {
     expect(result.media).toMatchObject({ total: 8, operational_errors: 1 });
     expect(result.system.outbox.state).toBe("attention_required");
     expect(result.system.audit.events_last_24h).toBe(12);
-    expect(result.content.pillar_coverage.frontend).toEqual({
+    expect(result.content.pillar_coverage.software_developer).toEqual({
       articles: 2,
       projects: 1,
       total: 3,
@@ -161,6 +161,6 @@ describe("dashboard aggregate", () => {
     expect(result.content.site.configured).toBe(false);
     expect(result.content.articles.total).toBe(0);
     expect(result.system.outbox.state).toBe("clear");
-    expect(result.content.pillar_coverage.full_stack.total).toBe(0);
+    expect(result.content.pillar_coverage.software_developer.total).toBe(0);
   });
 });

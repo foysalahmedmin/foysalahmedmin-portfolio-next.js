@@ -21,8 +21,8 @@ describe("ServicesSection", () => {
             title: "System delivery",
             summary: "Plan and build a reliable product system.",
             outcome: "A production-ready architecture and delivery plan.",
-            primary_pillar: "system_design",
-            secondary_pillars: ["backend"],
+            primary_pillar: "system_architect",
+            secondary_pillars: ["software_developer"],
             sequence: 0,
             is_featured: true,
             published_at: "2026-07-17T00:00:00.000Z",
@@ -35,9 +35,9 @@ describe("ServicesSection", () => {
     );
 
     expect(screen.getByText("System delivery")).toBeInTheDocument();
-    expect(screen.getByText("Capability shape")).toBeInTheDocument();
-    expect(screen.getByText("Deliverables")).toBeInTheDocument();
+    expect(screen.getByText("What is included")).toBeInTheDocument();
+    expect(screen.getByText("What you receive")).toBeInTheDocument();
     expect(screen.getByText("RFC")).toBeInTheDocument();
-    expect(screen.getByText("System Design")).toBeInTheDocument();
+    expect(screen.getByText("System Architect")).toBeInTheDocument();
   });
 });

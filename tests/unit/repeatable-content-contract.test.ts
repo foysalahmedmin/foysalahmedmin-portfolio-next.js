@@ -58,7 +58,7 @@ describe("repeatable-content query contract", () => {
   it("bounds pagination and rejects unknown or admin-only public filters", () => {
     expect(
       parseRecordListQuery(
-        new URLSearchParams("page=2&limit=50&pillar=frontend&sort=-sequence"),
+        new URLSearchParams("page=2&limit=50&pillar=software_developer&sort=-sequence"),
         serviceDefinition,
         "public"
       )
@@ -67,7 +67,7 @@ describe("repeatable-content query contract", () => {
       limit: 50,
       sort: "sequence",
       direction: -1,
-      filters: { pillar: "frontend" },
+      filters: { pillar: "software_developer" },
     });
     expect(() =>
       parseRecordListQuery(
@@ -176,7 +176,7 @@ describe("repeatable-content verification rules", () => {
     const input = {
       title: "TypeScript",
       group: new Types.ObjectId().toString(),
-      primary_pillar: "frontend",
+      primary_pillar: "software_developer",
       proficiency_level: "advanced",
       claim_verification: "verified",
     };
@@ -311,7 +311,7 @@ describe("model-level publish invariants", () => {
       claim_verification: "derived",
       group: new Types.ObjectId(),
       proficiency_level: "advanced",
-      primary_pillar: "frontend",
+      primary_pillar: "software_developer",
     });
     await expect(skill.validate()).rejects.toThrow("evidence metadata");
 

@@ -2,87 +2,53 @@ import { z } from "zod";
 
 export const PILLAR_CONTRACT_VERSION = 1 as const;
 
+// The portfolio presents three client-facing roles. Each one answers "what
+// problem can this person take off my hands?" rather than "which tools are
+// known?", so labels name a role and the technology detail lives in skills.
 export const PILLAR_CONTRACT = Object.freeze([
   Object.freeze({
-    key: "frontend",
-    label: "Frontend Engineering",
+    key: "system_architect",
+    label: "System Architect",
     order: 1,
-    fallback_visual_key: "frontend-grid",
-    default_icon_key: "code-window",
-    default_accent: "cyan",
-  }),
-  Object.freeze({
-    key: "backend",
-    label: "Backend Engineering",
-    order: 2,
-    fallback_visual_key: "backend-nodes",
-    default_icon_key: "server-stack",
-    default_accent: "blue",
-  }),
-  Object.freeze({
-    key: "ai_automation",
-    label: "AI Automation",
-    order: 3,
-    fallback_visual_key: "automation-flow",
-    default_icon_key: "automation-node",
-    default_accent: "violet",
-  }),
-  Object.freeze({
-    key: "system_design",
-    label: "System Design",
-    order: 4,
     fallback_visual_key: "system-blueprint",
     default_icon_key: "system-blueprint",
     default_accent: "amber",
   }),
   Object.freeze({
-    key: "devops_cloud",
-    label: "DevOps & Cloud",
-    order: 5,
-    fallback_visual_key: "pipeline-stages",
-    default_icon_key: "pipeline-stages",
-    default_accent: "rose",
-  }),
-  Object.freeze({
-    key: "full_stack",
-    label: "Full-Stack Development",
-    order: 6,
+    key: "software_developer",
+    label: "Software Developer",
+    order: 2,
     fallback_visual_key: "full-stack-layers",
     default_icon_key: "full-stack-layers",
     default_accent: "emerald",
+  }),
+  Object.freeze({
+    key: "ai_automation",
+    label: "AI Automation Developer",
+    order: 3,
+    fallback_visual_key: "automation-flow",
+    default_icon_key: "automation-node",
+    default_accent: "violet",
   }),
 ] as const);
 
 export const PILLAR_KEYS = Object.freeze(
   PILLAR_CONTRACT.map(({ key }) => key)
-) as readonly [
-  "frontend",
-  "backend",
-  "ai_automation",
-  "system_design",
-  "devops_cloud",
-  "full_stack",
-];
+) as readonly ["system_architect", "software_developer", "ai_automation"];
 
 export type PillarKey = (typeof PILLAR_KEYS)[number];
 
 export const PILLAR_ICON_KEYS = Object.freeze(
   PILLAR_CONTRACT.map(({ default_icon_key }) => default_icon_key)
-) as readonly [
-  "code-window",
-  "server-stack",
-  "automation-node",
-  "system-blueprint",
-  "pipeline-stages",
-  "full-stack-layers",
-];
+) as readonly ["system-blueprint", "full-stack-layers", "automation-node"];
 
+// Shared palette: every accent has a matching design token, so a pillar may
+// only pick from this list.
 export const PILLAR_ACCENTS = [
   "cyan",
   "blue",
   "violet",
   "amber",
-  "rose",
   "emerald",
 ] as const;
 

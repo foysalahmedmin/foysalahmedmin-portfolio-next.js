@@ -7,6 +7,7 @@ import {
   Title,
 } from "@/components/ui/section-title";
 import { PILLAR_KEYS } from "@/lib/content/pillars";
+import { getBalancedGridClass } from "@/lib/layout/balanced-grid";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { CSSProperties } from "react";
@@ -109,7 +110,7 @@ const PillarCard = ({
           {pillar.client_outcome ||
             pillar.summary ||
             pillar.seo_summary ||
-            "Published discipline details are being prepared."}
+            "Published details for this role are being prepared."}
         </p>
 
         {pillar.capabilities.length > 0 && (
@@ -234,14 +235,14 @@ export default function PillarShowcaseSection({
           <div className="grid gap-12 lg:grid-cols-[minmax(18rem,0.82fr)_minmax(0,1.18fr)] lg:items-start">
             <div className="lg:sticky lg:top-24">
               <SectionTitle className="text-left lg:mb-0">
-                <Subtitle>Six disciplines · one operating system</Subtitle>
+                <Subtitle>Three roles · one problem-solver</Subtitle>
                 <Title id="pillar-showcase-heading">
-                  {heading || "A full-stack practice with one consistent spine"}
+                  {heading || "From the first sketch to the running system"}
                 </Title>
                 <Description>
-                  Frontend, backend, AI automation, system design, and
-                  full-stack delivery are treated as one connected product
-                  system—not five disconnected service labels.
+                  Architecture, software development, and automation are
+                  handled as one connected solution, so the system you plan is
+                  the system that gets built and kept running.
                 </Description>
               </SectionTitle>
 
@@ -250,9 +251,9 @@ export default function PillarShowcaseSection({
                   Delivery principle
                 </p>
                 <p className="mt-3 text-sm leading-7 font-semibold">
-                  Every UI decision has data, security, operations, and
-                  automation consequences. The site mirrors that engineering
-                  habit: visible polish backed by durable systems.
+                  Every decision is explained in terms of cost, risk, and time
+                  to value. This site is built the same way: clear on the
+                  surface, dependable underneath.
                 </p>
               </div>
             </div>
@@ -271,21 +272,21 @@ export default function PillarShowcaseSection({
         ) : (
           <>
             <SectionTitle className="lg:mb-20">
-              <Subtitle>Six disciplines · one engineer</Subtitle>
+              <Subtitle>Three roles · one problem-solver</Subtitle>
               <Title id="pillar-showcase-heading">
-                {heading || "What I design, build, and ship"}
+                {heading || "Where I can take problems off your plate"}
               </Title>
               <Description>
-                Each capability has a distinct job. Together they produce
-                products that are usable, secure, maintainable, and ready to
-                operate at scale.
+                Each role covers a different stage of the same journey: deciding
+                what to build, building it well, and removing the manual work
+                around it.
               </Description>
             </SectionTitle>
 
             <ol
               className={cn(
-                "grid gap-5 md:grid-cols-2",
-                layout === "compact" ? "xl:grid-cols-5" : "xl:grid-cols-3"
+                "grid gap-5",
+                getBalancedGridClass(visible.length, "compact")
               )}
             >
               {visible.map((pillar, index) => (

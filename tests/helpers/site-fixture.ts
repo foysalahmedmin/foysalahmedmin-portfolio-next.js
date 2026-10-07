@@ -17,7 +17,7 @@ export const buildPublishableSiteDraft = () => {
       canonical: PILLAR_CONTRACT.map(({ label }) => label).join(" · "),
       compact: "Five connected engineering capabilities",
       mobile: "Full-stack systems and automation",
-      long: "End-to-end product engineering across five connected capability pillars.",
+      long: "End-to-end product engineering across three connected roles.",
       short_bio: "A test-only portfolio identity fixture.",
       long_bio:
         "A deterministic test fixture for the revisioned Site publishing contract.",
@@ -58,7 +58,7 @@ export const buildPublishableSiteDraft = () => {
       default_title: "Portfolio",
       title_template: "%s | Portfolio",
       default_description:
-        "A professional engineering portfolio spanning five capability pillars.",
+        "A professional engineering portfolio spanning three connected roles.",
       canonical_url: "https://portfolio.example.com",
       allow_indexing: true,
     },

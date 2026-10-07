@@ -14,13 +14,13 @@ vi.mock("@/components/motion/parallax-layer", () => ({
 describe("PillarShowcaseSection", () => {
   afterEach(cleanup);
 
-  it("renders the sticky six-pillar operating-system narrative", () => {
+  it("renders the sticky role narrative", () => {
     const site = createEmergencyPublicSite();
     render(<PillarShowcaseSection pillars={site.pillars} layout="sticky" />);
 
     expect(
       screen.getByRole("heading", {
-        name: "A full-stack practice with one consistent spine",
+        name: "From the first sketch to the running system",
       })
     ).toBeInTheDocument();
     expect(screen.getByText("Delivery principle")).toBeInTheDocument();
@@ -31,10 +31,10 @@ describe("PillarShowcaseSection", () => {
     }
     expect(
       screen.getAllByRole("link", { name: "Projects" })[0]
-    ).toHaveAttribute("href", "/projects?pillar=frontend");
+    ).toHaveAttribute("href", "/projects?pillar=system_architect");
     expect(
-      screen.getAllByRole("link", { name: "Articles" })[3]
-    ).toHaveAttribute("href", "/articles?pillar=system_design");
+      screen.getAllByRole("link", { name: "Articles" })[2]
+    ).toHaveAttribute("href", "/articles?pillar=ai_automation");
     expect(
       screen.getAllByRole("link", { name: "Services" })[0]
     ).toHaveAttribute("href", "#services");

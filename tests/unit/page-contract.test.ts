@@ -31,7 +31,7 @@ const homeDraft = (): TPageDraftSnapshot => ({
       item_limit: 6,
       source: {
         mode: "automatic",
-        filter: { featured: true, pillar: "full_stack" },
+        filter: { featured: true, pillar: "software_developer" },
       },
     },
   ],

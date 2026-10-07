@@ -834,7 +834,7 @@ const RepeatableRecordEditor = ({
         <EditorialPanel
           id="content-identity-heading"
           title="Content identity"
-          description="Stable identity, summary, and six-discipline relationships."
+          description="Stable identity, summary, and role relationships."
         >
           <div className="space-y-5">
             <div className="grid gap-5 md:grid-cols-2">
@@ -890,7 +890,7 @@ const RepeatableRecordEditor = ({
               <div className="grid gap-5 md:grid-cols-2">
                 <FieldFrame
                   id={fieldId("primary_pillar")}
-                  label="Primary discipline"
+                  label="Primary role"
                   error={errors.primary_pillar}
                 >
                   <select
@@ -928,7 +928,7 @@ const RepeatableRecordEditor = ({
                   }
                 >
                   <legend className="mb-1 text-sm font-medium">
-                    Secondary disciplines
+                    Secondary roles
                   </legend>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {PILLAR_OPTIONS.map((pillar) => {

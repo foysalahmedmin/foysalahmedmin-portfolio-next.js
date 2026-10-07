@@ -53,14 +53,14 @@ describe("AboutDetailsSection", () => {
     expect(screen.queryByText("Disabled process")).not.toBeInTheDocument();
   });
 
-  it("keeps engineering disciplines in canonical pillar order", () => {
+  it("keeps practice areas in canonical pillar order", () => {
     const site = createEmergencyPublicSite();
     site.pillars = [...site.pillars].reverse();
 
     render(<AboutDetailsSection site={site} />);
 
     const disciplineList = screen.getByRole("list", {
-      name: "Engineering disciplines",
+      name: "Practice areas",
     });
     const labels = Array.from(disciplineList.querySelectorAll("li")).map((li) =>
       li.textContent?.replace(/^\d+/, "").trim()

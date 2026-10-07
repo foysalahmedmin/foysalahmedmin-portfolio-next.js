@@ -16,7 +16,7 @@ import { PILLAR_CONTRACT, PILLAR_KEYS } from "@/lib/content/pillars";
 import { buildPublishableSiteDraft } from "../helpers/site-fixture";
 import { describe, expect, it } from "vitest";
 
-describe("Site six-pillar contract", () => {
+describe("Site role contract", () => {
   it("derives emergency and editable defaults from one ordered source", () => {
     const emergency = createEmergencyPublicSite();
     const neutral = createNeutralSiteDraft();
@@ -84,7 +84,7 @@ describe("Site six-pillar contract", () => {
     );
   });
 
-  it("accepts a complete six-pillar snapshot and rejects drift", () => {
+  it("accepts a complete role snapshot and rejects drift", () => {
     const valid = buildPublishableSiteDraft();
     expect(getSitePublishIssues(valid)).toEqual([]);
 

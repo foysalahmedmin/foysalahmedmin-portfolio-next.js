@@ -114,7 +114,7 @@ describe("Site and Page admin editor interactions", () => {
       <SiteAdminEditor initialSite={siteDto()} canEdit canPublish={false} />
     );
 
-    expect(screen.getByText("Exact six-pillar system")).toBeVisible();
+    expect(screen.getByText("Core roles")).toBeVisible();
     expect(screen.getAllByText("Immutable key")).toHaveLength(
       PILLAR_CONTRACT.length
     );

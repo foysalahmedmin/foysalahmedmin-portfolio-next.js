@@ -23,7 +23,11 @@ describe("truthful foundation seed", () => {
     expect(getSeedManifestChecksum(manifest)).toBe(
       getSeedManifestChecksum(otherActorManifest)
     );
-    expect(manifest.records).toHaveLength(59);
+    // 1 Site + 7 Pages + 6 FAQs + 2 legal documents, plus per role: a
+    // service, a skill group, 5 skills and a hero intent.
+    expect(manifest.records).toHaveLength(
+      1 + 7 + 6 + 2 + PILLAR_CONTRACT.length * 8 + 1
+    );
     expect(manifest.media).toHaveLength(PILLAR_CONTRACT.length + 1);
   });
 
@@ -100,8 +104,8 @@ describe("truthful foundation seed", () => {
     expect(resolved.references).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          field: "draft.pillars.3.visual_file",
-          file_id: fileIds[3],
+          field: "draft.pillars.2.visual_file",
+          file_id: fileIds[2],
           target_collection: "sites",
         }),
         expect.objectContaining({

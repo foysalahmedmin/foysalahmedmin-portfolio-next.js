@@ -236,7 +236,7 @@ describe("revisioned Site service", () => {
   it("blocks private, incomplete, missing, or purpose-incompatible Files", async () => {
     const draft = buildPublishableSiteDraft();
     draft.pillars[0]!.visual_file = "507f1f77bcf86cd799439099";
-    draft.pillars[0]!.visual_alt_text = "Abstract frontend systems visual";
+    draft.pillars[0]!.visual_alt_text = "Abstract architecture systems visual";
     mocks.siteRepository.findAdmin.mockResolvedValue(
       siteRecord({ revision: 2, draft })
     );
@@ -247,7 +247,7 @@ describe("revisioned Site service", () => {
     ).rejects.toMatchObject({
       status: 422,
       code: "SITE_PUBLISH_GRAPH_INVALID",
-      sources: ["pillars.frontend.visual_file"],
+      sources: ["pillars.system_architect.visual_file"],
     });
     expect(mocks.siteRepository.publishConditional).not.toHaveBeenCalled();
     expect(mocks.invalidatePublishedSiteCache).not.toHaveBeenCalled();
@@ -270,7 +270,7 @@ describe("revisioned Site service", () => {
     ).rejects.toMatchObject({
       status: 422,
       code: "SITE_PUBLISH_GRAPH_INVALID",
-      sources: ["pillars.frontend.visual_file"],
+      sources: ["pillars.system_architect.visual_file"],
     });
     expect(mocks.siteRepository.publishConditional).not.toHaveBeenCalled();
   });

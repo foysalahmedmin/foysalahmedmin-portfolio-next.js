@@ -32,7 +32,7 @@ describe("ArchitectureWorkflowSection", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "A product system, not a stack of disconnected skills",
+        name: "Solutions that stay reliable after launch",
       })
     ).toBeInTheDocument();
     expect(screen.getByText("AI automation lane")).toBeInTheDocument();
@@ -43,7 +43,7 @@ describe("ArchitectureWorkflowSection", () => {
     }
     expect(
       screen.getByRole("list", {
-        name: "Six-pillar system map in canonical order",
+        name: "System map of the three roles in canonical order",
       })
     ).toBeInTheDocument();
     expect(
@@ -57,14 +57,14 @@ describe("ArchitectureWorkflowSection", () => {
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /system design writing/i })
-    ).toHaveAttribute("href", "/articles?pillar=system_design");
+      screen.getByRole("link", { name: /architecture writing/i })
+    ).toHaveAttribute("href", "/articles?pillar=system_architect");
     expect(
       screen.getByRole("link", { name: /ai automation writing/i })
     ).toHaveAttribute("href", "/articles?pillar=ai_automation");
     expect(
-      screen.getByRole("link", { name: /full-stack delivery writing/i })
-    ).toHaveAttribute("href", "/articles?pillar=full_stack");
+      screen.getByRole("link", { name: /software development writing/i })
+    ).toHaveAttribute("href", "/articles?pillar=software_developer");
     expect(container.querySelector("canvas")).not.toBeInTheDocument();
     expect(container.querySelector("img")).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
@@ -84,7 +84,7 @@ describe("ArchitectureWorkflowSection", () => {
     render(<ArchitectureWorkflowSection site={site} layout="bento" />);
 
     const systemMap = screen.getByRole("list", {
-      name: "Six-pillar system map in canonical order",
+      name: "System map of the three roles in canonical order",
     });
     const labels = Array.from(systemMap.querySelectorAll("h4")).map(
       (heading) => heading.textContent

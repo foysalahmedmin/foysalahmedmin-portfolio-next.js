@@ -7,15 +7,13 @@ import {
 } from "@/components/ui/layout";
 
 const pillars = [
-  ["Frontend Engineering", "bg-pillar-frontend", "bg-pillar-frontend-surface"],
-  ["Backend Engineering", "bg-pillar-backend", "bg-pillar-backend-surface"],
-  ["AI Automation", "bg-pillar-ai", "bg-pillar-ai-surface"],
-  ["System Design", "bg-pillar-system", "bg-pillar-system-surface"],
+  ["System Architect", "bg-pillar-system", "bg-pillar-system-surface"],
   [
-    "Full-Stack Development",
+    "Software Developer",
     "bg-pillar-full-stack",
     "bg-pillar-full-stack-surface",
   ],
+  ["AI Automation Developer", "bg-pillar-ai", "bg-pillar-ai-surface"],
 ] as const;
 
 export const metadata = {
@@ -40,7 +38,7 @@ export default function DesignSystemPage() {
           <section aria-labelledby="pillar-token-title">
             <Stack gap="md">
               <h2 id="pillar-token-title" className="type-heading-2">
-                Six-pillar accents
+                Role accents
               </h2>
               <Grid columns={3}>
                 {pillars.map(([label, accent, surface]) => (

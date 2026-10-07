@@ -73,3 +73,30 @@ system design visual, kept under its own name so a dedicated asset can replace
 it without touching System Design. It is deliberately absent from
 `docs/content/generated-media-evidence/hero-candidates.v1.json`, which records
 only independently generated and reviewed candidates.
+
+## Amendment — 2026-10-08: three client-facing roles
+
+The pillar set was reduced from six lanes to three roles, written from the
+client's side rather than as a list of technologies:
+
+| Order | Key                  | Label                   | Absorbs                                |
+| ----- | -------------------- | ----------------------- | -------------------------------------- |
+| 1     | `system_architect`   | System Architect        | system design, DevOps and cloud        |
+| 2     | `software_developer` | Software Developer      | frontend, backend, full-stack          |
+| 3     | `ai_automation`      | AI Automation Developer | AI automation (key unchanged)          |
+
+The earlier keys (`frontend`, `backend`, `system_design`, `devops_cloud`,
+`full_stack`) no longer exist. This is a deliberate breaking change to the
+contract, taken while no content was published and no stored record referenced
+them; the seed was reset and re-applied rather than migrated. Any database that
+already holds records with the old keys needs a compensating migration first.
+
+The placeholder `devops-cloud.*` hero assets added with the sixth pillar were
+removed. Each role reuses the generated hero that fits it (`system-design-pilot`,
+`full-stack`, `ai-automation`). `hero-candidates.v1.json` is unchanged: it is a
+record of the five candidates that were generated and reviewed, some of which
+belong to lanes the roles absorbed.
+
+Skill copy, services, FAQs and the case-study page now lead with the business
+problem and the outcome, with technologies as supporting detail.
+

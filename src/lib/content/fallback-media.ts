@@ -17,20 +17,23 @@ const fallbackByKind: Record<FallbackMediaKind, string> = {
   profile: "/images/fallback-profile.svg",
 };
 
+// Each role reuses the generated hero that best fits it. The Software
+// Developer role absorbs the former frontend, backend and full-stack lanes
+// and shows the full-stack visual.
 const heroFallbackByPillar: Record<PillarKey, FallbackMediaPresentation> = {
-  frontend: {
-    src: "/images/heroes/frontend.master.png",
+  system_architect: {
+    src: "/images/heroes/system-design-pilot.master.png",
+    focal_point: { x: 0.72, y: 0.5 },
+    dominant_color: "#d8d8c8",
+    blur_data_url:
+      "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
+  },
+  software_developer: {
+    src: "/images/heroes/full-stack.master.png",
     focal_point: { x: 0.72, y: 0.5 },
     dominant_color: "#e8d8c8",
     blur_data_url:
-      "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAADwAQCdASoQAAkAAwBWJZQCdAD1eD1WhoAA4nK/w9qB82+9sr3M/iAIc14Uhdr84M6W+8Xyn2RMUar0GJ/HghWAAAA=",
-  },
-  backend: {
-    src: "/images/heroes/backend.master.png",
-    focal_point: { x: 0.72, y: 0.5 },
-    dominant_color: "#c8c8b8",
-    blur_data_url:
-      "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAAAQAgCdASoQAAkAAwBWJZQCw7EC1tmYzviAAP7nQKt+RUc2JjEym5M8LmfFDqKB1qn3h1Po2AAAAA==",
+      "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADwAQCdASoQAAkAAwBWJYwCdAEKCjBG9lgA/vBdhPVpERSzaokdeH5SMC5AZKITn+83rdevzgJDdCtiF2f8KgAA",
   },
   ai_automation: {
     src: "/images/heroes/ai-automation.master.png",
@@ -38,29 +41,6 @@ const heroFallbackByPillar: Record<PillarKey, FallbackMediaPresentation> = {
     dominant_color: "#d8c8b8",
     blur_data_url:
       "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJYwCdAEfPGWxwQAA/vPGRCUb6WFKVvOg1g5AQ8qJHxSXP1fveVeugAA=",
-  },
-  system_design: {
-    src: "/images/heroes/system-design-pilot.master.png",
-    focal_point: { x: 0.72, y: 0.5 },
-    dominant_color: "#d8d8c8",
-    blur_data_url:
-      "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
-  },
-  // Placeholder: byte-identical copy of the system design visual until a
-  // dedicated DevOps & Cloud hero is generated and passes the evidence gate.
-  devops_cloud: {
-    src: "/images/heroes/devops-cloud.master.png",
-    focal_point: { x: 0.72, y: 0.5 },
-    dominant_color: "#d8d8c8",
-    blur_data_url:
-      "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
-  },
-  full_stack: {
-    src: "/images/heroes/full-stack.master.png",
-    focal_point: { x: 0.72, y: 0.5 },
-    dominant_color: "#e8d8c8",
-    blur_data_url:
-      "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADwAQCdASoQAAkAAwBWJYwCdAEKCjBG9lgA/vBdhPVpERSzaokdeH5SMC5AZKITn+83rdevzgJDdCtiF2f8KgAA",
   },
 };
 

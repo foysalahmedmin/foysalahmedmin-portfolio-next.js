@@ -38,19 +38,19 @@ const AUTOMATION_STEPS = [
 
 const RELATED_INSIGHT_LINKS = [
   {
-    label: "System design writing",
-    href: "/articles?pillar=system_design",
-    summary: "Architecture boundaries, trade-offs, and operational thinking.",
+    label: "Architecture writing",
+    href: "/articles?pillar=system_architect",
+    summary: "Design decisions, trade-offs, and operational thinking.",
+  },
+  {
+    label: "Software development writing",
+    href: "/articles?pillar=software_developer",
+    summary: "How interface, API, data, and release quality connect.",
   },
   {
     label: "AI automation writing",
     href: "/articles?pillar=ai_automation",
     summary: "Automation patterns with validation and human control.",
-  },
-  {
-    label: "Full-stack delivery writing",
-    href: "/articles?pillar=full_stack",
-    summary: "How frontend, backend, data, and release quality connect.",
   },
 ] as const;
 
@@ -89,13 +89,12 @@ export default function ArchitectureWorkflowSection({
         <SectionTitle className="lg:mb-16">
           <Subtitle>Architecture · AI automation · delivery</Subtitle>
           <Title id="architecture-workflow-heading">
-            {heading || "A product system, not a stack of disconnected skills"}
+            {heading || "Solutions that stay reliable after launch"}
           </Title>
           <Description>
-            The public experience is intentionally shaped around five connected
-            disciplines. The same structure guides implementation: contracts
-            first, automation with review, and operational guardrails before
-            launch claims.
+            Every solution is shaped around three connected roles. The same
+            structure guides the work: decisions written down first, automation
+            with human review, and operational guardrails before launch.
           </Description>
         </SectionTitle>
 
@@ -121,17 +120,20 @@ export default function ArchitectureWorkflowSection({
                 id="architecture-system-map-heading"
                 className="mt-4 text-2xl leading-tight font-black"
               >
-                Five capability lanes feeding one delivery loop.
+                Three roles feeding one delivery loop.
               </h3>
               <p className="text-muted-foreground mt-4 max-w-2xl text-sm leading-7">
-                Frontend, backend, AI automation, system design, and full-stack
-                delivery stay connected so performance, data, security, and user
-                experience are not solved in separate silos.
+                Architecture, software development, and AI automation stay
+                connected so performance, data, security, and user experience
+                are not solved in separate silos.
               </p>
 
               <ol
-                className="mt-8 grid gap-3 sm:grid-cols-2"
-                aria-label="Six-pillar system map in canonical order"
+                className={cn(
+                  "mt-8 grid gap-3",
+                  pillars.length % 2 === 0 && "sm:grid-cols-2"
+                )}
+                aria-label="System map of the three roles in canonical order"
               >
                 {pillars.map((pillar, index) => (
                   <li

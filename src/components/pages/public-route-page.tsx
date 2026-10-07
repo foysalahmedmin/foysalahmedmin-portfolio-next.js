@@ -14,26 +14,26 @@ type TRouteHeader = Readonly<{
 
 const ROUTE_HEADER_FALLBACKS = {
   about: {
-    title: "About the engineering practice",
+    title: "About how I solve problems",
     description: "Published practice details are being prepared.",
     label: "About",
   },
   projects: {
-    title: "Engineering case studies",
+    title: "Problems solved",
     description:
-      "Explore decisions, constraints, implementation details, and verified outcomes across the six disciplines that define my work.",
+      "Case studies that start with the business problem, then walk through the approach, the solution, and what changed as a result.",
     label: "Projects",
   },
   articles: {
-    title: "Engineering field notes",
+    title: "Notes on solving real problems",
     description:
-      "Practical, human-written explanations of the choices, trade-offs, and patterns behind reliable digital products.",
+      "Practical, human-written notes on the decisions and trade-offs behind solutions that hold up in real use.",
     label: "Articles",
   },
   contact: {
-    title: "Get in Touch",
+    title: "Tell me about the problem",
     description:
-      "Share the goals, constraints, and context for a potential product engineering engagement.",
+      "Share what you are trying to achieve and what is getting in the way. I will reply with how I would approach it.",
     label: "Contact",
   },
 } as const;

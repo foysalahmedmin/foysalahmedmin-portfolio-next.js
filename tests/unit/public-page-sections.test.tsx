@@ -25,10 +25,10 @@ vi.mock("@/components/(common)/home-page/projects-section", () => ({
   }: {
     projects: Array<{ name: string }>;
     fallbacks?: {
-      project_by_pillar?: { backend?: { url?: string } };
+      project_by_pillar?: { software_developer?: { url?: string } };
     };
   }) => (
-    <section data-project-fallback={fallbacks?.project_by_pillar?.backend?.url}>
+    <section data-project-fallback={fallbacks?.project_by_pillar?.software_developer?.url}>
       projects:{projects.map(({ name }) => name).join(",")}
     </section>
   ),
@@ -40,11 +40,11 @@ vi.mock("@/components/(common)/home-page/articles-section", () => ({
   }: {
     articles: Array<{ name: string }>;
     fallbacks?: {
-      article_by_pillar?: { system_design?: { url?: string } };
+      article_by_pillar?: { system_architect?: { url?: string } };
     };
   }) => (
     <section
-      data-article-fallback={fallbacks?.article_by_pillar?.system_design?.url}
+      data-article-fallback={fallbacks?.article_by_pillar?.system_architect?.url}
     >
       articles:{articles.map(({ name }) => name).join(",")}
     </section>
@@ -102,11 +102,11 @@ describe("PublicPageSections", () => {
 
   it("renders primary content in the exact published Page order", () => {
     const site = createEmergencyPublicSite();
-    site.fallbacks.project_by_pillar.backend = {
+    site.fallbacks.project_by_pillar.software_developer = {
       id: "507f1f77bcf86cd799439031",
       url: "https://cdn.example.com/project-backend.webp",
     };
-    site.fallbacks.article_by_pillar.system_design = {
+    site.fallbacks.article_by_pillar.system_architect = {
       id: "507f1f77bcf86cd799439032",
       url: "https://cdn.example.com/article-system-design.webp",
     };
