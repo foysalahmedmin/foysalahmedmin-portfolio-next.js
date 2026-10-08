@@ -27,7 +27,7 @@ The public site and the admin console are being rebuilt on one monochrome design
    | Smoothness, constrained mobile (tier T2) | p95 frame ≤ 33 ms, dropped frames ≤ 8 %                                                    |
    | Lab INP (primary interactions)           | p75 ≤ 100 ms (field gate stays ≤ 200 ms)                                                   |
    | Fonts blocking first paint               | ≤ 150 KB woff2 (measured 117 KB: Archivo 88.0 + Instrument Sans 29.2); Mono lazy (37.5 KB) |
-   | Home length                              | Tier 1 ≤ 19 screens of scroll at 1440×900 including pins; Tier 1 + 2 ≤ 22                  |
+   | Home length                              | Tier 1 ≤ 24 screens of scroll at 1440×900 including the three pins; Tier 1 + 2 ≤ 27        |
    | Console bundle                           | Admin shell ≤ 150 KB gzip initial; no animation library in any admin chunk                 |
 
 6. **ADR 0001 note:** the role `accent` field is kept but inert on both surfaces. Role identity is carried by texture and glyph; no contract or data change.
