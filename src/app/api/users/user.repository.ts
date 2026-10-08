@@ -2,9 +2,11 @@ import AppQuery from "@/builder/app-query";
 import { parseSoftDeleteScope, setSoftDeleteScope } from "@/lib/db/soft-delete";
 import type { ClientSession } from "mongoose";
 import Article from "../articles/article.model";
+import CaseStudy from "../case-studies/case-study.model";
 import File from "../files/file.model";
 import Project from "../projects/project.model";
 import { Review } from "../reviews/review.model";
+import Video from "../videos/video.model";
 import { User } from "./user.model";
 import type { TUser, TUserDocument } from "./user.type";
 
@@ -23,6 +25,8 @@ export type TUserPurgeDependency = {
     | "authored_projects"
     | "client_projects"
     | "collaborating_projects"
+    | "authored_case_studies"
+    | "authored_videos"
     | "reviews"
     | "files"
   >;
@@ -109,6 +113,8 @@ export const findPurgeDependencies = async (
     projectAuthors,
     projectClients,
     projectCollaborators,
+    caseStudyAuthors,
+    videoAuthors,
     reviewAuthors,
     fileAuthors,
   ] = await Promise.all([
@@ -130,6 +136,14 @@ export const findPurgeDependencies = async (
     ),
     setSoftDeleteScope(
       Project.distinct("collaborators", { collaborators: { $in: ids } }),
+      "with_deleted"
+    ),
+    setSoftDeleteScope(
+      CaseStudy.distinct("author", { author: { $in: ids } }),
+      "with_deleted"
+    ),
+    setSoftDeleteScope(
+      Video.distinct("author", { author: { $in: ids } }),
       "with_deleted"
     ),
     setSoftDeleteScope(
@@ -160,6 +174,8 @@ export const findPurgeDependencies = async (
   addDependencies(projectAuthors, "authored_projects");
   addDependencies(projectClients, "client_projects");
   addDependencies(projectCollaborators, "collaborating_projects");
+  addDependencies(caseStudyAuthors, "authored_case_studies");
+  addDependencies(videoAuthors, "authored_videos");
   addDependencies(reviewAuthors, "reviews");
   addDependencies(fileAuthors, "files");
 

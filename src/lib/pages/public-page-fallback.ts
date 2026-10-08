@@ -57,8 +57,16 @@ const FALLBACK_SECTIONS: Readonly<
     emptySection("projects", "project-collection", "grid"),
     emptySection("contact", "contact-cta", "banner"),
   ],
+  "case-studies": [
+    emptySection("case-studies", "case-study-collection", "grid"),
+    emptySection("contact", "contact-cta", "banner"),
+  ],
   articles: [
     emptySection("articles", "article-collection", "grid"),
+    emptySection("contact", "contact-cta", "banner"),
+  ],
+  videos: [
+    emptySection("videos", "video-collection", "grid"),
     emptySection("contact", "contact-cta", "banner"),
   ],
   contact: [

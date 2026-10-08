@@ -58,6 +58,7 @@
     "nodemailer": "^7.0.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-player": "^3.4.0",
     "react-redux": "^9.2.0",
     "sanitize-html": "2.17.5",
     "sharp": "0.34.5",
@@ -97,5 +98,10 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vitest": "^4.1.10"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "youtube-video-element@1.9.0": "patches/youtube-video-element@1.9.0.patch"
+    }
   }
 }

@@ -55,6 +55,7 @@ import {
   CheckCircle2,
   Edit3,
   FileText,
+  Film,
   Grid3X3,
   ImageIcon,
   List,
@@ -226,6 +227,8 @@ const MediaPreview = ({ file }: { file: TFilePopulated }) => {
           aria-hidden="true"
           className="text-muted-foreground size-8"
         />
+      ) : file.mimetype.startsWith("video/") ? (
+        <Film aria-hidden="true" className="text-muted-foreground size-8" />
       ) : (
         <FileText aria-hidden="true" className="text-muted-foreground size-8" />
       )}

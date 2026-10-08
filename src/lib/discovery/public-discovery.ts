@@ -85,7 +85,7 @@ export const DEFAULT_ARTICLE_DISCOVERY_QUERY: Readonly<ArticleDiscoveryQuery> =
     page: 1,
   };
 
-type QuerySource =
+export type QuerySource =
   | URLSearchParams
   | Readonly<Record<string, string | string[] | number | null | undefined>>;
 
@@ -111,13 +111,13 @@ const MAX_SEARCH_LENGTH = 100;
 const MAX_FILTER_LENGTH = 96;
 const MIN_PORTFOLIO_YEAR = 1990;
 
-const readValue = (source: QuerySource, key: string): unknown => {
+export const readValue = (source: QuerySource, key: string): unknown => {
   if (source instanceof URLSearchParams) return source.get(key);
   const value = source[key];
   return Array.isArray(value) ? value[0] : value;
 };
 
-const normalizeSearch = (value: unknown, fallback = ""): string => {
+export const normalizeSearch = (value: unknown, fallback = ""): string => {
   if (typeof value !== "string" || CONTROL_CHARACTERS.test(value)) {
     return fallback;
   }
@@ -125,7 +125,7 @@ const normalizeSearch = (value: unknown, fallback = ""): string => {
   return bounded.trim() ? bounded : fallback;
 };
 
-const normalizeFilterToken = (value: unknown, fallback = "all"): string => {
+export const normalizeFilterToken = (value: unknown, fallback = "all"): string => {
   if (typeof value !== "string" || CONTROL_CHARACTERS.test(value)) {
     return fallback;
   }
@@ -133,14 +133,14 @@ const normalizeFilterToken = (value: unknown, fallback = "all"): string => {
   return bounded || fallback;
 };
 
-const normalizeCategory = (value: unknown, fallback = "all"): string => {
+export const normalizeCategory = (value: unknown, fallback = "all"): string => {
   if (typeof value === "string" && /[$[\]{}]/.test(value)) return fallback;
   const token = normalizeFilterToken(value, fallback);
   if (token === "all") return token;
   return normalizeSlugIdentifier(token) ?? fallback;
 };
 
-const normalizePage = (value: unknown, fallback = 1): number => {
+export const normalizePage = (value: unknown, fallback = 1): number => {
   const parsed =
     typeof value === "number" || typeof value === "string"
       ? Number(value)
@@ -161,7 +161,7 @@ const normalizeYear = (value: unknown, fallback: number | null = null) => {
     : fallback;
 };
 
-const isPillar = (value: string): value is PillarKey =>
+export const isPillar = (value: string): value is PillarKey =>
   PILLAR_KEYS.includes(value as PillarKey);
 
 const readBoolean = (value: unknown): boolean | undefined =>
@@ -223,7 +223,7 @@ export const articleDiscoveryCompositionQuery = (
   ...(filter.pillar ? { composition_pillar: filter.pillar } : {}),
 });
 
-const normalizePillar = (
+export const normalizePillar = (
   value: unknown,
   fallback: PillarKey | "all" = "all"
 ): PillarKey | "all" => {
@@ -231,7 +231,7 @@ const normalizePillar = (
   return token === "all" || isPillar(token) ? token : fallback;
 };
 
-const normalizeEnum = <TValue extends string>(
+export const normalizeEnum = <TValue extends string>(
   value: unknown,
   allowed: readonly TValue[],
   fallback: TValue
@@ -309,7 +309,7 @@ export const parseArticleDiscoveryQuery = (
     defaults
   );
 
-const setWhenNotDefault = (
+export const setWhenNotDefault = (
   params: URLSearchParams,
   key: string,
   value: string | number | null,
@@ -319,7 +319,7 @@ const setWhenNotDefault = (
   else params.set(key, String(value).trim());
 };
 
-const finishQueryString = (params: URLSearchParams) => {
+export const finishQueryString = (params: URLSearchParams) => {
   const value = params.toString();
   return value ? `?${value}` : "";
 };
@@ -470,7 +470,7 @@ export const buildArticleDiscoveryRepositoryQuery = (
   };
 };
 
-const toStringValue = (value: unknown): string | undefined => {
+export const toStringValue = (value: unknown): string | undefined => {
   if (typeof value === "string") return value;
   if (
     value &&
@@ -486,13 +486,13 @@ const toStringValue = (value: unknown): string | undefined => {
   return undefined;
 };
 
-const toIsoDate = (value: unknown): string | undefined => {
+export const toIsoDate = (value: unknown): string | undefined => {
   if (!value) return undefined;
   const date = value instanceof Date ? value : new Date(String(value));
   return Number.isNaN(date.valueOf()) ? undefined : date.toISOString();
 };
 
-const toStringArray = (value: unknown): string[] =>
+export const toStringArray = (value: unknown): string[] =>
   Array.isArray(value)
     ? value
         .filter((entry): entry is string => typeof entry === "string")
@@ -503,7 +503,7 @@ const toStringArray = (value: unknown): string[] =>
 
 const PUBLIC_CARD_CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]+/g;
 
-const toPublicCardText = (value: unknown, maximumLength: number) => {
+export const toPublicCardText = (value: unknown, maximumLength: number) => {
   if (typeof value !== "string") return undefined;
   const normalized = value
     .replace(PUBLIC_CARD_CONTROL_CHARACTERS, " ")
@@ -514,7 +514,7 @@ const toPublicCardText = (value: unknown, maximumLength: number) => {
   return normalized || undefined;
 };
 
-const toPublicMedia = (value: unknown) => {
+export const toPublicMedia = (value: unknown) => {
   if (!value || typeof value !== "object") return undefined;
   const source = value as Record<string, unknown>;
   const id = toStringValue(source._id);
@@ -542,7 +542,7 @@ const toPublicMedia = (value: unknown) => {
   };
 };
 
-const toPublicCategory = (value: unknown) => {
+export const toPublicCategory = (value: unknown) => {
   if (!value || typeof value !== "object") return undefined;
   const source = value as Record<string, unknown>;
   const id = toStringValue(source._id);
@@ -696,7 +696,7 @@ export const toSerializableArticleListItem = (
   };
 };
 
-const toSerializableCategory = <
+export const toSerializableCategory = <
   TCategory extends TProjectCategory | TArticleCategory,
 >(
   value: unknown

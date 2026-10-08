@@ -12,7 +12,9 @@ export const PAGE_ROUTE_KEYS = [
   "home",
   "about",
   "projects",
+  "case-studies",
   "articles",
+  "videos",
   "contact",
   "privacy",
   "terms",
@@ -23,7 +25,9 @@ export const PAGE_ROUTE_PATHS: Readonly<Record<TPageRouteKey, string>> = {
   home: "/",
   about: "/about",
   projects: "/projects",
+  "case-studies": "/case-studies",
   articles: "/articles",
+  videos: "/videos",
   contact: "/contact",
   privacy: "/privacy",
   terms: "/terms",
@@ -38,6 +42,8 @@ export const PAGE_SECTION_KINDS = [
   "metrics-strip",
   "project-collection",
   "article-collection",
+  "case-study-collection",
+  "video-collection",
   "service-collection",
   "skill-group-collection",
   "timeline",
@@ -129,6 +135,8 @@ export type TPageAdminDto = Readonly<{
 export type TPageReferenceDomain =
   | "project"
   | "article"
+  | "case-study"
+  | "video"
   | "service"
   | "skill-group"
   | "timeline-entry"

@@ -69,12 +69,30 @@ export type TCreativeWorkJsonLd = Readonly<{
   keywords?: readonly string[];
 }>;
 
+export type TVideoJsonLd = Readonly<{
+  "@context": "https://schema.org";
+  "@type": "VideoObject";
+  "@id": string;
+  url: string;
+  name: string;
+  description: string;
+  inLanguage: "en";
+  uploadDate: string;
+  mainEntityOfPage: Readonly<{ "@id": string }>;
+  thumbnailUrl?: string;
+  embedUrl?: string;
+  contentUrl?: string;
+  duration?: string;
+  keywords?: readonly string[];
+}>;
+
 export type TJsonLdNode =
   | TWebSiteJsonLd
   | TWebPageJsonLd
   | TBreadcrumbJsonLd
   | TArticleJsonLd
-  | TCreativeWorkJsonLd;
+  | TCreativeWorkJsonLd
+  | TVideoJsonLd;
 
 export type TJsonLdPayload = TJsonLdNode | readonly TJsonLdNode[];
 
@@ -252,6 +270,72 @@ export const buildCreativeWorkJsonLd = (
     ...(creator ? { creator } : {}),
     ...(createdAt ? { dateCreated: createdAt } : {}),
     ...(image ? { image } : {}),
+    ...(keywords.length ? { keywords } : {}),
+  };
+};
+
+const toIsoDuration = (seconds: number | undefined): string | undefined => {
+  if (!seconds || !Number.isFinite(seconds) || seconds <= 0) return undefined;
+  const total = Math.round(seconds);
+  const hours = Math.floor(total / 3_600);
+  const minutes = Math.floor((total % 3_600) / 60);
+  const rest = total % 60;
+  return `PT${hours ? `${hours}H` : ""}${minutes ? `${minutes}M` : ""}${rest || (!hours && !minutes) ? `${rest}S` : ""}`;
+};
+
+const publicHttpsUrl = (value: string | undefined): string | undefined => {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password
+      ? url.toString()
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+export const buildVideoJsonLd = (
+  site: TPublicSiteDto,
+  input: Readonly<{
+    pathname: string;
+    title: string;
+    description?: string;
+    published_at?: string;
+    thumbnail_url?: string;
+    embed_url?: string;
+    content_url?: string;
+    duration_seconds?: number;
+    keywords?: readonly string[];
+  }>
+): TVideoJsonLd | null => {
+  if (site.content_source !== "published") return null;
+  const canonical = buildCanonicalUrl(site, input.pathname);
+  const title = cleanJsonLdText(input.title, 120);
+  const uploadDate = cleanIsoDate(input.published_at);
+  if (!canonical || !title || !uploadDate) return null;
+  const description =
+    cleanJsonLdText(input.description, 320) ?? getSiteDefaultDescription(site);
+  const thumbnail = publicHttpsUrl(input.thumbnail_url);
+  const embedUrl = publicHttpsUrl(input.embed_url);
+  const contentUrl = publicHttpsUrl(input.content_url);
+  const duration = toIsoDuration(input.duration_seconds);
+  const keywords = cleanKeywords(input.keywords);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "@id": `${canonical}#video`,
+    url: canonical,
+    name: title,
+    description,
+    inLanguage: site.identity.locale,
+    uploadDate,
+    mainEntityOfPage: { "@id": `${canonical}#webpage` },
+    ...(thumbnail ? { thumbnailUrl: thumbnail } : {}),
+    ...(embedUrl ? { embedUrl } : {}),
+    ...(contentUrl ? { contentUrl } : {}),
+    ...(duration ? { duration } : {}),
     ...(keywords.length ? { keywords } : {}),
   };
 };

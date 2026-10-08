@@ -119,3 +119,37 @@ describe("browser security policy", () => {
     ).toBe("http://localhost:4100");
   });
 });
+
+describe("video embeds", () => {
+  const input = { production: true, cloudinaryEnabled: true, gcpEnabled: false };
+
+  it("lets public pages load only the YouTube player and nothing else framed", () => {
+    const policy = buildContentSecurityPolicy(input);
+    expect(policy).toContain(
+      "frame-src https://www.youtube.com https://www.youtube-nocookie.com"
+    );
+    expect(policy).toContain("https://www.youtube.com");
+    expect(policy).toMatch(/script-src 'self' 'unsafe-inline' https:\/\/www\.youtube\.com;/);
+    expect(policy).not.toMatch(/frame-src[^;]*\*/);
+    expect(policy).toContain("frame-ancestors 'none'");
+  });
+
+  it("keeps Page preview documents free of third-party frames and scripts", () => {
+    const preview = buildContentSecurityPolicy({
+      ...input,
+      framePolicy: "preview-document",
+      publicOrigin: "https://portfolio.example",
+    });
+    expect(preview).toContain("frame-src 'none'");
+    expect(preview).not.toContain("youtube");
+  });
+
+  it("delegates autoplay only to YouTube so a clicked video can start", () => {
+    const policy = buildBrowserSecurityHeaders(input).find(
+      (header) => header.key === "Permissions-Policy"
+    )!.value;
+    expect(policy).toContain('autoplay=(self "https://www.youtube.com")');
+    expect(policy).toContain("camera=()");
+    expect(policy).toContain("microphone=()");
+  });
+});

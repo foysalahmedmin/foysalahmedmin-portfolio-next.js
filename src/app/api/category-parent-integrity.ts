@@ -16,7 +16,11 @@ export type TCategoryParentHierarchyNode = {
 };
 
 type TCategoryParentIntegrityInput = Readonly<{
-  categoryLabel: "Article category" | "Project category";
+  categoryLabel:
+    | "Article category"
+    | "Project category"
+    | "Case study category"
+    | "Video category";
   categoryIds: Iterable<string>;
   parentId: string | null | undefined;
   findParentNodeById: (

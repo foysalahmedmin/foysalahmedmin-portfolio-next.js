@@ -31,6 +31,9 @@ describe("managed-media purpose policy", () => {
       "hero",
       "project",
       "article",
+      "case_study",
+      "video",
+      "video_file",
       "profile",
       "resume",
       "page",
@@ -57,6 +60,16 @@ describe("managed-media purpose policy", () => {
     for (const purpose of FILE_PURPOSES) {
       const policy = MANAGED_MEDIA_PURPOSE_POLICIES[purpose];
       if (policy.kind === "pdf") continue;
+      if (policy.kind === "video") {
+        expect(policy.accepted_mime_types).toEqual([
+          "video/mp4",
+          "video/webm",
+        ]);
+        expect(policy.accepted_extensions).toEqual(["mp4", "webm"]);
+        expect(policy.max_input_bytes).toBeGreaterThan(0);
+        expect(policy.max_input_bytes).toBeLessThanOrEqual(512 * MiB);
+        continue;
+      }
       expect(policy.kind).toBe("raster");
       expect(policy.accepted_mime_types).toEqual([
         "image/jpeg",
@@ -89,7 +102,12 @@ describe("managed-media purpose policy", () => {
       max_pixels: 40_000_000,
     });
 
-    for (const purpose of ["project", "article"] as const) {
+    for (const purpose of [
+      "project",
+      "article",
+      "case_study",
+      "video",
+    ] as const) {
       expect(MANAGED_MEDIA_PURPOSE_POLICIES[purpose]).toMatchObject({
         access: "public",
         max_input_bytes: 8 * MiB,
@@ -124,7 +142,8 @@ describe("managed-media purpose policy", () => {
 
   it("validates unknown purposes with a safe client error", () => {
     expect(isFilePurpose("project")).toBe(true);
-    expect(isFilePurpose("video")).toBe(false);
+    expect(isFilePurpose("video_file")).toBe(true);
+    expect(isFilePurpose("podcast")).toBe(false);
     expect(isFilePurpose({ purpose: "project" })).toBe(false);
     expect(getManagedMediaPurposePolicy("resume")).toBe(
       MANAGED_MEDIA_PURPOSE_POLICIES.resume

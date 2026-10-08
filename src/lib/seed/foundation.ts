@@ -1,7 +1,11 @@
 import { ObjectId, type Document } from "mongodb";
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { PAGE_SECTION_KINDS } from "../../app/api/pages/page.type.ts";
+import {
+  PAGE_ROUTE_KEYS,
+  PAGE_SECTION_KINDS,
+  type TPageRouteKey,
+} from "../../app/api/pages/page.type.ts";
 import {
   PILLAR_ACCENTS,
   PILLAR_CONTRACT,
@@ -17,7 +21,7 @@ import type {
   SeedTruthMarker,
 } from "./types.ts";
 
-export const FOUNDATION_SEED_VERSION = 6 as const;
+export const FOUNDATION_SEED_VERSION = 7 as const;
 
 const foundationTruth = Object.freeze({
   content_tier: "foundation",
@@ -249,15 +253,7 @@ const pageSectionSchema = z
 
 const pageDocumentSchema = z
   .object({
-    route_key: z.enum([
-      "home",
-      "about",
-      "projects",
-      "articles",
-      "contact",
-      "privacy",
-      "terms",
-    ]),
+    route_key: z.enum(PAGE_ROUTE_KEYS),
     locale: z.literal("en"),
     schema_version: z.literal(1),
     contract_version: z.literal(1),
@@ -572,13 +568,17 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
           internalLink("home", "Home", "/"),
           internalLink("about", "About", "/about"),
           internalLink("projects", "Projects", "/projects"),
+          internalLink("case-studies", "Case studies", "/case-studies"),
           internalLink("articles", "Articles", "/articles"),
+          internalLink("videos", "Videos", "/videos"),
           internalLink("contact", "Contact", "/contact"),
         ],
         footer: [
           internalLink("home", "Home", "/"),
           internalLink("projects", "Projects", "/projects"),
+          internalLink("case-studies", "Case studies", "/case-studies"),
           internalLink("articles", "Articles", "/articles"),
+          internalLink("videos", "Videos", "/videos"),
           internalLink("contact", "Contact", "/contact"),
         ],
         legal: [
@@ -817,6 +817,33 @@ const pageDrafts = {
         source: automatic({ featured: true }),
       },
       {
+        key: "case-studies",
+        kind: "case-study-collection",
+        visible: true,
+        heading: "Problems solved, start to finish",
+        layout: "featured",
+        item_limit: 3,
+        source: automatic({ featured: true }),
+      },
+      {
+        key: "videos",
+        kind: "video-collection",
+        visible: true,
+        heading: "See the thinking behind the work",
+        layout: "grid",
+        item_limit: 3,
+        source: automatic({ aspect_ratio: "landscape" }),
+      },
+      {
+        key: "reels",
+        kind: "video-collection",
+        visible: true,
+        heading: "Short clips, straight to the point",
+        layout: "grid",
+        item_limit: 4,
+        source: automatic({ aspect_ratio: "reel" }),
+      },
+      {
         key: "articles",
         kind: "article-collection",
         visible: true,
@@ -939,6 +966,26 @@ const pageDrafts = {
       },
     ],
   },
+  "case-studies": {
+    seo: { noindex: true },
+    sections: [
+      {
+        key: "case-studies",
+        kind: "case-study-collection",
+        visible: true,
+        layout: "grid",
+        item_limit: 12,
+        source: automatic(),
+      },
+      {
+        key: "contact",
+        kind: "contact-cta",
+        visible: true,
+        layout: "banner",
+        source: system,
+      },
+    ],
+  },
   articles: {
     seo: { noindex: true },
     sections: [
@@ -948,6 +995,26 @@ const pageDrafts = {
         visible: true,
         layout: "grid",
         item_limit: 12,
+        source: automatic(),
+      },
+      {
+        key: "contact",
+        kind: "contact-cta",
+        visible: true,
+        layout: "banner",
+        source: system,
+      },
+    ],
+  },
+  videos: {
+    seo: { noindex: true },
+    sections: [
+      {
+        key: "videos",
+        kind: "video-collection",
+        visible: true,
+        layout: "grid",
+        item_limit: 24,
         source: automatic(),
       },
       {
@@ -1527,6 +1594,10 @@ const createLegalDocumentRecords = (
     };
   });
 };
+
+/** The draft a fixed Page starts from; reused when a Page is added later. */
+export const getFoundationPageDraft = (routeKey: TPageRouteKey) =>
+  structuredClone(pageDrafts[routeKey]);
 
 const createPageRecords = (actor: SeedActor): SeedRecordDefinition[] =>
   Object.entries(pageDrafts).map(([routeKey, draft]) => ({
