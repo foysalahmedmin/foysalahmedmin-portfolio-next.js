@@ -1,6 +1,6 @@
 # ADR 0002: Custom UI, dependency policy, and test stack
 
-- **Status:** Accepted
+- **Status:** Accepted; amended by [ADR 0011](./0011-monochrome-surfaces-motion-and-3d.md) (runtime motion framework ban)
 - **Date:** 2026-07-15
 - **Decision owners:** Product owner and repository maintainer
 - **Supersedes:** None

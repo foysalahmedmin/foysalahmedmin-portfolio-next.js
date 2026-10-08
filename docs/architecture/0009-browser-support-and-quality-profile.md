@@ -1,6 +1,6 @@
 # ADR 0009: Browser support, runtime target, and quality profile
 
-- **Status:** Accepted
+- **Status:** Accepted; amended by [ADR 0011](./0011-monochrome-surfaces-motion-and-3d.md) (budgets)
 - **Date:** 2026-07-15
 - **Decision owners:** Product owner and repository maintainer
 - **Supersedes:** Undefined browser/device and performance assumptions
