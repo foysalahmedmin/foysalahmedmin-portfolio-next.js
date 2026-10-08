@@ -5,6 +5,10 @@ export const CONTENT_SLUG_SCOPES = [
   "article",
   "project_category",
   "article_category",
+  "case_study",
+  "video",
+  "case_study_category",
+  "video_category",
 ] as const;
 
 export type ContentSlugScope = (typeof CONTENT_SLUG_SCOPES)[number];

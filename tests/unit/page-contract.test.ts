@@ -43,12 +43,17 @@ describe("fixed-route Page composition contract", () => {
       "home",
       "about",
       "projects",
+      "case-studies",
       "articles",
+      "videos",
       "contact",
       "privacy",
       "terms",
     ]);
     expect(PAGE_SECTION_KINDS).not.toContain("custom-component");
+    expect(PAGE_SECTION_KINDS).toEqual(
+      expect.arrayContaining(["case-study-collection", "video-collection"])
+    );
   });
 
   it("accepts safe sources while rejecting arbitrary rendering controls", () => {
@@ -128,5 +133,73 @@ describe("fixed-route Page composition contract", () => {
     expect(getPagePublishStructureIssues("home", hidden)).toEqual(
       expect.arrayContaining(["sections.visible", "sections.required"])
     );
+  });
+});
+
+describe("case study and video Page sections", () => {
+  const section = (kind: string, filter: Record<string, unknown>) => ({
+    seo: { noindex: false },
+    sections: [
+      {
+        key: "library",
+        kind,
+        visible: true,
+        layout: "grid",
+        item_limit: 4,
+        source: { mode: "automatic", filter },
+      },
+    ],
+  });
+
+  it("filters videos by shape and rejects shapes that do not exist", () => {
+    expect(
+      parsePageDraftSnapshot("home", section("video-collection", { aspect_ratio: "reel" }))
+    ).toBeDefined();
+    expect(() =>
+      parsePageDraftSnapshot("home", section("video-collection", { aspect_ratio: "square" }))
+    ).toThrow();
+    expect(() =>
+      parsePageDraftSnapshot("home", section("video-collection", { pillar: "system_architect" }))
+    ).toThrow();
+  });
+
+  it("filters case studies by role and featured state", () => {
+    expect(
+      parsePageDraftSnapshot(
+        "case-studies",
+        section("case-study-collection", { featured: true, pillar: "ai_automation" })
+      )
+    ).toBeDefined();
+    expect(() =>
+      parsePageDraftSnapshot("case-studies", section("case-study-collection", { shape: "reel" }))
+    ).toThrow();
+  });
+
+  it("keeps each collection on its own fixed routes", () => {
+    expect(() =>
+      parsePageDraftSnapshot("articles", section("video-collection", {}))
+    ).toThrow();
+    expect(() =>
+      parsePageDraftSnapshot("videos", section("case-study-collection", {}))
+    ).toThrow();
+    expect(parsePageDraftSnapshot("videos", section("video-collection", {}))).toBeDefined();
+    expect(
+      parsePageDraftSnapshot("home", section("case-study-collection", { featured: true }))
+    ).toBeDefined();
+  });
+
+  it("allows two video sections on one Page so each shape gets its own", () => {
+    const draft = {
+      seo: { noindex: false },
+      sections: ["landscape", "reel"].map((shape) => ({
+        key: `videos-${shape}`,
+        kind: "video-collection",
+        visible: true,
+        layout: "grid",
+        item_limit: 3,
+        source: { mode: "automatic", filter: { aspect_ratio: shape } },
+      })),
+    };
+    expect(parsePageDraftSnapshot("home", draft).sections).toHaveLength(2);
   });
 });

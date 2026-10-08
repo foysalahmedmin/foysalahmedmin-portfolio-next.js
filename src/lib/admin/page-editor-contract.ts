@@ -11,6 +11,7 @@ import { TESTIMONIAL_RELATIONSHIPS } from "@/app/api/testimonials/testimonial.ty
 import { TIMELINE_ENTRY_TYPES } from "@/app/api/timeline/timeline-entry.type";
 import { PROJECT_TYPES } from "@/lib/content/portfolio-contract";
 import { PILLAR_KEYS } from "@/lib/content/pillars";
+import { VIDEO_ASPECT_RATIOS } from "@/lib/content/video-contract";
 
 export type TPageSectionEditorDefinition = Readonly<{
   label: string;
@@ -98,6 +99,26 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
     layouts: ["grid", "featured", "list"],
     source: "collection",
     filterFields: shared,
+  },
+  "case-study-collection": {
+    label: "Case studies",
+    layouts: ["grid", "featured", "list"],
+    source: "collection",
+    filterFields: shared,
+  },
+  "video-collection": {
+    label: "Videos",
+    layouts: ["grid", "featured", "list"],
+    source: "collection",
+    filterFields: [
+      { key: "featured", label: "Featured only", type: "boolean" },
+      {
+        key: "aspect_ratio",
+        label: "Shape",
+        type: "select",
+        options: VIDEO_ASPECT_RATIOS,
+      },
+    ],
   },
   "service-collection": {
     label: "Services",
@@ -205,6 +226,8 @@ export const PAGE_EDITOR_ROUTE_KINDS: Readonly<
     "service-collection",
     "skill-group-collection",
     "project-collection",
+    "case-study-collection",
+    "video-collection",
     "article-collection",
     "process-steps",
     "testimonial-collection",
@@ -222,7 +245,9 @@ export const PAGE_EDITOR_ROUTE_KINDS: Readonly<
     "contact-cta",
   ],
   projects: ["project-collection", "contact-cta"],
+  "case-studies": ["case-study-collection", "contact-cta"],
   articles: ["article-collection", "contact-cta"],
+  videos: ["video-collection", "contact-cta"],
   contact: ["contact-form", "faq-list"],
   privacy: ["legal-document"],
   terms: ["legal-document"],
@@ -232,7 +257,9 @@ const initialKind: Readonly<Record<TPageRouteKey, TPageSectionKind>> = {
   home: "site-hero",
   about: "site-introduction",
   projects: "project-collection",
+  "case-studies": "case-study-collection",
   articles: "article-collection",
+  videos: "video-collection",
   contact: "contact-form",
   privacy: "legal-document",
   terms: "legal-document",

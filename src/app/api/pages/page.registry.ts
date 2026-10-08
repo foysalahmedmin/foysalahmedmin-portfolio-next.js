@@ -1,4 +1,6 @@
 import Article from "@/app/api/articles/article.model";
+import CaseStudy from "@/app/api/case-studies/case-study.model";
+import Video from "@/app/api/videos/video.model";
 import { credentialDefinition } from "@/app/api/credentials/credential.definition";
 import { faqDefinition } from "@/app/api/faqs/faq.definition";
 import { legalDocumentDefinition } from "@/app/api/legal-documents/legal-document.definition";
@@ -73,6 +75,56 @@ const COLLECTION_REGISTRY = Object.freeze({
           field: "images",
           cardinality: "many",
           purposes: ["article"],
+          public: true,
+        },
+      ],
+      get_publish_issues: (record: Readonly<Record<string, unknown>>) =>
+        record.slug && record.category && record.author
+          ? []
+          : ["content_graph"],
+    } as unknown as TRegistryDefinition,
+  },
+  "case-study-collection": {
+    domain: "case-study",
+    definition: {
+      domain: "case-study",
+      model: CaseStudy,
+      file_fields: [
+        {
+          field: "thumbnail",
+          cardinality: "one",
+          purposes: ["case_study"],
+          public: true,
+        },
+        {
+          field: "images",
+          cardinality: "many",
+          purposes: ["case_study"],
+          public: true,
+        },
+      ],
+      get_publish_issues: (record: Readonly<Record<string, unknown>>) =>
+        record.slug && record.category && record.author
+          ? []
+          : ["content_graph"],
+    } as unknown as TRegistryDefinition,
+  },
+  "video-collection": {
+    domain: "video",
+    definition: {
+      domain: "video",
+      model: Video,
+      file_fields: [
+        {
+          field: "thumbnail",
+          cardinality: "one",
+          purposes: ["video"],
+          public: true,
+        },
+        {
+          field: "video_file",
+          cardinality: "one",
+          purposes: ["video_file"],
           public: true,
         },
       ],

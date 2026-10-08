@@ -2,6 +2,7 @@ import AppError from "@/builder/app-error";
 import httpStatus from "http-status";
 import { createHash } from "node:crypto";
 import path from "node:path";
+import { DEFAULT_VIDEO_UPLOAD_MAX_BYTES } from "@/lib/content/video-contract";
 import type {
   TFileAccess,
   TFileLifecycleState,
@@ -9,7 +10,7 @@ import type {
   TFileProvider,
 } from "./file.type";
 
-export type TManagedMediaKind = "raster" | "pdf";
+export type TManagedMediaKind = "raster" | "pdf" | "video";
 
 export type TManagedMediaPurposePolicy = {
   purpose: TFilePurpose;
@@ -37,6 +38,23 @@ const RASTER_MIME_TYPES = [
   "image/avif",
 ] as const;
 const RASTER_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "avif"] as const;
+const VIDEO_MIME_TYPES = ["video/mp4", "video/webm"] as const;
+const VIDEO_EXTENSIONS = ["mp4", "webm"] as const;
+
+/**
+ * Uploaded videos pass through the Next.js request body, which Vercel caps at
+ * 4.5 MB per function invocation, so the default stays safely below that.
+ * Self-hosted deployments can raise it with MEDIA_VIDEO_MAX_UPLOAD_BYTES; long
+ * videos belong on YouTube instead.
+ */
+export { DEFAULT_VIDEO_UPLOAD_MAX_BYTES };
+const resolveVideoUploadMaxBytes = (): number => {
+  const parsed = Number(process.env.MEDIA_VIDEO_MAX_UPLOAD_BYTES);
+  return Number.isSafeInteger(parsed) && parsed > 0
+    ? Math.min(parsed, 512 * MiB)
+    : DEFAULT_VIDEO_UPLOAD_MAX_BYTES;
+};
+const VIDEO_UPLOAD_MAX_BYTES = resolveVideoUploadMaxBytes();
 
 export const MANAGED_MEDIA_PURPOSE_POLICIES = {
   logo: {
@@ -106,6 +124,51 @@ export const MANAGED_MEDIA_PURPOSE_POLICIES = {
     allow_animation: false,
     delivery: "inline",
     webp_quality: 86,
+  },
+  case_study: {
+    purpose: "case_study",
+    kind: "raster",
+    access: "public",
+    accepted_mime_types: RASTER_MIME_TYPES,
+    accepted_extensions: RASTER_EXTENSIONS,
+    max_input_bytes: 8 * MiB,
+    max_output_bytes: 8 * MiB,
+    min_width: 320,
+    min_height: 180,
+    max_width: 8192,
+    max_height: 8192,
+    max_pixels: 40_000_000,
+    allow_animation: false,
+    delivery: "inline",
+    webp_quality: 86,
+  },
+  video: {
+    purpose: "video",
+    kind: "raster",
+    access: "public",
+    accepted_mime_types: RASTER_MIME_TYPES,
+    accepted_extensions: RASTER_EXTENSIONS,
+    max_input_bytes: 8 * MiB,
+    max_output_bytes: 8 * MiB,
+    min_width: 320,
+    min_height: 180,
+    max_width: 8192,
+    max_height: 8192,
+    max_pixels: 40_000_000,
+    allow_animation: false,
+    delivery: "inline",
+    webp_quality: 86,
+  },
+  video_file: {
+    purpose: "video_file",
+    kind: "video",
+    access: "public",
+    accepted_mime_types: VIDEO_MIME_TYPES,
+    accepted_extensions: VIDEO_EXTENSIONS,
+    max_input_bytes: VIDEO_UPLOAD_MAX_BYTES,
+    max_output_bytes: VIDEO_UPLOAD_MAX_BYTES,
+    allow_animation: false,
+    delivery: "inline",
   },
   profile: {
     purpose: "profile",
@@ -450,6 +513,9 @@ const PURPOSE_COMPATIBILITY: Readonly<
   hero: ["hero"],
   project: ["project"],
   article: ["article"],
+  case_study: ["case_study"],
+  video: ["video"],
+  video_file: ["video_file"],
   profile: ["profile"],
   resume: ["resume"],
   page: ["page"],

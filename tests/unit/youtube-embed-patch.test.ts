@@ -7,8 +7,9 @@ import { describe, expect, it } from "vitest";
 // The inline video player passes the real pixel size of its box to the
 // YouTube embed. The stock youtube-video-element hardcodes width/height of
 // "100%", which makes YouTube assume a landscape layout and pillarbox portrait
-// (Shorts) videos. These checks fail loudly if a dependency change ever drops
-// the patch that fixes this.
+// (Shorts) videos. The patch also re-applies the size when `config` arrives
+// after the iframe was built, which happens on the first, slowest mount. These
+// checks fail loudly if a dependency change ever drops the patch.
 const installedYoutubeElement = (): string => {
   const reactPlayerEntry = fileURLToPath(import.meta.resolve("react-player"));
   const fromReactPlayer = createRequire(reactPlayerEntry);
@@ -40,8 +41,9 @@ describe("youtube-video-element patch", () => {
     const manifest = JSON.parse(fs.readFileSync("package.json", "utf8")) as {
       pnpm?: { patchedDependencies?: Record<string, string> };
     };
-    const patch = manifest.pnpm?.patchedDependencies?.["youtube-video-element"];
-    expect(patch).toBe("patches/youtube-video-element.patch");
+    const patch =
+      manifest.pnpm?.patchedDependencies?.["youtube-video-element@1.9.0"];
+    expect(patch).toBe("patches/youtube-video-element@1.9.0.patch");
     expect(fs.existsSync(patch!)).toBe(true);
   });
 
@@ -56,6 +58,10 @@ describe("youtube-video-element patch", () => {
         /props\.config\)?\s*==\s*null\s*\?\s*void 0\s*:\s*_a\.width/
       );
       expect(source).not.toMatch(/width: "100%",\s*\n\s*height: "100%"/);
+      // A late `config` still resizes an iframe that already exists.
+      expect(source).toMatch(
+        /set config\(value\) \{[\s\S]*?querySelector\("iframe"\)[\s\S]*?setAttribute\("width"/
+      );
     }
     expect(
       fs.readFileSync(path.join(root, "youtube-video-element.d.ts"), "utf8")

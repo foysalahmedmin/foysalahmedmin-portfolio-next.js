@@ -88,6 +88,8 @@ export type AdminMutationRule = Readonly<{
   resource:
     | "article-categories"
     | "articles"
+    | "case-studies"
+    | "case-study-categories"
     | "contacts"
     | "dashboard"
     | "credentials"
@@ -99,6 +101,8 @@ export type AdminMutationRule = Readonly<{
     | "project-resources"
     | "projects"
     | "reviews"
+    | "video-categories"
+    | "videos"
     | "services"
     | "site"
     | "skill-groups"
@@ -123,6 +127,26 @@ export const ADMIN_MUTATION_MATRIX: readonly AdminMutationRule[] = [
   },
   {
     resource: "articles",
+    ordinary: "content:edit",
+    permanent: "content:permanent-delete",
+  },
+  {
+    resource: "case-studies",
+    ordinary: "content:edit",
+    permanent: "content:permanent-delete",
+  },
+  {
+    resource: "case-study-categories",
+    ordinary: "content:edit",
+    permanent: "content:permanent-delete",
+  },
+  {
+    resource: "video-categories",
+    ordinary: "content:edit",
+    permanent: "content:permanent-delete",
+  },
+  {
+    resource: "videos",
     ordinary: "content:edit",
     permanent: "content:permanent-delete",
   },
@@ -324,6 +348,10 @@ export const getAdminPageCapability = (pathname: string): Capability | null => {
   if (
     pathname === "/admin/articles" ||
     pathname.startsWith("/admin/articles/") ||
+    pathname === "/admin/case-studies" ||
+    pathname.startsWith("/admin/case-studies/") ||
+    pathname === "/admin/videos" ||
+    pathname.startsWith("/admin/videos/") ||
     pathname === "/admin/projects" ||
     pathname.startsWith("/admin/projects/") ||
     pathname === "/admin/project-resources" ||

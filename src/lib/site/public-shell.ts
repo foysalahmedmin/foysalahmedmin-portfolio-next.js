@@ -21,11 +21,18 @@ const emergencyNavigation: readonly TPublicShellLink[] = [
     external: false,
   },
   {
+    key: "case-studies",
+    label: "Case studies",
+    href: "/case-studies",
+    external: false,
+  },
+  {
     key: "articles",
     label: "Articles",
     href: "/articles",
     external: false,
   },
+  { key: "videos", label: "Videos", href: "/videos", external: false },
   { key: "contact", label: "Contact", href: "/contact", external: false },
 ];
 

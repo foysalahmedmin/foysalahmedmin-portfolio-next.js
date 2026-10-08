@@ -16,7 +16,7 @@ export type MediaPurposeOption = Readonly<{
   value: TFilePurpose;
   label: string;
   access: "public" | "private";
-  kind: "image" | "document";
+  kind: "image" | "document" | "video";
 }>;
 
 export const MEDIA_PURPOSE_OPTIONS: readonly MediaPurposeOption[] = [
@@ -24,6 +24,24 @@ export const MEDIA_PURPOSE_OPTIONS: readonly MediaPurposeOption[] = [
   { value: "hero", label: "Hero", access: "public", kind: "image" },
   { value: "project", label: "Project", access: "public", kind: "image" },
   { value: "article", label: "Article", access: "public", kind: "image" },
+  {
+    value: "case_study",
+    label: "Case study",
+    access: "public",
+    kind: "image",
+  },
+  {
+    value: "video",
+    label: "Video thumbnail",
+    access: "public",
+    kind: "image",
+  },
+  {
+    value: "video_file",
+    label: "Video file",
+    access: "public",
+    kind: "video",
+  },
   { value: "profile", label: "Profile", access: "public", kind: "image" },
   { value: "resume", label: "Resume", access: "private", kind: "document" },
   { value: "page", label: "Page", access: "public", kind: "image" },
@@ -210,10 +228,12 @@ export const getMediaPurposeOption = (
   MEDIA_PURPOSE_OPTIONS.find(({ value }) => value === purpose) ??
   MEDIA_PURPOSE_OPTIONS[MEDIA_PURPOSE_OPTIONS.length - 1];
 
-export const getMediaAccept = (purpose: TFilePurpose): string =>
-  getMediaPurposeOption(purpose).kind === "document"
-    ? "application/pdf,.pdf"
-    : "image/jpeg,image/png,image/webp,image/avif,.jpg,.jpeg,.png,.webp,.avif";
+export const getMediaAccept = (purpose: TFilePurpose): string => {
+  const { kind } = getMediaPurposeOption(purpose);
+  if (kind === "document") return "application/pdf,.pdf";
+  if (kind === "video") return "video/mp4,video/webm,.mp4,.webm";
+  return "image/jpeg,image/png,image/webp,image/avif,.jpg,.jpeg,.png,.webp,.avif";
+};
 
 export type MediaMetadataFormValues = {
   name: string;

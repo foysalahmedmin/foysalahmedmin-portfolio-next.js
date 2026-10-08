@@ -101,7 +101,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "youtube-video-element": "patches/youtube-video-element.patch"
+      "youtube-video-element@1.9.0": "patches/youtube-video-element@1.9.0.patch"
     }
   }
 }

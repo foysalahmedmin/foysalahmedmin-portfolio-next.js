@@ -8,6 +8,10 @@ export const getPublicArticleFilter = (now = new Date()) => ({
   ],
 });
 
+/** Case studies and videos publish exactly like articles do. */
+export const getPublicCaseStudyFilter = getPublicArticleFilter;
+export const getPublicVideoFilter = getPublicArticleFilter;
+
 export const getPublicProjectFilter = () => ({
   $or: [
     { publication_status: "published" as const },

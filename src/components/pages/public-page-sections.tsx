@@ -17,8 +17,10 @@ import {
 import ContactContentSection from "@/components/(common)/contact-page/contact-content-section";
 import AboutSection from "@/components/(common)/home-page/about-section";
 import ArticlesSection from "@/components/(common)/home-page/articles-section";
+import CaseStudiesSection from "@/components/(common)/home-page/case-studies-section";
 import HeroSection from "@/components/(common)/home-page/hero-section";
 import ProjectsSection from "@/components/(common)/home-page/projects-section";
+import VideosSection from "@/components/(common)/home-page/videos-section";
 import ArchitectureWorkflowSection from "@/components/sections/architecture-workflow-section";
 import ContactCTASection from "@/components/sections/contact-cta-section";
 import GithubProfileSection from "@/components/sections/github-profile-section";
@@ -36,6 +38,8 @@ import SkillsSection, {
   type TPublicSkillGroupWithSkills,
 } from "@/components/sections/skills-section";
 import type { TArticleListItem } from "@/types/article.type";
+import type { TCaseStudyListItem } from "@/types/case-study.type";
+import type { TVideoListItem } from "@/types/video.type";
 import type { TProjectListItem } from "@/types/project.type";
 import { Fragment, type ReactNode } from "react";
 
@@ -174,6 +178,44 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
               />
             );
             break;
+          case "case-study-collection":
+            content = (
+              <CaseStudiesSection
+                caseStudies={asItems<TCaseStudyListItem>(section.items)}
+                fallbacks={payload.site.fallbacks}
+                unavailable={unavailable}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "video-collection": {
+            const videos = asItems<TVideoListItem>(section.items);
+            const shape = section.source_filter?.aspect_ratio;
+            // One section per shape keeps landscape films and reels in
+            // separate frames; a section with no shape filter shows both.
+            content =
+              shape === "landscape" || shape === "reel" ? (
+                <VideosSection
+                  videos={videos}
+                  lane={shape}
+                  unavailable={unavailable}
+                  heading={section.heading}
+                />
+              ) : (
+                <>
+                  <VideosSection
+                    videos={videos}
+                    lane="landscape"
+                    unavailable={unavailable}
+                    heading={section.heading}
+                  />
+                  {videos.some((video) => video.aspect_ratio === "reel") ? (
+                    <VideosSection videos={videos} lane="reel" />
+                  ) : null}
+                </>
+              );
+            break;
+          }
           case "timeline":
             content = (
               <TimelineSection

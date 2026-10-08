@@ -17,8 +17,10 @@ import { timelineEntryDefinition } from "@/app/api/timeline/timeline-entry.defin
 import { SITE_CACHE_TAG } from "@/app/api/site/site.cache";
 import {
   ARTICLE_PUBLIC_CACHE_TAG,
+  CASE_STUDY_PUBLIC_CACHE_TAG,
   PROJECT_PUBLIC_CACHE_TAG,
   PUBLISHED_PAGE_RESOLVER_CACHE_TAG,
+  VIDEO_PUBLIC_CACHE_TAG,
 } from "@/lib/content/public-cache-tags";
 import { unstable_cache } from "next/cache";
 import { resolvePublishedPageUncached } from "./published-page-resolver";
@@ -31,6 +33,8 @@ export const PUBLISHED_PAGE_RESOLVER_TAGS = Object.freeze([
   SITE_CACHE_TAG,
   ARTICLE_PUBLIC_CACHE_TAG,
   PROJECT_PUBLIC_CACHE_TAG,
+  CASE_STUDY_PUBLIC_CACHE_TAG,
+  VIDEO_PUBLIC_CACHE_TAG,
   serviceDefinition.cache_tag,
   skillGroupDefinition.cache_tag,
   skillDefinition.cache_tag,

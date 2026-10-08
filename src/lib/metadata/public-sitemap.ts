@@ -1,7 +1,9 @@
 import "server-only";
 
 import { getPublicArticles } from "@/app/api/articles/article.service";
+import { getPublicCaseStudies } from "@/app/api/case-studies/case-study.service";
 import { getPublicProjects } from "@/app/api/projects/project.service";
+import { getPublicVideos } from "@/app/api/videos/video.service";
 import type { TPublicSiteDto } from "@/app/api/site/site.type";
 import type { MetadataRoute } from "next";
 import { getSitemapBase } from "./metadata-routes";
@@ -10,7 +12,13 @@ const STATIC_ROUTES = [
   { path: "/", priority: 1, changeFrequency: "weekly" as const },
   { path: "/about", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/projects", priority: 0.9, changeFrequency: "weekly" as const },
+  {
+    path: "/case-studies",
+    priority: 0.9,
+    changeFrequency: "weekly" as const,
+  },
   { path: "/articles", priority: 0.9, changeFrequency: "weekly" as const },
+  { path: "/videos", priority: 0.8, changeFrequency: "weekly" as const },
   { path: "/contact", priority: 0.7, changeFrequency: "monthly" as const },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" as const },
@@ -64,10 +72,12 @@ export const buildPublicSitemap = async (
   const base = getSitemapBase(site);
   if (!base) return [];
 
-  const [projects, articles] = await Promise.all([
+  const [projects, articles, caseStudies, videos] = await Promise.all([
     collectPublishedSlugs(getPublicProjects),
     collectPublishedSlugs(getPublicArticles),
-  ]).catch(() => [[], []] as const);
+    collectPublishedSlugs(getPublicCaseStudies),
+    collectPublishedSlugs(getPublicVideos),
+  ]).catch(() => [[], [], [], []] as const);
   const sitePublishedAt = site.published_at
     ? new Date(site.published_at)
     : undefined;
@@ -86,6 +96,24 @@ export const buildPublicSitemap = async (
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
+    ...caseStudies.map((caseStudy) => ({
+      url: new URL(`/case-studies/${caseStudy.slug}`, base).toString(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
+    ...videos.map((video) => {
+      const publishedAt = video.published_at
+        ? new Date(video.published_at)
+        : undefined;
+      return {
+        url: new URL(`/videos/${video.slug}`, base).toString(),
+        ...(publishedAt && !Number.isNaN(publishedAt.getTime())
+          ? { lastModified: publishedAt }
+          : {}),
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      };
+    }),
     ...articles.map((article) => {
       const publishedAt = article.published_at
         ? new Date(article.published_at)

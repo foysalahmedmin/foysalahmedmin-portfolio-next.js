@@ -3,7 +3,12 @@ import {
   MAX_CONTENT_SLUG_LENGTH,
 } from "@/lib/content/slug";
 
-export const TAXONOMY_KINDS = ["article", "project"] as const;
+export const TAXONOMY_KINDS = [
+  "article",
+  "project",
+  "case-study",
+  "video",
+] as const;
 export type TTaxonomyKind = (typeof TAXONOMY_KINDS)[number];
 export type TTaxonomyStatus = "active" | "inactive";
 
@@ -56,6 +61,16 @@ export const TAXONOMY_CONTRACT = {
     label: "Project categories",
     singular: "project category",
     resource: "project-categories",
+  },
+  "case-study": {
+    label: "Case study categories",
+    singular: "case study category",
+    resource: "case-study-categories",
+  },
+  video: {
+    label: "Video categories",
+    singular: "video category",
+    resource: "video-categories",
   },
 } as const satisfies Record<
   TTaxonomyKind,

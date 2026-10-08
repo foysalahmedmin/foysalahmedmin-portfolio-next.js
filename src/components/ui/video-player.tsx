@@ -20,11 +20,13 @@ function VideoCoverButton({
   label,
   thumbnailSrc,
   thumbnailSizes,
+  priority,
   onClick,
 }: {
   label: string;
   thumbnailSrc?: string;
   thumbnailSizes: string;
+  priority?: boolean;
   onClick: (e: React.MouseEvent) => void;
 }) {
   return (
@@ -40,6 +42,7 @@ function VideoCoverButton({
           alt=""
           fill
           sizes={thumbnailSizes}
+          priority={priority}
           className="object-cover transition-transform duration-300 group-hover/video:scale-105"
         />
       )}
@@ -121,6 +124,8 @@ interface VideoPlayerCoreProps {
   className?: string;
   /** Applied to the poster's <Image>, matching each grid's own responsive columns. */
   thumbnailSizes?: string;
+  /** Load the poster eagerly; set it on the one above-the-fold player. */
+  priority?: boolean;
   /**
    * How the player's box is shaped.
    *
@@ -178,6 +183,7 @@ export function VideoPlayerCore({
   thumbnailSrc,
   className,
   thumbnailSizes = "(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw",
+  priority = false,
   adaptiveFrame = false,
   orientation,
   aspectRatio,
@@ -363,6 +369,7 @@ export function VideoPlayerCore({
           label={`Play ${title}`}
           thumbnailSrc={thumbnailSrc}
           thumbnailSizes={thumbnailSizes}
+          priority={priority}
           onClick={start}
         />
       ) : (

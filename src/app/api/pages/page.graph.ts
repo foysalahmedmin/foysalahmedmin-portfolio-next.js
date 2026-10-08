@@ -1,11 +1,15 @@
 import ArticleCategory from "@/app/api/article-categories/article-category.model";
+import CaseStudyCategory from "@/app/api/case-study-categories/case-study-category.model";
+import VideoCategory from "@/app/api/video-categories/video-category.model";
 import * as FileRepository from "@/app/api/files/file.repository";
 import type { TFile, TFilePurpose } from "@/app/api/files/file.type";
 import { assertAllowedProviderUrl } from "@/app/api/files/managed-media.policy";
 import ProjectCategory from "@/app/api/project-categories/project-category.model";
 import {
   getPublicArticleFilter,
+  getPublicCaseStudyFilter,
   getPublicProjectFilter,
+  getPublicVideoFilter,
 } from "@/app/api/public-visibility";
 import Skill from "@/app/api/skills/skill.model";
 import { skillDefinition } from "@/app/api/skills/skill.definition";
@@ -54,6 +58,12 @@ const publicFilter = (
   }
   if (domain === "project") {
     return { ...getPublicProjectFilter(), is_deleted: false };
+  }
+  if (domain === "case-study") {
+    return { ...getPublicCaseStudyFilter(now), is_deleted: false };
+  }
+  if (domain === "video") {
+    return { ...getPublicVideoFilter(now), is_deleted: false };
   }
   return {
     locale: "en",
@@ -138,14 +148,28 @@ const validateLegacyRelations = async (
   domain: TPageReferenceDomain,
   records: readonly TGraphRecord[]
 ): Promise<string[]> => {
-  if (domain !== "article" && domain !== "project") return [];
+  if (
+    domain !== "article" &&
+    domain !== "project" &&
+    domain !== "case-study" &&
+    domain !== "video"
+  ) {
+    return [];
+  }
   const categoryIds = [
     ...new Set(records.flatMap((record) => ids(record.category))),
   ];
   const authorIds = [
     ...new Set(records.flatMap((record) => ids(record.author))),
   ];
-  const Category = domain === "article" ? ArticleCategory : ProjectCategory;
+  const Category =
+    domain === "article"
+      ? ArticleCategory
+      : domain === "case-study"
+        ? CaseStudyCategory
+        : domain === "video"
+          ? VideoCategory
+          : ProjectCategory;
   const categoryQuery = setSoftDeleteScope(
     Category.find({ _id: { $in: categoryIds }, status: "active" }),
     "active",

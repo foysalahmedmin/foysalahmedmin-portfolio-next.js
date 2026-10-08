@@ -140,6 +140,7 @@ const buildUploadingFile = (input: {
       etag: input.storage.etag,
       width: input.prepared.width,
       height: input.prepared.height,
+      duration: input.prepared.duration ?? input.storage.duration,
       extension: input.prepared.extension,
       file_type: input.prepared.file_type,
       immutable_key: input.storage.immutable_key,
@@ -739,6 +740,11 @@ export const getReferencePurposes = (
     /(?:^|_)(?:attachment|document|evidence|proof)(?:_|$)/.test(field);
   if (model === "Article") return ["article"];
   if (model === "Project") return ["project"];
+  if (model === "CaseStudy" || model === "CaseStudyCategory") {
+    return ["case_study"];
+  }
+  if (model === "Video") return field === "video_file" ? ["video_file"] : ["video"];
+  if (model === "VideoCategory") return ["video"];
   if (model === "User" && field === "image") return ["profile"];
   if (model === "ArticleCategory") return ["article"];
   if (model === "ProjectCategory") return ["project"];

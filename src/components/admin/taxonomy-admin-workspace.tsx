@@ -493,12 +493,15 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
     <div className="mx-auto max-w-[100rem] space-y-7">
       <EditorialWorkspaceHeader
         eyebrow="Content taxonomy"
-        title="Article and project categories"
-        description="Manage separate category identities, active visibility, hierarchy, and deletion lifecycle through the existing category APIs."
+        title="Content categories"
+        description="Manage separate category identities for articles, projects, case studies and videos: active visibility, hierarchy, and deletion lifecycle."
         status={
           <>
-            <EditorialStatus tone="success">Article taxonomy</EditorialStatus>
-            <EditorialStatus tone="success">Project taxonomy</EditorialStatus>
+            {TAXONOMY_KINDS.map((kind) => (
+              <EditorialStatus key={kind} tone="success">
+                {TAXONOMY_CONTRACT[kind].label}
+              </EditorialStatus>
+            ))}
             {!canEdit ? <EditorialStatus>Read only</EditorialStatus> : null}
           </>
         }
@@ -574,26 +577,22 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
           aria-label="Taxonomy type"
           className="border-border bg-muted/40 inline-flex rounded-xl border p-1"
         >
-          <TabsTrigger
-            value="article"
-            className="data-[state=active]:bg-card rounded-lg px-5 before:hidden data-[state=active]:shadow-sm"
-          >
-            Article categories
-          </TabsTrigger>
-          <TabsTrigger
-            value="project"
-            className="data-[state=active]:bg-card rounded-lg px-5 before:hidden data-[state=active]:shadow-sm"
-          >
-            Project categories
-          </TabsTrigger>
+          {TAXONOMY_KINDS.map((kind) => (
+            <TabsTrigger
+              key={kind}
+              value={kind}
+              className="data-[state=active]:bg-card rounded-lg px-5 before:hidden data-[state=active]:shadow-sm"
+            >
+              {TAXONOMY_CONTRACT[kind].label}
+            </TabsTrigger>
+          ))}
         </TabsList>
         <TabsContent className="mt-5">
-          <TabsItem value="article">
-            {state.kind === "article" ? table : null}
-          </TabsItem>
-          <TabsItem value="project">
-            {state.kind === "project" ? table : null}
-          </TabsItem>
+          {TAXONOMY_KINDS.map((kind) => (
+            <TabsItem key={kind} value={kind}>
+              {state.kind === kind ? table : null}
+            </TabsItem>
+          ))}
         </TabsContent>
       </Tabs>
 

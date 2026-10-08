@@ -5,6 +5,7 @@ import { TESTIMONIAL_RELATIONSHIPS } from "@/app/api/testimonials/testimonial.ty
 import { TIMELINE_ENTRY_TYPES } from "@/app/api/timeline/timeline-entry.type";
 import { PILLAR_KEYS } from "@/lib/content/pillars";
 import { PROJECT_TYPES } from "@/lib/content/portfolio-contract";
+import { VIDEO_ASPECT_RATIOS } from "@/lib/content/video-contract";
 import { z } from "zod";
 import {
   PAGE_ROUTE_KEYS,
@@ -142,6 +143,13 @@ export const pageSectionSchema = z.discriminatedUnion("kind", [
   collectionSection("article-collection", ["grid", "featured", "list"], {
     ...sharedContentFilter,
   }),
+  collectionSection("case-study-collection", ["grid", "featured", "list"], {
+    ...sharedContentFilter,
+  }),
+  collectionSection("video-collection", ["grid", "featured", "list"], {
+    featured: z.boolean().optional(),
+    aspect_ratio: z.enum(VIDEO_ASPECT_RATIOS).optional(),
+  }),
   collectionSection("service-collection", ["grid", "cards", "list"], {
     ...sharedContentFilter,
   }),
@@ -218,6 +226,8 @@ export const PAGE_ROUTE_SECTION_KINDS: Readonly<
     "service-collection",
     "skill-group-collection",
     "project-collection",
+    "case-study-collection",
+    "video-collection",
     "article-collection",
     "process-steps",
     "testimonial-collection",
@@ -235,7 +245,9 @@ export const PAGE_ROUTE_SECTION_KINDS: Readonly<
     "contact-cta",
   ],
   projects: ["project-collection", "contact-cta"],
+  "case-studies": ["case-study-collection", "contact-cta"],
   articles: ["article-collection", "contact-cta"],
+  videos: ["video-collection", "contact-cta"],
   contact: ["contact-form", "faq-list"],
   privacy: ["legal-document"],
   terms: ["legal-document"],
