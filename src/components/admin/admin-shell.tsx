@@ -6,9 +6,11 @@ import type { Capability } from "@/lib/auth/capabilities";
 import { cn } from "@/lib/utils";
 import { refreshToken, signOut } from "@/services/auth.service";
 import {
+  BookOpenCheck,
   BookOpenText,
   BriefcaseBusiness,
   ChevronLeft,
+  Clapperboard,
   ChevronRight,
   Component,
   FileStack,
@@ -79,9 +81,21 @@ const adminNavGroups: ReadonlyArray<
         capability: "content:read",
       },
       {
+        name: "Case studies",
+        href: "/admin/case-studies",
+        icon: BookOpenCheck,
+        capability: "content:read",
+      },
+      {
         name: "Articles",
         href: "/admin/articles",
         icon: BookOpenText,
+        capability: "content:read",
+      },
+      {
+        name: "Videos",
+        href: "/admin/videos",
+        icon: Clapperboard,
         capability: "content:read",
       },
       {
@@ -149,6 +163,8 @@ const adminNavGroups: ReadonlyArray<
 const routeLabels: Readonly<Record<string, string>> = {
   admin: "Dashboard",
   articles: "Articles",
+  "case-studies": "Case studies",
+  videos: "Videos",
   projects: "Projects",
   "project-resources": "Project resources",
   taxonomy: "Taxonomy",

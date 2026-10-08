@@ -1,3 +1,4 @@
+import { PAGE_ROUTE_KEYS } from "@/app/api/pages/page.type";
 import {
   createFoundationSeedManifest,
   planSeedManifest,
@@ -113,7 +114,9 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
       conflict: 0,
     });
     expect(await db.collection("sites").countDocuments()).toBe(1);
-    expect(await db.collection("pages").countDocuments()).toBe(7);
+    expect(await db.collection("pages").countDocuments()).toBe(
+      PAGE_ROUTE_KEYS.length
+    );
     expect(await db.collection("seed_media_intents").countDocuments()).toBe(
       manifest.media.length
     );
@@ -134,7 +137,9 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
       conflict: 0,
     });
     expect(await db.collection("sites").countDocuments()).toBe(1);
-    expect(await db.collection("pages").countDocuments()).toBe(7);
+    expect(await db.collection("pages").countDocuments()).toBe(
+      PAGE_ROUTE_KEYS.length
+    );
     expect(await db.collection("seed_media_intents").countDocuments()).toBe(
       manifest.media.length
     );
@@ -177,7 +182,9 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
       dry_run: false,
       force: false,
     });
-    expect(await db.collection("pages").countDocuments()).toBe(7);
+    expect(await db.collection("pages").countDocuments()).toBe(
+      PAGE_ROUTE_KEYS.length
+    );
     expect(await db.collection("seed_records").countDocuments()).toBe(
       manifest.records.length
     );

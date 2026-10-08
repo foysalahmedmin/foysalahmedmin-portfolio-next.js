@@ -4,8 +4,10 @@ import { requireAdminSession } from "@/lib/auth/admin-session";
 import {
   AlertTriangle,
   ArrowRight,
+  BookOpenCheck,
   BriefcaseBusiness,
   CheckCircle2,
+  Clapperboard,
   Clock3,
   FileText,
   Gauge,
@@ -41,11 +43,25 @@ const workspaceItems = [
     icon: BriefcaseBusiness,
   },
   {
+    title: "Case studies",
+    description: "Tell the full story of a problem solved, step by step.",
+    href: "/admin/case-studies",
+    capability: "content:read" as const,
+    icon: BookOpenCheck,
+  },
+  {
     title: "Articles",
     description: "Draft and publish long-form engineering knowledge.",
     href: "/admin/articles",
     capability: "content:read" as const,
     icon: FileText,
+  },
+  {
+    title: "Videos",
+    description: "Add landscape videos and reels from YouTube or an upload.",
+    href: "/admin/videos",
+    capability: "content:read" as const,
+    icon: Clapperboard,
   },
   {
     title: "Profile settings",

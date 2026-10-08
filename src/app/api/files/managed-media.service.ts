@@ -11,6 +11,7 @@ import {
   type TStoredObject,
 } from "@/lib/storage";
 import type { TStorageFile } from "@/lib/storage/storage.type";
+import { readMp4Metadata } from "@/lib/media/video-metadata";
 import { fileTypeFromBuffer } from "file-type";
 import httpStatus from "http-status";
 import { createHash } from "node:crypto";
@@ -122,7 +123,8 @@ export type TPreparedManagedMedia = {
   access: TFileAccess;
   width?: number;
   height?: number;
-  file_type: "image" | "document";
+  duration?: number;
+  file_type: "image" | "document" | "video";
   delivery: "inline" | "attachment";
 };
 
@@ -204,6 +206,21 @@ const prepareRaster = async (
   }
 };
 
+const assertVideoEnvelope = (buffer: Buffer, mime: string): void => {
+  const isMp4 =
+    mime === "video/mp4" && buffer.subarray(4, 8).toString("latin1") === "ftyp";
+  // EBML magic number that every WebM/Matroska document starts with.
+  const isWebm =
+    mime === "video/webm" &&
+    buffer.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]));
+  if (!isMp4 && !isWebm) {
+    throw new AppError(
+      httpStatus.UNPROCESSABLE_ENTITY,
+      "Malformed video upload"
+    );
+  }
+};
+
 const assertPdfEnvelope = (buffer: Buffer): void => {
   const prefix = buffer.subarray(0, 8).toString("ascii");
   const suffix = buffer
@@ -259,6 +276,8 @@ export const prepareManagedMedia = async (input: {
     "image/webp": ["webp"],
     "image/avif": ["avif"],
     "application/pdf": ["pdf"],
+    "video/mp4": ["mp4"],
+    "video/webm": ["webm"],
   };
   if (
     !policy.accepted_mime_types.includes(detectedMime) ||
@@ -274,6 +293,28 @@ export const prepareManagedMedia = async (input: {
   }
 
   const originalName = normalizeMediaFilename(input.file.name);
+  if (policy.kind === "video") {
+    assertVideoEnvelope(buffer, detectedMime);
+    const checksum = createHash("sha256").update(buffer).digest("hex");
+    const facts = detectedMime === "video/mp4" ? readMp4Metadata(buffer) : {};
+    return {
+      buffer,
+      original_name: originalName,
+      filename: `${originalName.replace(/\.[^.]+$/, "")}.${extension}`,
+      mimetype: detectedMime,
+      extension,
+      size: buffer.byteLength,
+      checksum,
+      purpose: input.purpose,
+      access: policy.access,
+      ...(facts.width && facts.height
+        ? { width: facts.width, height: facts.height }
+        : {}),
+      ...(facts.duration_seconds ? { duration: facts.duration_seconds } : {}),
+      file_type: "video",
+      delivery: policy.delivery,
+    };
+  }
   if (policy.kind === "pdf") {
     assertPdfEnvelope(buffer);
     const checksum = createHash("sha256").update(buffer).digest("hex");
@@ -342,16 +383,23 @@ export const uploadPreparedMedia = async (input: {
       }
     );
 
+    const expectedResourceType =
+      input.prepared.file_type === "document"
+        ? "raw"
+        : input.prepared.file_type === "video"
+          ? "video"
+          : "image";
     const providerShapeIsValid =
       result.size === input.prepared.size &&
       result.mimetype === input.prepared.mimetype &&
       (result.provider !== "cloudinary" ||
-        (result.resource_type ===
-          (input.prepared.file_type === "document" ? "raw" : "image") &&
+        (result.resource_type === expectedResourceType &&
           (input.prepared.file_type === "document" ||
-            (result.format === "webp" &&
-              result.width === input.prepared.width &&
-              result.height === input.prepared.height))));
+            (input.prepared.file_type === "video"
+              ? result.format === input.prepared.extension
+              : result.format === "webp" &&
+                result.width === input.prepared.width &&
+                result.height === input.prepared.height))));
     if (!providerShapeIsValid) {
       await adapter.remove(result).catch(() => undefined);
       throw new AppError(
@@ -401,8 +449,7 @@ const getStorageDeleteInput = (file: TFile) => {
     storage_key: storageKey,
     bucket: file.metadata?.bucket,
     resource_type:
-      file.metadata?.resource_type ||
-      (file.mimetype === "application/pdf" ? "raw" : "image"),
+      file.metadata?.resource_type || getStorageResourceType(file.mimetype),
     delivery_type: file.metadata?.delivery_type,
   };
 };
@@ -518,7 +565,9 @@ export const toStoredFileProvider = (
 ): Extract<TFileProvider, "gcs" | "cloudinary"> =>
   provider === "gcp" ? "gcs" : "cloudinary";
 
-export const getStorageResourceType = (
+export function getStorageResourceType(
   mimetype: string
-): TCloudinaryResourceType =>
-  mimetype === "application/pdf" ? "raw" : "image";
+): TCloudinaryResourceType {
+  if (mimetype === "application/pdf") return "raw";
+  return mimetype.startsWith("video/") ? "video" : "image";
+}

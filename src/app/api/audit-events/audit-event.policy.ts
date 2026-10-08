@@ -57,6 +57,8 @@ const REPEATABLE_CONTENT_TARGETS = [
 const PUBLISHABLE_CONTENT_TARGETS = [
   "article",
   "project",
+  "case-study",
+  "video",
   ...REPEATABLE_CONTENT_TARGETS,
 ] as const satisfies readonly TAuditTargetType[];
 
@@ -80,22 +82,34 @@ const ACTION_TARGETS: Readonly<
   "content.deleted": [
     "article",
     "project",
+    "case-study",
+    "video",
     "article-category",
     "project-category",
+    "case-study-category",
+    "video-category",
     ...REPEATABLE_CONTENT_TARGETS,
   ],
   "content.restored": [
     "article",
     "project",
+    "case-study",
+    "video",
     "article-category",
     "project-category",
+    "case-study-category",
+    "video-category",
     ...REPEATABLE_CONTENT_TARGETS,
   ],
   "content.permanently_deleted": [
     "article",
     "project",
+    "case-study",
+    "video",
     "article-category",
     "project-category",
+    "case-study-category",
+    "video-category",
     ...REPEATABLE_CONTENT_TARGETS,
   ],
   "site.settings.updated": ["site"],

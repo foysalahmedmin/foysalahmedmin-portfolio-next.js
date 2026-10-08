@@ -1,4 +1,5 @@
 import { getPublicArticlesForComposition } from "@/app/api/articles/article.service";
+import { getPublicCaseStudiesForComposition } from "@/app/api/case-studies/case-study.service";
 import { CredentialService } from "@/app/api/credentials/credential.service";
 import { FAQService } from "@/app/api/faqs/faq.service";
 import { LegalDocumentService } from "@/app/api/legal-documents/legal-document.service";
@@ -7,6 +8,7 @@ import { ServiceService } from "@/app/api/services/service.service";
 import { getPublicSkillGroupsForComposition } from "@/app/api/skill-groups/skill-group.service";
 import { TestimonialService } from "@/app/api/testimonials/testimonial.service";
 import { TimelineEntryService } from "@/app/api/timeline/timeline-entry.service";
+import { getPublicVideosForComposition } from "@/app/api/videos/video.service";
 import type { TPageSectionKind } from "./page.type";
 
 export type TPageCompositionReadInput = Readonly<{
@@ -32,6 +34,10 @@ export const readPageCompositionItems = async (
       return asItems(await getPublicProjectsForComposition(input));
     case "article-collection":
       return asItems(await getPublicArticlesForComposition(input));
+    case "case-study-collection":
+      return asItems(await getPublicCaseStudiesForComposition(input));
+    case "video-collection":
+      return asItems(await getPublicVideosForComposition(input));
     case "service-collection":
       return asItems(await ServiceService.getPublicForComposition(input));
     case "skill-group-collection":

@@ -291,9 +291,13 @@ const fileSchema = new Schema<TFileDocument>(
             enum: [
               "Article",
               "Project",
+              "CaseStudy",
+              "Video",
               "User",
               "ArticleCategory",
               "ProjectCategory",
+              "CaseStudyCategory",
+              "VideoCategory",
               "Review",
               "Contact",
               "ProjectResource",

@@ -3,6 +3,17 @@ const normalizeDirective = (value: string): string =>
 
 export type BrowserFramePolicy = "deny" | "preview-parent" | "preview-document";
 
+/**
+ * The only third-party origin the public site embeds is YouTube, for videos
+ * whose source is a YouTube link. The player loads the IFrame API script and
+ * renders the video in a frame; nothing else is allowed to be framed.
+ */
+export const YOUTUBE_SCRIPT_ORIGIN = "https://www.youtube.com";
+export const YOUTUBE_FRAME_ORIGINS = [
+  "https://www.youtube.com",
+  "https://www.youtube-nocookie.com",
+] as const;
+
 const normalizeHttpOrigin = (value?: string): string | null => {
   if (!value?.trim()) return null;
   try {
@@ -109,7 +120,7 @@ export const buildContentSecurityPolicy = (input: {
     framePolicy === "preview-document"
       ? "default-src 'none'"
       : "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${input.production ? "" : " 'unsafe-eval'"}${previewAssets ? ` ${previewAssets.static}` : ""}`,
+    `script-src 'self' 'unsafe-inline'${input.production ? "" : " 'unsafe-eval'"}${previewAssets ? ` ${previewAssets.static}` : ""}${framePolicy === "deny" ? ` ${YOUTUBE_SCRIPT_ORIGIN}` : ""}`,
     `style-src 'self' 'unsafe-inline'${previewAssets ? ` ${previewAssets.static}` : ""}`,
     `img-src ${imageSources.join(" ")}`,
     `media-src ${imageSources.join(" ")}`,
@@ -129,7 +140,11 @@ export const buildContentSecurityPolicy = (input: {
     framePolicy === "preview-document"
       ? "frame-ancestors 'self'"
       : "frame-ancestors 'none'",
-    framePolicy === "preview-parent" ? "frame-src 'self'" : "frame-src 'none'",
+    framePolicy === "preview-parent"
+      ? "frame-src 'self'"
+      : framePolicy === "deny"
+        ? `frame-src ${YOUTUBE_FRAME_ORIGINS.join(" ")}`
+        : "frame-src 'none'",
     ...(input.production ? ["upgrade-insecure-requests"] : []),
     "report-uri /api/security/csp-report",
   ];
@@ -159,7 +174,7 @@ export const buildBrowserSecurityHeaders = (input: {
   {
     key: "Permissions-Policy",
     value:
-      "accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+      `accelerometer=(self "${YOUTUBE_SCRIPT_ORIGIN}"), autoplay=(self "${YOUTUBE_SCRIPT_ORIGIN}"), camera=(), display-capture=(), geolocation=(), gyroscope=(self "${YOUTUBE_SCRIPT_ORIGIN}"), magnetometer=(), microphone=(), payment=(), usb=()`,
   },
   ...(input.production
     ? [

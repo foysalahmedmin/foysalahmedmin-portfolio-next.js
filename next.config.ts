@@ -40,6 +40,12 @@ const publicPreviewDiscoveryHeaders = [
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      // YouTube posters for videos that have no uploaded thumbnail.
+      {
+        protocol: "https" as const,
+        hostname: "i.ytimg.com",
+        pathname: "/vi/**",
+      },
       ...(cloudinaryCloudName
         ? [
             {

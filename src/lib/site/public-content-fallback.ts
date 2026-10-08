@@ -5,6 +5,7 @@ import type {
 import type { PillarKey } from "@/lib/content/pillars";
 
 export type TPublicContentFallbackKind = "project" | "article";
+// Case studies reuse the managed project fallbacks (see the case-study cards).
 
 export type TPublicContentFallbackInput = Readonly<{
   kind: TPublicContentFallbackKind;
