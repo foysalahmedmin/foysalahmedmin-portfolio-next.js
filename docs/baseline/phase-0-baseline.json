@@ -1,0 +1,271 @@
+{
+  "measured_at": "2026-10-08T16:42:31.106Z",
+  "base": "http://127.0.0.1:3107",
+  "node": "v20.20.2",
+  "results": [
+    {
+      "profile": "desktop",
+      "route": "/",
+      "html_kb": 36.2,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 232,
+      "lcp_ms": 464,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 12614,
+      "smoothness": {
+        "frames": 599,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 33.3,
+        "dropped_pct": 0.3,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/about",
+      "html_kb": 19.7,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 88,
+      "lcp_ms": 88,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 5349,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.8,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/contact",
+      "html_kb": 17,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 80,
+      "lcp_ms": 80,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 3179
+    },
+    {
+      "profile": "desktop",
+      "route": "/projects",
+      "html_kb": 25.7,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 80,
+      "lcp_ms": 336,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 4555
+    },
+    {
+      "profile": "desktop",
+      "route": "/case-studies",
+      "html_kb": 22.3,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 80,
+      "lcp_ms": 332,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 3298,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/articles",
+      "html_kb": 25.1,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 80,
+      "lcp_ms": 328,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 4483
+    },
+    {
+      "profile": "desktop",
+      "route": "/videos",
+      "html_kb": 22,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 80,
+      "lcp_ms": 328,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 3266
+    },
+    {
+      "profile": "desktop",
+      "route": "/privacy",
+      "html_kb": 15.9,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 84,
+      "lcp_ms": 84,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 2642
+    },
+    {
+      "profile": "desktop",
+      "route": "/terms",
+      "html_kb": 15.5,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 76,
+      "lcp_ms": 76,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 2425
+    },
+    {
+      "profile": "mobile",
+      "route": "/",
+      "html_kb": 36.2,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 748,
+      "lcp_ms": 748,
+      "cls": 0,
+      "tbt_ms": 95,
+      "doc_height_px": 21452,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/about",
+      "html_kb": 19.7,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 576,
+      "lcp_ms": 2204,
+      "cls": 0,
+      "tbt_ms": 46,
+      "doc_height_px": 7175,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/contact",
+      "html_kb": 17,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 588,
+      "lcp_ms": 588,
+      "cls": 0,
+      "tbt_ms": 69,
+      "doc_height_px": 4704
+    },
+    {
+      "profile": "mobile",
+      "route": "/projects",
+      "html_kb": 25.7,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 576,
+      "lcp_ms": 576,
+      "cls": 0,
+      "tbt_ms": 104,
+      "doc_height_px": 7996
+    },
+    {
+      "profile": "mobile",
+      "route": "/case-studies",
+      "html_kb": 22.3,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 568,
+      "lcp_ms": 568,
+      "cls": 0,
+      "tbt_ms": 53,
+      "doc_height_px": 4346,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/articles",
+      "html_kb": 25.1,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 584,
+      "lcp_ms": 584,
+      "cls": 0,
+      "tbt_ms": 139,
+      "doc_height_px": 8109
+    },
+    {
+      "profile": "mobile",
+      "route": "/videos",
+      "html_kb": 22,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 584,
+      "lcp_ms": 584,
+      "cls": 0,
+      "tbt_ms": 53,
+      "doc_height_px": 4335
+    },
+    {
+      "profile": "mobile",
+      "route": "/privacy",
+      "html_kb": 15.9,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 568,
+      "lcp_ms": 568,
+      "cls": 0,
+      "tbt_ms": 63,
+      "doc_height_px": 3575
+    },
+    {
+      "profile": "mobile",
+      "route": "/terms",
+      "html_kb": 15.5,
+      "js_kb_transferred": 523.2,
+      "js_requests": 21,
+      "fcp_ms": 572,
+      "lcp_ms": 572,
+      "cls": 0,
+      "tbt_ms": 60,
+      "doc_height_px": 3266
+    }
+  ]
+}
