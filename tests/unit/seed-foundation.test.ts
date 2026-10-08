@@ -1,3 +1,4 @@
+import { PAGE_ROUTE_KEYS } from "@/app/api/pages/page.type";
 import { parsePageDraftSnapshot } from "@/app/api/pages/page.validation";
 import { getSitePublishIssues } from "@/app/api/site/site.policy";
 import { siteDraftSnapshotSchema } from "@/app/api/site/site.validation";
@@ -23,10 +24,10 @@ describe("truthful foundation seed", () => {
     expect(getSeedManifestChecksum(manifest)).toBe(
       getSeedManifestChecksum(otherActorManifest)
     );
-    // 1 Site + 7 Pages + 6 FAQs + 2 legal documents, plus per role: a
+    // 1 Site + 9 Pages + 6 FAQs + 2 legal documents, plus per role: a
     // service, a skill group, 5 skills and a hero intent.
     expect(manifest.records).toHaveLength(
-      1 + 7 + 6 + 2 + PILLAR_CONTRACT.length * 8 + 1
+      1 + PAGE_ROUTE_KEYS.length + 6 + 2 + PILLAR_CONTRACT.length * 8 + 1
     );
     expect(manifest.media).toHaveLength(PILLAR_CONTRACT.length + 1);
   });
@@ -126,18 +127,12 @@ describe("truthful foundation seed", () => {
     ).not.toThrow();
   });
 
-  it("uses seven fixed draft Page compositions that satisfy the Page schemas", () => {
+  it("uses one fixed draft Page composition per route that satisfies the Page schemas", () => {
     const pages = createFoundationSeedManifest(actor).records.filter(
       (record) => record.collection === "pages"
     );
     expect(pages.map((record) => record.payload.route_key)).toEqual([
-      "home",
-      "about",
-      "projects",
-      "articles",
-      "contact",
-      "privacy",
-      "terms",
+      ...PAGE_ROUTE_KEYS,
     ]);
     for (const page of pages) {
       expect(() =>
@@ -193,6 +188,8 @@ describe("truthful foundation seed", () => {
       "testimonials",
       "projects",
       "articles",
+      "case_studies",
+      "videos",
       "timeline_entries",
       "credentials",
     ]) {

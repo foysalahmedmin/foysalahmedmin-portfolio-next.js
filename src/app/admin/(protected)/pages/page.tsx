@@ -49,7 +49,7 @@ export default async function AdminPagesIndex() {
           Pages
         </h1>
         <p className="text-muted-foreground mt-2 max-w-3xl text-sm leading-6">
-          Seven bounded public routes with revisioned SEO, typed section order,
+          Nine bounded public routes with revisioned SEO, typed section order,
           graph validation, private preview sessions and independent publish
           state.
         </p>

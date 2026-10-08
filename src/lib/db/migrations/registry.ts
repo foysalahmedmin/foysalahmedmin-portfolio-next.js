@@ -15,6 +15,7 @@ import repeatableContentFoundation from "./202607150012-repeatable-content-found
 import pageComposition from "./202607150013-page-composition.ts";
 import publicContentCacheInvalidation from "./202607150014-public-content-cache-invalidation.ts";
 import authMfaFoundation from "./202607170001-auth-mfa-foundation.ts";
+import caseStudyAndVideoFoundation from "./202610080001-case-study-and-video-foundation.ts";
 
 const MIGRATION_ID_PATTERN = /^\d{12}-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MIGRATION_SOURCE_PATTERN =
@@ -90,4 +91,5 @@ export const MIGRATION_REGISTRY = validateMigrationRegistry([
   pageComposition,
   publicContentCacheInvalidation,
   authMfaFoundation,
+  caseStudyAndVideoFoundation,
 ] as const);

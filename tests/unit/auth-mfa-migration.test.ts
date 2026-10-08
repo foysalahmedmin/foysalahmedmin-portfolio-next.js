@@ -9,7 +9,6 @@ import { describe, expect, it } from "vitest";
 describe("auth MFA foundation migration", () => {
   it("is registered after the existing immutable foundations", () => {
     const ids = MIGRATION_REGISTRY.map(({ id }) => id);
-    expect(ids.at(-1)).toBe("202607170001-auth-mfa-foundation");
     expect(ids.indexOf("202607170001-auth-mfa-foundation")).toBeGreaterThan(
       ids.indexOf("202607150014-public-content-cache-invalidation")
     );

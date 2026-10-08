@@ -2,9 +2,13 @@ import "server-only";
 
 import * as ArticleCategoryService from "@/app/api/article-categories/article-category.service";
 import * as ArticleService from "@/app/api/articles/article.service";
+import * as CaseStudyCategoryService from "@/app/api/case-study-categories/case-study-category.service";
+import * as CaseStudyService from "@/app/api/case-studies/case-study.service";
 import type { TResolvedPublishedPagePayload } from "@/app/api/pages/page-resolver.type";
 import * as ProjectCategoryService from "@/app/api/project-categories/project-category.service";
 import * as ProjectService from "@/app/api/projects/project.service";
+import * as VideoCategoryService from "@/app/api/video-categories/video-category.service";
+import * as VideoService from "@/app/api/videos/video.service";
 import {
   filterAndSortCuratedArticles,
   filterAndSortCuratedProjects,
@@ -27,6 +31,28 @@ import {
   toSerializableProjectCategory,
   toSerializableProjectListItem,
 } from "@/lib/discovery/public-discovery";
+import {
+  DEFAULT_CASE_STUDY_DISCOVERY_QUERY,
+  caseStudyDiscoveryCompositionQuery,
+  mergeCaseStudyDiscoveryQueryString,
+  normalizeCaseStudyDiscoveryCompositionFilter,
+  parseCaseStudyDiscoveryQuery,
+  toSerializableCaseStudyCategory,
+  toSerializableCaseStudyListItem,
+} from "@/lib/discovery/case-study-discovery";
+import {
+  DEFAULT_VIDEO_DISCOVERY_QUERY,
+  VIDEO_LANE_PAGE_SIZE,
+  mergeVideoDiscoveryQueryString,
+  normalizeVideoDiscoveryCompositionFilter,
+  parseVideoDiscoveryQuery,
+  toSerializableVideoCategory,
+  toSerializableVideoListItem,
+  videoDiscoveryCompositionQuery,
+  type VideoDiscoveryQuery,
+} from "@/lib/discovery/video-discovery";
+import type { VideoAspectRatio } from "@/lib/content/video-contract";
+import type { TVideosLane } from "@/components/(common)/videos-page/videos-content-section";
 import type { TPublicRouteDiscoveryData } from "./public-route-renderer.type";
 
 export type TPublicRouteSearchParams = Readonly<
@@ -265,6 +291,210 @@ const loadArticleDiscovery = async (
   };
 };
 
+type TCollectionKind =
+  | "project-collection"
+  | "article-collection"
+  | "case-study-collection"
+  | "video-collection";
+
+const sectionOf = (
+  payload: TResolvedPublishedPagePayload,
+  kind: TCollectionKind
+) => payload.sections.find((section) => section.kind === kind);
+
+const loadCaseStudyDiscovery = async (
+  payload: TResolvedPublishedPagePayload,
+  searchParams: TPublicRouteSearchParams,
+  mode: "live" | "preview"
+): Promise<TPublicRouteDiscoveryData> => {
+  const query =
+    mode === "preview"
+      ? { ...DEFAULT_CASE_STUDY_DISCOVERY_QUERY }
+      : parseCaseStudyDiscoveryQuery(searchParams);
+  const section = sectionOf(payload, "case-study-collection");
+  const composition = normalizeCaseStudyDiscoveryCompositionFilter(
+    section?.source_filter ?? {}
+  );
+  const [result, categories, facets] = await Promise.allSettled([
+    CaseStudyService.getPublicCaseStudyDiscovery({
+      ...query,
+      ...caseStudyDiscoveryCompositionQuery(composition),
+    }),
+    CaseStudyCategoryService.getPublicCaseStudyCategories({
+      limit: 50,
+      sort: "sequence,name",
+    }),
+    CaseStudyService.getPublicCaseStudyDiscoveryFacets(),
+  ]);
+  const discovery = result.status === "fulfilled" ? result.value : null;
+  const snapshot = (section?.items ?? []).flatMap((record) => {
+    const item = toSerializableCaseStudyListItem(record);
+    return item ? [item] : [];
+  });
+  const items = discovery
+    ? discovery.data.flatMap((record) => {
+        const item = toSerializableCaseStudyListItem(record);
+        return item ? [item] : [];
+      })
+    : snapshot;
+  const meta = discovery?.meta ?? {
+    total: items.length,
+    page: 1,
+    limit: Math.max(1, items.length),
+  };
+  let redirectTo: string | undefined;
+  if (mode === "live" && discovery) {
+    const currentQueryString = querySourceToQueryString(searchParams);
+    const totalPages = Math.max(1, Math.ceil(meta.total / meta.limit));
+    if (discovery.query.category !== query.category) {
+      redirectTo = `/case-studies${mergeCaseStudyDiscoveryQueryString(
+        currentQueryString,
+        discovery.query as typeof query
+      )}`;
+    } else if (meta.total > 0 && query.page > totalPages) {
+      redirectTo = `/case-studies${mergeCaseStudyDiscoveryQueryString(
+        currentQueryString,
+        { ...query, page: totalPages }
+      )}`;
+    }
+  }
+
+  return {
+    route_key: "case-studies",
+    props: {
+      items,
+      meta,
+      query,
+      categories:
+        categories.status === "fulfilled"
+          ? categories.value.data.flatMap((record) => {
+              const category = toSerializableCaseStudyCategory(record);
+              return category ? [category] : [];
+            })
+          : [],
+      facets: facets.status === "fulfilled" ? facets.value : { technologies: [] },
+      fallbacks: payload.site.fallbacks,
+      initialError: !discovery && !snapshot.length,
+    },
+    ...(redirectTo ? { redirect_to: redirectTo } : {}),
+  };
+};
+
+const EMPTY_LANE = (limit: number): TVideosLane => ({
+  items: [],
+  meta: { total: 0, page: 1, limit },
+});
+
+const loadVideoLane = async (
+  query: VideoDiscoveryQuery,
+  lane: VideoAspectRatio,
+  composition: Readonly<Record<string, string | boolean>>
+) => {
+  const limit = VIDEO_LANE_PAGE_SIZE[query.show][lane];
+  const result = await VideoService.getPublicVideoDiscovery({
+    search: query.search,
+    category: query.category,
+    sort: query.sort,
+    aspect_ratio: lane,
+    page: lane === "landscape" ? query.landscape_page : query.reel_page,
+    limit,
+    ...composition,
+  });
+  const lanePage: TVideosLane = {
+    items: result.data.flatMap((record) => {
+      const item = toSerializableVideoListItem(record);
+      return item ? [item] : [];
+    }),
+    meta: {
+      total: result.meta.total,
+      page: result.meta.page,
+      limit: result.meta.limit || limit,
+    },
+  };
+  return { lane: lanePage, category: result.query.category };
+};
+
+const loadVideoDiscovery = async (
+  payload: TResolvedPublishedPagePayload,
+  searchParams: TPublicRouteSearchParams,
+  mode: "live" | "preview"
+): Promise<TPublicRouteDiscoveryData> => {
+  const query =
+    mode === "preview"
+      ? { ...DEFAULT_VIDEO_DISCOVERY_QUERY }
+      : parseVideoDiscoveryQuery(searchParams);
+  const section = sectionOf(payload, "video-collection");
+  const composition = videoDiscoveryCompositionQuery(
+    normalizeVideoDiscoveryCompositionFilter(section?.source_filter ?? {})
+  );
+  const [landscape, reel, categories] = await Promise.allSettled([
+    query.show === "reel"
+      ? Promise.resolve(null)
+      : loadVideoLane(query, "landscape", composition),
+    query.show === "landscape"
+      ? Promise.resolve(null)
+      : loadVideoLane(query, "reel", composition),
+    VideoCategoryService.getPublicVideoCategories({
+      limit: 50,
+      sort: "sequence,name",
+    }),
+  ]);
+  const landscapeResult =
+    landscape.status === "fulfilled" ? landscape.value : null;
+  const reelResult = reel.status === "fulfilled" ? reel.value : null;
+  const failed =
+    (query.show !== "reel" && landscape.status === "rejected") ||
+    (query.show !== "landscape" && reel.status === "rejected");
+
+  let redirectTo: string | undefined;
+  if (mode === "live") {
+    const currentQueryString = querySourceToQueryString(searchParams);
+    const canonicalCategory =
+      landscapeResult?.category ?? reelResult?.category ?? query.category;
+    const clamp = (
+      data: TVideosLane | undefined,
+      current: number
+    ): number | null => {
+      if (!data || data.meta.total === 0) return null;
+      const totalPages = Math.max(1, Math.ceil(data.meta.total / data.meta.limit));
+      return current > totalPages ? totalPages : null;
+    };
+    const landscapePage = clamp(landscapeResult?.lane, query.landscape_page);
+    const reelPage = clamp(reelResult?.lane, query.reel_page);
+    if (
+      canonicalCategory !== query.category ||
+      landscapePage !== null ||
+      reelPage !== null
+    ) {
+      redirectTo = `/videos${mergeVideoDiscoveryQueryString(currentQueryString, {
+        ...query,
+        category: canonicalCategory,
+        landscape_page: landscapePage ?? query.landscape_page,
+        reel_page: reelPage ?? query.reel_page,
+      })}`;
+    }
+  }
+
+  return {
+    route_key: "videos",
+    props: {
+      landscape:
+        landscapeResult?.lane ?? EMPTY_LANE(VIDEO_LANE_PAGE_SIZE[query.show].landscape),
+      reel: reelResult?.lane ?? EMPTY_LANE(VIDEO_LANE_PAGE_SIZE[query.show].reel),
+      query,
+      categories:
+        categories.status === "fulfilled"
+          ? categories.value.data.flatMap((record) => {
+              const category = toSerializableVideoCategory(record);
+              return category ? [category] : [];
+            })
+          : [],
+      initialError: failed,
+    },
+    ...(redirectTo ? { redirect_to: redirectTo } : {}),
+  };
+};
+
 export const loadPublicRouteDiscovery = async (
   payload: TResolvedPublishedPagePayload,
   input: Readonly<{
@@ -278,6 +508,12 @@ export const loadPublicRouteDiscovery = async (
   }
   if (payload.page.route_key === "articles") {
     return await loadArticleDiscovery(payload, searchParams, input.mode);
+  }
+  if (payload.page.route_key === "case-studies") {
+    return await loadCaseStudyDiscovery(payload, searchParams, input.mode);
+  }
+  if (payload.page.route_key === "videos") {
+    return await loadVideoDiscovery(payload, searchParams, input.mode);
   }
   return null;
 };

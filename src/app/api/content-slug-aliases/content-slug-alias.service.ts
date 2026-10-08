@@ -14,6 +14,10 @@ const SCOPE_COLLECTIONS: Record<ContentSlugScope, string> = {
   article: "articles",
   project_category: "projectcategories",
   article_category: "articlecategories",
+  case_study: "case_studies",
+  video: "videos",
+  case_study_category: "case_study_categories",
+  video_category: "video_categories",
 };
 
 export const findSlugTarget = async (

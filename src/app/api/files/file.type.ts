@@ -16,6 +16,9 @@ export const FILE_PURPOSES = [
   "hero",
   "project",
   "article",
+  "case_study",
+  "video",
+  "video_file",
   "profile",
   "resume",
   "page",
@@ -60,9 +63,13 @@ export type TFileMetadataIssue =
 export type TFileReferenceModel =
   | "Article"
   | "Project"
+  | "CaseStudy"
+  | "Video"
   | "User"
   | "ArticleCategory"
   | "ProjectCategory"
+  | "CaseStudyCategory"
+  | "VideoCategory"
   | "Review"
   | "Contact"
   | "ProjectResource"

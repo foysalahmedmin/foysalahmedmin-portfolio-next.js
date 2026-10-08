@@ -1,6 +1,8 @@
 import type { TResolvedPublishedPagePayload } from "@/app/api/pages/page-resolver.type";
 import ArticlesContentSection from "@/components/(common)/articles-page/articles-content-section";
+import CaseStudiesContentSection from "@/components/(common)/case-studies-page/case-studies-content-section";
 import ProjectsContentSection from "@/components/(common)/projects-page/projects-content-section";
+import VideosContentSection from "@/components/(common)/videos-page/videos-content-section";
 import PageHeaderSection from "@/components/sections/page-header-section";
 import type { TBreadcrumbs } from "@/components/ui/breadcrumb";
 import type { TPublicRouteDiscoveryData } from "@/lib/pages/public-route-renderer.type";
@@ -24,11 +26,23 @@ const ROUTE_HEADER_FALLBACKS = {
       "Case studies that start with the business problem, then walk through the approach, the solution, and what changed as a result.",
     label: "Projects",
   },
+  "case-studies": {
+    title: "Problems solved, in depth",
+    description:
+      "Full stories that start with the business problem, then walk through the approach, the solution, and the result.",
+    label: "Case studies",
+  },
   articles: {
     title: "Notes on solving real problems",
     description:
       "Practical, human-written notes on the decisions and trade-offs behind solutions that hold up in real use.",
     label: "Articles",
+  },
+  videos: {
+    title: "Watch how problems get solved",
+    description:
+      "Walkthroughs and short reels that show the thinking and the tools behind the work.",
+    label: "Videos",
   },
   contact: {
     title: "Tell me about the problem",
@@ -92,7 +106,21 @@ export const PublicRoutePage = ({
               <ArticlesContentSection {...discovery.props} />
             ),
           }
-        : undefined;
+        : discovery?.route_key === "case-studies" &&
+            payload.page.route_key === "case-studies"
+          ? {
+              "case-study-collection": () => (
+                <CaseStudiesContentSection {...discovery.props} />
+              ),
+            }
+          : discovery?.route_key === "videos" &&
+              payload.page.route_key === "videos"
+            ? {
+                "video-collection": () => (
+                  <VideosContentSection {...discovery.props} />
+                ),
+              }
+            : undefined;
   const isLegal =
     payload.page.route_key === "privacy" || payload.page.route_key === "terms";
   const content = (
@@ -122,7 +150,9 @@ export const PublicRoutePage = ({
   ) : (
     <main
       className={
-        payload.page.route_key === "projects"
+        payload.page.route_key === "projects" ||
+        payload.page.route_key === "case-studies" ||
+        payload.page.route_key === "videos"
           ? "min-h-screen pb-20"
           : "min-h-screen"
       }

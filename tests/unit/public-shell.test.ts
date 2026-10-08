@@ -11,7 +11,15 @@ describe("public shell projection", () => {
     const site = createEmergencyPublicSite();
     expect(
       getPublicShellLinks(site, "header").map((link) => link.href)
-    ).toEqual(["/", "/about", "/projects", "/articles", "/contact"]);
+    ).toEqual([
+      "/",
+      "/about",
+      "/projects",
+      "/case-studies",
+      "/articles",
+      "/videos",
+      "/contact",
+    ]);
     expect(getPrimaryPublicCta(site)?.href).toBe("/contact");
   });
 

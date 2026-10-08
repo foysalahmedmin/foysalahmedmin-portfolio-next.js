@@ -1,5 +1,7 @@
 import { ENV } from "@/config";
 import type { TArticleCategory } from "@/types/article-category.type";
+import type { TCaseStudyCategory } from "@/types/case-study-category.type";
+import type { TVideoCategory } from "@/types/video-category.type";
 import type { TProjectCategory } from "@/types/project-category.type";
 import type { TResponse } from "@/types/response.type";
 
@@ -63,4 +65,34 @@ export async function getArticleCategories(
     }
   );
   return handleResponse<TArticleCategory[]>(res);
+}
+
+export async function getCaseStudyCategories(
+  params?: TQueryParams,
+  options: TRequestOptions = {}
+) {
+  const res = await fetch(
+    `${getBaseUrl()}/api/case-study-categories${getQueryString(params)}`,
+    {
+      method: "GET",
+      next: { revalidate: 3600 },
+      signal: options.signal,
+    }
+  );
+  return handleResponse<TCaseStudyCategory[]>(res);
+}
+
+export async function getVideoCategories(
+  params?: TQueryParams,
+  options: TRequestOptions = {}
+) {
+  const res = await fetch(
+    `${getBaseUrl()}/api/video-categories${getQueryString(params)}`,
+    {
+      method: "GET",
+      next: { revalidate: 3600 },
+      signal: options.signal,
+    }
+  );
+  return handleResponse<TVideoCategory[]>(res);
 }

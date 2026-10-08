@@ -302,13 +302,14 @@ const cloudinaryAdapter: TStorageAdapter = {
     const folder = normalizeFolder(config.folder || ENV.cloudinary_folder);
     const storageKey = [folder, input.immutable_key].filter(Boolean).join("/");
     const isRaw = input.mimetype === "application/pdf";
+    const isVideo = input.mimetype.startsWith("video/");
     const publicId = isRaw ? `${storageKey}.pdf` : storageKey;
     const deliveryType =
       input.access === "private" ? "authenticated" : "upload";
     const result = await new Promise<UploadApiResponse>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
-          resource_type: isRaw ? "raw" : "image",
+          resource_type: isRaw ? "raw" : isVideo ? "video" : "image",
           type: deliveryType,
           public_id: publicId,
           use_filename: false,
@@ -407,6 +408,8 @@ const cloudinaryAdapter: TStorageAdapter = {
       { resource_type: "image", type: "authenticated" },
       { resource_type: "raw", type: "upload" },
       { resource_type: "raw", type: "authenticated" },
+      { resource_type: "video", type: "upload" },
+      { resource_type: "video", type: "authenticated" },
     ] as const;
     for (const combination of combinations) {
       if (resources.length >= input.limit) break;

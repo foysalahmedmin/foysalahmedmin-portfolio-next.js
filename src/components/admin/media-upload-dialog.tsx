@@ -182,7 +182,11 @@ const MediaUploadDialog = ({ isOpen, setIsOpen, onUploaded }: Props) => {
                   ))}
                 </FormControl>
                 <FormControlHelper>
-                  {purposeOption.kind === "document" ? "PDF" : "Raster image"}
+                  {purposeOption.kind === "document"
+                    ? "PDF"
+                    : purposeOption.kind === "video"
+                      ? "MP4 or WebM video"
+                      : "Raster image"}
                   {" · "}
                   {purposeOption.access} delivery policy
                 </FormControlHelper>
