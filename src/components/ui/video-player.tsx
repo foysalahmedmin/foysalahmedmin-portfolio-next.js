@@ -5,10 +5,44 @@ import { cn } from "@/lib/utils";
 import { Pause, Play, TriangleAlert, Volume2, VolumeX } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Spinner } from "./spinner";
 
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
+
+type ReactPlayerConfig = NonNullable<
+  ComponentProps<typeof ReactPlayer>["config"]
+>;
+
+/**
+ * What react-player hands to the YouTube element. The patched
+ * youtube-video-element (patches/youtube-video-element@1.9.0.patch) also reads
+ * a pixel `width`/`height` from it, but the package's own typings only declare
+ * those two keys in the editor/compiler that resolved the patched copy of its
+ * .d.ts — a stale TS server resolves the stock one and rejects them. Declaring
+ * them here keeps the call site valid whichever copy was resolved.
+ */
+type YouTubeEmbedConfig = NonNullable<ReactPlayerConfig["youtube"]> & {
+  width?: number;
+  height?: number;
+};
+
+const toPlayerConfig = (size: {
+  width: number;
+  height: number;
+}): ReactPlayerConfig => {
+  const youtube: YouTubeEmbedConfig = {
+    width: size.width,
+    height: size.height,
+  };
+  return { youtube };
+};
 
 type PlayerStatus = "loading" | "ready" | "buffering" | "error";
 
@@ -382,22 +416,15 @@ export function VideoPlayerCore({
               controls={false}
               playsInline
               // Real pixel numbers reach the YouTube provider's own iframe
-              // via a patched dependency (patches/youtube-video-element.patch)
-              // — see that patch for why. CSS width/height alone leaves the
-              // iframe's own width/height *attributes* at the library's
-              // hardcoded "100%", which YouTube reads as "no real size
-              // given" and defaults its internal layout to landscape,
-              // rendering a portrait (Shorts) video pillarboxed regardless
-              // of the iframe's actual CSS-rendered shape.
-              // Real pixel numbers reach the YouTube provider's own iframe
-              // via a patched dependency (patches/youtube-video-element.patch)
-              // — see that patch for why. CSS width/height alone leaves the
-              // iframe's own width/height *attributes* at the library's
-              // hardcoded "100%", which YouTube reads as "no real size
-              // given" and defaults its internal layout to landscape,
-              // rendering a portrait (Shorts) video pillarboxed regardless
-              // of the iframe's actual CSS-rendered shape.
-              config={{ youtube: { width: size.width, height: size.height } }}
+              // via a patched dependency
+              // (patches/youtube-video-element@1.9.0.patch) — see that patch
+              // for why. CSS width/height alone leaves the iframe's own
+              // width/height *attributes* at the library's hardcoded "100%",
+              // which YouTube reads as "no real size given" and defaults its
+              // internal layout to landscape, rendering a portrait (Shorts)
+              // video pillarboxed regardless of the iframe's actual
+              // CSS-rendered shape.
+              config={toPlayerConfig(size)}
               style={{
                 position: "absolute",
                 top: 0,
