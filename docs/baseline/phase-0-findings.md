@@ -49,6 +49,8 @@ Not yet measured: real-GPU frame time and the cost of glass over the live canvas
 
 ## 3. Spike S2: the live style and motion tile
 
+**Revision 2 (after the owner's review):** the hero became a pinned scroll story (the three roles one at a time, no clicking, no side card), the 3D camera and scene react to each role, and the tile gained a trace rail, a scroll-linked triage and a pipeline scene with a switch-off ending. The plan (v1.3) records the decisions.
+
 [`docs/prototypes/signal-tile/index.html`](../prototypes/signal-tile/index.html) is a single file that opens by double click (libraries come from a CDN; it is a prototype, not production code). It contains: the hero with the lit maquette and pulse, the tier system (`?tier=0..3`) with the poster pipeline (T1 renders one frame, turns it into an image and releases WebGL), the zone switcher, the evidence strip, the pinned stack scene, the boundary wipe into a paper band, the process wire, the system lab (ramp, type, glass, status marks), the console dashboard tile, the final CTA and footer wordmark, the command palette (⌘K), the theme flip, and a reduced-motion switch. One clock drives Lenis, ScrollTrigger and the renderer.
 
 Issues the tile surfaced, now designed into the plan (see plan 3.2, 3.7.1):

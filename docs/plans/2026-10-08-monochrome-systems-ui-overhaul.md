@@ -2,7 +2,7 @@
 
 |              |                                                                                                                                                          |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | Draft v1.2 for owner approval (revised twice the same day). No code, seed, schema or ledger file has been changed.                                       |
+| **Status**   | Draft v1.3 for owner approval (revised three times the same day). No code, seed, schema or ledger file has been changed.                                 |
 | **Date**     | 2026-10-08                                                                                                                                               |
 | **Scope**    | Public site **and the admin console** on one design system. API behaviour, admin behaviour and data contracts keep working; data additions are additive. |
 | **Refines**  | `plan.md` phases P03 (tokens), P04 (motion), P12 (generated media), P13 (hero), P14 (homepage), P17 (About), P18 (perf)                                  |
@@ -23,6 +23,18 @@ Requested: a higher animation bar, a very smooth experience, UI consistency on e
 | 6   | **Roadmap is now 11 phases (P0 to P10)** with console phases and a dedicated motion-tuning pass.                                                                                                                                                         | 7                          |
 | 7   | **Mobile, touch, print and failure isolation:** a thumb-zone mobile blueprint, a print stylesheet, and a rule that any animation or 3D failure degrades silently to the static page.                                                                     | 3.7.1, 3.16                |
 | 8   | **New code findings:** pointer effects re-render React on every `mousemove`; a second rAF loop is about to be added; the admin animates `width` and blurs a sticky bar; 40 admin and 13 public files colour state with utilities.                        | 1.1                        |
+
+### Revision 1.3: hero scroll story and scroll storytelling (after the live tile review)
+
+Feedback from the Phase 0 tile: no clicking to choose a role, no card at the bottom right; the 3D background that shifts step by step is liked; the hero title should be the role itself, one at a time, changing as you scroll, with the old headline as a small line above; and scroll should give the visitor information, fun and pull.
+
+| #   | Change                                                                                                                                                                                                                                   | Where            |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| 1   | **Hero is a pinned scroll story:** the title is System Architect, then Software Developer, then AI Automation Developer, one per scroll beat, with the 3D camera and scene reacting to each. The side card and role buttons are removed. | 4.1 Ch.0, 3.8    |
+| 2   | **"Business problems in. Reliable systems out."** becomes the small kicker line above the title (it stays the page `h1`).                                                                                                                | 4.1, 5.4         |
+| 3   | **Scroll storytelling principles and a scroll story map** for the whole home page: what each scroll step teaches, the small delight it gives and what pulls the visitor on.                                                              | 3.7.4            |
+| 4   | **Triage and Pipeline made scroll-driven:** each pain lights up as you scroll to it; the pipeline pulse follows your scroll, a panel explains each step and its failure handling, and the last beat flips the switch off.                | 4.1 Ch.1, Ch.3   |
+| 5   | Four new effects (M36 to M39), three pins on Home instead of two, and an honest length budget (about 23 screens for Tier 1) with a pin-tuning pass.                                                                                      | App. A, 4.1, 6.2 |
 
 ### Revision 1.2: home page additions and polish
 
@@ -398,7 +410,7 @@ Glass is only used where a rich backdrop exists (the 3D scene, textured bands, p
 
 1. One master timeline per chapter; effects inside it share easing and tokens. No stray `transition: all`.
 2. Only `transform`, `opacity` and `clip-path` animate. No layout properties.
-3. At most two pinned scenes on the homepage (Stack and Pipeline), each ≤ 250–300 vh, always skippable (anchor links jump past them, keyboard scrolling works normally, and the reduced layout has no pins). No horizontal scroll hijacking.
+3. At most three pinned scenes on the homepage (hero role story about 300 vh, Stack about 160 vh, Pipeline about 300 vh). Each is a run of beats of one screen or less, always skippable (anchor links and the palette jump past them, keyboard scrolling works normally, and the reduced layout has no pins). Phones get shorter pins. No horizontal scroll hijacking.
 4. Entrance order is fixed: structure (lines, grid) first, then headings, then body, then controls.
 5. **Never hide the LCP element or primary content before JS.** Enhancement is additive: server HTML is complete and visible; the hero animates around the headline and settles it, it does not start from `opacity:0`.
 6. Smooth scroll (Lenis) only when `effectiveMotion === "full"` and pointer is fine. Native scroll position is kept, so find-in-page, anchors and keyboard scrolling keep working.
@@ -407,7 +419,7 @@ Glass is only used where a rich backdrop exists (the 3D scene, textured bands, p
 
 **Reduced variants.** `reduced` (OS setting or user choice): final state immediately, with opacity-only 150 ms fades where a transition aids comprehension; no parallax, no pins, no smooth scroll, no 3D motion (poster or still scene). `off`: final state, no transitions at all. Parity is tested: the reduced render equals the end frame of the full-motion render.
 
-The full registry (35 public effects and 7 console effects) with trigger, meaning, tokens, tier and reduced behaviour is Appendix A. Sections 3.7.1 to 3.7.3 add the smoothness rules, the signature library and the console preset.
+The full registry (39 public effects and 7 console effects) with trigger, meaning, tokens, tier and reduced behaviour is Appendix A. Sections 3.7.1 to 3.7.3 add the smoothness rules, the signature library and the console preset.
 
 ### 3.7.1 Smoothness engineering (how it stays at 60 fps)
 
@@ -502,13 +514,39 @@ The console must feel fast and quiet. It uses the same tokens, shortened, and no
 
 Not used in the console: Lenis, scroll scrubs, parallax, 3D, custom cursor, magnetic buttons, text splitting, count-up (numbers are static and exact), page-transition wipes.
 
+### 3.7.4 Scroll storytelling: information, delight, attraction
+
+Scroll is the main thing the visitor does, so every scroll step must give something back. These rules are what turn pinned scenes from decoration into a story.
+
+1. **One idea per beat.** A beat is the span of scroll in which one thing is on stage (one role, one pain, one pipeline step, one layer). A beat is one screen of scroll or less; nothing runs longer than a screen without something new happening.
+2. **Information first, then delight.** Each beat leads with a plain headline, then one line, then at most three supporting lines that appear one by one as you scroll. The effect carries the content; it never replaces it.
+3. **Cause and effect.** The scene answers the scroll: the title changes, the camera glides to that part of the system, the part reacts (grid lights, stack lifts apart, ring ignites, pulse speeds up). If something moves, it is because the visitor scrolled.
+4. **Progress is always visible.** A role bar in the hero, the trace rail down the left edge, the pulse in the pipeline and the wire in the process tell the visitor how far they are, so they trust the scroll and never feel trapped.
+5. **Invite the first scroll.** A small animated cue ("Scroll") appears at the start and disappears after the first move. Nothing on screen should look finished before the visitor has scrolled.
+6. **Reward curiosity.** Small discoveries for people who look closely: the pulse runs faster when you scroll faster, the stack lifts apart, the switch flips off at the end of the pipeline, numbers count up once.
+7. **Never a dead scroll, never a trap.** No pin lasts longer than three screens, every pin can be skipped by anchor, palette or keyboard, and reduced motion renders the same information as a plain stacked list.
+8. **Same information without motion.** Everything a beat teaches exists in the HTML in reading order, so no one needs the animation to understand the offer.
+
+**Scroll story map (Home):**
+
+| Chapter      | The visitor learns                                         | The small delight                                                                | What pulls them on                              |
+| ------------ | ---------------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Hero         | The three roles and what each takes off their plate        | Title swaps by scroll; camera glides; grid, stack and ring react                 | Huge type, a system that changes as they scroll |
+| Evidence     | Three checkable facts about how the work is done           | Numbers count up once                                                            | "Derived from code" marks: honesty on display   |
+| Triage       | Which of their own problems this solves, and how           | Each pain lights up as it reaches the middle; the group label follows            | "Pick the sentence that sounds like your week"  |
+| Stack        | Offers are layers; take one or all                         | The layers lift apart with leader lines                                          | Specs appear as the layers separate             |
+| Pipeline     | How automation is made safe: review gate, fallback, switch | The signal runs along the path; a panel explains each step; the switch flips off | The failure line under every step               |
+| Deliverables | What they will actually receive                            | Tabs turn into a printed page                                                    | Real artifacts, not mock-ups                    |
+| Process      | The project is predictable                                 | The wire draws as you scroll; the paper band wipes in                            | Contrast change signals a new chapter           |
+| Final CTA    | What happens after they write                              | Magnetic button, label roll                                                      | A clear, honest next step                       |
+
 ### 3.8 3D language ("the maquette")
 
 - **Subject:** a miniature of a real system: ingress gateway, service blocks, database, queue, AI agent core, human review gate, egress. About 40–60 blocks plus orthogonal conduits. Blocks are bevelled rounded boxes; conduits are thin boxes routed at right angles; each block carries an engraved mono label (rendered as DOM labels projected onto the scene so text stays crisp, selectable and translatable).
-- **Zones = roles.** Foundation grid plane (System Architect), stacked service slabs (Software Developer), agent core with pulse paths (AI Automation). Hovering or focusing a role label in the hero highlights its zone and swaps the glass info panel.
+- **Roles drive the scene.** The hero scroll story moves the camera and changes the scene: System Architect shows the whole system and lights the blueprint grid and conduits; Software Developer glides to the services and lifts the three service stacks apart (exploded view); AI Automation Developer moves in on the agent core, ignites a ring around it and speeds the pulse. Labels are DOM, shown per role and hidden where they would collide with the copy.
 - **Material:** greyscale PBR, node bodies 800–900, edges and conduits 300–400, pulses `--mono-white` emissive. Light theme renders the same scene as matte "clay" (bodies 100–200, soft ambient occlusion look via baked contact shadows, ink-coloured conduits).
 - **Lighting:** one soft key light top-left, a faint rim light, and a **procedural environment from Lightformers** (zero download, CSP-safe). Contact shadows baked once (`frames={1}`). No post-processing; glow is a pooled sprite.
-- **Camera:** perspective, slight downward angle; pointer rig lerps ±4°; scroll dollies from overview to a close-up of the agent zone over the first 120 vh, then the canvas fades out and unmounts.
+- **Camera:** perspective, slight downward angle, one keyframe per role blended in steps by the story timeline (hold 0.7, move 0.3, eased), plus a pointer rig of about ±1 unit. After the pin the hero scrolls away and the canvas unmounts. The scene is offset to the right with a camera view offset so the copy keeps the left half; a left scrim keeps the backdrop behind text within the glass ceiling.
 - **Geometry budget:** ≤ 150k triangles, ≤ 40 draw calls (instancing), textures ≤ 16 MB, no external model, HDR, Draco or KTX2 file.
 - **Accessibility:** canvas is `aria-hidden`. All meaningful content is DOM. A visible pause/"still image" control sits in the motion preference UI.
 - **Poster:** the LCP-safe server-rendered `<picture>` is generated from the same scene (`scripts/render-hero-poster.ts`, Playwright capture, AVIF/WebP, ≤ 60 KB mobile, ≤ 120 KB desktop; ADR 0009 caps are 200 / 350 KB). The canvas cross-fades over an identical composition, so there is no layout shift.
@@ -568,7 +606,7 @@ Every route belongs to exactly one archetype, and every archetype has one templa
 
 | Route                               | Archetype | Signature interaction (the only page-specific motion)   | Tone sequence                                              |
 | ----------------------------------- | --------- | ------------------------------------------------------- | ---------------------------------------------------------- |
-| `/`                                 | A1        | Signal pulse and trace rail                             | ink, paper band (process, engagement), ink, paper CTA band |
+| `/`                                 | A1        | Hero role story, signal pulse, trace rail               | ink, paper band (process, engagement), ink, paper CTA band |
 | `/case-studies`                     | A2        | Row preview on hover and focus                          | ink body, paper CTA band                                   |
 | `/case-studies/[id]`                | A3        | Diagram sync with chapters (M17)                        | ink body, paper CTA band                                   |
 | `/projects`, `/articles`, `/videos` | A2        | Lab switcher indicator (M28); row preview; poster hover | ink body, paper CTA band                                   |
@@ -664,11 +702,11 @@ The homepage section list keeps the closed Page kinds where possible and adds si
 
 | Chapter                         | Tier           | Tone  | Est. screens (desktop) |
 | ------------------------------- | -------------- | ----- | ---------------------- |
-| 0 Hero                          | 1              | ink   | 1.0                    |
+| 0 Hero (pinned story)           | 1              | ink   | 4.0                    |
 | 0b Evidence strip               | 1, conditional | ink   | 0.3                    |
-| 1 Triage                        | 1              | ink   | 1.6                    |
-| 2 Stack (pinned)                | 1              | ink   | 2.5                    |
-| 3 Pipeline (pinned)             | 1              | ink   | 3.0                    |
+| 1 Triage (scroll-linked)        | 1              | ink   | 2.5                    |
+| 2 Stack (pinned)                | 1              | ink   | 2.6                    |
+| 3 Pipeline (pinned)             | 1              | ink   | 4.0                    |
 | 4 Case files                    | 1              | ink   | 1.0                    |
 | 4b Deliverables you can inspect | 1              | ink   | 1.2                    |
 | 5 Process and 5b Engagement     | 1              | paper | 2.2                    |
@@ -682,46 +720,54 @@ The homepage section list keeps the closed Page kinds where possible and adds si
 | 9 Next steps and CTA            | 1              | paper | 1.3                    |
 | Footer                          | 1              | ink   | 0.6                    |
 
-**Home length budget.** Tier 1 is about 18 screens of scroll at 1440×900 including the two pins (about 12.6 of content); Tier 2 adds about 2.4. The harness measures document height and Phase 5 fails if Tier 1 exceeds 19 screens or Tier 1 plus Tier 2 exceeds 22. If it feels long, hide chapters rather than shrink them.
+**Home length budget.** Tier 1 is about 23 screens of scroll at 1440×900 including the three pins (about 13 screens of content, about 10 of pinned story); Tier 2 adds about 2.4. The harness measures document height and Phase 5 fails if Tier 1 exceeds 24 screens or Tier 1 plus Tier 2 exceeds 27. Phone pins are shorter, and Phase 9 includes a pin-tuning pass (target: hero about 2.6 screens, Stack 2, Pipeline about 3) judged on a real device. If the page still feels long, hide chapters rather than shrink them.
 
-#### Ch.0 `/ingress` — Hero (`site-hero`, new layout `topology`)
+#### Ch.0 `/ingress` — Hero: the three roles as a scroll story (`site-hero`, new layout `topology`)
 
-- **Job:** in five seconds say who this is, what problem they remove, and why it is credible. Make the visitor feel "systems and automation".
-- **Layout:** full viewport (`100svh`). Hairline blueprint grid with registration crosses. Left: mono eyebrow built from the three role labels (data-driven), the H1, one sentence, CTAs. Right and bleeding behind: the 3D maquette. Bottom-right: one glass-2 info panel for the selected zone. Bottom-left: scroll cue as a mono label, not an arrow icon.
+- **Job:** in the first scroll, say who this is, which problems each role removes and why it is credible, and make scrolling itself the invitation. **No clicking is needed anywhere in the hero** (owner decision after the live tile review).
+- **Layout:** one pinned scene (about 300 vh on desktop). A small mono kicker sits above the title: **Business problems in. Reliable systems out.** (it is the page `h1`). The big title is the role, one at a time: **System Architect**, then **Software Developer**, then **AI Automation Developer**. Under each title: one plain line, then three capability lines that appear one by one as you scroll. A thin role bar at the bottom shows progress and a scroll cue invites the first scroll. The 3D maquette sits behind and to the right. There is no side card and no role buttons.
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│ ▌wordmark   Solutions Work Process Lab About     ⌘K  ◐  [Start a project] │
+│ ▌wordmark   Problems Solutions Process …        ⌘K  ◐  [Start a project] │
 ├────────────────────────────────────────────────────────────────────┤
-│ ┃ SYSTEM ARCHITECT / SOFTWARE DEVELOPER / AI AUTOMATION DEVELOPER    │
-│ ┃                                      ╔═══ 3D maquette ═══╗       │
-│ ┃ BUSINESS PROBLEMS IN.                ║  ▪──┐  ▪──▪        ║       │
-│ ┃ RELIABLE SYSTEMS OUT.                ║     └──▪══▪ ← pulse║       │
-│ ┃                                      ║  ▪──────┘   ▪      ║       │
-│ ┃ one-sentence promise                 ╚═══════════════════╝       │
-│ ┃ [Describe your problem →]  How I work ↓        ┌ glass panel ┐   │
-│ ┃ ─ ─ ─ ─ hairline grid + ticks ─ ─ ─ ─ ─ ─ ─    │ zone: AI    │   │
-│ ┃ ingress                                        └─────────────┘   │
+│ ── BUSINESS PROBLEMS IN. RELIABLE SYSTEMS OUT.            (kicker, h1)   │
+│ ROLE 1 OF 3 · I TAKE THIS OFF YOUR PLATE            ╔═ 3D maquette ═╗   │
+│ SYSTEM                                              ║ ▪─┐  ▪──▪     ║   │
+│ ARCHITECT                                           ║   └──▪══▪ ←pulse│  │
+│ Get the design right before it gets expensive.      ╚═══════════════╝   │
+│ ■ Architecture and technical decision records        (grid lights up)    │
+│ ■ Database and data-model design                                         │
+│ [Describe your problem →]  [See how I work]                              │
+│ SYSTEM ARCHITECT · SOFTWARE DEVELOPER · AI AUTOMATION ───────── bar      │
 └────────────────────────────────────────────────────────────────────┘
- ┃ = trace rail
+ scroll → the title swaps, the camera glides, the scene reacts
 ```
 
-- **Copy intent:** the H1 states the outcome in the client's words; the sentence names the three roles' jobs; secondary CTA scrolls to Process. See 5.4 for options A to C (D-01).
-- **Motion:** M01 grid draws in (Assemble), M02 headline lines settle (Resolve), M03 poster to canvas crossfade (Assemble), M04 camera dolly with scroll (Transmit), M05 pointer depth on camera and layers (Respond), M16 reticle, M23 scroll velocity drives the pulse speed (Transmit).
+- **The scroll story** (timeline units: each role holds 0.7 and changes over 0.3, total 2.7, scrubbed linearly with `scrub.lag`):
+
+| Beat | Title                   | The 3D scene reacts (the camera glides, it never cuts)                | What the visitor learns                                       |
+| ---- | ----------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------- |
+| 1    | System Architect        | Whole system in view; the blueprint grid and conduits light up        | The design comes first: decisions, data model, security, cost |
+| 2    | Software Developer      | Camera moves to the services; the three service stacks lift apart     | The product gets built in layers you can review               |
+| 3    | AI Automation Developer | Camera moves to the agent core; a ring ignites; the pulse runs faster | Repetitive work becomes automation with a review gate         |
+
+- **Motion:** M36 role story (title lines mask out and in; capability lines reveal one by one), M37 scene reaction (camera path plus per-role scene state), M01 grid draw on load, M02 first title settles on load (nothing hidden before JS), M03 poster to canvas crossfade, M05 pointer depth, M23 scroll velocity drives the pulse, M16 reticle. Entrance ≤ 1.4 s and non-blocking.
 - **Entrance timeline** (server HTML is already complete and visible at first paint; nothing here gates content, and the canvas crossfade simply waits if the 3D chunk is late):
 
-| Time (ms)   | Event                                                                                   |
-| ----------- | --------------------------------------------------------------------------------------- |
-| 0           | First paint: headline, sentence, CTAs and the poster are all visible                    |
-| 0 to 300    | M01 hairline grid and registration crosses draw in behind the content                   |
-| 150 to 450  | Mono eyebrow decodes (M09)                                                              |
-| 200 to 800  | H1 lines settle from a 4 % mask offset and 3 % width difference (M02), no opacity start |
-| 500 to 1000 | After hydration and idle: poster crossfades to the live canvas (M03); pulse starts      |
-| 700 to 1100 | Glass info panel and CTAs settle (M07); total ≤ 1.4 s                                   |
+| Time (ms)   | Event                                                                                     |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| 0           | First paint: kicker, first role title, line, CTAs and the poster are all visible          |
+| 0 to 300    | M01 hairline grid draws in behind the content                                             |
+| 150 to 450  | Kicker decodes (M09)                                                                      |
+| 200 to 800  | First title settles from a small mask offset and width difference (M02), no opacity start |
+| 500 to 1000 | After hydration and idle: poster crossfades to the live canvas (M03); pulse starts        |
+| 700 to 1100 | CTAs settle (M07); total ≤ 1.4 s. The scroll cue then pulses until the first scroll       |
 
-- **3D / parallax:** the maquette (3.8). DOM parallax layers by depth: grid 0.05, canvas (camera-driven), ghosted index text 0.15, content 1.0, foreground ticks 1.1. Meaning: back layers move less, like infrastructure behind an interface.
-- **Fallback / reduced:** T0/T1 show the poster with two CSS parallax layers on pointer (T1 only, fine pointer, motion allowed); reduced shows the poster, static. No-JS shows the full hero text and poster. The role-label zone switcher works without WebGL (it changes the info panel and highlights the poster region).
-- **Replaces:** the custom five-slide autoplay hero (no autoplay, so the autoplay accessibility obligations disappear from the hero). `useAutoplayController` and `lib/motion/autoplay.ts` stay only if another consumer remains; otherwise they are removed with their tests in Phase 3.
+- **Data:** the three beats read from `Site.pillars` (label, headline, the first three capabilities); the kicker from `positioning.headline`. Nothing is hard-coded in the component.
+- **3D / parallax:** the maquette (3.8). DOM parallax layers by depth: grid 0.05, canvas (camera-driven), content 1.0. Back layers move less, like infrastructure behind an interface.
+- **Accessibility and fallback:** the DOM holds all three roles in order, so the page is complete without the pin. Reduced motion, no-JS, T0 and the static layout render the three roles as a plain stacked list (title, line, capabilities) over the still poster. Role titles are `h2` under the kicker `h1`; the role bar and cue are `aria-hidden`; the pin never traps keyboard scroll, and "See how I work" and the palette jump past it. On phones the pin is shorter (about 220 vh), labels are hidden and the scene sits behind a top scrim.
+- **Replaces:** the custom five-slide autoplay hero, and the interim "info card plus role buttons" idea that the tile review rejected. `useAutoplayController` and `lib/motion/autoplay.ts` stay only if another consumer remains; otherwise they are removed with their tests in Phase 3.
 
 #### Ch.0b Evidence strip (`metrics-strip`, new layout `evidence`)
 
@@ -734,7 +780,7 @@ The homepage section list keeps the closed Page kinds where possible and adds si
 #### Ch.1 `/triage` — Problems (new kind `problem-index`)
 
 - **Job:** let the visitor recognise their own situation and see the way out. This is the "problems I solve" heart of the repositioning.
-- **Layout:** two columns on desktop. Left (sticky): a short list of problem groups (Systems, AI Automation) with a mono count. Right: a typographic index. Each row is one pain sentence set large (step-3, Display wide). Selecting a row (click, Enter, or in-view on mobile) expands it inline into Approach, Deliverable and Outcome (Problem → Approach → Deliverable → Outcome as four mono-labelled lines), plus "Related case file" when one exists.
+- **Layout:** two columns on desktop. Left (sticky): the heading, the lead and a small group label (Systems or AI Automation) that follows the active pain. Right: a typographic index; each pain is one large sentence. **No clicking is needed:** each pain lights up as it reaches the middle of the screen, and its Approach, Deliverable and Outcome lines reveal one after another (Problem → Approach → Deliverable → Outcome as four mono-labelled lines), with a quiet "Describe this problem" link and "Related case file" when one exists.
 
 ```
  Systems ─────────────  │  OUR SOFTWARE KEEPS BREAKING AS WE GROW        ＋
@@ -747,7 +793,7 @@ The homepage section list keeps the closed Page kinds where possible and adds si
 ```
 
 - **Interaction that earns conversions:** "Describe this problem" links to `/contact?topic=<problem_key>`. The form shows the topic as a removable chip and pre-fills a subject line. No API change (client-side prefill only).
-- **Motion:** M07 rows rise in a stagger (Resolve); M13 expand on selection with a pulse drawn from row to panel (Transmit); M09 mono labels decode.
+- **Motion:** M38 triage focus (scroll-toggled, Resolve) with the staggered reveal of the three lines; M09 mono labels decode. Pains sit at a fixed height so nothing shifts while scrolling.
 - **Parallax:** a huge ghosted role glyph in the texture of the active area drifts at 0.15.
 - **Fallback / reduced:** semantic `<details>`-style disclosure; all details visible when motion is off; keyboard: arrow keys move between rows, Enter toggles.
 - **Source:** new kind `problem-index`, data derived from `Service.problems[]`.
@@ -776,7 +822,7 @@ The homepage section list keeps the closed Page kinds where possible and adds si
 #### Ch.3 `/pipeline` — Automation, step by step (`architecture-workflow`, new layout `pipeline`)
 
 - **Job:** prove judgement on AI automation by showing the guardrails, not the hype. Labelled **illustrative, not a client project**.
-- **Layout:** pinned scene about 300 vh. A horizontal path of five nodes in glass chips: **Input** → **Automation** → **AI agent** → **Review gate** → **Output**. A light pulse travels the path with scroll. At each node a panel states what it does and what happens when it fails (retry, alert, safe fallback). The last frame states the switch-off.
+- **Layout:** pinned scene about 300 vh. An orthogonal SVG path of five nodes in square chips: **Input** → **Automation** → **AI agent** → **Review gate** → **Output**. Scroll moves a light pulse along the path (it draws the path as it goes). A panel under the path swaps with each step: what the step does and what happens when it fails (retry, alert, safe fallback). In the last beat the pulse stops and a switch flips to Off: "One switch turns the whole thing off, and everything it did is logged." Phones: no pin; the pulse follows the section through the viewport.
 
 ```
  [Input] ───▶ [Automation] ───▶ [AI agent] ───▶ [Review gate] ───▶ [Output]
@@ -786,7 +832,7 @@ The homepage section list keeps the closed Page kinds where possible and adds si
                               when it fails: retry · alert · fallback · one switch to turn it off
 ```
 
-- **Motion:** M12 pipeline trace (Transmit): SVG `stroke-dashoffset` scrubbed with scroll with the shared tapered pulse head (M31), node highlight at each step, pulse speed following scroll velocity (M23). Pure SVG/DOM, no second WebGL canvas.
+- **Motion:** M12 pipeline trace (Transmit): the pulse position follows scroll linearly with the shared tapered head (M31) and pulse speed in the 3D scene follows scroll velocity (M23); M39 switch-off flip at the end. Pure SVG and DOM, no second WebGL canvas.
 - **Reduced:** static diagram with all labels and the failure line visible.
 - **Source:** `architecture-workflow`, layout `pipeline`; data `Site.workflow_example` (section 5).
 
@@ -1064,18 +1110,20 @@ type TSiteFinder = {
 
 Status tags: ✔ reused from repo seed · ✎ new draft needing owner voice approval · `[CONFIRM:ID]` unknown fact. `{name}` = `identity.public_name` (C-01).
 
-**Hero** (`site-hero`)
+**Hero** (`site-hero`): a kicker, then three role beats. Everything except the kicker and the eyebrow reuses seeded copy.
 
-| Field           | Copy                                                                                           | Status                   |
-| --------------- | ---------------------------------------------------------------------------------------------- | ------------------------ |
-| Eyebrow         | Built from role labels: `System Architect / Software Developer / AI Automation Developer`      | ✔ data                  |
-| H1 **A** (rec.) | **Business problems in. Reliable systems out.**                                                | ✎ D-01                   |
-| H1 B            | I design the system. Then I build it, and automate the rest.                                   | ✎ D-01                   |
-| H1 C            | Less manual work. Fewer fragile systems.                                                       | ✎ D-01                   |
-| Subline         | I turn business problems into clear architectures, working software and dependable automation. | ✔ `positioning.compact` |
-| Primary CTA     | Describe your problem                                                                          | ✎                        |
-| Secondary CTA   | See how I work                                                                                 | ✎                        |
-| Microcopy       | Email or form. `[CONFIRM:C-04]` response time is shown only if you confirm one.                | ✎                        |
+| Field              | Copy                                                                                                           | Status           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Kicker (page `h1`) | **Business problems in. Reliable systems out.**                                                                | ✎ D-01           |
+| Beat 1             | **System Architect** · Get the design right before it gets expensive. · first three capabilities from the role | ✔ `PILLAR_COPY` |
+| Beat 2             | **Software Developer** · Turn the idea into a product people can use. · first three capabilities               | ✔ `PILLAR_COPY` |
+| Beat 3             | **AI Automation Developer** · Hand repetitive work to automation you can trust. · first three capabilities     | ✔ `PILLAR_COPY` |
+| Beat eyebrow       | Role 1 of 3 · I take this off your plate (2 of 3, 3 of 3)                                                      | ✎                |
+| Role bar           | System Architect · Software Developer · AI Automation (from the role labels)                                   | ✔ data          |
+| Scroll cue         | Scroll                                                                                                         | ✎                |
+| Primary CTA        | Describe your problem                                                                                          | ✎                |
+| Secondary CTA      | See how I work                                                                                                 | ✎                |
+| Microcopy          | Email or form. `[CONFIRM:C-04]` response time is shown only if you confirm one.                                | ✎                |
 
 **Evidence strip** (`metrics-strip:evidence`): no heading, the row speaks. Cells are ✔ derived from the launch case studies and re-derived at each release (C-30): **15** schema migrations applied cleanly from an empty database · **860** automated tests passing · **None** redeploys needed to change public content. Each cell shows its verification mark and a "how this was measured" note.
 
@@ -1205,7 +1253,7 @@ New dev tooling: none beyond the ADR 0002 test stack. `@types/three` added. `tra
 | Smoothness, constrained mobile (T2)           | p95 frame interval ≤ 33 ms, dropped frames ≤ 8 %                                                                                                                                                                                                        | New (3.7.1)                    |
 | Interaction latency (lab)                     | INP p75 ≤ 100 ms on primary interactions; field gate stays ≤ 200 ms                                                                                                                                                                                     | Tightened                      |
 | Navigation                                    | Visual response ≤ 100 ms after a click; prefetched routes show content ≤ 300 ms                                                                                                                                                                         | New                            |
-| Home length                                   | Tier 1 ≤ 19 screens of scroll at 1440×900 including pins; Tier 1 + 2 ≤ 22                                                                                                                                                                               | New (4.1)                      |
+| Home length                                   | Tier 1 ≤ 24 screens of scroll at 1440×900 including the three pins; Tier 1 + 2 ≤ 27                                                                                                                                                                     | New (4.1)                      |
 | Console bundle                                | Admin shell ≤ 150 KB gz initial; list and editor routes ≤ +60 KB gz each; no animation library in any admin chunk                                                                                                                                       | New                            |
 | Console interactions                          | Filters, selection and toggles ≤ 100 ms; route skeleton visible ≤ 100 ms                                                                                                                                                                                | New                            |
 | Lighthouse (median of 3)                      | Performance ≥ 90, Accessibility ≥ 95 on Home, About, Case study, Contact; lhci extended with a mobile profile                                                                                                                                           | ADR 0009 + extended            |
@@ -1229,7 +1277,7 @@ Runtime governor: sample frame time for 2 s after init; if the average is under 
 
 - Contrast is a tested property: token matrix test (all text/surface pairs ≥ 4.5:1, large text ≥ 3:1, UI boundaries ≥ 3:1) plus Playwright pixel sampling under every glass text box and over the canvas.
 - Focus: double ring on every interactive element; targets ≥ 44×44 for primary actions (24×24 minimum); skip link kept; visible focus never hidden by sticky header (`scroll-padding-top` already tokenised).
-- No information is hover-only. Triage rows, previews and zone panels have focus, keyboard and tap equivalents.
+- No information is hover-only. Triage links, previews and the hero role story have keyboard and tap equivalents (all content is in the DOM in reading order).
 - Motion: `prefers-reduced-motion` and the in-site preference both honoured; 3D has an explicit still-image control; pinned scenes have a no-pin reduced layout; no flashing above 1 Hz.
 - `prefers-contrast: more`, `prefers-reduced-transparency` and `forced-colors` remove glass and thicken lines (3.5).
 - Diagrams: SVG with `<title>`, `<desc>` and an equivalent text list; canvas `aria-hidden`.
@@ -1298,7 +1346,7 @@ Dependencies: P0 → P1 → P2 → (P3 ∥ P4 ∥ P7) → P5 → P6; P7 → P8; 
 ### Phase 3: Shell, hero and 3D (L, highest risk)
 
 - **Work:** public header, footer and trace rail; hero (`topology` layout); maquette scene, materials, camera rig; tiers and governor; poster render script and ingestion through ManagedMedia; kill switches; replace the old hero (and remove `useAutoplayController` and its tests if no consumer remains).
-- **Acceptance:** 6.2 budgets met on the constrained profile (LCP, CLS, INP, frame times, chunk sizes); canvas pauses off-screen and unmounts; T0 and T1 render poster only; no-JS shows complete hero content; glass contrast sampling green over the canvas; the zone switcher works without WebGL; harness green on Home.
+- **Acceptance:** 6.2 budgets met on the constrained profile (LCP, CLS, INP, frame times, chunk sizes); canvas pauses off-screen and unmounts; T0 and T1 render poster only; no-JS shows complete hero content; glass contrast sampling green over the canvas; the hero scroll story works without WebGL (same three beats over the poster); harness green on Home.
 - **Tests:** tier-forced Playwright specs, 3D smoke, perf sampler, lhci mobile, axe, visual (poster).
 
 ### Phase 4: Data model and content layer (M–L, parallel with Phases 3 and 7)
@@ -1310,7 +1358,7 @@ Dependencies: P0 → P1 → P2 → (P3 ∥ P4 ∥ P7) → P5 → P6; P7 → P8; 
 ### Phase 5: Home chapters (L)
 
 - **Work:** tier 1: Evidence strip, Triage, Stack, Pipeline, Case files, Deliverables, Process wire and Engagement, Capability registry, Commitments and Trust, Field notes, FAQ, Next steps and CTA. Tier 2, built but `visible: false` until confirmed: Fit check, Starting-point finder, How I think. Page composition in the seed; per-section tests.
-- **Acceptance:** each section has a keyboard path and reduced parity; no pinned scene exceeds its length budget (max two on Home); Home Lighthouse ≥ 90 and a11y ≥ 95 on the constrained profile; CLS ≤ 0.05; harness green; no hover-only information; Home length within the 4.1 budget (≤ 19 screens Tier 1, ≤ 22 with Tier 2); the evidence strip hides itself with fewer than three qualifying metrics; Tier 2 sections can be switched on from the admin without a deploy; the finder works with the network off.
+- **Acceptance:** each section has a keyboard path and reduced parity; no pinned scene exceeds its length budget (max three on Home) and every beat is one screen or less; Home Lighthouse ≥ 90 and a11y ≥ 95 on the constrained profile; CLS ≤ 0.05; harness green; no hover-only information; Home length within the 4.1 budget (≤ 24 screens Tier 1, ≤ 27 with Tier 2); the evidence strip hides itself with fewer than three qualifying metrics; Tier 2 sections can be switched on from the admin without a deploy; the finder works with the network off.
 - **Tests:** component specs, home e2e journeys (triage → contact with topic; finder → contact), visual, axe, lhci, document-height check.
 
 ### Phase 6: Public inner pages (L)
@@ -1349,29 +1397,29 @@ Dependencies: P0 → P1 → P2 → (P3 ∥ P4 ∥ P7) → P5 → P6; P7 → P8; 
 
 ### Risks
 
-| #   | Risk                                                                            | Likelihood | Impact | Mitigation / trigger                                                                                                              |
-| --- | ------------------------------------------------------------------------------- | ---------- | ------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| R1  | Monochrome glass reads flat or "dull"                                           | Medium     | High   | Live tile (S2) is a gate before any build. Lit 3D backdrop, grain, specular edges, inversion bands (3.4).                         |
-| R2  | Blur over an animating canvas is slow on integrated and mobile GPUs             | High       | High   | Measure in S1; no blur over canvas on T2 or below; one panel only on T3; solid fallback.                                          |
-| R3  | 3D hurts LCP or TBT                                                             | Medium     | High   | Poster is LCP; canvas after idle; deferred budget; kill switch; governor.                                                         |
-| R4  | Three chunk exceeds its budget (R3F was 242 KB gz)                              | Low        | Medium | Resolved by S1: vanilla Three is 135 KB gz; OGL (14 KB) remains the fallback; fall back to Direction B for the hero if both fail. |
-| R5  | Variable font payload too large                                                 | Low        | Medium | Measured 117 KB for the preloaded fonts (budget 150 KB); `fonttools` and `next/font/local` stay as the fallback.                  |
-| R6  | Lenis and ScrollTrigger conflict with anchors, focus, sticky header or modals   | Medium     | Medium | Lenis only when full and fine pointer; stop on overlay; `data-lenis-prevent`; tests for anchor and keyboard paths.                |
-| R7  | View Transitions unsupported or unstable on Next 16.1.1                         | Medium     | Low    | Spike S3; CSS crossfade fallback; feature-detected.                                                                               |
-| R8  | Schema changes break strict Zod parsing of stored snapshots                     | Low        | High   | All new fields optional with defaults; contract tests against stored v7 fixtures; seed dry-run before apply.                      |
-| R9  | Existing tests are tightly coupled to old visuals                               | High       | Low    | Rewrite in the phase that replaces the component; never delete without a replacement.                                             |
-| R10 | Content unknowns block launch                                                   | High       | High   | Unknowns ship as `unverified` and hidden. Phase 10 is owner-dependent; Phases 1 to 9 are not.                                     |
-| R11 | Scroll fatigue from pinned scenes                                               | Medium     | Medium | Max two pins on Home, length budgets, anchors, no-pin reduced layout, owner can set Reduced.                                      |
-| R12 | Drift into the "AI-generated" look during build                                 | Medium     | Medium | Appendix D checklist is a review gate in every phase.                                                                             |
-| R13 | Dark-by-default conflicts with a visitor's OS light setting                     | Low        | Low    | First visit dark, three-state toggle persisted (D-02).                                                                            |
-| R14 | Scope: this is a large programme                                                | High       | Medium | Phase gates deliver a shippable improvement after Phases 1, 2, 5 and 7. Phase 3 is the only high-risk build.                      |
-| R15 | The admin sweep is large (63 files, about 17k lines, a 2,175-line site editor)  | High       | Medium | Strangler migration; primitives and patterns first (Phase 7); six gated batches; restyle only; stop rule.                         |
-| R16 | Consistency drifts while pages are built in parallel                            | Medium     | Medium | Templates, design lint, consistency probe and System lab all exist from Phase 1.                                                  |
-| R17 | Over-animation and motion fatigue                                               | Medium     | Medium | Doctrine ("rest is a feature"), one signature interaction per page, two pins maximum, dedicated tuning pass.                      |
-| R18 | Jank leaks into the admin through shared hooks or providers                     | Low        | Medium | Engine isolated to `components/motion` and `components/three`; bundle boundary test.                                              |
-| R19 | State is hard to read without colour in dense admin tables                      | Medium     | Medium | Marks with text, pattern fills, usability check in Phase 7; fallback is one rare signal tone (D-06).                              |
-| R20 | Authenticated e2e needs a replica-set test database and a bootstrap admin in CI | Medium     | Medium | Reuse the integration-test URI pattern; if unavailable, a mocked-session visual suite plus a manual release item.                 |
-| R21 | The unsaved-changes guard cannot intercept every App Router navigation          | Medium     | Low    | `beforeunload` plus link-capture best effort; the limit is documented, autosave of a local draft is a later option.               |
+| #   | Risk                                                                            | Likelihood | Impact | Mitigation / trigger                                                                                                                                                                         |
+| --- | ------------------------------------------------------------------------------- | ---------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Monochrome glass reads flat or "dull"                                           | Medium     | High   | Live tile (S2) is a gate before any build. Lit 3D backdrop, grain, specular edges, inversion bands (3.4).                                                                                    |
+| R2  | Blur over an animating canvas is slow on integrated and mobile GPUs             | High       | High   | Measure in S1; no blur over canvas on T2 or below; one panel only on T3; solid fallback.                                                                                                     |
+| R3  | 3D hurts LCP or TBT                                                             | Medium     | High   | Poster is LCP; canvas after idle; deferred budget; kill switch; governor.                                                                                                                    |
+| R4  | Three chunk exceeds its budget (R3F was 242 KB gz)                              | Low        | Medium | Resolved by S1: vanilla Three is 135 KB gz; OGL (14 KB) remains the fallback; fall back to Direction B for the hero if both fail.                                                            |
+| R5  | Variable font payload too large                                                 | Low        | Medium | Measured 117 KB for the preloaded fonts (budget 150 KB); `fonttools` and `next/font/local` stay as the fallback.                                                                             |
+| R6  | Lenis and ScrollTrigger conflict with anchors, focus, sticky header or modals   | Medium     | Medium | Lenis only when full and fine pointer; stop on overlay; `data-lenis-prevent`; tests for anchor and keyboard paths.                                                                           |
+| R7  | View Transitions unsupported or unstable on Next 16.1.1                         | Medium     | Low    | Spike S3; CSS crossfade fallback; feature-detected.                                                                                                                                          |
+| R8  | Schema changes break strict Zod parsing of stored snapshots                     | Low        | High   | All new fields optional with defaults; contract tests against stored v7 fixtures; seed dry-run before apply.                                                                                 |
+| R9  | Existing tests are tightly coupled to old visuals                               | High       | Low    | Rewrite in the phase that replaces the component; never delete without a replacement.                                                                                                        |
+| R10 | Content unknowns block launch                                                   | High       | High   | Unknowns ship as `unverified` and hidden. Phase 10 is owner-dependent; Phases 1 to 9 are not.                                                                                                |
+| R11 | Scroll fatigue from pinned scenes                                               | High       | Medium | Max three pins on Home, each beat one screen or less, progress always visible, anchors and the palette skip pins, shorter pins on phones, pin-tuning pass in Phase 9, owner can set Reduced. |
+| R12 | Drift into the "AI-generated" look during build                                 | Medium     | Medium | Appendix D checklist is a review gate in every phase.                                                                                                                                        |
+| R13 | Dark-by-default conflicts with a visitor's OS light setting                     | Low        | Low    | First visit dark, three-state toggle persisted (D-02).                                                                                                                                       |
+| R14 | Scope: this is a large programme                                                | High       | Medium | Phase gates deliver a shippable improvement after Phases 1, 2, 5 and 7. Phase 3 is the only high-risk build.                                                                                 |
+| R15 | The admin sweep is large (63 files, about 17k lines, a 2,175-line site editor)  | High       | Medium | Strangler migration; primitives and patterns first (Phase 7); six gated batches; restyle only; stop rule.                                                                                    |
+| R16 | Consistency drifts while pages are built in parallel                            | Medium     | Medium | Templates, design lint, consistency probe and System lab all exist from Phase 1.                                                                                                             |
+| R17 | Over-animation and motion fatigue                                               | Medium     | Medium | Doctrine ("rest is a feature"), one signature interaction per page, three pins maximum, dedicated tuning pass.                                                                               |
+| R18 | Jank leaks into the admin through shared hooks or providers                     | Low        | Medium | Engine isolated to `components/motion` and `components/three`; bundle boundary test.                                                                                                         |
+| R19 | State is hard to read without colour in dense admin tables                      | Medium     | Medium | Marks with text, pattern fills, usability check in Phase 7; fallback is one rare signal tone (D-06).                                                                                         |
+| R20 | Authenticated e2e needs a replica-set test database and a bootstrap admin in CI | Medium     | Medium | Reuse the integration-test URI pattern; if unavailable, a mocked-session visual suite plus a manual release item.                                                                            |
+| R21 | The unsaved-changes guard cannot intercept every App Router navigation          | Medium     | Low    | `beforeunload` plus link-capture best effort; the limit is documented, autosave of a local draft is a later option.                                                                          |
 
 ---
 
@@ -1426,7 +1474,7 @@ Nothing below is guessed in the draft copy. Until confirmed, the data is `unveri
 
 | ID   | Decision                                                                                                                               | My recommendation                                                                                                              |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| D-01 | Hero headline: A "Business problems in. Reliable systems out." / B / C                                                                 | A                                                                                                                              |
+| D-01 | Kicker line above the role titles (kept as "Business problems in. Reliable systems out." at your request) and the beat eyebrow wording | Keep as is                                                                                                                     |
 | D-02 | First-visit theme: always dark, or follow the OS                                                                                       | Dark first, three-state toggle                                                                                                 |
 | D-03 | Any personal accessibility constraints on 3D, smooth scroll or cursor effects you want to be conservative about                        | Default as planned; every effect is switchable                                                                                 |
 | D-04 | Phase 0 live style and motion tile sign-off, public and console (gate before Phase 1)                                                  | Required                                                                                                                       |
@@ -1442,43 +1490,47 @@ Nothing below is guessed in the draft copy. Until confirmed, the data is `unveri
 
 Every effect must exist in `src/lib/motion/registry.ts` with these fields; a unit test fails on any gap. Tiers: effect runs on T3 / T2 / T1; `—` means not run. **Reduced** = OS or user reduce; **Off** = user off.
 
-| ID  | Name                 | Trigger                                | Meaning  | Duration / ease                  | T3 / T2 / T1 | Reduced                            |
-| --- | -------------------- | -------------------------------------- | -------- | -------------------------------- | ------------ | ---------------------------------- |
-| M01 | Grid draw            | Load (hero)                            | Assemble | `scene`, `signal`                | ✓ / ✓ / CSS  | Instant, final grid                |
-| M02 | Line settle          | Load, in-view                          | Resolve  | `slow`, `signal`, `stagger.line` | ✓ / ✓ / CSS  | Instant                            |
-| M03 | Topology in          | Load (after idle)                      | Assemble | `scene`, `settle`                | ✓ / ✓ / —    | Poster only                        |
-| M04 | Camera dolly         | Scroll scrub (hero 120vh)              | Transmit | `scrub.lag`                      | ✓ / ✓ / —    | Fixed still camera                 |
-| M05 | Pointer depth        | Pointer move                           | Respond  | `fast`, lerp                     | ✓ / — / CSS  | None                               |
-| M06 | Signal rail          | Scroll progress                        | Transmit | `scrub.lag`                      | ✓ / ✓ / ✓    | Static ticks, active tick only     |
-| M07 | Reveal rise          | In-view                                | Resolve  | `base`, `signal`                 | ✓ / ✓ / CSS  | Opacity 150 ms or instant          |
-| M08 | Media wipe           | In-view                                | Resolve  | `slow`, `snap`                   | ✓ / ✓ / CSS  | Instant                            |
-| M09 | Label decode         | In-view (first time)                   | Resolve  | `base`, ≤ 24 chars               | ✓ / ✓ / —    | Instant text                       |
-| M10 | Count-up             | In-view (verified or derived numerics) | Resolve  | `slow`, `settle`                 | ✓ / ✓ / —    | Final number                       |
-| M11 | Stack explode        | Pinned scrub (~250vh)                  | Assemble | `scrub.lag`                      | ✓ / ✓ / —    | Static panels, all specs shown     |
-| M12 | Pipeline trace       | Pinned scrub (~300vh)                  | Transmit | `scrub.lag`                      | ✓ / ✓ / —    | Static diagram, failure line shown |
-| M13 | Problem expand       | Click, Enter, in-view                  | Transmit | `base`, `settle`                 | ✓ / ✓ / ✓    | Instant expand                     |
-| M14 | Magnetic CTA         | Pointer near                           | Respond  | `fast`, spring                   | ✓ / — / —    | None                               |
-| M15 | Sheen                | Pointer over glass                     | Respond  | `micro`                          | ✓ / — / —    | Static edge highlight              |
-| M16 | Reticle cursor       | Pointer (fine)                         | Respond  | lag 120 ms                       | ✓ / — / —    | Native cursor only                 |
-| M17 | Chapter sync         | Scroll (case file)                     | Assemble | `scrub.lag`                      | ✓ / ✓ / —    | All nodes visible, no highlight    |
-| M18 | Route shutter        | Navigation                             | Assemble | 420 ms, `snap`                   | ✓ / ✓ / —    | Instant or crossfade 150 ms        |
-| M19 | Wire draw            | Scroll (process, timeline)             | Assemble | `scrub.lag`                      | ✓ / ✓ / —    | Complete wire                      |
-| M20 | Palette open         | ⌘K / button                            | Respond  | `fast`, `signal`                 | ✓ / ✓ / ✓    | Instant                            |
-| M21 | Theme flip           | Toggle                                 | Respond  | 480 ms circular reveal           | ✓ / ✓ / —    | Instant swap                       |
-| M22 | Footer wordmark      | Scroll into footer                     | Resolve  | `scrub.lag`                      | ✓ / ✓ / —    | Static wordmark                    |
-| M23 | Velocity coupling    | Scroll velocity                        | Transmit | damped, ≤ 3° skew                | ✓ / — / —    | None                               |
-| M24 | Boundary wipe        | Scroll (tone change)                   | Assemble | `scrub.lag`, 30vh                | ✓ / ✓ / —    | Instant tone change                |
-| M25 | Frame parallax       | Scroll (media frames)                  | Assemble | `scrub.lag`, ±8 %                | ✓ / ✓ / —    | Static image                       |
-| M26 | Underline draw       | Hover, focus                           | Respond  | `fast`, `signal`                 | ✓ / ✓ / ✓    | Instant underline                  |
-| M27 | Label roll           | Hover, press, loading                  | Respond  | `micro`, press 50 ms             | ✓ / — / —    | Colour-free state swap, no roll    |
-| M28 | Nav indicator        | Route or hover change                  | Respond  | `base`, `settle`                 | ✓ / ✓ / ✓    | Instant                            |
-| M29 | Glass tilt           | Pointer over featured glass            | Respond  | spring, ≤ 3°                     | ✓ / — / —    | None                               |
-| M30 | Shared-element morph | Navigation                             | Assemble | 420 ms, `snap`                   | ✓ / ✓ / —    | Instant or crossfade               |
-| M31 | Path draw            | Scroll, in-view                        | Transmit | `scrub.lag` or `slow`            | ✓ / ✓ / —    | Complete path                      |
-| M32 | Field focus          | Focus, valid, invalid                  | Respond  | `fast`                           | ✓ / ✓ / ✓    | Instant                            |
-| M33 | Skeleton breathe     | Loading                                | Resolve  | 1.4 s loop                       | ✓ / ✓ / ✓    | Static skeleton                    |
-| M34 | Reading progress     | Scroll (articles, case files)          | Transmit | linear                           | ✓ / ✓ / ✓    | Static or hidden                   |
-| M35 | Header hide and show | Scroll direction and speed             | Respond  | `base`, `snap`                   | ✓ / ✓ / ✓    | Header always visible              |
+| ID  | Name                 | Trigger                                | Meaning  | Duration / ease                  | T3 / T2 / T1 | Reduced                              |
+| --- | -------------------- | -------------------------------------- | -------- | -------------------------------- | ------------ | ------------------------------------ |
+| M01 | Grid draw            | Load (hero)                            | Assemble | `scene`, `signal`                | ✓ / ✓ / CSS  | Instant, final grid                  |
+| M02 | Line settle          | Load, in-view                          | Resolve  | `slow`, `signal`, `stagger.line` | ✓ / ✓ / CSS  | Instant                              |
+| M03 | Topology in          | Load (after idle)                      | Assemble | `scene`, `settle`                | ✓ / ✓ / —    | Poster only                          |
+| M04 | Camera dolly         | Scroll scrub (hero 120vh)              | Transmit | `scrub.lag`                      | ✓ / ✓ / —    | Fixed still camera                   |
+| M05 | Pointer depth        | Pointer move                           | Respond  | `fast`, lerp                     | ✓ / — / CSS  | None                                 |
+| M06 | Signal rail          | Scroll progress                        | Transmit | `scrub.lag`                      | ✓ / ✓ / ✓    | Static ticks, active tick only       |
+| M07 | Reveal rise          | In-view                                | Resolve  | `base`, `signal`                 | ✓ / ✓ / CSS  | Opacity 150 ms or instant            |
+| M08 | Media wipe           | In-view                                | Resolve  | `slow`, `snap`                   | ✓ / ✓ / CSS  | Instant                              |
+| M09 | Label decode         | In-view (first time)                   | Resolve  | `base`, ≤ 24 chars               | ✓ / ✓ / —    | Instant text                         |
+| M10 | Count-up             | In-view (verified or derived numerics) | Resolve  | `slow`, `settle`                 | ✓ / ✓ / —    | Final number                         |
+| M11 | Stack explode        | Pinned scrub (~250vh)                  | Assemble | `scrub.lag`                      | ✓ / ✓ / —    | Static panels, all specs shown       |
+| M12 | Pipeline trace       | Pinned scrub (~300vh)                  | Transmit | `scrub.lag`                      | ✓ / ✓ / —    | Static diagram, failure line shown   |
+| M13 | Problem expand       | Click, Enter, in-view                  | Transmit | `base`, `settle`                 | ✓ / ✓ / ✓    | Instant expand                       |
+| M14 | Magnetic CTA         | Pointer near                           | Respond  | `fast`, spring                   | ✓ / — / —    | None                                 |
+| M15 | Sheen                | Pointer over glass                     | Respond  | `micro`                          | ✓ / — / —    | Static edge highlight                |
+| M16 | Reticle cursor       | Pointer (fine)                         | Respond  | lag 120 ms                       | ✓ / — / —    | Native cursor only                   |
+| M17 | Chapter sync         | Scroll (case file)                     | Assemble | `scrub.lag`                      | ✓ / ✓ / —    | All nodes visible, no highlight      |
+| M18 | Route shutter        | Navigation                             | Assemble | 420 ms, `snap`                   | ✓ / ✓ / —    | Instant or crossfade 150 ms          |
+| M19 | Wire draw            | Scroll (process, timeline)             | Assemble | `scrub.lag`                      | ✓ / ✓ / —    | Complete wire                        |
+| M20 | Palette open         | ⌘K / button                            | Respond  | `fast`, `signal`                 | ✓ / ✓ / ✓    | Instant                              |
+| M21 | Theme flip           | Toggle                                 | Respond  | 480 ms circular reveal           | ✓ / ✓ / —    | Instant swap                         |
+| M22 | Footer wordmark      | Scroll into footer                     | Resolve  | `scrub.lag`                      | ✓ / ✓ / —    | Static wordmark                      |
+| M23 | Velocity coupling    | Scroll velocity                        | Transmit | damped, ≤ 3° skew                | ✓ / — / —    | None                                 |
+| M24 | Boundary wipe        | Scroll (tone change)                   | Assemble | `scrub.lag`, 30vh                | ✓ / ✓ / —    | Instant tone change                  |
+| M25 | Frame parallax       | Scroll (media frames)                  | Assemble | `scrub.lag`, ±8 %                | ✓ / ✓ / —    | Static image                         |
+| M26 | Underline draw       | Hover, focus                           | Respond  | `fast`, `signal`                 | ✓ / ✓ / ✓    | Instant underline                    |
+| M27 | Label roll           | Hover, press, loading                  | Respond  | `micro`, press 50 ms             | ✓ / — / —    | Colour-free state swap, no roll      |
+| M28 | Nav indicator        | Route or hover change                  | Respond  | `base`, `settle`                 | ✓ / ✓ / ✓    | Instant                              |
+| M29 | Glass tilt           | Pointer over featured glass            | Respond  | spring, ≤ 3°                     | ✓ / — / —    | None                                 |
+| M30 | Shared-element morph | Navigation                             | Assemble | 420 ms, `snap`                   | ✓ / ✓ / —    | Instant or crossfade                 |
+| M31 | Path draw            | Scroll, in-view                        | Transmit | `scrub.lag` or `slow`            | ✓ / ✓ / —    | Complete path                        |
+| M32 | Field focus          | Focus, valid, invalid                  | Respond  | `fast`                           | ✓ / ✓ / ✓    | Instant                              |
+| M33 | Skeleton breathe     | Loading                                | Resolve  | 1.4 s loop                       | ✓ / ✓ / ✓    | Static skeleton                      |
+| M34 | Reading progress     | Scroll (articles, case files)          | Transmit | linear                           | ✓ / ✓ / ✓    | Static or hidden                     |
+| M35 | Header hide and show | Scroll direction and speed             | Respond  | `base`, `snap`                   | ✓ / ✓ / ✓    | Header always visible                |
+| M36 | Role story           | Scroll scrub (hero pin ≈ 300vh)        | Resolve  | `scrub.lag`, hold .7 / change .3 | ✓ / ✓ / ✓    | Roles stacked as a plain list        |
+| M37 | Scene reaction       | Scroll (hero pin)                      | Assemble | camera glide, eased              | ✓ / ✓ / —    | Poster still                         |
+| M38 | Triage focus         | Scroll (each pain in view)             | Resolve  | 600 to 700 ms, `signal`          | ✓ / ✓ / ✓    | All pains fully visible              |
+| M39 | Switch-off flip      | Scroll (end of pipeline)               | Transmit | `fast`                           | ✓ / ✓ / —    | Static "Off" state with the sentence |
 
 **Console registry** (calm preset, 3.7.3). Same required fields, no tiers.
 
