@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 export const PILLAR_CONTRACT_VERSION = 1 as const;
 
 // The portfolio presents three client-facing roles. Each one answers "what
@@ -54,8 +52,6 @@ export const PILLAR_ACCENTS = [
 
 export type PillarIconKey = (typeof PILLAR_ICON_KEYS)[number];
 export type PillarAccent = (typeof PILLAR_ACCENTS)[number];
-
-export const pillarKeySchema = z.enum(PILLAR_KEYS);
 
 export const getPillarLabel = (key: PillarKey): string =>
   PILLAR_CONTRACT.find((pillar) => pillar.key === key)!.label;

@@ -1,9 +1,9 @@
-import { canonicalSlugSchema } from "@/lib/content/slug";
+import { canonicalSlugSchema } from "@/lib/content/slug.schema";
 import {
   PILLAR_KEYS,
   normalizePillarRelationships,
-  pillarKeySchema,
 } from "@/lib/content/pillars";
+import { pillarKeySchema } from "@/lib/content/pillars.schema";
 import { SOFT_DELETE_SCOPES } from "@/lib/db/soft-delete";
 import { z } from "zod";
 import {

@@ -6,10 +6,10 @@ import {
   PILLAR_CONTRACT_VERSION,
   PILLAR_KEYS,
   normalizePillarRelationships,
-  pillarKeySchema,
 } from "@/lib/content/pillars";
+import { pillarKeySchema } from "@/lib/content/pillars.schema";
+import { deriveArticleBodyMetadata } from "@/lib/content/article-body";
 import {
-  deriveArticleBodyMetadata,
   deriveReadingTimeMinutes,
   getProjectPublishReadiness,
   getArticlePublishReadiness,
@@ -17,10 +17,10 @@ import {
 } from "@/lib/content/portfolio-contract";
 import {
   appendSlugSuffix,
-  canonicalSlugSchema,
   normalizeSlug,
   normalizeSlugIdentifier,
 } from "@/lib/content/slug";
+import { canonicalSlugSchema } from "@/lib/content/slug.schema";
 import {
   CONTENT_SLUG_INDEX_TARGETS,
   CONTENT_SLUG_TARGETS,

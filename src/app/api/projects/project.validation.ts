@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { PILLAR_KEYS, pillarKeySchema } from "@/lib/content/pillars";
+import { PILLAR_KEYS } from "@/lib/content/pillars";
+import { pillarKeySchema } from "@/lib/content/pillars.schema";
 import {
   isAllowedPublicProjectUrl,
   LINK_VISIBILITIES,

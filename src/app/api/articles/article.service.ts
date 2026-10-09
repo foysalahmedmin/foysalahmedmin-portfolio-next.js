@@ -4,8 +4,8 @@ import {
   normalizePillarRelationships,
   type PillarKey,
 } from "@/lib/content/pillars";
+import { deriveArticleBodyMetadata } from "@/lib/content/article-body";
 import {
-  deriveArticleBodyMetadata,
   deriveReadingTimeMinutes,
   getArticlePublishReadiness,
 } from "@/lib/content/portfolio-contract";
