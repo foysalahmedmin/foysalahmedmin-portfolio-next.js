@@ -2,7 +2,6 @@ import AnimationApplier from "@/components/appliers/animation-applier";
 import ThemeApplier from "@/components/appliers/theme-applier";
 import { buildSiteMetadata } from "@/lib/metadata/site-metadata";
 import { readPublishedSite } from "@/lib/site/published-site";
-import ReduxProvider from "@/providers/redux-provider";
 import MotionProvider from "@/providers/motion-provider";
 import ParallaxProvider from "@/providers/parallax-provider";
 import { WebVitalsReporter } from "@/components/observability/web-vitals-reporter";
@@ -70,17 +69,15 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <ReduxProvider>
-          <MotionProvider>
-            <ParallaxProvider>
-              {/* Appliers */}
-              <ThemeApplier />
-              {children}
-              <AnimationApplier />
-              <WebVitalsReporter />
-            </ParallaxProvider>
-          </MotionProvider>
-        </ReduxProvider>
+        <MotionProvider>
+          <ParallaxProvider>
+            {/* Appliers */}
+            <ThemeApplier />
+            {children}
+            <AnimationApplier />
+            <WebVitalsReporter />
+          </ParallaxProvider>
+        </MotionProvider>
       </body>
     </html>
   );

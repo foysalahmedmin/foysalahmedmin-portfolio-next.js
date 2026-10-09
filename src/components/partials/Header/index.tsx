@@ -11,8 +11,7 @@ import {
   type TPublicShellLink,
 } from "@/lib/site/public-shell";
 import { cn } from "@/lib/utils";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { toggleTheme } from "@/redux/slices/setting-slice";
+import { toggleTheme, useSetting } from "@/state/setting-store";
 import { ArrowUpRight, Menu, Monitor, Moon, Sun, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -60,8 +59,7 @@ const PublicLink = ({
 };
 
 const ThemeToggle = () => {
-  const { theme } = useAppSelector((state) => state.setting);
-  const dispatch = useAppDispatch();
+  const theme = useSetting((setting) => setting.theme);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -80,7 +78,7 @@ const ThemeToggle = () => {
       type="button"
       variant="ghost"
       shape="icon"
-      onClick={() => dispatch(toggleTheme())}
+      onClick={toggleTheme}
       aria-label="Change color theme"
     >
       {icon}
