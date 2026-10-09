@@ -1,13 +1,5 @@
-import { z } from "zod";
-
 export const MAX_CONTENT_SLUG_LENGTH = 96;
 export const CONTENT_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-export const canonicalSlugSchema = z
-  .string()
-  .min(1)
-  .max(MAX_CONTENT_SLUG_LENGTH)
-  .regex(CONTENT_SLUG_PATTERN, "Use a canonical lowercase slug");
 
 type NormalizeSlugOptions = Readonly<{
   fallback?: string;

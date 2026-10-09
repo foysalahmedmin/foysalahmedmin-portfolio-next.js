@@ -11,8 +11,8 @@ import {
   PILLAR_CONTRACT,
   PILLAR_ICON_KEYS,
   PILLAR_KEYS,
-  pillarKeySchema,
 } from "../content/pillars.ts";
+import { pillarKeySchema } from "../content/pillars.schema.ts";
 import { SeedError } from "./errors.ts";
 import type {
   SeedActor,
