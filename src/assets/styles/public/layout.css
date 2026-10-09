@@ -1,0 +1,27 @@
+/*
+ * One container for the public surface (docs plan 3.2, 3.13).
+ * Tailwind's built-in `container` steps its max-width per breakpoint and legacy sections add `px-6`
+ * on top, so the same page had three left edges. On the public surface the container is the token
+ * width (1360 px) with the gutter token as its only inset, so header, page header, sections, CTA band
+ * and footer share one edge. Lives in @layer utilities so it outranks Tailwind's generated `.container`.
+ */
+[data-surface="public"] .container {
+  margin-inline: auto;
+  padding-inline: 0;
+  width: min(100% - 2 * var(--gutter), var(--container-wide));
+  max-width: none;
+}
+
+/* Print: the paper theme, no chrome (docs plan 3.16) */
+@media print {
+  [data-surface="public"] [data-chrome],
+  [data-surface="public"] .grain,
+  [data-surface="public"] [data-cta-band] {
+    display: none !important;
+  }
+}
+
+/* Skeletons (utilities layer, so it outranks the `bg-muted` utility on the element): a quiet foreground wash, visible on every tone (the legacy muted fill is nearly invisible on ink) */
+[data-surface] [data-skeleton] {
+  background-color: color-mix(in oklab, var(--foreground) 9%, transparent);
+}

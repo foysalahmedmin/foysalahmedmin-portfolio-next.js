@@ -1,0 +1,206 @@
+/*
+ * Glass, hairlines, corner ticks, grain and texture (docs plan 3.4, 3.5).
+ * Glass is only used where a rich backdrop exists. Contrast rules (computed, enforced by
+ * tests/unit/token-contrast.test.ts): dark glass alpha <= 0.08 under body text, the backdrop
+ * behind it <= --mono-700, glass-3 only on top of the overlay scrim.
+ */
+
+:root {
+  --glass-blur-1: 12px;
+  --glass-blur-2: 20px;
+  --glass-blur-3: 32px;
+  --glass-brightness: 1.08;
+  --glass-contrast: 1.05;
+  --glass-saturate: 0; /* forces any stray colour under glass to grey */
+}
+
+@media (max-width: 767px) {
+  :root {
+    --glass-blur-1: 8px;
+    --glass-blur-2: 12px;
+    --glass-blur-3: 16px;
+  }
+}
+
+.glass-1,
+.glass-2,
+.glass-3 {
+  backdrop-filter: blur(var(--glass-blur-2)) brightness(var(--glass-brightness))
+    contrast(var(--glass-contrast)) saturate(var(--glass-saturate));
+  box-shadow: var(--glass-edge), var(--elev-2);
+}
+
+.glass-1 {
+  backdrop-filter: blur(var(--glass-blur-1)) brightness(var(--glass-brightness))
+    saturate(var(--glass-saturate));
+  background: var(--glass-1-bg);
+}
+
+.glass-2 {
+  background: var(--glass-2-bg);
+}
+
+.glass-3 {
+  backdrop-filter: blur(var(--glass-blur-3)) brightness(var(--glass-brightness))
+    contrast(var(--glass-contrast)) saturate(var(--glass-saturate));
+  box-shadow: var(--glass-edge), var(--elev-4);
+  background: var(--glass-3-bg);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-1,
+  .glass-2,
+  .glass-3 {
+    background: var(--glass-fallback);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .glass-1,
+  .glass-2,
+  .glass-3 {
+    backdrop-filter: none;
+    box-shadow: inset 0 0 0 1px var(--line-4);
+    background: var(--glass-fallback);
+  }
+}
+
+@media (forced-colors: active) {
+  .glass-1,
+  .glass-2,
+  .glass-3 {
+    backdrop-filter: none;
+    box-shadow: none;
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+}
+
+/* A flat translucent fill for elements nested inside glass (no glass inside glass) */
+.glass-inner {
+  background: var(--glass-1-bg);
+}
+
+/* ---------- Hairlines and corner ticks ---------- */
+.hairline {
+  border-block-start: 1px solid var(--line-2);
+}
+
+.hairline-b {
+  border-block-end: 1px solid var(--line-2);
+}
+
+.hairline-grid {
+  background-image:
+    linear-gradient(to right, var(--line-1) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-1) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.ticks {
+  position: relative;
+}
+
+.ticks::before,
+.ticks::after {
+  position: absolute;
+  border: 1px solid var(--line-4);
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  content: "";
+}
+
+.ticks::before {
+  top: 6px;
+  left: 6px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.ticks::after {
+  right: 6px;
+  bottom: 6px;
+  border-top: 0;
+  border-left: 0;
+}
+
+/* The console has no corner ticks (3.11) */
+[data-surface="console"] .ticks::before,
+[data-surface="console"] .ticks::after {
+  display: none;
+}
+
+/* ---------- Grain ---------- */
+.grain {
+  position: fixed;
+  opacity: var(--grain-opacity, 0.05);
+  z-index: var(--z-grain);
+  inset: 0;
+  background-image: url("/textures/grain.png");
+  background-size: 160px 160px;
+  pointer-events: none;
+}
+
+@media (prefers-contrast: more), (forced-colors: active) {
+  .grain {
+    display: none;
+  }
+}
+
+@media print {
+  .grain {
+    display: none;
+  }
+}
+
+/* ---------- Role textures (replace the old per-role accent colours) ---------- */
+.tx-blueprint {
+  background-image:
+    linear-gradient(to right, var(--line-1) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-1) 1px, transparent 1px),
+    linear-gradient(to right, var(--line-2) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-2) 1px, transparent 1px);
+  background-size:
+    16px 16px,
+    16px 16px,
+    80px 80px,
+    80px 80px;
+}
+
+.tx-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--line-1) 0 1px,
+    transparent 1px 10px
+  );
+}
+
+.tx-dots {
+  background-image: radial-gradient(var(--line-3) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+}
+
+/* ---------- Tone bands ---------- */
+[data-tone] {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Fixed chrome (header, rail, dock) adopts the tone of the band beneath it.
+   components/surface/chrome-tone-controller.tsx flips data-tone on [data-chrome] elements. */
+[data-chrome] {
+  transition:
+    color var(--dur-base) var(--ease-signal),
+    border-color var(--dur-base) var(--ease-signal);
+}
+
+[data-chrome][data-tone] {
+  background-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-chrome] {
+    transition: none;
+  }
+}

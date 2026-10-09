@@ -37,8 +37,13 @@ export default function RootLayout({
                     var s = raw ? JSON.parse(raw) : null;
                     var root = document.documentElement;
 
-                    // ---- Theme ----
-                    var theme = s && s.theme ? s.theme : 'system';
+                    // ---- Surface: the public site is monochrome, the admin keeps its legacy tokens until Phase 7 ----
+                    var path = window.location.pathname;
+                    var admin = path === '/admin' || path.indexOf('/admin/') === 0;
+                    if (!admin) root.setAttribute('data-surface', 'public');
+
+                    // ---- Theme (first visit: dark on the public site, system in the admin) ----
+                    var theme = s && s.theme ? s.theme : (admin ? 'system' : 'dark');
                     var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                     var mode =
                       theme === 'dark'

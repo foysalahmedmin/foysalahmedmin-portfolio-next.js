@@ -1,0 +1,46 @@
+/*
+ * Display fallbacks, calibrated per width step (docs plan 3.3, R5).
+ *
+ * Archivo's width axis makes the display type far wider than any system face: measured against Arial
+ * Bold at the same size, Archivo at wdth 125 / wght 800 is 1.282x wider, at wdth 118 1.192x, at wdth 112
+ * 1.109x and at wdth 100 0.952x (means over eight real headlines, spread under 0.025). next/font's own
+ * fallback is tuned for the default instance only, so a swap re-wrapped every headline and shifted the
+ * page (lab CLS 0.069 on the constrained mobile profile). These faces scale Arial Bold to the width of
+ * the real face, so the swap changes the letterforms but not the line breaks.
+ * (`adjustFontFallback` is off for the display face in app/(common)/fonts.ts so these come first.)
+ */
+@font-face {
+  font-weight: 100 900;
+  size-adjust: 128.2%;
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"),
+    local("Arial");
+  font-family: "Archivo Fallback 125";
+}
+
+@font-face {
+  font-weight: 100 900;
+  size-adjust: 119.2%;
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"),
+    local("Arial");
+  font-family: "Archivo Fallback 118";
+}
+
+@font-face {
+  font-weight: 100 900;
+  size-adjust: 110.9%;
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"),
+    local("Arial");
+  font-family: "Archivo Fallback 112";
+}
+
+@font-face {
+  font-weight: 100 900;
+  size-adjust: 95.2%;
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"),
+    local("Arial");
+  font-family: "Archivo Fallback 100";
+}

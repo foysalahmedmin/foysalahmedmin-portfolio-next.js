@@ -5,10 +5,11 @@
 @custom-variant motion-reduce (&:is(html:not([data-motion="full"]) *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Radii: legacy values unless a surface sets --r-* (tokens.css) */
+  --radius-sm: var(--r-sm, calc(var(--radius) - 4px));
+  --radius-md: var(--r-control, calc(var(--radius) - 2px));
+  --radius-lg: var(--r-panel, var(--radius));
+  --radius-xl: var(--r-slab, calc(var(--radius) + 4px));
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -62,6 +63,29 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Signal text and line tokens (fall back to the legacy muted tones outside a surface) */
+  --color-fg-secondary: var(--text-secondary, var(--muted-foreground));
+  --color-fg-faint: var(--text-faint, var(--muted-foreground));
+  --color-line-1: var(--line-1, var(--border));
+  --color-line-2: var(--line-2, var(--border));
+  --color-line-3: var(--line-3, var(--border-strong));
+  --color-line-4: var(--line-4, var(--border-strong));
+
+  /* Type families: the face variables come from next/font in the public layout */
+  --font-display: var(--ff-display, "Helvetica Neue", Arial, sans-serif);
+  --font-text: var(--ff-body, "Helvetica Neue", Arial, sans-serif);
+  --font-mono: var(
+    --ff-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace
+  );
 
   /* animation */
   --animate-checkbox: checkbox 0.3s ease-in-out;
@@ -207,17 +231,25 @@
 @layer base {
   @import "../assets/styles/base/variables.css";
   @import "../assets/styles/base/typography.css";
+  @import "../assets/styles/public/fonts.css";
+  @import "../assets/styles/public/tokens.css";
+  @import "../assets/styles/public/type.css";
 }
 
 /* Component Styles */
 @layer components {
   @import "../assets/styles/components/checkbox.css";
+  @import "../assets/styles/public/glass.css";
+  @import "../assets/styles/public/marks.css";
 }
 
 /* Utility Styles */
 @layer utilities {
   @import "../assets/styles/utilities/loading.css";
   @import "../assets/styles/utilities/intersection-observer.css";
+  @import "../assets/styles/public/focus.css";
+  @import "../assets/styles/public/layout.css";
+  @import "../assets/styles/public/state.css";
 
   .text-glow {
     text-shadow: 0 0 15px color-mix(in srgb, var(--primary) 50%, transparent);

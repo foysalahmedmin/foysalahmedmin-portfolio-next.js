@@ -1,0 +1,188 @@
+/*
+ * Type utilities and the legacy-class bridge (docs plan 3.3).
+ * Width is a semantic axis: statements are set wide, annotations narrow.
+ * These rules live in @layer base, so Tailwind utilities on an element still win.
+ */
+
+/* ---------- Scale utilities (new code uses these) ---------- */
+.t-eyebrow {
+  font-weight: 500;
+  font-stretch: 75%;
+  font-size: var(--step--2);
+  line-height: 1.4;
+  font-family: var(--ff-mono, ui-monospace, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.t-caption {
+  font-size: var(--step--1);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+.t-body {
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+
+.t-lead {
+  color: var(--text-secondary, var(--muted-foreground));
+  font-weight: 500;
+  font-size: var(--step-1);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.t-h4,
+.t-h3,
+.t-h2,
+.t-h1,
+.t-wordmark {
+  text-wrap: balance;
+}
+
+.t-h4 {
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: var(--step-2);
+  line-height: 1.15;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.02em;
+}
+
+.t-h3 {
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: var(--step-3);
+  line-height: 1.05;
+  font-family: var(--ff-display-112, var(--ff-display, inherit));
+  letter-spacing: -0.03em;
+}
+
+.t-h2 {
+  font-weight: 750;
+  font-stretch: 118%;
+  font-size: var(--step-4);
+  line-height: 1;
+  font-family: var(--ff-display-118, var(--ff-display, inherit));
+  letter-spacing: -0.035em;
+}
+
+.t-h1 {
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: var(--step-5);
+  line-height: 0.95;
+  font-family: var(--ff-display-125, var(--ff-display, inherit));
+  letter-spacing: -0.04em;
+}
+
+.t-wordmark {
+  font-weight: 850;
+  font-stretch: 125%;
+  font-size: var(--step-6);
+  line-height: 0.9;
+  font-family: var(--ff-display-125, var(--ff-display, inherit));
+  letter-spacing: -0.045em;
+}
+
+.t-mono {
+  font-family: var(--ff-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.t-measure {
+  max-inline-size: 64ch;
+  text-wrap: pretty;
+}
+
+/* ---------- Public surface: headings, body and the legacy .type-* bridge ---------- */
+/* :where() keeps this at zero specificity so the step classes (.t-h1 ...) choose their calibrated family */
+:where([data-surface="public"]) :is(h1, h2, h3, h4) {
+  font-family: var(--ff-display);
+  text-wrap: balance;
+}
+
+[data-surface="public"] :is(p, li, dd) {
+  text-wrap: pretty;
+}
+
+/* The legacy display class is the home hero until Phase 3; it sits one step below the page-header H1 */
+[data-surface="public"] .type-display {
+  /* em, not ch: ch follows the glyph width and would re-wrap when the display face swaps in */
+  max-width: 13em;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: var(--step-4);
+  line-height: 0.95;
+  font-family: var(--ff-display-125);
+  letter-spacing: -0.04em;
+}
+
+[data-surface="public"] .type-heading-1 {
+  font-weight: 750;
+  font-stretch: 118%;
+  font-size: var(--step-4);
+  line-height: 1;
+  font-family: var(--ff-display-118);
+  letter-spacing: -0.035em;
+}
+
+[data-surface="public"] .type-heading-2 {
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: var(--step-3);
+  line-height: 1.05;
+  font-family: var(--ff-display-112);
+  letter-spacing: -0.03em;
+}
+
+[data-surface="public"] .type-heading-3 {
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: var(--step-2);
+  line-height: 1.15;
+  font-family: var(--ff-display-100);
+  letter-spacing: -0.02em;
+}
+
+[data-surface="public"] .type-lead {
+  max-width: 62ch;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: var(--step-1);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+[data-surface="public"] .type-label {
+  font-weight: 500;
+  font-stretch: 75%;
+  font-size: var(--step--2);
+  line-height: 1.4;
+  font-family: var(--ff-mono);
+  letter-spacing: 0.08em;
+}
+
+[data-surface="public"] .type-metric {
+  font-weight: 600;
+  font-stretch: 90%;
+  font-size: clamp(2rem, 1.5rem + 2vw, 3.2rem);
+  line-height: 1;
+  font-family: var(--ff-mono);
+  letter-spacing: -0.04em;
+}
+
+[data-surface="public"] .editorial blockquote {
+  border-inline-start-color: var(--line-4);
+}
+
+[data-surface="public"] .editorial :is(pre, code) {
+  font-family: var(--ff-mono);
+}
+
+[data-surface="public"] ::selection {
+  background: var(--foreground);
+  color: var(--background);
+}
