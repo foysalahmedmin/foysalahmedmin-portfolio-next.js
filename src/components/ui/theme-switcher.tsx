@@ -1,14 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { toggleTheme } from "@/redux/slices/setting-slice";
+import { toggleTheme, useSetting } from "@/state/setting-store";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const ThemeSwitcher = () => {
-  const dispatch = useAppDispatch();
-  const { theme } = useAppSelector((state) => state.setting);
+  const theme = useSetting((setting) => setting.theme);
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
@@ -18,19 +16,9 @@ const ThemeSwitcher = () => {
 
   if (!mounted) return null;
 
-  const handleToggle = () => {
-    dispatch(toggleTheme());
-    
-    // The actual class toggle is handled in the layout script, 
-    // but we can force an update here if needed for immediate feedback 
-    // though the script in layout.tsx reads from localStorage which toggleTheme updates.
-    // However, toggleTheme just updates the state, the script in layout.tsx runs on initial load.
-    // We need a side effect to update the DOM.
-  };
-
   return (
     <button
-      onClick={handleToggle}
+      onClick={toggleTheme}
       className="relative flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
       title={`Current theme: ${theme}`}
     >
