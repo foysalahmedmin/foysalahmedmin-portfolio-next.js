@@ -1,0 +1,271 @@
+{
+  "measured_at": "2026-10-09T20:56:32.466Z",
+  "base": "http://127.0.0.1:3109",
+  "node": "v20.20.2",
+  "results": [
+    {
+      "profile": "desktop",
+      "route": "/",
+      "html_kb": 16.8,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 160,
+      "lcp_ms": 160,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 5020,
+      "smoothness": {
+        "frames": 598,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 33.4,
+        "dropped_pct": 0.5,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/about",
+      "html_kb": 16.4,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 76,
+      "lcp_ms": 76,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 5529,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.8,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/contact",
+      "html_kb": 14.1,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 76,
+      "lcp_ms": 76,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 2950
+    },
+    {
+      "profile": "desktop",
+      "route": "/projects",
+      "html_kb": 19.5,
+      "js_kb_transferred": 234.1,
+      "js_requests": 22,
+      "fcp_ms": 84,
+      "lcp_ms": 84,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 2791
+    },
+    {
+      "profile": "desktop",
+      "route": "/case-studies",
+      "html_kb": 21.4,
+      "js_kb_transferred": 220.4,
+      "js_requests": 21,
+      "fcp_ms": 84,
+      "lcp_ms": 84,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 3160,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.8,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/articles",
+      "html_kb": 19.1,
+      "js_kb_transferred": 232,
+      "js_requests": 22,
+      "fcp_ms": 80,
+      "lcp_ms": 80,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 2919
+    },
+    {
+      "profile": "desktop",
+      "route": "/videos",
+      "html_kb": 19.8,
+      "js_kb_transferred": 220.4,
+      "js_requests": 21,
+      "fcp_ms": 80,
+      "lcp_ms": 80,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 2960
+    },
+    {
+      "profile": "desktop",
+      "route": "/privacy",
+      "html_kb": 11.7,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 72,
+      "lcp_ms": 72,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 1684
+    },
+    {
+      "profile": "desktop",
+      "route": "/terms",
+      "html_kb": 11.7,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 72,
+      "lcp_ms": 72,
+      "cls": 0,
+      "tbt_ms": 0,
+      "doc_height_px": 1779
+    },
+    {
+      "profile": "mobile",
+      "route": "/",
+      "html_kb": 16.8,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 1108,
+      "lcp_ms": 1108,
+      "cls": 0.001,
+      "tbt_ms": 129,
+      "doc_height_px": 6618,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/about",
+      "html_kb": 16.4,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 912,
+      "lcp_ms": 912,
+      "cls": 0.003,
+      "tbt_ms": 71,
+      "doc_height_px": 6812,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.8,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/contact",
+      "html_kb": 14.1,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 920,
+      "lcp_ms": 920,
+      "cls": 0.003,
+      "tbt_ms": 16,
+      "doc_height_px": 4196
+    },
+    {
+      "profile": "mobile",
+      "route": "/projects",
+      "html_kb": 19.5,
+      "js_kb_transferred": 234.1,
+      "js_requests": 22,
+      "fcp_ms": 904,
+      "lcp_ms": 904,
+      "cls": 0.002,
+      "tbt_ms": 80,
+      "doc_height_px": 2955
+    },
+    {
+      "profile": "mobile",
+      "route": "/case-studies",
+      "html_kb": 21.4,
+      "js_kb_transferred": 220.4,
+      "js_requests": 21,
+      "fcp_ms": 920,
+      "lcp_ms": 920,
+      "cls": 0.013,
+      "tbt_ms": 64,
+      "doc_height_px": 3586,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/articles",
+      "html_kb": 19.1,
+      "js_kb_transferred": 232,
+      "js_requests": 22,
+      "fcp_ms": 916,
+      "lcp_ms": 916,
+      "cls": 0.003,
+      "tbt_ms": 73,
+      "doc_height_px": 3390
+    },
+    {
+      "profile": "mobile",
+      "route": "/videos",
+      "html_kb": 19.8,
+      "js_kb_transferred": 220.4,
+      "js_requests": 21,
+      "fcp_ms": 908,
+      "lcp_ms": 908,
+      "cls": 0.004,
+      "tbt_ms": 38,
+      "doc_height_px": 3396
+    },
+    {
+      "profile": "mobile",
+      "route": "/privacy",
+      "html_kb": 11.7,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 900,
+      "lcp_ms": 900,
+      "cls": 0.003,
+      "tbt_ms": 17,
+      "doc_height_px": 2367
+    },
+    {
+      "profile": "mobile",
+      "route": "/terms",
+      "html_kb": 11.7,
+      "js_kb_transferred": 204.1,
+      "js_requests": 19,
+      "fcp_ms": 888,
+      "lcp_ms": 888,
+      "cls": 0.003,
+      "tbt_ms": 19,
+      "doc_height_px": 2367
+    }
+  ]
+}
