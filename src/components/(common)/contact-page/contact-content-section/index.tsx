@@ -1,14 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field-error";
 import type { TPublicSiteDto } from "@/app/api/site/site.type";
-import {
-  contactVisibleFieldsSchema,
-  type ContactPublicError,
-  type ContactPublicSuccess,
-  type ContactVisibleFields,
+import type {
+  ContactPublicError,
+  ContactPublicSuccess,
+  ContactVisibleFields,
 } from "@/app/api/contacts/contact-public.contract";
 import {
+  AlertTriangle,
+  Check,
   ClipboardCheck,
   Clock3,
   MapPin,
@@ -17,6 +19,13 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+
+// The validation schema pulls in zod (about 49 KB gzip). It loads on the first field focus, not with the
+// page, so every public route's initial JavaScript stays inside budget (ADR 0009). Submit awaits it.
+const importContract = () =>
+  import("@/app/api/contacts/contact-public.contract");
+let contractModule: ReturnType<typeof importContract> | undefined;
+const loadContract = () => (contractModule ??= importContract());
 
 const EMPTY_FORM: ContactVisibleFields = {
   name: "",
@@ -112,6 +121,7 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
     e.preventDefault();
     if (status === "loading") return;
 
+    const { contactVisibleFieldsSchema } = await loadContract();
     const parsed = contactVisibleFieldsSchema.safeParse(formData);
     if (!parsed.success) {
       const errors: Record<string, string> = {};
@@ -205,7 +215,7 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
             {(contact.location ||
               contact.availability_label ||
               contact.response_promise) && (
-              <div className="border-border bg-surface-raised rounded-3xl border p-7 shadow-[var(--shadow-xs)]">
+              <div className="border-border bg-surface-raised rounded-xl border p-7 shadow-[var(--shadow-xs)]">
                 <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
                   Engagement context
                 </p>
@@ -227,7 +237,7 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
                   {contact.availability_label && (
                     <div className="flex gap-3">
                       <span
-                        className="bg-success mt-1.5 size-3 shrink-0 rounded-full"
+                        className="bg-foreground mt-1.5 size-3 shrink-0"
                         aria-hidden="true"
                       />
                       <div>
@@ -259,7 +269,7 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
               {inquirySteps.map((step, i) => (
                 <div
                   key={step.label}
-                  className="fade-left group border-border bg-card hover:border-primary/50 flex items-start gap-6 rounded-2xl border p-8 transition-[border-color,box-shadow] duration-300 hover:shadow-lg"
+                  className="fade-left group border-border bg-card hover:border-primary/50 flex items-start gap-6 rounded-xl border p-8 transition-[border-color,box-shadow] duration-300 hover:shadow-lg"
                   style={{ animationDelay: `${i * 0.1}s` }}
                 >
                   <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground flex size-14 items-center justify-center rounded-xl transition-colors">
@@ -279,9 +289,9 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
           </div>
 
           {/* Contact Form */}
-          <div className="fade-right border-border bg-card rounded-3xl border p-8 shadow-sm lg:p-12">
+          <div className="fade-right border-border bg-card rounded-xl border p-8 shadow-sm lg:p-12">
             <div className="mb-10">
-              <h3 className="text-2xl font-bold">Send a Message</h3>
+              <h2 className="text-2xl font-bold">Send a Message</h2>
               <p className="text-muted-foreground mt-2">
                 Share the context, goals, and constraints.
                 {contact.response_promise
@@ -292,6 +302,7 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
 
             <form
               onSubmit={handleSubmit}
+              onFocusCapture={() => void loadContract()}
               className="relative space-y-6"
               noValidate
               aria-busy={status === "loading"}
@@ -335,9 +346,9 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
                     onChange={(e) => updateField("name", e.target.value)}
                   />
                   {fieldErrors.name && (
-                    <p id="contact-name-error" className="text-sm text-red-600">
+                    <FieldError id="contact-name-error">
                       {fieldErrors.name}
-                    </p>
+                    </FieldError>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -366,12 +377,9 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
                     onChange={(e) => updateField("email", e.target.value)}
                   />
                   {fieldErrors.email && (
-                    <p
-                      id="contact-email-error"
-                      className="text-sm text-red-600"
-                    >
+                    <FieldError id="contact-email-error">
                       {fieldErrors.email}
-                    </p>
+                    </FieldError>
                   )}
                 </div>
               </div>
@@ -399,12 +407,9 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
                   onChange={(e) => updateField("subject", e.target.value)}
                 />
                 {fieldErrors.subject && (
-                  <p
-                    id="contact-subject-error"
-                    className="text-sm text-red-600"
-                  >
+                  <FieldError id="contact-subject-error">
                     {fieldErrors.subject}
-                  </p>
+                  </FieldError>
                 )}
               </div>
               <div className="space-y-2">
@@ -439,12 +444,9 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
                   Please avoid passwords, access keys, or other sensitive data.
                 </p>
                 {fieldErrors.message && (
-                  <p
-                    id="contact-message-error"
-                    className="text-sm text-red-600"
-                  >
+                  <FieldError id="contact-message-error">
                     {fieldErrors.message}
-                  </p>
+                  </FieldError>
                 )}
               </div>
 
@@ -480,16 +482,36 @@ const ContactContentSection = ({ site }: { site?: TPublicSiteDto }) => {
                   status === "idle"
                     ? "sr-only"
                     : status === "success" || status === "duplicate"
-                      ? "border-success/30 bg-success/10 text-success mt-4 rounded-lg border p-4 text-sm font-medium"
+                      ? "border-foreground mt-4 flex items-start gap-3 rounded-lg border border-solid p-4 text-sm font-medium"
                       : status === "loading"
                         ? "text-muted-foreground mt-4 text-sm font-medium"
-                        : "border-destructive/30 bg-destructive/10 text-destructive mt-4 rounded-lg border p-4 text-sm font-medium"
+                        : "border-foreground mt-4 flex items-start gap-3 rounded-lg border border-dashed p-4 text-sm font-semibold"
                 }
               >
-                {statusMessage}
-                {receipt && (status === "success" || status === "duplicate")
-                  ? ` Reference: ${receipt}.`
-                  : ""}
+                {/* State is a glyph plus a label, never a colour (docs plan 3.6) */}
+                {status === "success" || status === "duplicate" ? (
+                  <Check
+                    className="mt-0.5 size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                ) : status !== "idle" && status !== "loading" ? (
+                  <AlertTriangle
+                    className="mt-0.5 size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                ) : null}
+                <span>
+                  {status !== "idle" &&
+                  status !== "loading" &&
+                  status !== "success" &&
+                  status !== "duplicate" ? (
+                    <strong className="font-bold">Error: </strong>
+                  ) : null}
+                  {statusMessage}
+                  {receipt && (status === "success" || status === "duplicate")
+                    ? ` Reference: ${receipt}.`
+                    : ""}
+                </span>
               </div>
 
               <p className="text-muted-foreground text-xs leading-relaxed">

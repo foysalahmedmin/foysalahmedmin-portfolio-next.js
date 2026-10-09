@@ -39,6 +39,11 @@ describe("MetricsStripSection", () => {
     expect(screen.getByText("Core disciplines")).toBeInTheDocument();
     expect(screen.getByText("Guardrail tracks")).toBeInTheDocument();
     expect(screen.queryByText("Client outcomes")).not.toBeInTheDocument();
-    expect(screen.getByText("✓ verified")).toBeInTheDocument();
+    // Verification is a mark plus a visible label, never colour alone (docs plan 3.6)
+    expect(screen.getByText("Verified")).toBeInTheDocument();
+    expect(screen.getByText("Derived from code")).toBeInTheDocument();
+    expect(
+      document.querySelectorAll("dl > div > :not(dt):not(dd)")
+    ).toHaveLength(0);
   });
 });

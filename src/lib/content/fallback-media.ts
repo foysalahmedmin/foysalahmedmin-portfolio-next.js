@@ -24,21 +24,21 @@ const heroFallbackByPillar: Record<PillarKey, FallbackMediaPresentation> = {
   system_architect: {
     src: "/images/heroes/system-design-pilot.master.png",
     focal_point: { x: 0.72, y: 0.5 },
-    dominant_color: "#d8d8c8",
+    dominant_color: "#d8d8d8",
     blur_data_url:
       "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
   },
   software_developer: {
     src: "/images/heroes/full-stack.master.png",
     focal_point: { x: 0.72, y: 0.5 },
-    dominant_color: "#e8d8c8",
+    dominant_color: "#e8e8e8",
     blur_data_url:
       "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADwAQCdASoQAAkAAwBWJYwCdAEKCjBG9lgA/vBdhPVpERSzaokdeH5SMC5AZKITn+83rdevzgJDdCtiF2f8KgAA",
   },
   ai_automation: {
     src: "/images/heroes/ai-automation.master.png",
     focal_point: { x: 0.72, y: 0.5 },
-    dominant_color: "#d8c8b8",
+    dominant_color: "#c8c8c8",
     blur_data_url:
       "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJYwCdAEfPGWxwQAA/vPGRCUb6WFKVvOg1g5AQ8qJHxSXP1fveVeugAA=",
   },

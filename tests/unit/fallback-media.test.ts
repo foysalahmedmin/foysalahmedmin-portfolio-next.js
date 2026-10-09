@@ -33,7 +33,7 @@ describe("emergency media resolver", () => {
     );
     expect(presentation).toMatchObject({
       focal_point: { x: 0.72, y: 0.5 },
-      dominant_color: "#e8d8c8",
+      dominant_color: "#e8e8e8",
     });
     expect(presentation.blur_data_url).toMatch(/^data:image\/webp;base64,/);
   });
