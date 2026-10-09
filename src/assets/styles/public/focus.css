@@ -1,0 +1,81 @@
+/*
+ * Double-ring focus (docs plan 3.6): 2 px ink outside, 2 px paper inside, so one of the two
+ * always contrasts with whatever is behind the control. Lives in @layer utilities, after
+ * Tailwind's generated utilities, so it also replaces `focus-visible:outline-none` plus a faint ring.
+ */
+[data-surface="public"]
+  :is(
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    summary,
+    [tabindex]:not([tabindex="-1"]),
+    [role="button"]
+  ):focus-visible,
+[data-surface="console"]
+  :is(
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    summary,
+    [tabindex]:not([tabindex="-1"]),
+    [role="button"]
+  ):focus-visible {
+  outline: 2px solid var(--focus-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus-paper);
+}
+
+/* The System lab shows focus without moving keyboard focus: [data-force-state="focus"] */
+[data-surface] [data-force-state="focus"] {
+  outline: 2px solid var(--focus-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus-paper);
+}
+
+[data-surface="public"] :is(input, textarea, select):focus-visible,
+[data-surface="console"] :is(input, textarea, select):focus-visible {
+  border-color: var(--focus-ink);
+}
+
+@media (forced-colors: active) {
+  [data-surface="public"]
+    :is(
+      a,
+      button,
+      input,
+      textarea,
+      select,
+      summary,
+      [tabindex]:not([tabindex="-1"]),
+      [role="button"]
+    ):focus-visible,
+  [data-surface="console"]
+    :is(
+      a,
+      button,
+      input,
+      textarea,
+      select,
+      summary,
+      [tabindex]:not([tabindex="-1"]),
+      [role="button"]
+    ):focus-visible {
+    outline: 3px solid Highlight;
+    box-shadow: none;
+  }
+}
+
+/* Disabled: faint text and a hatch, never only reduced opacity (3.6) */
+[data-surface="public"] :is(button, input, textarea, select):disabled,
+[data-surface="public"] [aria-disabled="true"] {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--line-1) 0 2px,
+    transparent 2px 6px
+  );
+}

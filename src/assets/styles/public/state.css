@@ -1,0 +1,28 @@
+/*
+ * Surface-scoped state and media treatments. These add shape and pattern to existing classes without
+ * editing the components, so the admin (no data-surface) is untouched. They live in @layer utilities,
+ * after Tailwind's generated utilities, so `border`, `border-input` and friends cannot override them.
+ */
+
+/* ---------- Surface-scoped state treatments (no class changes, so the admin is untouched) ---------- */
+[data-surface] [aria-invalid="true"] {
+  border-style: dashed;
+}
+
+[data-surface] [data-variant="destructive"] {
+  outline: 1px dashed currentColor;
+  outline-offset: -4px;
+}
+
+/* ---------- Monochrome media (docs plan 3.4) ----------
+   Any image, poster, thumbnail or embed stays on-brand, even if a colour file is uploaded.
+   Reversible and free of any pipeline change. The 3D canvas is already monochrome and is not filtered. */
+[data-surface="public"] :is(img, video, iframe, [data-mono-media]) {
+  filter: grayscale(1) contrast(1.05);
+}
+
+@media print {
+  [data-surface="public"] :is(img, video, iframe, [data-mono-media]) {
+    filter: grayscale(1);
+  }
+}

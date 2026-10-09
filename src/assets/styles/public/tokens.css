@@ -1,0 +1,333 @@
+/*
+ * Signal design tokens (docs/plans/2026-10-08-monochrome-systems-ui-overhaul.md, section 3.2).
+ *
+ * One token system, applied through [data-surface="public"] (the "stage") and
+ * [data-surface="console"] (the "workbench"), plus [data-density] and [data-tone].
+ *
+ * Strangler rule: the legacy tokens in variables.css stay in place. Wherever no data-surface
+ * attribute is set (today: the whole admin) nothing in this file applies, so the admin renders
+ * exactly as before. The console surface is defined here but not switched on until Phase 7.
+ *
+ * Every value is pure neutral. State is never carried by hue (section 3.6).
+ */
+
+/* ---------- 1. Ramp and surface-independent scales ---------- */
+:root {
+  --mono-white: #ffffff; /* specular highlights and 3D pulses only, never text */
+  --mono-50: #fafafa;
+  --mono-100: #f2f2f2;
+  --mono-200: #e3e3e3;
+  --mono-300: #cecece;
+  --mono-400: #ababab;
+  --mono-500: #868686;
+  --mono-600: #636363;
+  --mono-700: #454545; /* backdrop ceiling behind dark glass text */
+  --mono-800: #2a2a2a;
+  --mono-900: #161616;
+  --mono-950: #0a0a0a;
+  --mono-void: #030303; /* deepest shadow, 3D background only */
+
+  /* Motion tokens (mirrored by src/lib/motion/tokens.ts from Phase 2) */
+  --dur-micro: 120ms;
+  --dur-fast: 200ms;
+  --dur-base: 360ms;
+  --dur-slow: 640ms;
+  --dur-scene: 1100ms;
+  --ease-signal: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-settle: cubic-bezier(0.22, 0.8, 0.2, 1);
+  --ease-snap: cubic-bezier(0.7, 0, 0.2, 1);
+
+  /* Fluid type scale (section 3.3). Sizes are always clamp() with a rem floor. */
+  --step--2: clamp(0.6875rem, 0.66rem + 0.1vw, 0.75rem);
+  --step--1: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.1875rem);
+  --step-1: clamp(1.25rem, 1.1rem + 0.7vw, 1.75rem);
+  --step-2: clamp(1.5rem, 1.2rem + 1.3vw, 2.5rem);
+  --step-3: clamp(2rem, 1.4rem + 2.6vw, 3.75rem);
+  --step-4: clamp(2.75rem, 1.6rem + 4.8vw, 6rem);
+  --step-5: clamp(3.5rem, 1.8rem + 7.4vw, 9rem);
+  --step-6: clamp(4.5rem, 1.5rem + 11vw, 13rem);
+
+  /* Layout */
+  --container-prose: 46rem;
+  --gutter-grid: 1.5rem;
+  --z-rail: 55;
+  --z-chrome: 60;
+  --z-grain: 90;
+}
+
+/* ---------- 2. Surface shape, type and density (theme independent) ---------- */
+[data-surface="public"] {
+  --ff-body: var(--font-text-face), "Helvetica Neue", Arial, sans-serif;
+  --ff-display:
+    var(--font-display-face), "Archivo Fallback 112", Arial, sans-serif;
+  --ff-display-125:
+    var(--font-display-face), "Archivo Fallback 125", Arial, sans-serif;
+  --ff-display-118:
+    var(--font-display-face), "Archivo Fallback 118", Arial, sans-serif;
+  --ff-display-112:
+    var(--font-display-face), "Archivo Fallback 112", Arial, sans-serif;
+  --ff-display-100:
+    var(--font-display-face), "Archivo Fallback 100", Arial, sans-serif;
+  --ff-mono:
+    var(--font-mono-face), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Radius: control 2 px, panel 6 px, glass slab 10 px (corner ticks replace big radii) */
+  --r-sm: 2px;
+  --r-control: 2px;
+  --r-panel: 6px;
+  --r-slab: 10px;
+  --radius-2xl: var(--r-slab);
+  --radius-3xl: var(--r-slab);
+  --radius-xs: 2px;
+  --radius-sm-token: 2px;
+  --radius-md-token: 2px;
+  --radius-lg-token: var(--r-panel);
+  --radius-xl-token: var(--r-slab);
+
+  --header-offset: 5.5rem;
+  --space-section: clamp(4.5rem, 8vw, 9rem);
+  --space-section-compact: clamp(3rem, 5vw, 6rem);
+  --container-wide: 85rem;
+}
+
+[data-surface="console"] {
+  --ff-body: var(--font-text-face), "Helvetica Neue", Arial, sans-serif;
+  --ff-display:
+    var(--font-display-face), "Archivo Fallback 112", Arial, sans-serif;
+  --ff-display-125:
+    var(--font-display-face), "Archivo Fallback 125", Arial, sans-serif;
+  --ff-display-118:
+    var(--font-display-face), "Archivo Fallback 118", Arial, sans-serif;
+  --ff-display-112:
+    var(--font-display-face), "Archivo Fallback 112", Arial, sans-serif;
+  --ff-display-100:
+    var(--font-display-face), "Archivo Fallback 100", Arial, sans-serif;
+  --ff-mono:
+    var(--font-mono-face), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Radius: 2 / 4 / 6 px, no ticks */
+  --r-sm: 2px;
+  --r-control: 2px;
+  --r-panel: 4px;
+  --r-slab: 6px;
+  --radius-2xl: var(--r-slab);
+  --radius-3xl: var(--r-slab);
+  --radius-xs: 2px;
+  --radius-sm-token: 2px;
+  --radius-md-token: 2px;
+  --radius-lg-token: var(--r-panel);
+  --radius-xl-token: var(--r-slab);
+
+  --header-offset: 3.5rem;
+  --container-wide: 100rem;
+}
+
+/* Density: public is comfortable, console is compact (section 3.11) */
+:where([data-surface="public"]),
+[data-density="comfortable"] {
+  --control-h: 2.75rem;
+  --control-h-lg: 3rem;
+  --control-h-sm: 2.5rem;
+  --ui-text: var(--step-0);
+  --hit-area: 2.75rem;
+  --field-gap: 1.25rem;
+}
+
+:where([data-surface="console"]),
+[data-density="compact"] {
+  --control-h: 2.25rem;
+  --control-h-lg: 2.5rem;
+  --control-h-sm: 2rem;
+  --ui-text: 0.875rem;
+  --hit-area: 2.25rem;
+  --field-gap: 0.875rem;
+}
+
+@media (pointer: coarse) {
+  [data-surface="console"],
+  [data-density="compact"] {
+    --hit-area: 2.75rem;
+  }
+}
+
+/* ---------- 3. Semantic tokens: ink (dark) and paper (light) ---------- */
+/*
+ * INK applies to: the dark theme on any surface, any [data-tone="ink"] subtree, and
+ * [data-tone="invert"] while the light theme is active (an inverted band is the opposite of the page).
+ * PAPER is the mirror image. Elements never carry both a surface and a tone, so these never
+ * compete at equal specificity.
+ */
+.dark [data-surface="public"],
+.dark[data-surface="public"],
+.dark [data-surface="console"],
+.dark[data-surface="console"],
+[data-tone="ink"],
+:root:not(.dark) [data-tone="invert"] {
+  color-scheme: dark;
+  --background: var(--mono-950);
+  --foreground: var(--mono-50);
+  --surface-subtle: var(--mono-900);
+  --surface-raised: var(--mono-800);
+  --surface-inverse: var(--mono-50);
+  --card: var(--mono-900);
+  --card-foreground: var(--mono-50);
+  --popover: var(--mono-900);
+  --popover-foreground: var(--mono-50);
+  --primary: var(--mono-50);
+  --primary-foreground: var(--mono-950);
+  --secondary: var(--mono-800);
+  --secondary-foreground: var(--mono-50);
+  --muted: var(--mono-900);
+  --muted-foreground: var(--mono-400);
+  --text-secondary: var(--mono-300);
+  --text-faint: var(--mono-500);
+  --accent: var(--mono-800);
+  --accent-foreground: var(--mono-50);
+  /* State is not colour: these resolve to the same inversion as primary; components add glyph and label */
+  --destructive: var(--mono-50);
+  --destructive-foreground: var(--mono-950);
+  --success: var(--mono-50);
+  --success-foreground: var(--mono-950);
+  --warning: var(--mono-300);
+  --warning-foreground: var(--mono-950);
+  --info: var(--mono-400);
+  --info-foreground: var(--mono-950);
+
+  --line-1: rgb(255 255 255 / 0.08);
+  --line-2: rgb(255 255 255 / 0.14);
+  --line-3: rgb(255 255 255 / 0.24);
+  --line-4: rgb(255 255 255 / 0.4);
+  --border: var(--line-2);
+  --border-strong: var(--line-4);
+  --input: var(--line-4);
+  --ring: var(--mono-50);
+  --overlay: rgb(3 3 3 / 0.78);
+
+  --focus-ink: var(--mono-50);
+  --focus-paper: var(--mono-950);
+
+  --glass-1-bg: rgb(255 255 255 / 0.05);
+  --glass-2-bg: rgb(255 255 255 / 0.08);
+  --glass-3-bg: rgb(255 255 255 / 0.12);
+  --glass-fallback: rgb(22 22 22 / 0.94);
+  --glass-edge:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08), inset 0 -1px 0 rgb(0 0 0 / 0.4);
+
+  --elev-1: 0 1px 0 var(--line-2);
+  --elev-2: 0 8px 24px rgb(0 0 0 / 0.35);
+  --elev-3: 0 24px 64px rgb(0 0 0 / 0.45), 0 2px 6px rgb(0 0 0 / 0.3);
+  --elev-4: 0 32px 96px rgb(0 0 0 / 0.55), 0 4px 12px rgb(0 0 0 / 0.35);
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-sm: 0 8px 24px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 18px 48px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 32px 80px rgb(0 0 0 / 0.5);
+
+  --grain-opacity: 0.05;
+}
+
+:root:not(.dark) [data-surface="public"],
+:root:not(.dark)[data-surface="public"],
+:root:not(.dark) [data-surface="console"],
+:root:not(.dark)[data-surface="console"],
+[data-tone="paper"],
+.dark [data-tone="invert"] {
+  color-scheme: light;
+  --background: var(--mono-50);
+  --foreground: var(--mono-950);
+  --surface-subtle: var(--mono-100);
+  --surface-raised: var(--mono-white);
+  --surface-inverse: var(--mono-950);
+  --card: var(--mono-white);
+  --card-foreground: var(--mono-950);
+  --popover: var(--mono-white);
+  --popover-foreground: var(--mono-950);
+  --primary: var(--mono-950);
+  --primary-foreground: var(--mono-50);
+  --secondary: var(--mono-200);
+  --secondary-foreground: var(--mono-950);
+  --muted: var(--mono-100);
+  --muted-foreground: var(--mono-600);
+  --text-secondary: var(--mono-700);
+  --text-faint: var(--mono-500);
+  --accent: var(--mono-200);
+  --accent-foreground: var(--mono-950);
+  --destructive: var(--mono-950);
+  --destructive-foreground: var(--mono-50);
+  --success: var(--mono-950);
+  --success-foreground: var(--mono-50);
+  --warning: var(--mono-700);
+  --warning-foreground: var(--mono-50);
+  --info: var(--mono-600);
+  --info-foreground: var(--mono-50);
+
+  --line-1: rgb(0 0 0 / 0.08);
+  --line-2: rgb(0 0 0 / 0.14);
+  --line-3: rgb(0 0 0 / 0.24);
+  /* 48% (not 40%) so control borders reach 3:1 on paper: black 40% over mono-50 is only 2.83:1 */
+  --line-4: rgb(0 0 0 / 0.48);
+  --border: var(--line-2);
+  --border-strong: var(--line-4);
+  --input: var(--line-4);
+  --ring: var(--mono-950);
+  --overlay: rgb(10 10 10 / 0.6);
+
+  --focus-ink: var(--mono-950);
+  --focus-paper: var(--mono-50);
+
+  --glass-1-bg: rgb(255 255 255 / 0.6);
+  --glass-2-bg: rgb(255 255 255 / 0.72);
+  --glass-3-bg: rgb(255 255 255 / 0.82);
+  --glass-fallback: rgb(255 255 255 / 0.96);
+  --glass-edge:
+    inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 1px rgb(0 0 0 / 0.08);
+
+  --elev-1: 0 1px 0 var(--line-2);
+  --elev-2: 0 8px 24px rgb(0 0 0 / 0.1);
+  --elev-3: 0 24px 56px rgb(0 0 0 / 0.14), 0 2px 6px rgb(0 0 0 / 0.08);
+  --elev-4: 0 32px 80px rgb(0 0 0 / 0.2), 0 4px 12px rgb(0 0 0 / 0.1);
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.08);
+  --shadow-sm: 0 8px 24px rgb(0 0 0 / 0.08);
+  --shadow-md: 0 18px 48px rgb(0 0 0 / 0.12);
+  --shadow-lg: 0 32px 80px rgb(0 0 0 / 0.16);
+
+  --grain-opacity: 0.035;
+}
+
+/* Tokens that follow the semantic set on either surface (declared after both sets) */
+[data-surface="public"],
+[data-surface="console"],
+[data-tone] {
+  /* The five role "pillar" colours, charts and sidebar tokens collapse to greys.
+     Role identity is carried by texture and glyph (3.4), never by hue. */
+  --pillar-frontend: var(--foreground);
+  --pillar-backend: var(--foreground);
+  --pillar-ai: var(--foreground);
+  --pillar-system: var(--foreground);
+  --pillar-full-stack: var(--foreground);
+  --pillar-frontend-surface: var(--surface-subtle);
+  --pillar-backend-surface: var(--surface-subtle);
+  --pillar-ai-surface: var(--surface-subtle);
+  --pillar-system-surface: var(--surface-subtle);
+  --pillar-full-stack-surface: var(--surface-subtle);
+
+  --chart-1: var(--foreground);
+  --chart-2: var(--text-secondary);
+  --chart-3: var(--muted-foreground);
+  --chart-4: var(--text-faint);
+  --chart-5: var(--line-4);
+
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  /* Primary button hover: a quiet step toward the page, since primary and foreground are the same grey */
+  --btn-hover-bg: color-mix(in oklab, var(--primary) 80%, var(--background));
+  --btn-hover-fg: var(--primary-foreground);
+}
