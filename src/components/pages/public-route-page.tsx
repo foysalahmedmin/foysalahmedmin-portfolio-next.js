@@ -1,12 +1,20 @@
 import type { TResolvedPublishedPagePayload } from "@/app/api/pages/page-resolver.type";
-import ArticlesContentSection from "@/components/(common)/articles-page/articles-content-section";
-import CaseStudiesContentSection from "@/components/(common)/case-studies-page/case-studies-content-section";
-import ProjectsContentSection from "@/components/(common)/projects-page/projects-content-section";
-import VideosContentSection from "@/components/(common)/videos-page/videos-content-section";
-import PageHeaderSection from "@/components/sections/page-header-section";
+import {
+  ChapterPage,
+  ConversationLayout,
+  DocumentLayout,
+  IndexLayout,
+  NarrativePage,
+} from "@/components/templates";
+import type { PageTemplateProps } from "@/components/templates";
 import type { TBreadcrumbs } from "@/components/ui/breadcrumb";
+import type { ComponentType, ReactElement } from "react";
 import type { TPublicRouteDiscoveryData } from "@/lib/pages/public-route-renderer.type";
-import { PublicPageSections } from "./public-page-sections";
+import type { TPageSectionKind } from "@/app/api/pages/page.type";
+import {
+  PublicPageSections,
+  type TPublicPageSectionOverrides,
+} from "./public-page-sections";
 
 type TRouteHeader = Readonly<{
   title: string;
@@ -52,6 +60,22 @@ const ROUTE_HEADER_FALLBACKS = {
   },
 } as const;
 
+// Every route belongs to exactly one archetype (docs plan 3.12); the template owns the page anatomy.
+const TEMPLATE_BY_ROUTE: Record<
+  TResolvedPublishedPagePayload["page"]["route_key"],
+  (props: PageTemplateProps) => ReactElement
+> = {
+  home: ChapterPage,
+  about: NarrativePage,
+  contact: ConversationLayout,
+  privacy: DocumentLayout,
+  terms: DocumentLayout,
+  projects: IndexLayout,
+  "case-studies": IndexLayout,
+  articles: IndexLayout,
+  videos: IndexLayout,
+};
+
 export const getPublicRouteHeader = (
   payload: TResolvedPublishedPagePayload
 ): TRouteHeader | null => {
@@ -84,82 +108,84 @@ export const getPublicRouteHeader = (
   };
 };
 
+type DiscoveryKey = TPublicRouteDiscoveryData["route_key"];
+
+/**
+ * The interactive discovery sections (filters, search, pagination) are client components. A route
+ * passes only its own renderer, so the other public routes do not load that client code: a static
+ * import here would put every discovery section into the initial JavaScript of every page.
+ */
+export type DiscoveryRenderers = Readonly<{
+  [K in DiscoveryKey]?: ComponentType<
+    Extract<TPublicRouteDiscoveryData, { route_key: K }>["props"]
+  >;
+}>;
+
+const DISCOVERY_SECTION_KIND = {
+  projects: "project-collection",
+  articles: "article-collection",
+  "case-studies": "case-study-collection",
+  videos: "video-collection",
+} as const satisfies Record<DiscoveryKey, TPageSectionKind>;
+
+const discoveryOverrides = (
+  routeKey: string,
+  discovery: TPublicRouteDiscoveryData | null | undefined,
+  renderers: DiscoveryRenderers | undefined
+): TPublicPageSectionOverrides | undefined => {
+  if (!discovery || discovery.route_key !== routeKey) return undefined;
+  const Render = renderers?.[discovery.route_key] as
+    | ComponentType<typeof discovery.props>
+    | undefined;
+  if (!Render) return undefined;
+  return {
+    [DISCOVERY_SECTION_KIND[discovery.route_key]]: () => (
+      <Render {...discovery.props} />
+    ),
+  };
+};
+
 export const PublicRoutePage = ({
   payload,
   discovery,
+  discoveryRenderers,
 }: Readonly<{
   payload: TResolvedPublishedPagePayload;
   discovery?: TPublicRouteDiscoveryData | null;
+  discoveryRenderers?: DiscoveryRenderers;
 }>) => {
   const header = getPublicRouteHeader(payload);
-  const sectionOverrides =
-    discovery?.route_key === "projects" && payload.page.route_key === "projects"
-      ? {
-          "project-collection": () => (
-            <ProjectsContentSection {...discovery.props} />
-          ),
-        }
-      : discovery?.route_key === "articles" &&
-          payload.page.route_key === "articles"
-        ? {
-            "article-collection": () => (
-              <ArticlesContentSection {...discovery.props} />
-            ),
-          }
-        : discovery?.route_key === "case-studies" &&
-            payload.page.route_key === "case-studies"
+  const sectionOverrides = discoveryOverrides(
+    payload.page.route_key,
+    discovery,
+    discoveryRenderers
+  );
+  const Template = TEMPLATE_BY_ROUTE[payload.page.route_key];
+  // A page whose composition already ends in a contact-cta section must not get a second band.
+  const hasCtaSection = payload.sections.some(
+    (section) => section.kind === "contact-cta"
+  );
+
+  return (
+    <Template
+      route={payload.page.route_key}
+      revision={payload.page.published_revision || undefined}
+      site={payload.site}
+      cta={hasCtaSection ? false : undefined}
+      header={
+        header
           ? {
-              "case-study-collection": () => (
-                <CaseStudiesContentSection {...discovery.props} />
-              ),
+              title: header.title,
+              lede: header.description,
+              path: header.breadcrumbs,
             }
-          : discovery?.route_key === "videos" &&
-              payload.page.route_key === "videos"
-            ? {
-                "video-collection": () => (
-                  <VideosContentSection {...discovery.props} />
-                ),
-              }
-            : undefined;
-  const isLegal =
-    payload.page.route_key === "privacy" || payload.page.route_key === "terms";
-  const content = (
-    <>
-      {header ? (
-        <PageHeaderSection
-          title={header.title}
-          description={header.description}
-          breadcrumbItems={header.breadcrumbs}
-        />
-      ) : null}
+          : null
+      }
+    >
       <PublicPageSections
         payload={payload}
         sectionOverrides={sectionOverrides}
       />
-    </>
-  );
-  const revision = payload.page.published_revision || undefined;
-
-  return isLegal ? (
-    <div
-      data-public-route={payload.page.route_key}
-      data-page-revision={revision}
-    >
-      {content}
-    </div>
-  ) : (
-    <main
-      className={
-        payload.page.route_key === "projects" ||
-        payload.page.route_key === "case-studies" ||
-        payload.page.route_key === "videos"
-          ? "min-h-screen pb-20"
-          : "min-h-screen"
-      }
-      data-public-route={payload.page.route_key}
-      data-page-revision={revision}
-    >
-      {content}
-    </main>
+    </Template>
   );
 };

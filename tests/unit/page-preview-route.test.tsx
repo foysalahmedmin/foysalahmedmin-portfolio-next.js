@@ -63,6 +63,14 @@ vi.mock("@/components/partials/footer", () => ({
 vi.mock("@/components/ui/scroll-to-top", () => ({
   default: () => null,
 }));
+// next/font and the document-level surface helpers need a browser or the Next build
+vi.mock("@/app/(common)/fonts", () => ({ publicFontVariables: "font-vars" }));
+vi.mock("@/components/surface/chrome-tone-controller", () => ({
+  ChromeToneController: () => null,
+}));
+vi.mock("@/components/surface/surface-marker", () => ({
+  SurfaceMarker: () => null,
+}));
 vi.mock("@/components/pages/public-route-page", () => ({
   PublicRoutePage: () => <main>public route renderer</main>,
 }));

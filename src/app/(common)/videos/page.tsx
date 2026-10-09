@@ -1,3 +1,4 @@
+import VideosContentSection from "@/components/(common)/videos-page/videos-content-section";
 import { PublicRoutePage } from "@/components/pages/public-route-page";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
 import { getPublicPagePayloadOrFallback } from "@/lib/pages/public-page-fallback";
@@ -27,9 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     : metadata;
 }
 
-export default async function VideosPage({
-  searchParams,
-}: VideosPageProps) {
+export default async function VideosPage({ searchParams }: VideosPageProps) {
   const [payload, rawSearchParams] = await Promise.all([
     getPublicPagePayloadOrFallback("videos"),
     searchParams,
@@ -40,5 +39,11 @@ export default async function VideosPage({
   });
   if (discovery?.redirect_to) redirect(discovery.redirect_to);
 
-  return <PublicRoutePage payload={payload} discovery={discovery} />;
+  return (
+    <PublicRoutePage
+      payload={payload}
+      discovery={discovery}
+      discoveryRenderers={{ videos: VideosContentSection }}
+    />
+  );
 }

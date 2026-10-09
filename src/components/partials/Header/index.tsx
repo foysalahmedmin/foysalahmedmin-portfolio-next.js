@@ -236,6 +236,7 @@ const Header = ({ site, className }: HeaderProps) => {
   return (
     <>
       <header
+        data-chrome
         className={cn(
           "bg-background/85 text-foreground sticky top-0 z-[var(--z-header)] h-20 border-b backdrop-blur-xl transition-[background-color,box-shadow,transform,border-color] duration-[var(--motion-standard)] motion-reduce:transform-none motion-reduce:transition-none",
           scrollTop > 24 ? "border-border shadow-sm" : "border-transparent",

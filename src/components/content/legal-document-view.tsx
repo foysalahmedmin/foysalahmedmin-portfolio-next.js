@@ -26,7 +26,7 @@ export const LegalDocumentUnavailable = ({
 }) => {
   const label = documentLabel(type);
   return (
-    <main className="min-h-[70vh] pb-24">
+    <div className="pb-24">
       <PageHeaderSection
         title={`${label} unavailable`}
         subtitle="LEGAL"
@@ -37,7 +37,7 @@ export const LegalDocumentUnavailable = ({
         ]}
       />
       <section className="container mx-auto px-6 py-20 text-center">
-        <div className="border-border bg-card mx-auto max-w-2xl rounded-3xl border p-8 md:p-12">
+        <div className="border-border bg-card mx-auto max-w-2xl rounded-xl border p-8 md:p-12">
           <FileCheck2 className="text-primary mx-auto size-10" aria-hidden />
           <h2 className="mt-6 text-2xl font-bold">Reviewed copy is pending</h2>
           <p className="text-muted-foreground mx-auto mt-4 max-w-xl leading-7">
@@ -50,7 +50,7 @@ export const LegalDocumentUnavailable = ({
           </Button>
         </div>
       </section>
-    </main>
+    </div>
   );
 };
 
@@ -67,7 +67,7 @@ export const LegalDocumentView = ({
     site.identity.public_name || site.identity.short_name || "Site owner";
 
   return (
-    <main className="min-h-screen pb-24 lg:pb-32 print:pb-0">
+    <div className="pb-24 lg:pb-32 print:pb-0">
       <div className="print:hidden">
         <PageHeaderSection
           title={document.title || label}
@@ -84,13 +84,13 @@ export const LegalDocumentView = ({
       </div>
 
       <article className="container mx-auto px-6 pt-16 lg:pt-24 print:max-w-none print:px-0 print:pt-0">
-        <header className="border-border bg-card mx-auto max-w-5xl rounded-3xl border p-7 md:p-10 print:max-w-none print:rounded-none print:border-0 print:p-0">
+        <header className="border-border bg-card mx-auto max-w-5xl rounded-xl border p-7 md:p-10 print:max-w-none print:rounded-none print:border-0 print:p-0">
           <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
             {label}
           </p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">
+          <h2 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">
             {document.title}
-          </h1>
+          </h2>
           {document.summary && (
             <p className="text-muted-foreground mt-4 max-w-3xl text-lg leading-8">
               {document.summary}
@@ -118,7 +118,7 @@ export const LegalDocumentView = ({
         </header>
 
         <div className="mx-auto mt-10 grid max-w-5xl gap-10 lg:grid-cols-[minmax(0,1fr)_15rem] print:mt-8 print:block print:max-w-none">
-          <div className="border-border bg-card rounded-3xl border p-7 md:p-12 print:rounded-none print:border-0 print:p-0">
+          <div className="border-border bg-card rounded-xl border p-7 md:p-12 print:rounded-none print:border-0 print:p-0">
             {document.sections.map((section, index) => (
               <section
                 key={section.key}
@@ -142,7 +142,7 @@ export const LegalDocumentView = ({
               </section>
             ))}
 
-            <aside className="bg-muted/50 mt-12 rounded-2xl p-6 print:border print:bg-transparent">
+            <aside className="bg-muted/50 mt-12 rounded-xl p-6 print:border print:bg-transparent">
               <h2 className="font-bold">Questions about this document?</h2>
               <p className="text-muted-foreground mt-2 leading-7">
                 Contact {contactOwner} through the published contact channel.
@@ -190,6 +190,6 @@ export const LegalDocumentView = ({
           </nav>
         </div>
       </article>
-    </main>
+    </div>
   );
 };

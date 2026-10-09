@@ -1,6 +1,5 @@
+import { PageHeader } from "@/components/templates/page-header";
 import type { TBreadcrumbs } from "@/components/ui/breadcrumb";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { cn } from "@/lib/utils";
 import React from "react";
 
 interface PageHeaderSectionProps {
@@ -9,70 +8,29 @@ interface PageHeaderSectionProps {
   description?: string;
   breadcrumbItems?: TBreadcrumbs;
   className?: string;
+  /** Kept for source compatibility; the shared header is always left-set. */
   align?: "left" | "center";
 }
 
+/**
+ * Compatibility wrapper. The shared header lives in `templates/page-header`; this keeps the old
+ * import path and props working for callers that render a header from inside a section.
+ */
 const PageHeaderSection: React.FC<PageHeaderSectionProps> = ({
   title,
   subtitle,
   description,
   breadcrumbItems,
   className,
-  align = "center",
-}) => {
-  const renderTitle = (text: string) => {
-    const words = text.split(" ");
-    if (words.length <= 1) return text;
-
-    const lastWord = words.pop();
-    return (
-      <>
-        {words.join(" ")} <span className="text-primary">{lastWord}</span>
-      </>
-    );
-  };
-
-  return (
-    <section
-      className={cn(
-        "bg-muted border-border border-b py-20 lg:py-32",
-        className
-      )}
-    >
-      <div className="container mx-auto px-6">
-        <div
-          className={cn(
-            "flex flex-col gap-6",
-            align === "center"
-              ? "items-center text-center"
-              : "items-start text-left"
-          )}
-        >
-          {breadcrumbItems && (
-            <div className="fade-down">
-              <Breadcrumb items={breadcrumbItems} />
-            </div>
-          )}
-
-          <div className="max-w-3xl">
-            {subtitle && (
-              <span className="text-primary fade-down mb-3 inline-block text-sm font-bold tracking-widest uppercase">
-                {subtitle}
-              </span>
-            )}
-            <h1 className="fade-down text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
-              {renderTitle(title)}
-            </h1>
-            {description && (
-              <p className="fade-up text-muted-foreground mx-auto mt-6 text-lg leading-relaxed md:text-xl">
-                {description}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
+}) => (
+  <PageHeader
+    title={title}
+    lede={description}
+    path={breadcrumbItems}
+    eyebrow={subtitle}
+    level="detail"
+    {...(className ? { className } : {})}
+  />
+);
 
 export default PageHeaderSection;

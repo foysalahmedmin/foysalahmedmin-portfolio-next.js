@@ -6,9 +6,15 @@ import { PageDomainError } from "@/app/api/pages/page.policy";
 import { readDraftPreview } from "@/app/api/pages/page.service";
 import { PAGE_ROUTE_KEYS, type TPageRouteKey } from "@/app/api/pages/page.type";
 import PagePreviewRuntime from "@/components/admin/page-preview-runtime";
+import ArticlesContentSection from "@/components/(common)/articles-page/articles-content-section";
+import CaseStudiesContentSection from "@/components/(common)/case-studies-page/case-studies-content-section";
+import ProjectsContentSection from "@/components/(common)/projects-page/projects-content-section";
+import VideosContentSection from "@/components/(common)/videos-page/videos-content-section";
 import { PublicRoutePage } from "@/components/pages/public-route-page";
 import Footer from "@/components/partials/footer";
 import Header from "@/components/partials/Header";
+import { ChromeToneController } from "@/components/surface/chrome-tone-controller";
+import { SurfaceMarker } from "@/components/surface/surface-marker";
 import ScrollToTop from "@/components/ui/scroll-to-top";
 import { requireAdminSession } from "@/lib/auth/admin-session";
 import { normalizePagePreviewDisplay } from "@/lib/pages/page-preview-display";
@@ -16,9 +22,11 @@ import { getAdminPagePreviewPath } from "@/lib/pages/page-preview-path";
 import { loadPublicRouteDiscovery } from "@/lib/pages/public-route-discovery";
 import { resolvePageSnapshotUncached } from "@/lib/pages/published-page-resolver";
 import { readPublishedSite } from "@/lib/site/published-site";
+import { cn } from "@/lib/utils";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { publicFontVariables } from "@/app/(common)/fonts";
 
 type PreviewPageProps = Readonly<{
   params: Promise<{ routeKey: string }>;
@@ -171,10 +179,20 @@ export default async function AdminPublicPagePreview({
 
   return (
     <PagePreviewRuntime {...display}>
-      <div className="bg-background text-foreground min-h-screen">
+      {/* The preview renders the public site, so it carries the public surface (the admin around it stays legacy) */}
+      <div
+        data-surface="public"
+        data-density="comfortable"
+        className={cn(
+          publicFontVariables,
+          "bg-background text-foreground font-text min-h-screen"
+        )}
+      >
+        <SurfaceMarker surface="public" fontClassNames={publicFontVariables} />
+        <ChromeToneController />
         <a
           href="#preview-main-content"
-          className="bg-background text-foreground focus-visible:ring-ring fixed top-3 left-3 z-[2000] -translate-y-24 rounded-lg px-4 py-3 font-semibold shadow-lg transition-transform focus-visible:translate-y-0 focus-visible:ring-2"
+          className="bg-foreground text-background fixed top-3 left-3 z-[2000] -translate-y-24 px-4 py-3 font-semibold transition-transform focus-visible:translate-y-0"
         >
           Skip to preview content
         </a>
@@ -188,10 +206,17 @@ export default async function AdminPublicPagePreview({
           <PublicRoutePage
             payload={resolved.payload}
             discovery={resolved.discovery}
+            discoveryRenderers={{
+              projects: ProjectsContentSection,
+              articles: ArticlesContentSection,
+              "case-studies": CaseStudiesContentSection,
+              videos: VideosContentSection,
+            }}
           />
         </div>
         <Footer site={resolved.payload.site} />
         <ScrollToTop />
+        <div className="grain" aria-hidden="true" />
       </div>
     </PagePreviewRuntime>
   );

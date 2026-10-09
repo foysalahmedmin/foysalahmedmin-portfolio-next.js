@@ -1,3 +1,4 @@
+import { DetailLayout } from "@/components/templates";
 import * as ProjectResourceService from "@/app/api/project-resources/project-resource.service";
 import * as ProjectService from "@/app/api/projects/project.service";
 import { JsonLdScript } from "@/components/content/json-ld-script";
@@ -129,12 +130,14 @@ export default async function ProjectDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <ProjectDetailsSection
-        project={project}
-        resources={resources}
-        related={related}
-        fallbacks={site.fallbacks}
-      />
+      <DetailLayout route="project" site={site}>
+        <ProjectDetailsSection
+          project={project}
+          resources={resources}
+          related={related}
+          fallbacks={site.fallbacks}
+        />
+      </DetailLayout>
     </>
   );
 }

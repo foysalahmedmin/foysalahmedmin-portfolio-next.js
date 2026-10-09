@@ -92,7 +92,7 @@ const ProjectDetailsSection = ({
   const cover = project.thumbnail?.url ? project.thumbnail : managedFallback;
 
   return (
-    <main className="bg-background min-h-screen">
+    <div className="bg-background">
       <header className="relative overflow-hidden pt-20 pb-16 lg:pt-28 lg:pb-24">
         <div className="bg-primary/10 pointer-events-none absolute top-0 left-1/2 h-[30rem] w-[70rem] -translate-x-1/2 rounded-full blur-[140px]" />
         <div className="relative container mx-auto px-6">
@@ -150,7 +150,7 @@ const ProjectDetailsSection = ({
       </header>
 
       <div className="container mx-auto px-6">
-        <div className="border-border bg-surface-subtle relative aspect-[16/9] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
+        <div className="border-border bg-surface-subtle relative aspect-[16/9] overflow-hidden rounded-xl border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
           <ParallaxLayer className="absolute -inset-[3%]" depth="subtle">
             <OptimizedMedia
               src={cover?.url}
@@ -247,7 +247,7 @@ const ProjectDetailsSection = ({
                 {project.outcomes.map((outcome) => (
                   <div
                     key={`${outcome.label}-${outcome.value}`}
-                    className="border-border bg-card rounded-2xl border p-5"
+                    className="border-border bg-card rounded-xl border p-5"
                   >
                     <CheckCircle2
                       className="text-success size-5"
@@ -275,7 +275,7 @@ const ProjectDetailsSection = ({
             >
               <div className="grid gap-4 md:grid-cols-2">
                 {project.security && (
-                  <div className="border-border bg-card rounded-2xl border p-5">
+                  <div className="border-border bg-card rounded-xl border p-5">
                     <ShieldCheck
                       className="text-primary size-5"
                       aria-hidden="true"
@@ -287,7 +287,7 @@ const ProjectDetailsSection = ({
                   </div>
                 )}
                 {project.performance_reliability && (
-                  <div className="border-border bg-card rounded-2xl border p-5">
+                  <div className="border-border bg-card rounded-xl border p-5">
                     <Layers3
                       className="text-primary size-5"
                       aria-hidden="true"
@@ -339,7 +339,7 @@ const ProjectDetailsSection = ({
         </div>
 
         <aside className="h-fit space-y-6 lg:sticky lg:top-28">
-          <div className="border-border bg-card rounded-2xl border p-6">
+          <div className="border-border bg-card rounded-xl border p-6">
             <h2 className="font-black">Project facts</h2>
             <dl className="mt-5 space-y-4 text-sm">
               {pillar && (
@@ -374,7 +374,7 @@ const ProjectDetailsSection = ({
             </dl>
           </div>
           {safeResources.length > 0 && (
-            <div className="border-border bg-card rounded-2xl border p-6">
+            <div className="border-border bg-card rounded-xl border p-6">
               <h2 className="font-black">Public resources</h2>
               <ul className="mt-4 space-y-2">
                 {safeResources.map((resource) => (
@@ -396,7 +396,7 @@ const ProjectDetailsSection = ({
               </ul>
             </div>
           )}
-          <div className="bg-primary text-primary-foreground rounded-2xl p-6">
+          <div className="bg-primary text-primary-foreground rounded-xl p-6">
             <h2 className="text-xl font-black">Facing a similar problem?</h2>
             <p className="mt-3 text-sm leading-6 opacity-85">
               Tell me what you are trying to achieve and what is getting in the
@@ -430,7 +430,7 @@ const ProjectDetailsSection = ({
                 <Link
                   key={item._id}
                   href={`/projects/${item.slug ?? item._id}`}
-                  className="border-border bg-card hover:border-primary group rounded-2xl border p-6"
+                  className="border-border bg-card hover:border-primary group rounded-xl border p-6"
                 >
                   <p className="text-primary text-xs font-black uppercase">
                     {item.primary_pillar
@@ -456,7 +456,7 @@ const ProjectDetailsSection = ({
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 };
 

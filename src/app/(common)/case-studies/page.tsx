@@ -1,3 +1,4 @@
+import CaseStudiesContentSection from "@/components/(common)/case-studies-page/case-studies-content-section";
 import { PublicRoutePage } from "@/components/pages/public-route-page";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
 import { getPublicPagePayloadOrFallback } from "@/lib/pages/public-page-fallback";
@@ -40,5 +41,11 @@ export default async function CaseStudiesPage({
   });
   if (discovery?.redirect_to) redirect(discovery.redirect_to);
 
-  return <PublicRoutePage payload={payload} discovery={discovery} />;
+  return (
+    <PublicRoutePage
+      payload={payload}
+      discovery={discovery}
+      discoveryRenderers={{ "case-studies": CaseStudiesContentSection }}
+    />
+  );
 }
