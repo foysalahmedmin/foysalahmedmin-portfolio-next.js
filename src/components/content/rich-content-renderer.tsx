@@ -75,7 +75,7 @@ export const RichContentRenderer = ({
             return (
               <figure
                 key={`quote-${index}`}
-                className="border-primary bg-primary/5 my-10 rounded-r-2xl border-l-2 p-6"
+                className="border-primary bg-primary/5 my-10 rounded-r-xl border-l-2 p-6"
               >
                 <blockquote className="text-xl leading-8 font-semibold">
                   {block.quote}
@@ -93,7 +93,7 @@ export const RichContentRenderer = ({
               <aside
                 key={`callout-${index}`}
                 className={cn(
-                  "border-border my-10 rounded-2xl border p-6",
+                  "border-border my-10 rounded-xl border p-6",
                   block.tone === "success" && "border-success/30 bg-success/10",
                   block.tone === "warning" && "border-warning/30 bg-warning/10",
                   block.tone === "info" && "border-primary/30 bg-primary/5"
@@ -111,7 +111,7 @@ export const RichContentRenderer = ({
             if (!file) return null;
             return (
               <figure key={`${file.id}-${index}`} className="my-10">
-                <div className="border-border relative aspect-video overflow-hidden rounded-2xl border">
+                <div className="border-border relative aspect-video overflow-hidden rounded-xl border">
                   <OptimizedMedia
                     src={file.url}
                     alt={block.alt || file.alt_text || ""}
@@ -132,7 +132,7 @@ export const RichContentRenderer = ({
           return (
             <figure
               key={`architecture-${index}`}
-              className="border-border bg-surface-raised my-10 rounded-2xl border p-6"
+              className="border-border bg-surface-raised my-10 rounded-xl border p-6"
             >
               <figcaption>
                 <h3 className="text-xl font-bold">{block.title}</h3>

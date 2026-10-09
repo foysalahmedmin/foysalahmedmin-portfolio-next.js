@@ -31,7 +31,7 @@ const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
       <div className="container mx-auto px-6">
         <div className="grid items-center gap-16 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="relative">
-            <div className="border-border bg-surface-subtle relative aspect-[4/5] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)]">
+            <div className="border-border bg-surface-subtle relative aspect-[4/5] overflow-hidden rounded-xl border shadow-[var(--shadow-lg)]">
               <OptimizedMedia
                 src={profile?.url}
                 alt={resolveMediaAlt(
@@ -47,7 +47,7 @@ const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
               />
               <div className="from-background/60 absolute inset-0 bg-gradient-to-t via-transparent to-transparent" />
             </div>
-            <div className="border-border bg-card absolute -right-4 -bottom-8 max-w-64 rounded-2xl border p-5 shadow-[var(--shadow-md)] sm:right-8">
+            <div className="border-border bg-card absolute -right-4 -bottom-8 max-w-64 rounded-xl border p-5 shadow-[var(--shadow-md)] sm:right-8">
               <Layers3 className="text-primary size-6" aria-hidden="true" />
               <p className="mt-3 text-sm leading-6 font-semibold">
                 Architecture, software, and automation, with one accountable
@@ -74,7 +74,7 @@ const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
                 "Published practice details are being prepared."}
             </p>
             {site.positioning.client_promise && (
-              <blockquote className="border-primary bg-primary/5 mt-7 rounded-r-2xl border-l-2 p-5 text-base leading-7 font-semibold">
+              <blockquote className="border-primary bg-primary/5 mt-7 rounded-r-xl border-l-2 p-5 text-base leading-7 font-semibold">
                 {site.positioning.client_promise}
               </blockquote>
             )}
@@ -113,7 +113,7 @@ const AboutDetailsSection = ({ site }: { site: TPublicSiteDto }) => {
                   {operatingPrinciples.map((step, index) => (
                     <li
                       key={step.key}
-                      className="border-border bg-card rounded-2xl border p-4"
+                      className="border-border bg-card rounded-xl border p-4"
                     >
                       <span className="text-primary text-xs font-black tabular-nums">
                         {String(index + 1).padStart(2, "0")}

@@ -103,7 +103,7 @@ const Brand = ({ site }: { site: TPublicSiteDto }) => {
       className="focus-visible:ring-primary flex min-h-11 min-w-0 items-center gap-3 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
       aria-label={`${name} home`}
     >
-      <span className="border-border bg-surface-subtle relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-2xl border">
+      <span className="border-border bg-surface-subtle relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border">
         {logo ? (
           <OptimizedMedia
             src={logo.url}
@@ -195,7 +195,7 @@ const MobileNavigation = ({
                     link={link}
                     onClick={onClose}
                     className={cn(
-                      "focus-visible:ring-primary group flex min-h-16 items-center justify-between rounded-2xl px-4 text-2xl font-black tracking-tight focus-visible:ring-2 focus-visible:outline-none sm:text-3xl",
+                      "focus-visible:ring-primary group flex min-h-16 items-center justify-between rounded-xl px-4 text-2xl font-black tracking-tight focus-visible:ring-2 focus-visible:outline-none sm:text-3xl",
                       active ? "bg-primary/10 text-primary" : "hover:bg-muted"
                     )}
                   >

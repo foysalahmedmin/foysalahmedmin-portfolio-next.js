@@ -72,7 +72,7 @@ export default function ProcessStepsSection({
             >
               {visible.map((step, index) => (
                 <li key={step.key} className="relative flex gap-5">
-                  <span className="bg-primary text-primary-foreground ring-surface-subtle z-10 grid size-12 shrink-0 place-items-center rounded-2xl text-sm font-black ring-8">
+                  <span className="bg-primary text-primary-foreground ring-surface-subtle z-10 grid size-12 shrink-0 place-items-center rounded-xl text-sm font-black ring-8">
                     {String(index + 1).padStart(2, "0")}
                   </span>
 

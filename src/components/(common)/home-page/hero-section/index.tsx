@@ -170,7 +170,7 @@ const HeroSection = ({ site }: { site: TPublicSiteDto }) => {
             )}
           </div>
 
-          <div className="border-border bg-background/70 hidden rounded-3xl border p-5 backdrop-blur-xl lg:block">
+          <div className="border-border bg-background/70 hidden rounded-xl border p-5 backdrop-blur-xl lg:block">
             <p className="text-muted-foreground text-xs font-bold tracking-[0.16em] uppercase">
               Capability map
             </p>

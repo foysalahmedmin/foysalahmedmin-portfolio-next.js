@@ -55,7 +55,7 @@ export default function GithubProfileSection({
         </SectionTitle>
 
         <div className="border-border bg-card mx-auto flex max-w-3xl flex-col items-center gap-6 rounded-[var(--radius-xl-token)] border p-8 text-center shadow-[var(--shadow-sm)]">
-          <span className="bg-primary/10 text-primary inline-grid size-14 place-items-center rounded-2xl">
+          <span className="bg-primary/10 text-primary inline-grid size-14 place-items-center rounded-xl">
             <GitBranch className="size-7" aria-hidden="true" />
           </span>
           <a
