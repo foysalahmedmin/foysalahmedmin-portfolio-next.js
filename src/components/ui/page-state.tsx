@@ -1,34 +1,10 @@
+import { ArchetypeSkeleton } from "@/components/templates/archetype-skeleton";
 import { Skeleton } from "@/components/ui/async-state";
 import { Container, Section, Stack } from "@/components/ui/layout";
 
+/** @deprecated Use `ArchetypeSkeleton` from `@/components/templates/archetype-skeleton`. */
 export function PublicPageSkeleton() {
-  return (
-    <main aria-busy="true" aria-label="Loading page">
-      <Section>
-        <Container>
-          <Stack gap="lg">
-            <div className="max-w-3xl space-y-5">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-16 w-full max-w-2xl md:h-24" />
-              <Skeleton className="h-6 w-full max-w-xl" />
-            </div>
-            <Skeleton className="aspect-[16/7] w-full rounded-[var(--radius-xl-token)]" />
-            <div className="grid gap-6 md:grid-cols-3">
-              {Array.from({ length: 3 }, (_, index) => (
-                <Skeleton
-                  key={index}
-                  className="aspect-[4/3] rounded-[var(--radius-lg-token)]"
-                />
-              ))}
-            </div>
-          </Stack>
-        </Container>
-      </Section>
-      <span className="sr-only" role="status">
-        Loading content…
-      </span>
-    </main>
-  );
+  return <ArchetypeSkeleton archetype="A2" />;
 }
 
 export function SectionSkeleton({ label }: { label: string }) {

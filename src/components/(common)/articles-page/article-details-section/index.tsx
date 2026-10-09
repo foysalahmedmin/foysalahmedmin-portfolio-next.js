@@ -52,7 +52,7 @@ const ArticleDetailsSection = ({
   const cover = article.thumbnail?.url ? article.thumbnail : managedFallback;
 
   return (
-    <main className="min-h-screen">
+    <div>
       <header className="bg-surface-subtle border-border relative overflow-hidden border-b py-20 lg:py-28">
         <div className="bg-primary/10 pointer-events-none absolute -top-40 left-1/2 size-[38rem] -translate-x-1/2 rounded-full blur-[150px]" />
         <div className="relative container mx-auto px-6">
@@ -118,7 +118,7 @@ const ArticleDetailsSection = ({
       </header>
 
       <div className="container mx-auto -mt-8 px-6 lg:-mt-12">
-        <div className="border-border bg-muted relative aspect-[16/9] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
+        <div className="border-border bg-muted relative aspect-[16/9] overflow-hidden rounded-xl border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
           <OptimizedMedia
             src={cover?.url}
             alt={resolveMediaAlt(cover, article.name)}
@@ -161,7 +161,7 @@ const ArticleDetailsSection = ({
             </div>
           )}
 
-          <div className="border-border bg-card mt-14 flex flex-col items-start justify-between gap-6 rounded-2xl border p-6 sm:flex-row sm:items-center">
+          <div className="border-border bg-card mt-14 flex flex-col items-start justify-between gap-6 rounded-xl border p-6 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-lg font-black">
                 Share the canonical article
@@ -195,7 +195,7 @@ const ArticleDetailsSection = ({
                 <Link
                   key={item._id}
                   href={`/articles/${item.slug ?? item._id}`}
-                  className="border-border bg-card hover:border-primary group rounded-2xl border p-6"
+                  className="border-border bg-card hover:border-primary group rounded-xl border p-6"
                 >
                   <p className="text-primary text-xs font-black uppercase">
                     {item.primary_pillar
@@ -221,7 +221,7 @@ const ArticleDetailsSection = ({
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 };
 

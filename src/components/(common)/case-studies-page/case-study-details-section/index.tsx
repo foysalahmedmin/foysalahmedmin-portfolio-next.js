@@ -108,9 +108,7 @@ const CaseStudyDetailsSection = ({
   const ended = formatMonth(caseStudy.ended_at);
   const timeframe =
     caseStudy.duration_label ||
-    (started && ended
-      ? `${started} – ${ended}`
-      : (started ?? ended ?? null));
+    (started && ended ? `${started} – ${ended}` : (started ?? ended ?? null));
   const hasBody = Boolean(caseStudy.content?.trim() || caseStudy.rich_content);
   // Number only the sections that are actually shown, in reading order.
   let section = 0;
@@ -119,7 +117,7 @@ const CaseStudyDetailsSection = ({
   const outcomes = caseStudy.outcomes ?? [];
 
   return (
-    <main className="bg-background min-h-screen">
+    <div className="bg-background">
       <header className="relative overflow-hidden pt-20 pb-16 lg:pt-28 lg:pb-24">
         <div className="bg-primary/10 pointer-events-none absolute top-0 left-1/2 h-[30rem] w-[70rem] -translate-x-1/2 rounded-full blur-[140px]" />
         <div className="relative container mx-auto px-6">
@@ -177,7 +175,7 @@ const CaseStudyDetailsSection = ({
       </header>
 
       <div className="container mx-auto px-6">
-        <div className="border-border bg-surface-subtle relative aspect-[16/9] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
+        <div className="border-border bg-surface-subtle relative aspect-[16/9] overflow-hidden rounded-xl border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
           <ParallaxLayer className="absolute -inset-[3%]" depth="subtle">
             <OptimizedMedia
               src={cover?.url}
@@ -224,7 +222,9 @@ const CaseStudyDetailsSection = ({
               eyebrow={nextEyebrow("Approach")}
               title="How I approached it"
             >
-              {caseStudy.approach ? <Paragraphs text={caseStudy.approach} /> : null}
+              {caseStudy.approach ? (
+                <Paragraphs text={caseStudy.approach} />
+              ) : null}
               {caseStudy.key_decisions?.length ? (
                 <ol className="mt-6 space-y-3">
                   {caseStudy.key_decisions.map((decision, index) => (
@@ -264,7 +264,7 @@ const CaseStudyDetailsSection = ({
                   {outcomes.map((outcome) => (
                     <div
                       key={`${outcome.label}-${outcome.value}`}
-                      className="border-border bg-card rounded-2xl border p-5"
+                      className="border-border bg-card rounded-xl border p-5"
                     >
                       <CheckCircle2
                         className="text-success size-5"
@@ -292,7 +292,11 @@ const CaseStudyDetailsSection = ({
           ) : null}
 
           {hasBody ? (
-            <DetailSection id="detail" eyebrow={nextEyebrow("In depth")} title="The full story">
+            <DetailSection
+              id="detail"
+              eyebrow={nextEyebrow("In depth")}
+              title="The full story"
+            >
               <RichContentRenderer
                 document={caseStudy.rich_content}
                 legacyHtml={caseStudy.content ?? ""}
@@ -338,7 +342,7 @@ const CaseStudyDetailsSection = ({
         </div>
 
         <aside className="h-fit space-y-6 lg:sticky lg:top-28">
-          <div className="border-border bg-card rounded-2xl border p-6">
+          <div className="border-border bg-card rounded-xl border p-6">
             <h2 className="font-black">Case study facts</h2>
             <dl className="mt-5 space-y-4 text-sm">
               <FactRow label="Client" value={caseStudy.client_name} />
@@ -387,7 +391,7 @@ const CaseStudyDetailsSection = ({
               ) : null}
             </dl>
           </div>
-          <div className="bg-primary text-primary-foreground rounded-2xl p-6">
+          <div className="bg-primary text-primary-foreground rounded-xl p-6">
             <h2 className="text-xl font-black">Facing a similar problem?</h2>
             <p className="mt-3 text-sm leading-6 opacity-85">
               Tell me what you are trying to achieve and what is getting in the
@@ -426,7 +430,7 @@ const CaseStudyDetailsSection = ({
           </div>
         </section>
       ) : null}
-    </main>
+    </div>
   );
 };
 

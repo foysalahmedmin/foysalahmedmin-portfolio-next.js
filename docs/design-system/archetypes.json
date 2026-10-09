@@ -1,0 +1,99 @@
+{
+  "$comment": "The contract the consistency probe (tests/e2e/consistency.spec.ts) and tests/unit/archetypes.test.ts read. Change it in the same PR as any template change (docs plan 3.15). `pageHeader`: false, \"index\" (H1 at --step-5), \"detail\" (H1 at --step-4) or \"deferred\" (the page still renders its own hero; moved onto PageHeader in Phase 6). `ctaBand`: whether the shared CtaBand is expected. `shell: false`: the page renders outside the public layout (unmatched URLs), so no header, footer or grain is expected; a `notFound()` raised inside a public route renders (common)/not-found.tsx inside the shell.",
+  "version": 1,
+  "public": {
+    "surface": "public",
+    "shell": {
+      "headerHeightPx": 80,
+      "containerMaxPx": 1360,
+      "gutterMinPx": 16,
+      "gutterMaxPx": 32,
+      "sectionCompactMinPx": 48,
+      "sectionCompactMaxPx": 96,
+      "ctaBandTone": "invert",
+      "grain": true
+    },
+    "h1": {
+      "index": { "minFontPx": 56, "minWeight": 750, "minStretchPct": 112 },
+      "detail": { "minFontPx": 44, "minWeight": 700, "minStretchPct": 112 }
+    },
+    "archetypes": {
+      "A1": {
+        "name": "Chapter",
+        "template": "ChapterPage",
+        "pageHeader": false,
+        "ctaBand": true,
+        "routes": ["/"]
+      },
+      "A2": {
+        "name": "Index",
+        "template": "IndexLayout",
+        "pageHeader": "index",
+        "ctaBand": true,
+        "routes": ["/projects", "/case-studies", "/articles", "/videos"]
+      },
+      "A3": {
+        "name": "Story",
+        "template": "StoryLayout",
+        "pageHeader": "deferred",
+        "ctaBand": true,
+        "discover": {
+          "api": "/api/case-studies?limit=1",
+          "linkPrefix": "/case-studies/"
+        }
+      },
+      "A4": {
+        "name": "Detail",
+        "template": "DetailLayout",
+        "pageHeader": "deferred",
+        "ctaBand": true,
+        "discover": [
+          { "api": "/api/projects?limit=1", "linkPrefix": "/projects/" },
+          { "api": "/api/articles?limit=1", "linkPrefix": "/articles/" },
+          { "api": "/api/videos?limit=1", "linkPrefix": "/videos/" }
+        ]
+      },
+      "A5": {
+        "name": "Narrative",
+        "template": "NarrativePage",
+        "pageHeader": "index",
+        "ctaBand": true,
+        "routes": ["/about"]
+      },
+      "A6": {
+        "name": "Conversation",
+        "template": "ConversationLayout",
+        "pageHeader": "index",
+        "ctaBand": false,
+        "routes": ["/contact"]
+      },
+      "A7": {
+        "name": "Document",
+        "template": "DocumentLayout",
+        "pageHeader": "detail",
+        "ctaBand": false,
+        "routes": ["/privacy", "/terms"]
+      },
+      "A8": {
+        "name": "System",
+        "template": "SystemPage",
+        "shell": false,
+        "pageHeader": false,
+        "ctaBand": false,
+        "routes": ["/__no-such-route__"]
+      }
+    }
+  },
+  "console": {
+    "surface": "console",
+    "status": "stubbed in Phase 1; the admin renders these from Phase 7",
+    "archetypes": {
+      "C1": { "name": "Overview", "template": "ConsoleOverview" },
+      "C2": { "name": "Workspace list", "template": "ConsoleList" },
+      "C3": { "name": "Editor", "template": "ConsoleEditor" },
+      "C4": { "name": "Inbox", "template": "ConsoleInbox" },
+      "C5": { "name": "Settings", "template": "ConsoleSettings" },
+      "C6": { "name": "Auth", "template": "ConsoleAuth" }
+    }
+  }
+}

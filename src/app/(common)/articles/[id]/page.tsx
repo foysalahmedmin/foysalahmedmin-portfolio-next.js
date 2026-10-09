@@ -1,3 +1,4 @@
+import { DetailLayout } from "@/components/templates";
 import * as ArticleService from "@/app/api/articles/article.service";
 import ArticleDetailsSection from "@/components/(common)/articles-page/article-details-section";
 import { JsonLdScript } from "@/components/content/json-ld-script";
@@ -120,11 +121,13 @@ export default async function ArticleDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <ArticleDetailsSection
-        article={article}
-        related={related}
-        fallbacks={site.fallbacks}
-      />
+      <DetailLayout route="article" site={site}>
+        <ArticleDetailsSection
+          article={article}
+          related={related}
+          fallbacks={site.fallbacks}
+        />
+      </DetailLayout>
     </>
   );
 }

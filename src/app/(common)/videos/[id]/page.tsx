@@ -1,3 +1,4 @@
+import { DetailLayout } from "@/components/templates";
 import * as VideoService from "@/app/api/videos/video.service";
 import VideoDetailsSection from "@/components/(common)/videos-page/video-details-section";
 import { JsonLdScript } from "@/components/content/json-ld-script";
@@ -104,7 +105,9 @@ export default async function VideoDetailsPage({ params }: Props) {
       published_at: video.published_at,
       thumbnail_url:
         video.thumbnail?.url ??
-        (video.youtube_id ? toYouTubeThumbnailUrl(video.youtube_id) : undefined),
+        (video.youtube_id
+          ? toYouTubeThumbnailUrl(video.youtube_id)
+          : undefined),
       embed_url: video.youtube_id
         ? `https://www.youtube.com/embed/${video.youtube_id}`
         : undefined,
@@ -122,7 +125,9 @@ export default async function VideoDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <VideoDetailsSection video={video} related={related} />
+      <DetailLayout route="video" site={site}>
+        <VideoDetailsSection video={video} related={related} />
+      </DetailLayout>
     </>
   );
 }

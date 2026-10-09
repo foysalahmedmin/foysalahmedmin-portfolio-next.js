@@ -38,7 +38,7 @@ const VideoDetailsSection = ({
   const duration = formatVideoDuration(video.duration_seconds);
 
   return (
-    <main className="bg-background min-h-screen" data-video-shape={video.aspect_ratio}>
+    <div className="bg-background" data-video-shape={video.aspect_ratio}>
       <header className="relative overflow-hidden pt-20 pb-10 lg:pt-28">
         <div className="bg-primary/10 pointer-events-none absolute top-0 left-1/2 h-[26rem] w-[60rem] -translate-x-1/2 rounded-full blur-[140px]" />
         <div className="relative container mx-auto px-6">
@@ -84,23 +84,22 @@ const VideoDetailsSection = ({
       <div className="container mx-auto px-6">
         {playback ? (
           <div
-            className={cn(
-              "mx-auto w-full",
-              isReel ? "max-w-sm" : "max-w-5xl"
-            )}
+            className={cn("mx-auto w-full", isReel ? "max-w-sm" : "max-w-5xl")}
           >
             <VideoPlayerCore
               src={playback.src}
               title={video.name}
               thumbnailSrc={playback.poster}
-              thumbnailSizes={isReel ? "384px" : "(max-width: 1024px) 100vw, 1024px"}
+              thumbnailSizes={
+                isReel ? "384px" : "(max-width: 1024px) 100vw, 1024px"
+              }
               priority
               orientation={video.aspect_ratio}
-              className="border-border rounded-[1.5rem] border shadow-[var(--shadow-lg)]"
+              className="border-border rounded-xl border shadow-[var(--shadow-lg)]"
             />
           </div>
         ) : (
-          <p className="border-border text-muted-foreground mx-auto max-w-xl rounded-2xl border border-dashed p-8 text-center text-sm">
+          <p className="border-border text-muted-foreground mx-auto max-w-xl rounded-xl border border-dashed p-8 text-center text-sm">
             This video is not available right now.
           </p>
         )}
@@ -143,7 +142,9 @@ const VideoDetailsSection = ({
             >
               {isReel ? "More reels" : "More videos"}
             </h2>
-            <ul className={cn("mt-8", VIDEO_LANE_GRID_CLASS[video.aspect_ratio])}>
+            <ul
+              className={cn("mt-8", VIDEO_LANE_GRID_CLASS[video.aspect_ratio])}
+            >
               {related.map((item) => (
                 <li key={item._id} className="min-w-0">
                   <VideoCard video={item} />
@@ -155,7 +156,7 @@ const VideoDetailsSection = ({
       ) : null}
 
       <section className="container mx-auto px-6 pb-24">
-        <div className="bg-primary text-primary-foreground mx-auto max-w-3xl rounded-2xl p-8">
+        <div className="bg-primary text-primary-foreground mx-auto max-w-3xl rounded-xl p-8">
           <h2 className="text-2xl font-black">Have a problem like this one?</h2>
           <p className="mt-3 text-sm leading-6 opacity-85">
             Tell me what you are trying to achieve and what is getting in the
@@ -170,7 +171,7 @@ const VideoDetailsSection = ({
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 };
 

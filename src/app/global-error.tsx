@@ -22,8 +22,8 @@ export default function GlobalError({
             placeItems: "center",
             padding: "2rem",
             fontFamily: "system-ui, sans-serif",
-            background: "#0d1220",
-            color: "#f5f7ff",
+            background: "#0a0a0a",
+            color: "#fafafa",
           }}
         >
           <section style={{ maxWidth: "38rem", textAlign: "center" }}>
@@ -47,10 +47,10 @@ export default function GlobalError({
                 marginTop: "1.5rem",
                 minHeight: "2.75rem",
                 border: "2px solid currentColor",
-                borderRadius: "999px",
+                borderRadius: "2px",
                 padding: ".65rem 1.25rem",
-                color: "#0d1220",
-                background: "#f5f7ff",
+                color: "#0a0a0a",
+                background: "#fafafa",
                 fontWeight: 700,
               }}
             >
