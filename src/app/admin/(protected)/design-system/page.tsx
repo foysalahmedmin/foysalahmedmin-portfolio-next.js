@@ -1,95 +1,120 @@
+import { ArchetypesSection } from "@/components/design-system/archetypes-section";
+import { ComponentsSection } from "@/components/design-system/components-section";
+import { GlassSection } from "@/components/design-system/glass-section";
+import { MotionSection } from "@/components/design-system/motion-section";
 import {
-  Cluster,
-  Container,
-  Grid,
-  Section,
-  Stack,
-} from "@/components/ui/layout";
-
-const pillars = [
-  ["System Architect", "bg-pillar-system", "bg-pillar-system-surface"],
-  [
-    "Software Developer",
-    "bg-pillar-full-stack",
-    "bg-pillar-full-stack-surface",
-  ],
-  ["AI Automation Developer", "bg-pillar-ai", "bg-pillar-ai-surface"],
-] as const;
+  RampSection,
+  SemanticSection,
+} from "@/components/design-system/tokens-section";
+import { TypeSection } from "@/components/design-system/type-section";
+import { Container, Section, Stack } from "@/components/ui/layout";
+import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "Design system preview",
+  title: "System lab",
   robots: { index: false, follow: false },
 };
 
-export default function DesignSystemPage() {
+const sections: ReadonlyArray<{
+  id: string;
+  title: string;
+  lede: string;
+  content: ReactNode;
+}> = [
+  {
+    id: "ramp",
+    title: "Monochrome ramp",
+    lede: "Thirteen greys carry everything. White is for highlights only, never text.",
+    content: <RampSection />,
+  },
+  {
+    id: "semantic",
+    title: "Semantic tokens, ink and paper",
+    lede: "The same names resolve differently per tone. State is never a hue.",
+    content: <SemanticSection />,
+  },
+  {
+    id: "type",
+    title: "Type",
+    lede: "Archivo for statements (width is a semantic axis), Instrument Sans for text, Martian Mono for annotation.",
+    content: <TypeSection />,
+  },
+  {
+    id: "glass",
+    title: "Glass tiers",
+    lede: "Used only where a rich backdrop exists, and only within the contrast rules.",
+    content: <GlassSection />,
+  },
+  {
+    id: "components",
+    title: "Components by state, tone, density and surface",
+    lede: "Every component in every state, in both tones and both densities. The fastest consistency regression target.",
+    content: <ComponentsSection />,
+  },
+  {
+    id: "archetypes",
+    title: "Archetype templates",
+    lede: "Every route belongs to one archetype and one template. Pages compose a template; they never rebuild a header or a call-to-action band.",
+    content: <ArchetypesSection />,
+  },
+  {
+    id: "motion",
+    title: "Motion lab",
+    lede: "Duration and easing tokens. The full effect registry lands with the motion engine.",
+    content: <MotionSection />,
+  },
+];
+
+export default function SystemLabPage() {
   return (
     <Section>
       <Container>
         <Stack gap="xl">
           <Stack gap="sm">
-            <p className="type-label text-primary">Private system preview</p>
-            <h1 className="type-heading-1">Portfolio product language</h1>
+            <p className="type-label text-primary">Private reference</p>
+            <h1 className="type-heading-1">System lab</h1>
             <p className="type-lead">
-              A semantic, accessible foundation shared by the public experience
-              and administration workspace.
+              The single reference for the Signal design system. The frames
+              below render the new tokens inside their own surface, so this page
+              can show ink and paper, comfortable and compact, public and
+              console side by side while the admin around it keeps its legacy
+              look until Phase 7.
             </p>
+            <nav
+              aria-label="Sections"
+              className="flex flex-wrap gap-x-5 gap-y-2 text-sm"
+            >
+              {sections.map((section) => (
+                <a
+                  key={section.id}
+                  href={`#${section.id}`}
+                  className="underline underline-offset-4"
+                >
+                  {section.title}
+                </a>
+              ))}
+            </nav>
           </Stack>
 
-          <section aria-labelledby="pillar-token-title">
-            <Stack gap="md">
-              <h2 id="pillar-token-title" className="type-heading-2">
-                Role accents
-              </h2>
-              <Grid columns={3}>
-                {pillars.map(([label, accent, surface]) => (
-                  <article
-                    key={label}
-                    className={`${surface} border-border rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-sm)]`}
-                  >
-                    <div className={`${accent} mb-8 size-12 rounded-full`} />
-                    <h3 className="type-heading-3">{label}</h3>
-                  </article>
-                ))}
-              </Grid>
-            </Stack>
-          </section>
-
-          <section aria-labelledby="status-token-title">
-            <Stack gap="md">
-              <h2 id="status-token-title" className="type-heading-2">
-                Semantic status
-              </h2>
-              <Cluster>
-                <span className="bg-success text-success-foreground rounded-full px-4 py-2 font-semibold">
-                  Ready
-                </span>
-                <span className="bg-warning text-warning-foreground rounded-full px-4 py-2 font-semibold">
-                  Needs review
-                </span>
-                <span className="bg-info text-info-foreground rounded-full px-4 py-2 font-semibold">
-                  In progress
-                </span>
-                <span className="bg-destructive text-destructive-foreground rounded-full px-4 py-2 font-semibold">
-                  Failed
-                </span>
-              </Cluster>
-            </Stack>
-          </section>
-
-          <section className="editorial" aria-labelledby="editorial-title">
-            <h2 id="editorial-title">Editorial rhythm</h2>
-            <p>
-              Long-form content keeps a readable measure, visible focus, stable
-              tables, and predictable code overflow across compact and wide
-              screens.
-            </p>
-            <blockquote>
-              Design decisions should make technical evidence easier to trust.
-            </blockquote>
-            <pre>
-              <code>{`const pillars = 5 as const;`}</code>
-            </pre>
-          </section>
+          {sections.map((section) => (
+            <section
+              key={section.id}
+              id={section.id}
+              aria-labelledby={`${section.id}-title`}
+            >
+              <Stack gap="md">
+                <div>
+                  <h2 id={`${section.id}-title`} className="type-heading-2">
+                    {section.title}
+                  </h2>
+                  <p className="text-muted-foreground mt-2 max-w-prose">
+                    {section.lede}
+                  </p>
+                </div>
+                {section.content}
+              </Stack>
+            </section>
+          ))}
         </Stack>
       </Container>
     </Section>
