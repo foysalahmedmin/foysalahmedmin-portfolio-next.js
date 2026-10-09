@@ -30,7 +30,10 @@ for (const theme of ["dark", "light"] as const) {
       );
     }, theme);
     await page.goto("/about");
-    await expect(page.locator("main:not([aria-busy])")).toBeVisible();
+    // Dynamic routes stream behind a skeleton; wait for the single, settled main
+    await expect(page.locator("main")).toHaveCount(1);
+    await expect(page.locator("main")).not.toHaveAttribute("aria-busy", "true");
+    await expect(page.locator("main")).toBeVisible();
     const header = page.locator("header[data-chrome]");
     const band = page.locator("[data-cta-band]");
     await expect(band).toHaveAttribute("data-tone", "invert");
