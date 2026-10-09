@@ -91,7 +91,7 @@ export const ProjectGallery = ({
                   lastTriggerRef.current = event.currentTarget;
                   setActiveIndex(index);
                 }}
-                className="border-border focus-visible:ring-primary group relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border text-left focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                className="border-border focus-visible:ring-primary group relative block aspect-[4/3] w-full overflow-hidden rounded-xl border text-left focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 aria-label={`Open image ${index + 1} of ${images.length}${
                   image.caption ? `: ${image.caption}` : ""
                 }`}
@@ -125,7 +125,7 @@ export const ProjectGallery = ({
         <ModalBackdrop className="flex items-center justify-center p-3 sm:p-6">
           <ModalContent
             size="none"
-            className="bg-background relative max-h-[calc(100dvh-1.5rem)] w-full max-w-6xl overflow-hidden rounded-2xl border shadow-2xl"
+            className="bg-background relative max-h-[calc(100dvh-1.5rem)] w-full max-w-6xl overflow-hidden rounded-xl border shadow-2xl"
           >
             <ModalHeader className="gap-4 px-4 py-3 sm:px-6">
               <div className="min-w-0">

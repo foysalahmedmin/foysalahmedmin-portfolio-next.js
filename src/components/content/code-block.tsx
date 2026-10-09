@@ -24,7 +24,7 @@ export const CodeBlock = ({
   };
 
   return (
-    <figure className="border-border bg-surface-raised my-10 overflow-hidden rounded-2xl border shadow-[var(--shadow-xs)]">
+    <figure className="border-border bg-surface-raised my-10 overflow-hidden rounded-xl border shadow-[var(--shadow-xs)]">
       <div className="border-border bg-muted flex min-h-11 items-center justify-between gap-4 border-b px-4">
         <span className="text-muted-foreground text-xs font-bold tracking-wide uppercase">
           {language || "Code"}

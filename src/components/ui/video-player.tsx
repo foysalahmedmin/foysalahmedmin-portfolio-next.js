@@ -88,7 +88,7 @@ function VideoCoverButton({
         aria-hidden
         className={cn(
           "absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center",
-          "h-10 w-16 rounded-xl md:h-12 md:w-20 md:rounded-2xl",
+          "h-10 w-16 rounded-xl md:h-12 md:w-20 md:rounded-xl",
           "bg-card/10 border border-white/20 text-white shadow-2xl backdrop-blur-md",
           "group-hover/video:bg-card/30 transition-all duration-300 group-hover/video:scale-110 group-hover/video:border-white/35",
           "group-active/video:scale-95"
@@ -557,7 +557,7 @@ export const VideoPlayer = ({
     title="video"
     thumbnailSrc={thumbnail}
     className={cn(
-      "border-primary/10 rounded-2xl border",
+      "border-primary/10 rounded-xl border",
       aspectRatio === "shorts"
         ? "mx-auto aspect-9/16 max-w-70"
         : "aspect-video w-full",

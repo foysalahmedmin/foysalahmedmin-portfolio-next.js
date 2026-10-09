@@ -14,7 +14,7 @@ const AboutSection = ({ site }: { site: TPublicSiteDto }) => {
       <div className="container mx-auto px-6">
         <div className="grid items-center gap-20 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="relative">
-            <div className="border-border bg-surface-subtle group relative mx-auto aspect-square max-w-[34rem] overflow-hidden rounded-[2rem] border shadow-[var(--shadow-lg)]">
+            <div className="border-border bg-surface-subtle group relative mx-auto aspect-square max-w-[34rem] overflow-hidden rounded-xl border shadow-[var(--shadow-lg)]">
               <OptimizedMedia
                 src={profile?.url}
                 alt={resolveMediaAlt(
@@ -30,7 +30,7 @@ const AboutSection = ({ site }: { site: TPublicSiteDto }) => {
               />
               <div className="from-background/70 absolute inset-0 bg-gradient-to-t via-transparent to-transparent" />
             </div>
-            <div className="border-border bg-card absolute right-4 -bottom-9 left-4 mx-auto max-w-xs rounded-2xl border p-5 shadow-[var(--shadow-md)] lg:right-8 lg:left-auto">
+            <div className="border-border bg-card absolute right-4 -bottom-9 left-4 mx-auto max-w-xs rounded-xl border p-5 shadow-[var(--shadow-md)] lg:right-8 lg:left-auto">
               <Layers3 className="text-primary size-7" aria-hidden="true" />
               <p className="mt-3 text-sm leading-6 font-semibold">
                 {site.positioning.client_promise ||

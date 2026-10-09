@@ -138,7 +138,7 @@ export default function ArchitectureWorkflowSection({
                 {pillars.map((pillar, index) => (
                   <li
                     key={pillar.key}
-                    className="border-border bg-background/70 rounded-2xl border p-4"
+                    className="border-border bg-background/70 rounded-xl border p-4"
                   >
                     <span className="text-muted-foreground text-xs font-black tracking-[0.16em] uppercase">
                       {String(index + 1).padStart(2, "0")}
@@ -194,7 +194,7 @@ export default function ArchitectureWorkflowSection({
                 {GUARDRAILS.map((guardrail) => (
                   <article
                     key={guardrail.key}
-                    className="border-border rounded-2xl border p-4"
+                    className="border-border rounded-xl border p-4"
                     role="listitem"
                   >
                     <h3 className="text-sm font-black">{guardrail.title}</h3>
@@ -238,7 +238,7 @@ export default function ArchitectureWorkflowSection({
               <Link
                 key={link.href}
                 href={link.href}
-                className="border-border bg-card hover:border-primary focus-visible:ring-primary group rounded-2xl border p-4 focus-visible:ring-2 focus-visible:outline-none"
+                className="border-border bg-card hover:border-primary focus-visible:ring-primary group rounded-xl border p-4 focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span className="flex items-center justify-between gap-3 text-sm font-black">
                   {link.label}

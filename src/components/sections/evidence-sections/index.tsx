@@ -39,7 +39,7 @@ const EmptyEvidence = ({
   title: string;
   unavailable?: boolean;
 }) => (
-  <div className="border-border bg-surface-subtle rounded-2xl border p-8 text-center">
+  <div className="border-border bg-surface-subtle rounded-xl border p-8 text-center">
     <h3 className="font-bold">
       {unavailable
         ? `${title} are temporarily unavailable`
@@ -87,7 +87,7 @@ export const TimelineSection = ({
               }`}
             >
               <span className="bg-primary ring-background absolute top-7 left-3 z-10 size-4 rounded-full ring-4 md:left-1/2 md:-translate-x-1/2" />
-              <article className="border-border bg-card ml-12 rounded-2xl border p-6 shadow-sm md:ml-0 md:odd:mr-10 md:even:ml-10">
+              <article className="border-border bg-card ml-12 rounded-xl border p-6 shadow-sm md:ml-0 md:odd:mr-10 md:even:ml-10">
                 <div className="text-primary flex items-center gap-2 text-xs font-black tracking-wide uppercase">
                   <CalendarRange className="size-4" aria-hidden />
                   {formatMonth(entry.started_at)} –{" "}
@@ -186,7 +186,7 @@ export const CredentialsSection = ({
                     href={credential.credential_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="border-border bg-card hover:border-primary focus-visible:ring-primary block h-full rounded-2xl border p-6 focus-visible:ring-2 focus-visible:outline-none"
+                    className="border-border bg-card hover:border-primary focus-visible:ring-primary block h-full rounded-xl border p-6 focus-visible:ring-2 focus-visible:outline-none"
                   >
                     {content}
                     <span className="text-primary mt-5 inline-block text-sm font-bold">
@@ -194,7 +194,7 @@ export const CredentialsSection = ({
                     </span>
                   </a>
                 ) : (
-                  <article className="border-border bg-card h-full rounded-2xl border p-6">
+                  <article className="border-border bg-card h-full rounded-xl border p-6">
                     {content}
                   </article>
                 )}
@@ -257,7 +257,7 @@ export const FAQSection = ({
           {isOpenList && (
             <div className="border-border bg-background rounded-[var(--radius-xl-token)] border p-5 shadow-[var(--shadow-xs)]">
               <div className="flex items-start gap-3">
-                <span className="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-2xl">
+                <span className="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-xl">
                   <HelpCircle className="size-5" aria-hidden />
                 </span>
                 <div>
@@ -298,7 +298,7 @@ export const FAQSection = ({
               {faqs.map((faq) => (
                 <details
                   key={faq.slug}
-                  className="border-border bg-card group rounded-2xl border p-1"
+                  className="border-border bg-card group rounded-xl border p-1"
                 >
                   <summary className="focus-visible:ring-primary flex min-h-14 cursor-pointer list-none items-center justify-between gap-5 rounded-xl px-5 py-3 font-bold focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
                     {faq.question}
@@ -354,7 +354,7 @@ export const TestimonialsSection = ({
             {testimonials.map((testimonial) => (
               <li
                 key={testimonial.slug}
-                className="border-border bg-card rounded-2xl border p-7"
+                className="border-border bg-card rounded-xl border p-7"
               >
                 <Quote className="text-primary size-7" aria-hidden />
                 <blockquote className="mt-5 text-lg leading-8 font-semibold">
@@ -410,7 +410,7 @@ export const TestimonialsSection = ({
               ].map((item) => (
                 <li
                   key={item}
-                  className="border-border text-muted-foreground rounded-2xl border p-4 text-sm font-semibold"
+                  className="border-border text-muted-foreground rounded-xl border p-4 text-sm font-semibold"
                 >
                   {item}
                 </li>
