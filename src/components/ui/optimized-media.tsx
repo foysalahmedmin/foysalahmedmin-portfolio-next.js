@@ -104,6 +104,7 @@ export default function OptimizedMedia({
   return (
     <Image
       {...props}
+      data-mono-media=""
       src={source}
       alt={alt}
       fill={fill}
