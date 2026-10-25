@@ -24,7 +24,7 @@ import ProjectsSection from "@/components/(common)/home-page/projects-section";
 import VideosSection from "@/components/(common)/home-page/videos-section";
 import ArchitectureWorkflowSection from "@/components/sections/architecture-workflow-section";
 import ContactCTASection from "@/components/sections/contact-cta-section";
-import GithubProfileSection from "@/components/sections/github-profile-section";
+import GithubProfileSection from "@/components/sections/github-profile-section/live";
 import MetricsStripSection from "@/components/sections/metrics-strip-section";
 import PillarShowcaseSection from "@/components/sections/pillar-showcase-section";
 import ProcessStepsSection from "@/components/sections/process-steps-section";
@@ -77,9 +77,17 @@ const asSkillGroups = (
       : []
   );
 
+/** The open-code section always closes the page, whatever order the page document lists it in. */
+export const withGithubLast = (
+  sections: TResolvedPublishedPagePayload["sections"]
+) => [
+  ...sections.filter((section) => section.kind !== "github-profile"),
+  ...sections.filter((section) => section.kind === "github-profile"),
+];
+
 export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
   <>
-    {payload.sections.map((section) => {
+    {withGithubLast(payload.sections).map((section) => {
       const unavailable = section.health.status === "unavailable";
       let content: ReactNode = null;
       const override = sectionOverrides?.[section.kind];
