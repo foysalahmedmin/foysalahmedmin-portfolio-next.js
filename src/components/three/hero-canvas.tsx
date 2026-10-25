@@ -27,6 +27,8 @@ import type { SceneController } from "./topology-scene";
 const HERO_BEATS = 3;
 /** Milliseconds the hero may be off screen before its GPU memory is released (docs plan 6.3). */
 const RELEASE_AFTER_MS = 4_000;
+/** How long a lost WebGL context may take to come back before the hero falls back to the poster. */
+const LOST_GRACE_MS = 3_000;
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -120,6 +122,7 @@ export function HeroCanvas({ enabled }: { enabled: boolean }) {
     let controller: SceneController | null = null;
     let unsubscribe: (() => void) | null = null;
     let releaseTimer: number | undefined;
+    let lostTimer: number | undefined;
     let cancelled = false;
     let creating = false;
     let visible = false;
@@ -213,10 +216,18 @@ export function HeroCanvas({ enabled }: { enabled: boolean }) {
         controller.resize(element.clientWidth, element.clientHeight);
         const instance = controller;
         instance.canvas.addEventListener("webglcontextlost", (event) => {
+          // Cancelling the event lets the browser restore the context (a GPU reset, or a hot reload in
+          // development). Only a scene that stays lost falls back to the poster.
           event.preventDefault();
-          // Disposing the scene loses its context on purpose; only a live scene losing it is a failure
-          if (!cancelled && instance === controller) demote(1);
+          if (cancelled || instance !== controller) return;
+          window.clearTimeout(lostTimer);
+          lostTimer = window.setTimeout(() => {
+            if (!cancelled && instance === controller) demote(1);
+          }, LOST_GRACE_MS);
         });
+        instance.canvas.addEventListener("webglcontextrestored", () =>
+          window.clearTimeout(lostTimer)
+        );
         unsubscribe = subscribeFrames(engine, onFrame);
       } catch {
         // No 3D chunk or no context: the poster stays, and the page does not notice
@@ -270,6 +281,7 @@ export function HeroCanvas({ enabled }: { enabled: boolean }) {
     return () => {
       cancelled = true;
       window.clearTimeout(releaseTimer);
+      window.clearTimeout(lostTimer);
       intersection.disconnect();
       resize.disconnect();
       theme.disconnect();
