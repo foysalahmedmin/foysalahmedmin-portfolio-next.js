@@ -130,6 +130,16 @@ describe("SiteHeroSection: the whole story is in the HTML", () => {
     }
   });
 
+  it("fetches the default-theme poster at parse time and high priority, the other one lazily", () => {
+    const { container } = render(<SiteHeroSection site={site} />);
+    const dark = container.querySelector(".hero-poster--dark img")!;
+    const light = container.querySelector(".hero-poster--light img")!;
+    expect(dark).toHaveAttribute("loading", "eager");
+    expect(dark).toHaveAttribute("fetchpriority", "high");
+    expect(light).toHaveAttribute("loading", "lazy");
+    expect(light).not.toHaveAttribute("fetchpriority");
+  });
+
   it("keeps the role bar and the scroll cue out of the accessibility tree", () => {
     const { container } = render(<SiteHeroSection site={site} />);
     expect(container.querySelector(".hero-rolebar")).toHaveAttribute(
