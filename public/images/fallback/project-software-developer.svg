@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="t d">
+  <title id="t">Abstract application interface</title>
+  <desc id="d">A browser window with navigation, cards, a bar chart and a code panel.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1b1b1b"/><stop offset="1" stop-color="#0c0c0c"/></linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#fff" stroke-opacity=".07"/></pattern>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect width="1200" height="900" fill="url(#grid)"/>
+
+  <g stroke="#fff" stroke-opacity=".6" stroke-width="3">
+    <rect x="130" y="130" width="940" height="640" rx="26" fill="#202020"/>
+    <path d="M130 200H1070" fill="none" stroke-opacity=".35"/>
+    <path d="M300 200V770" fill="none" stroke-opacity=".25"/>
+  </g>
+  <g fill="#fff"><circle cx="175" cy="165" r="9" fill-opacity=".5"/><circle cx="210" cy="165" r="9" fill-opacity=".35"/><circle cx="245" cy="165" r="9" fill-opacity=".2"/></g>
+  <rect x="420" y="146" width="360" height="38" rx="19" fill="#fff" fill-opacity=".1"/>
+  <g fill="#fff" fill-opacity=".16">
+    <rect x="165" y="240" width="105" height="18" rx="9"/><rect x="165" y="290" width="85" height="18" rx="9"/><rect x="165" y="340" width="100" height="18" rx="9"/><rect x="165" y="390" width="70" height="18" rx="9"/>
+  </g>
+  <rect x="165" y="236" width="105" height="26" rx="13" fill="#fff" fill-opacity=".9" opacity=".0"/>
+  <g stroke="#fff" stroke-opacity=".5" stroke-width="2.5" fill="#2a2a2a">
+    <rect x="335" y="235" width="215" height="130" rx="16"/><rect x="570" y="235" width="215" height="130" rx="16"/><rect x="805" y="235" width="230" height="130" rx="16"/>
+  </g>
+  <g fill="#fff"><rect x="360" y="262" width="80" height="16" rx="8" fill-opacity=".85"/><rect x="595" y="262" width="80" height="16" rx="8" fill-opacity=".85"/><rect x="830" y="262" width="80" height="16" rx="8" fill-opacity=".85"/>
+    <rect x="360" y="300" width="140" height="10" rx="5" fill-opacity=".25"/><rect x="595" y="300" width="140" height="10" rx="5" fill-opacity=".25"/><rect x="830" y="300" width="150" height="10" rx="5" fill-opacity=".25"/></g>
+  <g stroke="#fff" stroke-opacity=".5" stroke-width="2.5" fill="#2a2a2a"><rect x="335" y="395" width="450" height="340" rx="18"/></g>
+  <g fill="#fff"><rect x="375" y="600" width="46" height="100" rx="8" fill-opacity=".25"/><rect x="445" y="540" width="46" height="160" rx="8" fill-opacity=".4"/><rect x="515" y="570" width="46" height="130" rx="8" fill-opacity=".3"/><rect x="585" y="480" width="46" height="220" rx="8" fill-opacity=".85"/><rect x="655" y="520" width="46" height="180" rx="8" fill-opacity=".5"/><rect x="725" y="450" width="26" height="250" rx="8" fill-opacity=".2"/></g>
+  <g stroke="#fff" stroke-opacity=".7" stroke-width="2.5" fill="#101010"><rect x="805" y="395" width="270" height="400" rx="18" transform="translate(0 0)"/></g>
+  <g fill="#fff"><rect x="835" y="430" width="90" height="12" rx="6" fill-opacity=".8"/><rect x="855" y="462" width="150" height="12" rx="6" fill-opacity=".35"/><rect x="855" y="494" width="110" height="12" rx="6" fill-opacity=".35"/><rect x="835" y="526" width="130" height="12" rx="6" fill-opacity=".8"/><rect x="855" y="558" width="160" height="12" rx="6" fill-opacity=".35"/><rect x="855" y="590" width="80" height="12" rx="6" fill-opacity=".35"/><rect x="835" y="622" width="60" height="12" rx="6" fill-opacity=".8"/><rect x="835" y="680" width="10" height="22" rx="2"/></g>
+  <path d="M960 690l0 70 20-18 16 34 12-6-16-34 28-2z" fill="#fff" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+</svg>

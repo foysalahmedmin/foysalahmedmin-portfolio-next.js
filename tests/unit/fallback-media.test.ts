@@ -45,7 +45,7 @@ describe("emergency media resolver", () => {
     }
   });
 
-  it.each(["project", "article", "profile"] as const)(
+  it.each(["article", "profile"] as const)(
     "returns a deterministic %s SVG fallback",
     (kind) => {
       const first = getFallbackMedia(kind, PILLAR_KEYS[0]);
@@ -55,6 +55,32 @@ describe("emergency media resolver", () => {
       );
     }
   );
+
+  it("gives a project the drawing of its role, one frame for all three, and a default without one", () => {
+    const art = PILLAR_KEYS.map((key) => getFallbackMedia("project", key));
+    expect(new Set(art).size).toBe(PILLAR_KEYS.length);
+    for (const src of [...art, getFallbackMedia("project")]) {
+      expect(src).toMatch(
+        /^\/images\/(fallback\/project-[a-z-]+|fallback-project)\.svg$/
+      );
+      expect(fs.existsSync(path.resolve("public", src.slice(1)))).toBe(true);
+    }
+    for (const src of art) {
+      // One shared frame: 4:3 on a dark grid, no colour
+      const svg = fs.readFileSync(path.resolve("public", src.slice(1)), "utf8");
+      expect(svg).toContain('viewBox="0 0 1200 900"');
+      const colours = [...svg.matchAll(/#([0-9a-f]{3}|[0-9a-f]{6})\b/gi)].map(
+        (match) => match[1]!
+      );
+      expect(colours.length).toBeGreaterThan(0);
+      for (const colour of colours) {
+        const hex =
+          colour.length === 3 ? [...colour].map((c) => c + c).join("") : colour;
+        expect(hex.slice(0, 2), `${src} ${colour}`).toBe(hex.slice(2, 4));
+        expect(hex.slice(2, 4), `${src} ${colour}`).toBe(hex.slice(4, 6));
+      }
+    }
+  });
 
   it("keeps the legacy hero SVG available when no pillar is supplied", () => {
     expect(getFallbackMedia("hero")).toBe("/images/fallback-hero.svg");
