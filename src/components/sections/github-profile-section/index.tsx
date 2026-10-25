@@ -66,7 +66,6 @@ const ContributionDots = ({
                   key={day.date}
                   className="dot"
                   data-level={day.level}
-                  style={{ "--w": weekIndex } as CSSProperties}
                   title={formatDay(day.date, day.count)}
                 />
               ) : (

@@ -300,7 +300,7 @@ export function VideoPlayerCore({
           : { width, height }
       );
     };
-    measure(container.getBoundingClientRect());
+    // No read here: a ResizeObserver reports the size after the first layout, without forcing one
     const observer = new ResizeObserver(([entry]) => {
       measure(entry.contentRect);
     });
