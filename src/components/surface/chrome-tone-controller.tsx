@@ -32,7 +32,12 @@ export function ChromeToneController() {
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
     let mutation: MutationObserver | null = null;
+    let arrivals: MutationObserver | null = null;
     let raf = 0;
+
+    const countTargets = () =>
+      document.querySelectorAll("[data-band], [data-chrome]").length;
+    let known = -1;
 
     const setup = () => {
       observers.splice(0).forEach((observer) => observer.disconnect());
@@ -42,6 +47,7 @@ export function ChromeToneController() {
       const chromes = Array.from(
         document.querySelectorAll<HTMLElement>("[data-chrome]")
       );
+      known = countTargets();
       if (!bands.length || !chromes.length) {
         chromes.forEach((chrome) => chrome.removeAttribute("data-tone"));
         return;
@@ -92,6 +98,11 @@ export function ChromeToneController() {
     setup();
     window.addEventListener("resize", schedule, { passive: true });
     window.addEventListener("load", schedule, { once: true });
+    // Streamed routes add their bands after this effect ran: set up again when the set of bands changes
+    arrivals = new MutationObserver(() => {
+      if (countTargets() !== known) schedule();
+    });
+    arrivals.observe(document.body, { childList: true, subtree: true });
     mutation = new MutationObserver(() => {
       document
         .querySelectorAll<
@@ -109,6 +120,7 @@ export function ChromeToneController() {
       window.removeEventListener("resize", schedule);
       window.removeEventListener("load", schedule);
       mutation?.disconnect();
+      arrivals?.disconnect();
       observers.forEach((observer) => observer.disconnect());
       document
         .querySelectorAll("[data-chrome]")
