@@ -10,13 +10,13 @@ import { describe, expect, it } from "vitest";
 describe("emergency media resolver", () => {
   it("returns the generated public hero preview for each pillar", () => {
     expect(getFallbackMedia("hero", "system_architect")).toBe(
-      "/images/heroes/system-design-pilot.master.png"
+      "/images/hero/system-architect.master.png"
     );
     expect(getFallbackMedia("hero", "software_developer")).toBe(
-      "/images/heroes/full-stack.master.png"
+      "/images/hero/software-developer.master.png"
     );
     expect(getFallbackMedia("hero", "ai_automation")).toBe(
-      "/images/heroes/ai-automation.master.png"
+      "/images/hero/ai-automation.master.png"
     );
 
     // Every pillar must resolve to its own hero file, never the generic
@@ -24,7 +24,7 @@ describe("emergency media resolver", () => {
     const heroes = PILLAR_KEYS.map((key) => getFallbackMedia("hero", key));
     expect(new Set(heroes).size).toBe(PILLAR_KEYS.length);
     for (const src of heroes) {
-      expect(src.startsWith("/images/heroes/")).toBe(true);
+      expect(src.startsWith("/images/hero/")).toBe(true);
     }
 
     const presentation = getFallbackMediaPresentation(

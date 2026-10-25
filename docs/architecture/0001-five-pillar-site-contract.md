@@ -68,7 +68,7 @@ limits, and tests derive it from `PILLAR_CONTRACT`, so a further pillar needs no
 edits outside `src/lib/content/pillars.ts` and the seed manifest.
 
 No generated hero art exists for the new pillar yet. `devops-cloud.*` in
-`seed-assets/heroes` and `public/images/heroes` is a byte-identical copy of the
+`seed-assets/heroes` and `public/images/hero` is a byte-identical copy of the
 system design visual, kept under its own name so a dedicated asset can replace
 it without touching System Design. It is deliberately absent from
 `docs/content/generated-media-evidence/hero-candidates.v1.json`, which records
@@ -79,11 +79,11 @@ only independently generated and reviewed candidates.
 The pillar set was reduced from six lanes to three roles, written from the
 client's side rather than as a list of technologies:
 
-| Order | Key                  | Label                   | Absorbs                                |
-| ----- | -------------------- | ----------------------- | -------------------------------------- |
-| 1     | `system_architect`   | System Architect        | system design, DevOps and cloud        |
-| 2     | `software_developer` | Software Developer      | frontend, backend, full-stack          |
-| 3     | `ai_automation`      | AI Automation Developer | AI automation (key unchanged)          |
+| Order | Key                  | Label                   | Absorbs                         |
+| ----- | -------------------- | ----------------------- | ------------------------------- |
+| 1     | `system_architect`   | System Architect        | system design, DevOps and cloud |
+| 2     | `software_developer` | Software Developer      | frontend, backend, full-stack   |
+| 3     | `ai_automation`      | AI Automation Developer | AI automation (key unchanged)   |
 
 The earlier keys (`frontend`, `backend`, `system_design`, `devops_cloud`,
 `full_stack`) no longer exist. This is a deliberate breaking change to the
@@ -92,11 +92,16 @@ them; the seed was reset and re-applied rather than migrated. Any database that
 already holds records with the old keys needs a compensating migration first.
 
 The placeholder `devops-cloud.*` hero assets added with the sixth pillar were
-removed. Each role reuses the generated hero that fits it (`system-design-pilot`,
-`full-stack`, `ai-automation`). `hero-candidates.v1.json` is unchanged: it is a
-record of the five candidates that were generated and reviewed, some of which
-belong to lanes the roles absorbed.
+removed. Each role reuses the generated hero that fits it, and the files are
+named after the role: `system-architect.*`, `software-developer.*` and
+`ai-automation.*` (the former `system-design-pilot`, `full-stack` and
+`ai-automation` candidates). The two lanes the Software Developer role absorbed
+are kept as variants of it, `software-developer-frontend.*` and
+`software-developer-backend.*`. They live in one folder, `public/images/hero/`
+(with the live scene's poster), mirrored byte for byte from `seed-assets/heroes/`.
+`hero-candidates.v1.json` still records the five candidates that were generated
+and reviewed (its `asset_id`, `media_key` and `pillar` values are history and
+did not change; only the file paths follow the new names).
 
 Skill copy, services, FAQs and the case-study page now lead with the business
 problem and the outcome, with technologies as supporting detail.
-

@@ -74,7 +74,7 @@ const sha256 = (relativePath: string): string =>
     .digest("hex");
 
 const publicMirrorPath = (relativePath: string): string =>
-  relativePath.replace(/^seed-assets\/heroes/, "public/images/heroes");
+  relativePath.replace(/^seed-assets\/heroes/, "public/images/hero");
 
 describe("generated hero media evidence", () => {
   it("documents the accepted candidate set without fake publication approval", () => {

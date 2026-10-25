@@ -240,7 +240,7 @@ license decision, managed File ID, or approval result.
 The current generated candidate evidence is recorded in
 `docs/content/generated-media-evidence/system-design-pilot.v1.json`. The source
 and derivative image bytes are tracked under `seed-assets/` for repeatable
-managed-media ingestion, with public preview copies under `public/images/heroes/`.
+managed-media ingestion, with public preview copies under `public/images/hero/`.
 Candidate evidence is not approval and does not permit public attachment by
 itself.
 

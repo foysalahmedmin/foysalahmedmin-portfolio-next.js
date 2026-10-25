@@ -4,8 +4,8 @@
   "state": "generated_candidate_set",
   "approved": false,
   "generated_at": "2026-07-16T23:37:26Z",
-  "repository_policy": "source/master assets are tracked under seed-assets; public preview copies are tracked under public/images/heroes",
-  "public_mirror_root": "public/images/heroes",
+  "repository_policy": "source/master assets are tracked under seed-assets; public preview copies are tracked under public/images/hero",
+  "public_mirror_root": "public/images/hero",
   "shared_gates": {
     "source_dimensions": "pass_candidate",
     "optimization_budget": "pass_candidate",
@@ -30,8 +30,8 @@
       "media_key": "hero.frontend",
       "pillar": "frontend",
       "source": {
-        "local_path": "seed-assets/heroes/frontend.master.png",
-        "raw_local_path": "seed-assets/heroes/frontend.raw.png",
+        "local_path": "seed-assets/heroes/software-developer-frontend.master.png",
+        "raw_local_path": "seed-assets/heroes/software-developer-frontend.raw.png",
         "width": 2400,
         "height": 1350,
         "sha256": "0522bde5710dd8be93c0fe77287a448840a276c1f5f4f3842ea091e7765414da",
@@ -41,7 +41,7 @@
       },
       "derivatives": {
         "desktop_webp": {
-          "local_path": "seed-assets/heroes/derivatives/frontend.desktop.q82.webp",
+          "local_path": "seed-assets/heroes/derivatives/software-developer-frontend.desktop.q82.webp",
           "width": 1600,
           "height": 900,
           "quality": 82,
@@ -50,7 +50,7 @@
           "budget_gate": "pass"
         },
         "mobile_webp": {
-          "local_path": "seed-assets/heroes/derivatives/frontend.mobile.q78.webp",
+          "local_path": "seed-assets/heroes/derivatives/software-developer-frontend.mobile.q78.webp",
           "width": 1080,
           "height": 1350,
           "quality": 78,
@@ -59,7 +59,7 @@
           "budget_gate": "pass"
         },
         "desktop_avif": {
-          "local_path": "seed-assets/heroes/derivatives/frontend.desktop.q55.avif",
+          "local_path": "seed-assets/heroes/derivatives/software-developer-frontend.desktop.q55.avif",
           "width": 1600,
           "height": 900,
           "quality": 55,
@@ -68,7 +68,7 @@
           "budget_gate": "pass"
         },
         "mobile_avif": {
-          "local_path": "seed-assets/heroes/derivatives/frontend.mobile.q52.avif",
+          "local_path": "seed-assets/heroes/derivatives/software-developer-frontend.mobile.q52.avif",
           "width": 1080,
           "height": 1350,
           "quality": 52,
@@ -96,7 +96,7 @@
         "is_decorative": true,
         "extraction": {
           "tool": "sharp",
-          "source": "seed-assets/heroes/frontend.master.png"
+          "source": "seed-assets/heroes/software-developer-frontend.master.png"
         }
       }
     },
@@ -105,8 +105,8 @@
       "media_key": "hero.backend",
       "pillar": "backend",
       "source": {
-        "local_path": "seed-assets/heroes/backend.master.png",
-        "raw_local_path": "seed-assets/heroes/backend.raw.png",
+        "local_path": "seed-assets/heroes/software-developer-backend.master.png",
+        "raw_local_path": "seed-assets/heroes/software-developer-backend.raw.png",
         "width": 2400,
         "height": 1350,
         "sha256": "1b55ad618e371d627dca2e0b47730a776bc431967a410ed1164c9f228968a496",
@@ -116,7 +116,7 @@
       },
       "derivatives": {
         "desktop_webp": {
-          "local_path": "seed-assets/heroes/derivatives/backend.desktop.q82.webp",
+          "local_path": "seed-assets/heroes/derivatives/software-developer-backend.desktop.q82.webp",
           "width": 1600,
           "height": 900,
           "quality": 82,
@@ -125,7 +125,7 @@
           "budget_gate": "pass"
         },
         "mobile_webp": {
-          "local_path": "seed-assets/heroes/derivatives/backend.mobile.q78.webp",
+          "local_path": "seed-assets/heroes/derivatives/software-developer-backend.mobile.q78.webp",
           "width": 1080,
           "height": 1350,
           "quality": 78,
@@ -134,7 +134,7 @@
           "budget_gate": "pass"
         },
         "desktop_avif": {
-          "local_path": "seed-assets/heroes/derivatives/backend.desktop.q55.avif",
+          "local_path": "seed-assets/heroes/derivatives/software-developer-backend.desktop.q55.avif",
           "width": 1600,
           "height": 900,
           "quality": 55,
@@ -143,7 +143,7 @@
           "budget_gate": "pass"
         },
         "mobile_avif": {
-          "local_path": "seed-assets/heroes/derivatives/backend.mobile.q52.avif",
+          "local_path": "seed-assets/heroes/derivatives/software-developer-backend.mobile.q52.avif",
           "width": 1080,
           "height": 1350,
           "quality": 52,
@@ -170,7 +170,7 @@
         "is_decorative": true,
         "extraction": {
           "tool": "sharp",
-          "source": "seed-assets/heroes/backend.master.png"
+          "source": "seed-assets/heroes/software-developer-backend.master.png"
         }
       }
     },
@@ -253,8 +253,8 @@
       "media_key": "hero.system_design",
       "pillar": "system_design",
       "source": {
-        "local_path": "seed-assets/heroes/system-design-pilot.master.png",
-        "raw_local_path": "seed-assets/heroes/system-design-pilot.raw.png",
+        "local_path": "seed-assets/heroes/system-architect.master.png",
+        "raw_local_path": "seed-assets/heroes/system-architect.raw.png",
         "width": 2400,
         "height": 1350,
         "sha256": "cff50878cfd638fe5252238a2e517a463bc679958503b7971d8d03437087a937",
@@ -264,7 +264,7 @@
       },
       "derivatives": {
         "desktop_webp": {
-          "local_path": "seed-assets/heroes/derivatives/system-design-pilot.desktop.q82.webp",
+          "local_path": "seed-assets/heroes/derivatives/system-architect.desktop.q82.webp",
           "width": 1600,
           "height": 900,
           "quality": 82,
@@ -273,7 +273,7 @@
           "budget_gate": "pass"
         },
         "mobile_webp": {
-          "local_path": "seed-assets/heroes/derivatives/system-design-pilot.mobile.q78.webp",
+          "local_path": "seed-assets/heroes/derivatives/system-architect.mobile.q78.webp",
           "width": 1080,
           "height": 1350,
           "quality": 78,
@@ -282,7 +282,7 @@
           "budget_gate": "pass"
         },
         "desktop_avif": {
-          "local_path": "seed-assets/heroes/derivatives/system-design-pilot.desktop.q55.avif",
+          "local_path": "seed-assets/heroes/derivatives/system-architect.desktop.q55.avif",
           "width": 1600,
           "height": 900,
           "quality": 55,
@@ -291,7 +291,7 @@
           "budget_gate": "pass"
         },
         "mobile_avif": {
-          "local_path": "seed-assets/heroes/derivatives/system-design-pilot.mobile.q52.avif",
+          "local_path": "seed-assets/heroes/derivatives/system-architect.mobile.q52.avif",
           "width": 1080,
           "height": 1350,
           "quality": 52,
@@ -318,7 +318,7 @@
         "is_decorative": true,
         "extraction": {
           "tool": "sharp",
-          "source": "seed-assets/heroes/system-design-pilot.master.png"
+          "source": "seed-assets/heroes/system-architect.master.png"
         }
       }
     },
@@ -327,8 +327,8 @@
       "media_key": "hero.full_stack",
       "pillar": "full_stack",
       "source": {
-        "local_path": "seed-assets/heroes/full-stack.master.png",
-        "raw_local_path": "seed-assets/heroes/full-stack.raw.png",
+        "local_path": "seed-assets/heroes/software-developer.master.png",
+        "raw_local_path": "seed-assets/heroes/software-developer.raw.png",
         "width": 2400,
         "height": 1350,
         "sha256": "eb651e5758ed85bb6a034312610f1d22b1ed843baecfcc7e103616a8b81723ce",
@@ -338,7 +338,7 @@
       },
       "derivatives": {
         "desktop_webp": {
-          "local_path": "seed-assets/heroes/derivatives/full-stack.desktop.q82.webp",
+          "local_path": "seed-assets/heroes/derivatives/software-developer.desktop.q82.webp",
           "width": 1600,
           "height": 900,
           "quality": 82,
@@ -347,7 +347,7 @@
           "budget_gate": "pass"
         },
         "mobile_webp": {
-          "local_path": "seed-assets/heroes/derivatives/full-stack.mobile.q78.webp",
+          "local_path": "seed-assets/heroes/derivatives/software-developer.mobile.q78.webp",
           "width": 1080,
           "height": 1350,
           "quality": 78,
@@ -356,7 +356,7 @@
           "budget_gate": "pass"
         },
         "desktop_avif": {
-          "local_path": "seed-assets/heroes/derivatives/full-stack.desktop.q55.avif",
+          "local_path": "seed-assets/heroes/derivatives/software-developer.desktop.q55.avif",
           "width": 1600,
           "height": 900,
           "quality": 55,
@@ -365,7 +365,7 @@
           "budget_gate": "pass"
         },
         "mobile_avif": {
-          "local_path": "seed-assets/heroes/derivatives/full-stack.mobile.q52.avif",
+          "local_path": "seed-assets/heroes/derivatives/software-developer.mobile.q52.avif",
           "width": 1080,
           "height": 1350,
           "quality": 52,
@@ -392,7 +392,7 @@
         "is_decorative": true,
         "extraction": {
           "tool": "sharp",
-          "source": "seed-assets/heroes/full-stack.master.png"
+          "source": "seed-assets/heroes/software-developer.master.png"
         }
       }
     }

@@ -38,7 +38,7 @@ type Evidence = {
 };
 
 const publicMirrorPath = (relativePath: string): string =>
-  relativePath.replace(/^seed-assets\/heroes/, "public/images/heroes");
+  relativePath.replace(/^seed-assets\/heroes/, "public/images/hero");
 
 const sha256 = (buffer: Buffer): string =>
   createHash("sha256").update(buffer).digest("hex");
