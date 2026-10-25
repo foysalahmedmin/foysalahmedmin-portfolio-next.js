@@ -97,7 +97,10 @@ export default function SiteHeroSection({
               width={1920}
               height={1080}
               decoding="async"
-              loading="lazy"
+              // The poster for the default (dark) theme is the page's largest paint: fetched at parse time, at
+              // high priority. The light one is only needed by visitors who chose light, and loads when shown.
+              loading={theme === "dark" ? "eager" : "lazy"}
+              {...(theme === "dark" ? { fetchPriority: "high" as const } : {})}
             />
           </picture>
         ))}

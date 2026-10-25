@@ -90,7 +90,7 @@
   object-fit: cover;
 }
 
-/* The poster that does not match the theme is never fetched (lazy images in display: none do not load) */
+/* The light poster is lazy, so it is only fetched when the light theme shows it; the dark one is fetched at parse time */
 html.dark .hero-poster--light,
 html.light .hero-poster--dark {
   display: none;
