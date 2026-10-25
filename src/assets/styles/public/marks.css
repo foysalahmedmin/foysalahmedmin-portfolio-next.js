@@ -74,7 +74,7 @@
   }
 }
 
-/* ---------- Link underline draw (M27) ---------- */
+/* ---------- Link underline draw (M26) ---------- */
 .link-draw {
   transition: background-size var(--dur-base) var(--ease-signal);
   background-image: linear-gradient(currentColor, currentColor);

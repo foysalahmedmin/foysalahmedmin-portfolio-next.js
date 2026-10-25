@@ -8,7 +8,7 @@ export type TextLinkProps = Omit<ComponentProps<"a">, "href"> & {
   /**
    * `inline` (default) keeps an underline at rest, because a link inside running text must not be told
    * apart by colour alone (WCAG 1.4.1) and these tokens have no link colour. `quiet` is for navigation and
-   * standalone links: the underline draws in on hover and focus (M27).
+   * standalone links: the underline draws in on hover and focus (M26).
    */
   variant?: "inline" | "quiet";
   /** Open in a new tab with a safe rel and a visible arrow. Detected automatically for https URLs. */
