@@ -22,21 +22,21 @@ const fallbackByKind: Record<FallbackMediaKind, string> = {
 // and shows the full-stack visual.
 const heroFallbackByPillar: Record<PillarKey, FallbackMediaPresentation> = {
   system_architect: {
-    src: "/images/heroes/system-design-pilot.master.png",
+    src: "/images/hero/system-architect.master.png",
     focal_point: { x: 0.72, y: 0.5 },
     dominant_color: "#d8d8d8",
     blur_data_url:
       "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAkAAwBWJZQCdAEfkQKnAgAA/u/u+wgmKC6+yNz7CS7mdRi0R5XJ0xGltTAQAAA=",
   },
   software_developer: {
-    src: "/images/heroes/full-stack.master.png",
+    src: "/images/hero/software-developer.master.png",
     focal_point: { x: 0.72, y: 0.5 },
     dominant_color: "#e8e8e8",
     blur_data_url:
       "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADwAQCdASoQAAkAAwBWJYwCdAEKCjBG9lgA/vBdhPVpERSzaokdeH5SMC5AZKITn+83rdevzgJDdCtiF2f8KgAA",
   },
   ai_automation: {
-    src: "/images/heroes/ai-automation.master.png",
+    src: "/images/hero/ai-automation.master.png",
     focal_point: { x: 0.72, y: 0.5 },
     dominant_color: "#c8c8c8",
     blur_data_url:
