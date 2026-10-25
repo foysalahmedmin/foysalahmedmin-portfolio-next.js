@@ -1,5 +1,6 @@
 "use client";
 
+import { applyThemeMode } from "@/lib/theme";
 import { useSetting } from "@/state/setting-store";
 import { useEffect } from "react";
 
@@ -10,22 +11,8 @@ const ThemeApplier = () => {
 
   useEffect(() => {
     const root = document.documentElement;
-    
-    // Theme logic
-    if (theme) {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const mode = 
-        theme === "dark" 
-          ? "dark" 
-          : theme === "light" 
-          ? "light" 
-          : prefersDark 
-          ? "dark" 
-          : "light";
-          
-      root.classList.remove("light", "dark");
-      root.classList.add(mode);
-    }
+
+    if (theme) applyThemeMode(theme);
 
     // Direction logic
     if (direction) {

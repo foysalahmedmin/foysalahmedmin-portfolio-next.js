@@ -44,6 +44,8 @@ export type PinSceneOptions = Readonly<{
   /** Pin length in viewport heights (clamped to 100..300). */
   length: number;
   beats: number;
+  /** Called with the scrubbed scroll progress (0..1) on every change; drives scenes outside the DOM, such as the 3D camera. */
+  onProgress?: (progress: number) => void;
 }>;
 
 export type EngineBehaviors = {

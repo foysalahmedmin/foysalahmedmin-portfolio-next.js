@@ -321,6 +321,28 @@ describe("PinScene", () => {
     view.unmount();
     expect(fake.cleanups.pinScene).toHaveBeenCalledTimes(1);
   });
+
+  it("hands the scrubbed progress to a scene that lives outside the DOM", () => {
+    const fake = createFakeEngine();
+    const onProgress = vi.fn();
+    render(
+      withEngine(
+        fake.engine,
+        3,
+        <PinScene length={240} beats={2} onProgress={onProgress} data-hero="">
+          <PinBeat index={0}>First beat</PinBeat>
+        </PinScene>
+      )
+    );
+    const options = fake.behaviors.pinScene.mock.calls[0]![1] as {
+      onProgress: (progress: number) => void;
+    };
+    options.onProgress(0.4);
+    expect(onProgress).toHaveBeenCalledWith(0.4);
+    expect(document.querySelector("[data-pin-scene]")).toHaveAttribute(
+      "data-hero"
+    );
+  });
 });
 
 describe("Cursor (M16)", () => {

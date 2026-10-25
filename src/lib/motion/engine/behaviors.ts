@@ -1,6 +1,7 @@
 import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { formatCount } from "../counter";
+import { activeBeat, storyTime } from "../story";
 import { dur, easeFn, scrubLag, staggerLine } from "../tokens";
 import type {
   Cleanup,
@@ -239,12 +240,11 @@ export function createBehaviors(host: BehaviorHost): EngineBehaviors {
       const state = { progress: 0 };
       let beat = -1;
       const write = () => {
+        // Story time (docs plan 3.7.4): each beat holds 0.7 and changes over 0.3
+        const time = storyTime(state.progress, beats);
         element.style.setProperty("--pin-progress", state.progress.toFixed(4));
-        element.style.setProperty(
-          "--pin-position",
-          (state.progress * beats).toFixed(4)
-        );
-        const next = Math.min(beats - 1, Math.floor(state.progress * beats));
+        element.style.setProperty("--pin-position", time.toFixed(4));
+        const next = activeBeat(time, beats);
         if (next !== beat) {
           beat = next;
           element.dataset.beat = String(next);
@@ -256,6 +256,7 @@ export function createBehaviors(host: BehaviorHost): EngineBehaviors {
             );
           }
         }
+        options.onProgress?.(state.progress);
       };
       write();
 

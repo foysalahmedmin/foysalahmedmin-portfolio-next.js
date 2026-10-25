@@ -1,14 +1,25 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  type ComponentProps,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { useEngine } from "./engine-provider";
 
-type PinSceneProps = {
+type PinSceneProps = Omit<
+  ComponentProps<"section">,
+  "ref" | "children" | "onProgress"
+> & {
   /** Pin length in viewport heights, 100 to 300 (a pin never lasts more than three screens). */
   length?: number;
   /** How many beats the scene has; each is one screen of scroll or less. */
   beats: number;
+  /** Scrubbed scroll progress (0..1), for scenes that live outside the DOM (the 3D camera). */
+  onProgress?: (progress: number) => void;
   className?: string;
   children: ReactNode;
 };
@@ -22,8 +33,10 @@ type PinSceneProps = {
 export function PinScene({
   length = 300,
   beats,
+  onProgress,
   className,
   children,
+  ...props
 }: PinSceneProps) {
   const ref = useRef<HTMLElement>(null);
   const engine = useEngine();
@@ -31,8 +44,8 @@ export function PinScene({
   useEffect(() => {
     const element = ref.current;
     if (!engine || !element) return;
-    return engine.behaviors.pinScene(element, { length, beats });
-  }, [engine, length, beats]);
+    return engine.behaviors.pinScene(element, { length, beats, onProgress });
+  }, [engine, length, beats, onProgress]);
 
   return (
     <section
@@ -40,27 +53,29 @@ export function PinScene({
       data-pin-scene=""
       data-beats={beats}
       className={cn("relative", className)}
+      {...props}
     >
       <div data-pin-stage="">{children}</div>
     </section>
   );
 }
 
-/** One beat of a `PinScene`. While pinned, beats cross-fade by position (hold 0.7, change 0.3). */
+/** One beat of a `PinScene`. While pinned, beats cross-fade on the story clock (hold 0.7, change 0.3). */
 export function PinBeat({
   index,
   className,
+  style,
   children,
-}: {
+  ...props
+}: Omit<ComponentProps<"div">, "ref"> & {
   index: number;
-  className?: string;
-  children: ReactNode;
 }) {
   return (
     <div
       data-pin-beat={index}
       className={cn(className)}
-      style={{ "--beat": index } as CSSProperties}
+      style={{ "--beat": index, ...style } as CSSProperties}
+      {...props}
     >
       {children}
     </div>

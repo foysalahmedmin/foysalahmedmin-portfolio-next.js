@@ -70,7 +70,7 @@ html.lenis body {
   translate: 0 -50%;
   z-index: var(--z-rail);
   inset-block-start: 50%;
-  inset-inline-start: 1.25rem;
+  inset-inline-start: 0.5rem;
 }
 
 @media (min-width: 1280px) {
@@ -105,7 +105,7 @@ html.lenis body {
     inline-size var(--dur-fast) var(--ease-signal),
     background-color var(--dur-fast) var(--ease-signal);
   background: var(--line-4);
-  inline-size: 0.75rem;
+  inline-size: 0.5rem;
   block-size: 1px;
 }
 
@@ -115,10 +115,10 @@ html.lenis body {
 
 [data-trace-rail] a[data-active] [data-trace-tick] {
   background: var(--foreground);
-  inline-size: 1.75rem;
+  inline-size: 1.25rem;
 }
 
-/* The label is real text for assistive technology; sighted users get it on hover, focus or when current */
+/* The label is real text for assistive technology; sighted users get them all when the rail is pointed at or focused, and the current tick is marked by its length */
 [data-trace-label] {
   opacity: 0;
   transition: opacity var(--dur-fast) var(--ease-signal);
@@ -129,9 +129,7 @@ html.lenis body {
   white-space: nowrap;
 }
 
-[data-trace-rail]
-  a:is(:hover, :focus-visible, [data-active])
-  [data-trace-label] {
+[data-trace-rail]:is(:hover, :focus-within) [data-trace-label] {
   opacity: 1;
 }
 
@@ -152,6 +150,33 @@ html.lenis body {
   block-size: 100%;
 }
 
+/* Phones and tablets: a 2 px progress line at the top instead of the rail (docs plan 4.0) */
+[data-trace-progressbar] {
+  position: fixed;
+  z-index: calc(var(--z-header) + 2);
+  inset: 0 0 auto;
+  block-size: 2px;
+  pointer-events: none;
+}
+
+[data-trace-progressbar] > span {
+  display: block;
+  transform: scaleX(var(--trace-progress, 0));
+  transform-origin: left;
+  background: var(--foreground);
+  block-size: 100%;
+}
+
+@media (min-width: 1280px) {
+  [data-trace-progressbar] {
+    display: none;
+  }
+}
+
+html:not([data-motion="full"]) [data-trace-progressbar] {
+  display: none;
+}
+
 /* Reduced and off motion keep the ticks and the current mark, and drop the moving fill */
 html:not([data-motion="full"]) [data-trace-fill] {
   display: none;
@@ -168,8 +193,8 @@ html:not([data-motion="full"]) [data-trace-fill] {
 /* ---------- Pinned scenes (3.7.4) ----------
    Unpinned (reduced, off, touch, no JavaScript) the beats stack as a plain list. Pinned, the track is
    `--pin-length` screens taller than one screen and the stage sticks to the top for that distance;
-   beats share the stage and cross-fade by position: a beat holds for 70% of its span and changes over
-   30%. Sticky, not a fixed-position pin: see the pinScene behaviour. */
+   beats share the stage and cross-fade on the story clock: a beat holds for 0.7 of a unit and hands
+   over to the next over 0.3 (src/lib/motion/story.ts). Sticky, not a fixed-position pin: see the pinScene behaviour. */
 [data-pin-scene][data-pinned="true"] {
   block-size: calc(100svh + var(--pin-length, 240) * 1svh);
 }
@@ -183,10 +208,11 @@ html:not([data-motion="full"]) [data-trace-fill] {
 
 [data-pin-scene][data-pinned="true"] [data-pin-beat] {
   position: absolute;
-  opacity: clamp(
-    0,
-    calc((0.5 - abs(var(--pin-position, 0) - var(--beat, 0) - 0.5)) / 0.15),
-    1
+
+  /* In from 0.3 before its start, out over the last 0.3 of its hold; the first never fades in, the last never out */
+  opacity: min(
+    clamp(0, calc((var(--pin-position, 0) - var(--beat, 0) + 0.3) / 0.3), 1),
+    clamp(0, calc(1 - (var(--pin-position, 0) - var(--beat, 0) - 0.7) / 0.3), 1)
   );
   inset: 0;
 }
@@ -215,6 +241,27 @@ html[data-vt="running"]::view-transition-new(root) {
 
   to {
     clip-path: inset(0);
+  }
+}
+
+/* Theme flip (M21): the new theme grows out of the toggle as a circle */
+html[data-vt="theme"]::view-transition-old(root) {
+  z-index: 1;
+  animation: none;
+}
+
+html[data-vt="theme"]::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-flip 480ms var(--ease-snap) both;
+}
+
+@keyframes theme-flip {
+  from {
+    clip-path: circle(0 at var(--flip-x, 50%) var(--flip-y, 50%));
+  }
+
+  to {
+    clip-path: circle(150vmax at var(--flip-x, 50%) var(--flip-y, 50%));
   }
 }
 
