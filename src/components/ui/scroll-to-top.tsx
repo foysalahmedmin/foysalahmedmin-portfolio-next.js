@@ -1,22 +1,32 @@
 "use client";
 
-import { useScrollPosition } from "@/hooks/ui/use-scroll-position";
 import { cn } from "@/lib/utils";
 import { ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 
+const SHOW_AFTER_PX = 400;
+
 const ScrollToTop = () => {
-  const { scrollTop } = useScrollPosition();
   const [isVisible, setIsVisible] = useState(false);
 
+  // One frame at a time, reading only the scroll offset (the page's size is not needed, and reading it
+  // lays the page out). A restored scroll position fires a scroll event, so there is no read at mount.
   useEffect(() => {
-    if (scrollTop > 400) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
-  }, [scrollTop]);
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      setIsVisible(window.scrollY > SHOW_AFTER_PX);
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
