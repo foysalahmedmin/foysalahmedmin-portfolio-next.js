@@ -82,11 +82,12 @@ describe("motion effect registry (docs plan Appendix A)", () => {
     }
   });
 
-  it("every built public effect has a live demo in the Motion lab", () => {
-    const built = PUBLIC_EFFECTS.filter((effect) => effect.built).map(
-      (effect) => effect.id
-    );
-    expect([...LAB_DEMO_IDS].sort()).toEqual([...built].sort());
+  it("every built public effect is demonstrated: in the Motion lab, or on the real page it lives in", () => {
+    const built = PUBLIC_EFFECTS.filter((effect) => effect.built);
+    const inLab = built
+      .filter((effect) => !effect.demoRoute)
+      .map((effect) => effect.id);
+    expect([...LAB_DEMO_IDS].sort()).toEqual([...inLab].sort());
 
     const page = readFileSync(
       join(process.cwd(), "src/app/(lab)/lab/motion/page.tsx"),
@@ -94,6 +95,9 @@ describe("motion effect registry (docs plan Appendix A)", () => {
     );
     for (const id of LAB_DEMO_IDS) {
       expect(page, id).toContain(`effectId="${id}"`);
+    }
+    for (const effect of built.filter((entry) => entry.demoRoute)) {
+      expect(effect.demoRoute, effect.id).toMatch(/^\//);
     }
   });
 
