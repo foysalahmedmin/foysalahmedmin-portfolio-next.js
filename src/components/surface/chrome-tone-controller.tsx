@@ -1,5 +1,6 @@
 "use client";
 
+import { measureThenMutate } from "@/lib/dom/frame-batch";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
@@ -39,8 +40,9 @@ export function ChromeToneController() {
       document.querySelectorAll("[data-band], [data-chrome]").length;
     let known = -1;
 
+    let signature = "";
+
     const setup = () => {
-      observers.splice(0).forEach((observer) => observer.disconnect());
       const bands = Array.from(
         document.querySelectorAll<HTMLElement>("[data-band]")
       );
@@ -49,45 +51,63 @@ export function ChromeToneController() {
       );
       known = countTargets();
       if (!bands.length || !chromes.length) {
+        observers.splice(0).forEach((observer) => observer.disconnect());
+        signature = "";
         chromes.forEach((chrome) => chrome.removeAttribute("data-tone"));
         return;
       }
 
-      for (const chrome of chromes) {
-        const rect = chrome.getBoundingClientRect();
-        const lineY = Math.round(rect.top + rect.height / 2);
-        const viewport = window.innerHeight;
-        const under = new Set<Element>();
+      // Measure all the chrome in one read, then build the observers: the page is laid out once
+      measureThenMutate(
+        () => ({
+          viewport: window.innerHeight,
+          lines: chromes.map((chrome) => {
+            const rect = chrome.getBoundingClientRect();
+            return Math.round(rect.top + rect.height / 2);
+          }),
+        }),
+        ({ viewport, lines }) => {
+          // The same bands under the same lines in the same viewport: the observers already say it
+          const next = `${bands.length}|${viewport}|${lines.join(",")}`;
+          if (next === signature && observers.length > 0) return;
+          signature = next;
+          observers.splice(0).forEach((observer) => observer.disconnect());
 
-        const apply = () => {
-          const active = bands.find((band) => under.has(band));
-          if (!active) {
-            chrome.removeAttribute("data-tone");
-            return;
-          }
-          chrome.setAttribute("data-tone", resolveTone(readTone(active)));
-        };
+          chromes.forEach((chrome, index) => {
+            const lineY = lines[index]!;
+            const under = new Set<Element>();
 
-        const observer = new IntersectionObserver(
-          (entries) => {
-            for (const entry of entries) {
-              if (entry.isIntersecting) under.add(entry.target);
-              else under.delete(entry.target);
-            }
-            apply();
-          },
-          {
-            rootMargin: `${-lineY}px 0px ${-(viewport - lineY - 1)}px 0px`,
-            threshold: 0,
-          }
-        );
-        bands.forEach((band) => observer.observe(band));
-        observers.push(observer);
+            const apply = () => {
+              const active = bands.find((band) => under.has(band));
+              if (!active) {
+                chrome.removeAttribute("data-tone");
+                return;
+              }
+              chrome.setAttribute("data-tone", resolveTone(readTone(active)));
+            };
 
-        // Re-resolve when the theme flips (an "invert" band changes meaning)
-        (chrome as HTMLElement & { __applyTone?: () => void }).__applyTone =
-          apply;
-      }
+            const observer = new IntersectionObserver(
+              (entries) => {
+                for (const entry of entries) {
+                  if (entry.isIntersecting) under.add(entry.target);
+                  else under.delete(entry.target);
+                }
+                apply();
+              },
+              {
+                rootMargin: `${-lineY}px 0px ${-(viewport - lineY - 1)}px 0px`,
+                threshold: 0,
+              }
+            );
+            bands.forEach((band) => observer.observe(band));
+            observers.push(observer);
+
+            // Re-resolve when the theme flips (an "invert" band changes meaning)
+            (chrome as HTMLElement & { __applyTone?: () => void }).__applyTone =
+              apply;
+          });
+        }
+      );
     };
 
     const schedule = () => {

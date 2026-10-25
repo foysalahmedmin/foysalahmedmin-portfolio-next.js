@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { measureThenMutate } from "@/lib/dom/frame-batch";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
@@ -31,37 +32,34 @@ export function Rail({
   const track = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
 
-  const measure = useCallback(() => {
-    const element = track.current;
-    if (!element) return;
-    const max = element.scrollWidth - element.clientWidth - 2;
-    setEdges({
-      start: element.scrollLeft <= 2,
-      end: element.scrollLeft >= max,
-    });
-  }, []);
-
   useEffect(() => {
     const element = track.current;
     if (!element) return;
-    measure();
+    const read = () => ({
+      start: element.scrollLeft <= 2,
+      end: element.scrollLeft >= element.scrollWidth - element.clientWidth - 2,
+    });
+    const commit = () => setEdges(read());
+    // The first reading shares one layout with the page's other mount-time measurements; later ones
+    // (scrolling, resizing) find the layout clean
+    measureThenMutate(read, setEdges);
     let frame = 0;
     const onScroll = () => {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        measure();
+        commit();
       });
     };
     element.addEventListener("scroll", onScroll, { passive: true });
-    const observer = new ResizeObserver(measure);
+    const observer = new ResizeObserver(commit);
     observer.observe(element);
     return () => {
       element.removeEventListener("scroll", onScroll);
       observer.disconnect();
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [measure]);
+  }, []);
 
   const go = (direction: 1 | -1) => {
     const element = track.current;

@@ -1,5 +1,6 @@
 "use client";
 
+import { measureThenMutate } from "@/lib/dom/frame-batch";
 import { useEffect, type RefObject } from "react";
 
 /** How far you must keep scrolling down, in px, before the header gets out of the way (M35). */
@@ -21,7 +22,15 @@ export function useHeaderHide(
     const header = ref.current;
     if (!header) return;
 
-    let lastY = window.scrollY;
+    // window.scrollY lays the page out on the spot, so the starting point is read in the frame the other
+    // mount-time measurements share
+    let lastY = -1;
+    measureThenMutate(
+      () => window.scrollY,
+      (y) => {
+        if (lastY < 0) lastY = y;
+      }
+    );
     let travelled = 0;
     let frame = 0;
 
@@ -32,7 +41,7 @@ export function useHeaderHide(
     const update = () => {
       frame = 0;
       const y = window.scrollY;
-      const delta = y - lastY;
+      const delta = lastY < 0 ? 0 : y - lastY;
       lastY = y;
 
       if (y < SHOW_AT_TOP || locked) return show();
@@ -79,27 +88,38 @@ export function useNavIndicator(
       nav.querySelectorAll<HTMLElement>("a[data-nav-link]")
     );
 
+    // The text, not the padding: 12 px of padding on each side
+    const measureLink = (link: HTMLElement) => ({
+      x: link.offsetLeft + 12,
+      w: Math.max(0, link.offsetWidth - 24),
+    });
+    const apply = ({ x, w }: { x: number; w: number }) => {
+      nav.style.setProperty("--ind-x", `${x}px`);
+      nav.style.setProperty("--ind-w", String(w));
+    };
+    // After mount the layout is clean, so hover and focus read it directly
     const place = (link: HTMLElement | null) => {
       if (!link) {
         nav.style.setProperty("--ind-w", "0");
         return;
       }
-      // The text, not the padding: 12 px of padding on each side
-      nav.style.setProperty("--ind-x", `${link.offsetLeft + 12}px`);
-      nav.style.setProperty(
-        "--ind-w",
-        String(Math.max(0, link.offsetWidth - 24))
-      );
+      apply(measureLink(link));
     };
     const current = () =>
       links.find((link) => link.getAttribute("aria-current") === "page") ??
       null;
     const rest = () => place(current());
 
-    rest();
-    // No sweep from the left edge on first placement
+    // The first placement shares one layout with the other mount-time measurements
+    const first = current();
+    if (first) measureThenMutate(() => measureLink(first), apply);
+    else place(null);
+    // No sweep from the left edge on first placement: transitions switch on one frame after it
+    let ready2 = 0;
     const ready = window.requestAnimationFrame(() => {
-      nav.dataset.indicator = "ready";
+      ready2 = window.requestAnimationFrame(() => {
+        nav.dataset.indicator = "ready";
+      });
     });
 
     const cleanups = links.map((link) => {
@@ -120,6 +140,7 @@ export function useNavIndicator(
 
     return () => {
       window.cancelAnimationFrame(ready);
+      window.cancelAnimationFrame(ready2);
       cleanups.forEach((cleanup) => cleanup());
       observer.disconnect();
     };

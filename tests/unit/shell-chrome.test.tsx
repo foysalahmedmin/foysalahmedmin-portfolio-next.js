@@ -142,6 +142,8 @@ describe("header that gets out of the way (M35)", () => {
   it("hides after a long scroll down and returns on a small scroll up", () => {
     const flush = stubFrames();
     render(<Harness />);
+    // The first frame settles the starting scroll position
+    flush();
     const header = screen.getByTestId("header");
 
     for (const y of [60, 120, 200, 300]) {
@@ -158,6 +160,8 @@ describe("header that gets out of the way (M35)", () => {
   it("stays put near the top and ignores tiny jitters", () => {
     const flush = stubFrames();
     render(<Harness />);
+    // The first frame settles the starting scroll position
+    flush();
     const header = screen.getByTestId("header");
     scrollTo(70);
     flush();
@@ -173,6 +177,8 @@ describe("header that gets out of the way (M35)", () => {
   it("never hides while keyboard focus is inside, and comes back when focus enters", () => {
     const flush = stubFrames();
     render(<Harness />);
+    // The first frame settles the starting scroll position
+    flush();
     const header = screen.getByTestId("header");
     screen.getByText("inside").focus();
     for (const y of [150, 300, 450]) {
@@ -194,6 +200,8 @@ describe("header that gets out of the way (M35)", () => {
   it("does not hide while something holds the header open", () => {
     const flush = stubFrames();
     render(<Harness locked />);
+    // The first frame settles the starting scroll position
+    flush();
     const header = screen.getByTestId("header");
     for (const y of [150, 400, 800]) {
       scrollTo(y);
@@ -205,6 +213,8 @@ describe("header that gets out of the way (M35)", () => {
   it("handles scroll events one frame at a time and tidies up on unmount", () => {
     const flush = stubFrames();
     const view = render(<Harness />);
+    // The first frame settles the starting scroll position
+    flush();
     const header = screen.getByTestId("header");
     scrollTo(500);
     scrollTo(900);
@@ -279,10 +289,13 @@ describe("sliding navigation indicator (M28)", () => {
     const [home, about] = Array.from(nav.querySelectorAll<HTMLElement>("a"));
     void measure;
 
+    // The first placement waits for the frame the other mount-time measurements share
+    expect(nav.style.getPropertyValue("--ind-x")).toBe("");
+    flush();
     // 12 px of padding each side is excluded
     expect(nav.style.getPropertyValue("--ind-x")).toBe("12px");
     expect(nav.style.getPropertyValue("--ind-w")).toBe("56");
-    // no sweep from the left edge on first placement
+    // no sweep from the left edge: transitions switch on a frame after the first placement
     expect(nav.dataset.indicator).toBeUndefined();
     flush();
     expect(nav.dataset.indicator).toBe("ready");
