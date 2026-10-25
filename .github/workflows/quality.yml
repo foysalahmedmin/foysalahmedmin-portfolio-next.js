@@ -121,6 +121,7 @@ jobs:
           tests/e2e/public-quality.spec.ts
           tests/e2e/motion.spec.ts
           tests/e2e/harness.spec.ts
+          tests/e2e/hero.spec.ts
           --project=chromium-desktop
           --project=chromium-mobile
         env:
