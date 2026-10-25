@@ -18,7 +18,11 @@ import { createProject } from "../src/app/api/projects/project.service.ts";
 import { ServiceService } from "../src/app/api/services/service.service.ts";
 import { createVideo } from "../src/app/api/videos/video.service.ts";
 import { createVideoCategory } from "../src/app/api/video-categories/video-category.service.ts";
-import { getAdminSite, publishSite, updateSiteDraft } from "../src/app/api/site/site.service.ts";
+import {
+  getAdminSite,
+  publishSite,
+  updateSiteDraft,
+} from "../src/app/api/site/site.service.ts";
 import connectDB from "../src/lib/db.ts";
 import { getFoundationPageDraft } from "../src/lib/seed/foundation.ts";
 import {
@@ -66,7 +70,9 @@ const withNavLink = <T extends { key: string; href?: string }>(
   link: NavLink,
   after: string
 ): T[] => {
-  if (links.some((entry) => entry.key === link.key || entry.href === link.href)) {
+  if (
+    links.some((entry) => entry.key === link.key || entry.href === link.href)
+  ) {
     return links;
   }
   const next = [...links];
@@ -80,7 +86,10 @@ const explain = (error: unknown): string => {
   return `${e.code ?? ""} ${e.message ?? String(error)} ${e.sources ? JSON.stringify(e.sources) : ""}`.trim();
 };
 
-const step = async <T>(label: string, run: () => Promise<T>): Promise<T | undefined> => {
+const step = async <T>(
+  label: string,
+  run: () => Promise<T>
+): Promise<T | undefined> => {
   try {
     const value = await run();
     console.log(`OK    ${label}`);
@@ -147,11 +156,27 @@ await step("site draft", async () => {
     email_visibility: "public",
   };
   draft.social_links = [
-    { key: "github", platform: "github", label: "GitHub", url: "https://github.com/foysalahmedmin", enabled: true },
-    { key: "linkedin", platform: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com/in/foysalahmedmin/", enabled: true },
+    {
+      key: "github",
+      platform: "github",
+      label: "GitHub",
+      url: "https://github.com/foysalahmedmin",
+      enabled: true,
+    },
+    {
+      key: "linkedin",
+      platform: "linkedin",
+      label: "LinkedIn",
+      url: "https://www.linkedin.com/in/foysalahmedmin/",
+      enabled: true,
+    },
   ];
   draft.footer = { ...draft.footer, copyright_name: "Foysal Ahmed" };
-  const caseStudiesLink = navLink("case-studies", "Case studies", "/case-studies");
+  const caseStudiesLink = navLink(
+    "case-studies",
+    "Case studies",
+    "/case-studies"
+  );
   const videosLink = navLink("videos", "Videos", "/videos");
   draft.navigation = {
     ...draft.navigation,
@@ -173,7 +198,10 @@ await step("site draft", async () => {
     canonical_url: SITE_URL,
     allow_indexing: true,
   };
-  await updateSiteDraft({ expected_revision: current.revision, draft }, context);
+  await updateSiteDraft(
+    { expected_revision: current.revision, draft },
+    context
+  );
 });
 await step("site publish", async () => {
   const current = await getAdminSite();
@@ -187,29 +215,53 @@ const ensureCategory = async (
     | "article_categories"
     | "case_study_categories"
     | "video_categories",
-  create: (payload: { name: string; slug: string; sequence: number; description: string }) => Promise<{ _id: unknown }>,
+  create: (payload: {
+    name: string;
+    slug: string;
+    sequence: number;
+    description: string;
+  }) => Promise<{ _id: unknown }>,
   name: string,
   slug: string,
   description: string,
   sequence = 1
 ): Promise<string> => {
-  const existing = await db.collection(collection).findOne({ slug, is_deleted: { $ne: true } });
+  const existing = await db
+    .collection(collection)
+    .findOne({ slug, is_deleted: { $ne: true } });
   if (existing) return existing._id.toString();
   const created = await create({ name, slug, sequence, description });
   return String(created._id);
 };
 
 const projectCategory = await step("project category", () =>
-  ensureCategory("project_categories", createProjectCategory as never, "Case Studies", "case-studies", "Problems solved, with the approach and the result.")
+  ensureCategory(
+    "project_categories",
+    createProjectCategory as never,
+    "Case Studies",
+    "case-studies",
+    "Problems solved, with the approach and the result."
+  )
 );
 const articleCategory = await step("article category", () =>
-  ensureCategory("article_categories", createArticleCategory as never, "Engineering Notes", "engineering-notes", "Practical notes on solving real problems.")
+  ensureCategory(
+    "article_categories",
+    createArticleCategory as never,
+    "Engineering Notes",
+    "engineering-notes",
+    "Practical notes on solving real problems."
+  )
 );
 
 for (const [index, project] of LAUNCH_PROJECTS.entries()) {
   if (!projectCategory) break;
   await step(`project: ${project.name}`, async () => {
-    if (await db.collection("projects").findOne({ name: project.name, is_deleted: { $ne: true } })) return;
+    if (
+      await db
+        .collection("projects")
+        .findOne({ name: project.name, is_deleted: { $ne: true } })
+    )
+      return;
     await createProject(
       {
         name: project.name,
@@ -231,7 +283,10 @@ for (const [index, project] of LAUNCH_PROJECTS.entries()) {
         implementation: project.implementation,
         security: project.security,
         performance_reliability: project.performance_reliability,
-        outcomes: project.outcomes.map((outcome) => ({ ...outcome, verification_state: "derived" as const })),
+        outcomes: project.outcomes.map((outcome) => ({
+          ...outcome,
+          verification_state: "derived" as const,
+        })),
         learnings: [...project.learnings],
         is_featured: index < 3,
       },
@@ -243,7 +298,12 @@ for (const [index, project] of LAUNCH_PROJECTS.entries()) {
 for (const [index, article] of LAUNCH_ARTICLES.entries()) {
   if (!articleCategory) break;
   await step(`article: ${article.name}`, async () => {
-    if (await db.collection("articles").findOne({ name: article.name, is_deleted: { $ne: true } })) return;
+    if (
+      await db
+        .collection("articles")
+        .findOne({ name: article.name, is_deleted: { $ne: true } })
+    )
+      return;
     await createArticle(
       {
         name: article.name,
@@ -256,7 +316,9 @@ for (const [index, article] of LAUNCH_ARTICLES.entries()) {
         reading_time_minutes: article.minutes,
         reading_time_source: "manual",
         status: "published",
-        published_at: new Date(Date.now() - (LAUNCH_ARTICLES.length - index) * 86_400_000),
+        published_at: new Date(
+          Date.now() - (LAUNCH_ARTICLES.length - index) * 86_400_000
+        ),
         is_featured: index < 3,
       },
       actor
@@ -298,7 +360,12 @@ for (const [index, study] of LAUNCH_CASE_STUDIES.entries()) {
   const categoryId = caseStudyCategories.get(study.category);
   if (!categoryId) continue;
   await step(`case study: ${study.name}`, async () => {
-    if (await db.collection("case_studies").findOne({ name: study.name, is_deleted: { $ne: true } })) return;
+    if (
+      await db
+        .collection("case_studies")
+        .findOne({ name: study.name, is_deleted: { $ne: true } })
+    )
+      return;
     await createCaseStudy(
       {
         name: study.name,
@@ -326,7 +393,9 @@ for (const [index, study] of LAUNCH_CASE_STUDIES.entries()) {
         learnings: [...study.learnings],
         keywords: [...study.keywords],
         status: "published",
-        published_at: new Date(Date.now() - (LAUNCH_CASE_STUDIES.length - index) * 86_400_000),
+        published_at: new Date(
+          Date.now() - (LAUNCH_CASE_STUDIES.length - index) * 86_400_000
+        ),
         is_featured: index < 3,
       },
       actor
@@ -338,7 +407,12 @@ for (const [index, video] of LAUNCH_VIDEOS.entries()) {
   const categoryId = videoCategories.get(video.category);
   if (!categoryId) continue;
   await step(`video: ${video.name}`, async () => {
-    if (await db.collection("videos").findOne({ name: video.name, is_deleted: { $ne: true } })) return;
+    if (
+      await db
+        .collection("videos")
+        .findOne({ name: video.name, is_deleted: { $ne: true } })
+    )
+      return;
     await createVideo(
       {
         name: video.name,
@@ -350,7 +424,9 @@ for (const [index, video] of LAUNCH_VIDEOS.entries()) {
         description: video.description,
         keywords: [...video.keywords],
         status: "published",
-        published_at: new Date(Date.now() - (LAUNCH_VIDEOS.length - index) * 3_600_000),
+        published_at: new Date(
+          Date.now() - (LAUNCH_VIDEOS.length - index) * 3_600_000
+        ),
         is_featured: index < 2,
       },
       actor
@@ -362,14 +438,23 @@ for (const [index, video] of LAUNCH_VIDEOS.entries()) {
 const publishRecords = async (
   label: string,
   collection: string,
-  service: { updateRecord: (id: string, input: unknown, actor: never) => Promise<unknown> },
+  service: {
+    updateRecord: (
+      id: string,
+      input: unknown,
+      actor: never
+    ) => Promise<unknown>;
+  },
   extra: Record<string, unknown> = {}
 ) => {
   const rows = await db
     .collection(collection)
     .find({
       is_deleted: { $ne: true },
-      $or: [{ status: "draft" }, ...(extra.is_featured ? [{ is_featured: { $ne: true } }] : [])],
+      $or: [
+        { status: "draft" },
+        ...(extra.is_featured ? [{ is_featured: { $ne: true } }] : []),
+      ],
     })
     .toArray();
   for (const row of rows) {
@@ -392,10 +477,17 @@ const SERVICE_SUMMARIES: Record<string, string> = {
     "Replace repetitive manual work with automation you can monitor, review, and switch off.",
 };
 for (const [slug, summary] of Object.entries(SERVICE_SUMMARIES)) {
-  await db.collection("services").updateOne({ slug, status: "draft" }, { $set: { summary } });
+  await db
+    .collection("services")
+    .updateOne({ slug, status: "draft" }, { $set: { summary } });
 }
-await publishRecords("service", "services", ServiceService, { is_featured: true });
-await publishRecords("faq", "faqs", FAQService, { claim_verification: "not_applicable", is_featured: true });
+await publishRecords("service", "services", ServiceService, {
+  is_featured: true,
+});
+await publishRecords("faq", "faqs", FAQService, {
+  claim_verification: "not_applicable",
+  is_featured: true,
+});
 await publishRecords("legal", "legal_documents", LegalDocumentService, {
   claim_verification: "not_applicable",
   reviewed_at: new Date().toISOString(),
@@ -426,9 +518,46 @@ for (const route of PAGES) {
           !draft.sections.some((existing) => existing.key === section.key)
       );
       if (additions.length) {
-        const at = draft.sections.findIndex((section) => section.key === "articles");
+        const at = draft.sections.findIndex(
+          (section) => section.key === "articles"
+        );
         draft.sections.splice(
           at === -1 ? draft.sections.length : at,
+          0,
+          ...additions
+        );
+      }
+    }
+    if (route === "about") {
+      // The About page started as an introduction, a FAQ and the contact band. It gains the practice,
+      // the services, how the work is kept reliable, selected work and case studies and the open-code
+      // section once, after the introduction; sections the owner already has are left untouched.
+      const wanted = [
+        "pillars",
+        "services",
+        "architecture-workflow",
+        "projects",
+        "case-studies",
+        "github",
+      ];
+      const additions = getFoundationPageDraft("about").sections.filter(
+        (section) =>
+          wanted.includes(section.key) &&
+          !draft.sections.some((existing) => existing.key === section.key)
+      );
+      if (additions.length) {
+        const beforeContact = draft.sections.findIndex(
+          (section) => section.key === "contact"
+        );
+        const at = draft.sections.findIndex(
+          (section) => section.key === "faqs"
+        );
+        draft.sections.splice(
+          at !== -1
+            ? at
+            : beforeContact === -1
+              ? draft.sections.length
+              : beforeContact,
           0,
           ...additions
         );
@@ -438,8 +567,14 @@ for (const route of PAGES) {
     // verified evidence; there are no testimonials, timeline or credentials)
     // would make the whole Page unpublishable.
     const EMPTY_SECTIONS = ["skills", "trust", "timeline", "credentials"];
-    draft.sections = draft.sections.filter((section) => !EMPTY_SECTIONS.includes(section.key));
-    const saved = await updatePageDraft(route, { expected_revision: revision, draft }, context);
+    draft.sections = draft.sections.filter(
+      (section) => !EMPTY_SECTIONS.includes(section.key)
+    );
+    const saved = await updatePageDraft(
+      route,
+      { expected_revision: revision, draft },
+      context
+    );
     revision = saved.revision;
     await publishPage(route, { expected_revision: revision }, context);
   });
