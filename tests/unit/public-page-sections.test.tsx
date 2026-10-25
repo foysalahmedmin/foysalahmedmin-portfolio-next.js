@@ -9,7 +9,7 @@ import { PublicPageSections } from "@/components/pages/public-page-sections";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/(common)/home-page/hero-section", () => ({
+vi.mock("@/components/sections/site-hero-section", () => ({
   default: () => <section>hero</section>,
 }));
 vi.mock("@/components/(common)/home-page/about-section", () => ({

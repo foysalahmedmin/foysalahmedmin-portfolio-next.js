@@ -1,70 +1,77 @@
-import type {
-  TPublicSiteDto,
-  TPublicSiteMediaDto,
-} from "@/app/api/site/site.type";
+import type { TPublicSiteDto } from "@/app/api/site/site.type";
 import { PILLAR_CONTRACT, type PillarKey } from "@/lib/content/pillars";
-import {
-  getPrimaryPublicCta,
-  resolvePublicSiteLink,
-  type TPublicShellLink,
-} from "./public-shell";
+import { getPrimaryPublicCta, type TPublicShellLink } from "./public-shell";
 
-export type TPublicHeroSlide = Readonly<{
+/**
+ * Hero copy that is not yet Site data (docs plan 5.4, owner decision D-01: the kicker stays as it was at
+ * the owner's request). Phase 4 moves these into the Site document with the rest of the copy deck; until
+ * then they live here, in one place, and the three roles read everything else from `Site.pillars`.
+ */
+export const HERO_COPY = {
+  kicker: "Business problems in. Reliable systems out.",
+  roleEyebrow: "I take this off your plate",
+  cue: "Scroll",
+  primary: "Describe your problem",
+  secondary: "See how I work",
+} as const;
+
+export type TPublicHeroRole = Readonly<{
   key: PillarKey;
   label: string;
+  /** The label broken into at most two display lines: the last word drops to the second line. */
+  lines: readonly string[];
   headline: string;
-  summary: string;
-  outcome?: string;
   capabilities: readonly string[];
-  image?: TPublicSiteMediaDto;
-  priority: boolean;
-  cta: TPublicShellLink | null;
 }>;
 
 export type TPublicHero = Readonly<{
-  eyebrow: string;
-  slides: readonly [
-    TPublicHeroSlide,
-    TPublicHeroSlide,
-    TPublicHeroSlide,
-    TPublicHeroSlide,
-    TPublicHeroSlide,
-  ];
-  primary_cta: TPublicShellLink | null;
+  kicker: string;
+  roles: readonly TPublicHeroRole[];
+  primary: TPublicShellLink;
+  secondary: TPublicShellLink;
 }>;
 
-export const buildPublicHero = (site: TPublicSiteDto): TPublicHero => {
-  const slides = site.pillars.map((pillar, index) => ({
+export const splitRoleTitle = (label: string): readonly string[] => {
+  const words = label.trim().split(/\s+/).filter(Boolean);
+  if (words.length < 2) return [label.trim()];
+  const last = words.pop()!;
+  return [words.join(" "), last];
+};
+
+export const buildPublicHero = (
+  site: TPublicSiteDto,
+  options: Readonly<{ processHref?: string }> = {}
+): TPublicHero => {
+  const roles: TPublicHeroRole[] = site.pillars.map((pillar) => ({
     key: pillar.key,
     label: pillar.label,
+    lines: splitRoleTitle(pillar.label),
     headline: pillar.headline?.trim() || pillar.label,
-    summary:
-      pillar.summary?.trim() ||
-      pillar.seo_summary?.trim() ||
-      site.positioning.short_bio?.trim() ||
-      "Published details are being prepared.",
-    ...(pillar.client_outcome?.trim()
-      ? { outcome: pillar.client_outcome.trim() }
-      : {}),
-    capabilities: pillar.capabilities.slice(0, 4),
-    ...(pillar.visual ? { image: pillar.visual } : {}),
-    priority: index === 0,
-    cta: pillar.cta ? resolvePublicSiteLink(pillar.cta, site) : null,
+    capabilities: pillar.capabilities.slice(0, 3),
   }));
 
-  if (slides.length !== PILLAR_CONTRACT.length) {
+  if (roles.length !== PILLAR_CONTRACT.length) {
     throw new Error(
       `The public hero requires exactly ${PILLAR_CONTRACT.length} Site pillars`
     );
   }
 
+  const configured = getPrimaryPublicCta(site);
   return {
-    eyebrow:
-      site.positioning.mobile?.trim() ||
-      site.positioning.compact?.trim() ||
-      site.positioning.canonical?.trim() ||
-      "Architecture, software, and automation",
-    slides: slides as unknown as TPublicHero["slides"],
-    primary_cta: getPrimaryPublicCta(site),
+    kicker: HERO_COPY.kicker,
+    roles,
+    // The configured call to action decides where it goes; the hero decides what it says
+    primary: {
+      key: configured?.key ?? "hero-primary",
+      label: HERO_COPY.primary,
+      href: configured?.href ?? "/contact",
+      external: configured?.external ?? false,
+    },
+    secondary: {
+      key: "hero-secondary",
+      label: HERO_COPY.secondary,
+      href: options.processHref ?? "/about",
+      external: false,
+    },
   };
 };

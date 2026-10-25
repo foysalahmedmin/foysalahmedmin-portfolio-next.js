@@ -1,0 +1,486 @@
+/*
+ * The hero (docs plan 4.1, Chapter 0 "ingress"). Utilities layer, public surface only.
+ *
+ * Two states from one markup:
+ *  - unpinned (reduced and off motion, touch, no JavaScript): the kicker, the actions and the three
+ *    roles stack in the page over a poster that sticks behind them as you scroll;
+ *  - pinned (the engine is running): the section is a tall track with a sticky stage, and the story
+ *    clock (`--pin-position`, 0 to 2.7 in beat units: each role holds 0.7 and changes over 0.3) moves the
+ *    titles, the lines and the role bar. Nothing is hidden until the engine has pinned the section.
+ */
+
+/* ---------- Backdrop: grid, poster, canvas, scrim ---------- */
+
+/* Unpinned, the stage is a one-cell grid: the backdrop sticks to the top of the cell for the whole
+   height of the copy, and the copy sits in the same cell above it. A negative margin would let the
+   backdrop hang below the section into the next one, which is why this is a grid. */
+[data-hero] [data-pin-stage] {
+  display: grid;
+}
+
+.hero-backdrop {
+  position: sticky;
+  grid-area: 1 / 1;
+  align-self: start;
+  z-index: 0;
+  inset-block-start: 0;
+  block-size: 100svh;
+  overflow: clip;
+  pointer-events: none;
+}
+
+[data-hero][data-pinned="true"] .hero-backdrop {
+  position: absolute;
+  inset: 0;
+  block-size: auto;
+}
+
+.hero-grid-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* M01: the hairline grid draws in on load; it is never the thing that hides content */
+.hero-grid {
+  position: absolute;
+  opacity: 0.55;
+  mask-image: radial-gradient(90% 80% at 62% 45%, #000 30%, transparent 78%);
+  animation: hero-grid-draw var(--dur-scene) var(--ease-signal) backwards;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--line-1) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-1) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+@keyframes hero-grid-draw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0);
+  }
+}
+
+.hero-poster {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+.hero-poster img {
+  display: block;
+  /* The posters are scenes on a transparent background; the page colour behind them is the stage */
+  filter: none !important;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* The poster that does not match the theme is never fetched (lazy images in display: none do not load) */
+html.dark .hero-poster--light,
+html.light .hero-poster--dark {
+  display: none;
+}
+
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* M03: the canvas cross-fades over the poster once it has drawn a frame */
+.hero-canvas canvas {
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-signal);
+}
+
+.hero-canvas:is([data-scene-state="live"], [data-scene-state="paused"]) canvas {
+  opacity: 1;
+}
+
+.hero-label {
+  position: absolute;
+  opacity: 0;
+  z-index: 2;
+  inset: 0 auto auto 0;
+  border: 1px solid var(--line-3);
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  padding: 0.25rem 0.5rem;
+  pointer-events: none;
+  color: var(--foreground);
+  font-size: var(--step--2);
+  font-family: var(--ff-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* A scrim keeps what sits behind the copy inside the contrast rules for text (docs plan 3.5) */
+.hero-scrim {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      var(--background) 0%,
+      color-mix(in oklab, var(--background) 72%, transparent) 28%,
+      transparent 62%
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--background) 70%, transparent) 0,
+      transparent 8rem
+    );
+  pointer-events: none;
+}
+
+@media (orientation: portrait), (max-width: 819px) {
+  .hero-scrim {
+    background: linear-gradient(
+      180deg,
+      var(--background) 0%,
+      color-mix(in oklab, var(--background) 82%, transparent) 55%,
+      color-mix(in oklab, var(--background) 40%, transparent) 100%
+    );
+  }
+
+  .hero-canvas canvas,
+  .hero-poster img {
+    opacity: 0.7;
+  }
+
+  .hero-canvas:is([data-scene-state="live"], [data-scene-state="paused"])
+    canvas {
+    opacity: 0.7;
+  }
+}
+
+/* ---------- Copy ---------- */
+.hero-copy {
+  display: flex;
+  position: relative;
+  grid-area: 1 / 1;
+  flex-direction: column;
+  gap: 2rem;
+  z-index: 4;
+  padding-block: calc(var(--header-offset) + 2.5rem) 4rem;
+}
+
+.hero-kicker {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  animation: hero-rise 800ms var(--ease-signal) 500ms backwards;
+}
+
+@keyframes hero-rise {
+  from {
+    transform: translate3d(0, 14px, 0);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+.hero-beats {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-beat {
+  padding-block: 3rem;
+  min-block-size: 62svh;
+}
+
+.hero-eyebrow {
+  margin: 0 0 1rem;
+  color: var(--text-secondary);
+}
+
+.hero-title {
+  margin: 0;
+  max-inline-size: 12em;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(2.3rem, 0.8rem + 5.2vw, 6.6rem);
+  line-height: 0.93;
+  font-family: var(--ff-display-125, var(--ff-display, inherit));
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.hero-line {
+  display: block;
+  margin-block: -0.06em;
+  /* room for the glyphs inside the mask, taken back with the negative margin */
+  padding-block: 0.06em;
+  overflow: clip;
+}
+
+.hero-line > span {
+  display: block;
+  transform-origin: 0 50%;
+}
+
+/* M02: the first title settles on load from a small offset; there is no opacity start */
+.hero-beat:first-child .hero-line > span {
+  animation: hero-title-settle 900ms var(--ease-signal) backwards;
+  animation-delay: calc(100ms + var(--k, 0) * 90ms);
+}
+
+@keyframes hero-title-settle {
+  from {
+    transform: translate3d(0, 14%, 0) scaleX(0.94);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+.hero-lead {
+  margin: 1.3rem 0 1.1rem;
+  max-inline-size: 30ch;
+}
+
+.hero-caps {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero-caps li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  max-inline-size: 38ch;
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.hero-caps li::before {
+  flex: none;
+  translate: 0 -0.05em;
+  background: var(--foreground);
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  content: "";
+}
+
+.hero-cue,
+.hero-rolebar {
+  display: none;
+}
+
+/* ---------- Pinned: the story clock moves the copy ---------- */
+[data-hero][data-pinned="true"] .hero-copy {
+  justify-content: center;
+  padding-block: calc(var(--header-offset) + 1rem) 6rem;
+  block-size: 100svh;
+}
+
+[data-hero][data-pinned="true"] .hero-beats {
+  position: relative;
+  order: 2;
+  block-size: clamp(21rem, 58svh, 36rem);
+}
+
+[data-hero][data-pinned="true"] .hero-ctas {
+  order: 3;
+}
+
+[data-hero][data-pinned="true"] .hero-beat {
+  position: absolute;
+
+  /* Every beat is always opaque; its titles, lines and capabilities move on their own schedules */
+  opacity: 1;
+  inset: 0 0 auto 0;
+  padding: 0;
+  min-block-size: 0;
+
+  /* Time since this beat began (beat units), and how far it is from entering and leaving */
+  --tau: calc(var(--pin-position, 0) - var(--i, 0));
+}
+
+/* Titles: each line slides up out of its mask, holds, and slides out the top */
+[data-hero][data-pinned="true"] .hero-line {
+  --lag: calc(var(--k, 0) * 0.04);
+}
+
+[data-hero][data-pinned="true"] .hero-line > span {
+  transform: translateY(
+    calc(
+      (
+          clamp(0, (0.12 + var(--lag) - var(--tau)) / 0.3, 1) *
+            (1 - var(--first, 0)) -
+            clamp(0, (var(--tau) - 0.7 - var(--lag)) / 0.3, 1) *
+            (1 - var(--last, 0))
+        ) *
+        112%
+    )
+  );
+}
+
+/* The eyebrow and the plain line follow the title in and leave a little before it */
+[data-hero][data-pinned="true"] :is(.hero-eyebrow, .hero-lead) {
+  transform: translateY(
+    calc(
+      (1 - clamp(0, (var(--tau) + 0.05) / 0.22, 1)) * (1 - var(--first, 0)) *
+        14px - clamp(0, (var(--tau) - 0.7) / 0.2, 1) * (1 - var(--last, 0)) *
+        16px
+    )
+  );
+  opacity: calc(
+    clamp(0, (var(--tau) + 0.05) / 0.22, 1) * (1 - var(--first, 0)) +
+      var(--first, 0) - clamp(0, (var(--tau) - 0.7) / 0.2, 1) *
+      (1 - var(--last, 0))
+  );
+}
+
+/* Capabilities appear one by one while the role holds */
+[data-hero][data-pinned="true"] .hero-caps li {
+  transform: translateY(
+    calc(
+      (1 - clamp(0, (var(--tau) - (0.12 + var(--c, 0) * 0.14)) / 0.2, 1)) * 14px
+    )
+  );
+  opacity: calc(
+    clamp(0, (var(--tau) - (0.12 + var(--c, 0) * 0.14)) / 0.2, 1) -
+      clamp(0, (var(--tau) - 0.7) / 0.2, 1) * (1 - var(--last, 0))
+  );
+}
+
+/* Scroll speed skews the big titles a little, damped (M23, tier 3 only: the canvas writes --hero-skew) */
+[data-hero][data-pinned="true"] .hero-title {
+  transform: skewY(var(--hero-skew, 0deg));
+  transform-origin: 0 100%;
+}
+
+/* The role bar: three labels and a fill that follows progress */
+[data-hero][data-pinned="true"] .hero-rolebar {
+  display: flex;
+  position: absolute;
+  align-items: center;
+  gap: 1rem;
+  z-index: 5;
+  margin-inline: auto;
+  inset-block-end: 1.8rem;
+  inset-inline: var(--gutter, 1.5rem);
+  max-inline-size: var(--container-wide, 1360px);
+}
+
+.hero-rolebar > span {
+  transition: color var(--dur-base) var(--ease-signal);
+  color: var(--text-secondary);
+}
+
+[data-hero][data-beat="0"] .hero-rolebar > span:nth-child(1),
+[data-hero][data-beat="1"] .hero-rolebar > span:nth-child(2),
+[data-hero][data-beat="2"] .hero-rolebar > span:nth-child(3) {
+  color: var(--foreground);
+}
+
+.hero-track {
+  position: relative;
+  flex: 1;
+  background: var(--line-2);
+  block-size: 1px;
+  overflow: hidden;
+}
+
+.hero-fill {
+  position: absolute;
+  transform: scaleX(var(--pin-progress, 0));
+  transform-origin: left;
+  inset: 0;
+  background: var(--foreground);
+}
+
+/* The scroll cue invites the first scroll and goes once it has begun */
+[data-hero][data-pinned="true"] .hero-cue {
+  display: flex;
+  position: absolute;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  translate: -50% 0;
+  opacity: clamp(0, calc(1 - var(--pin-progress, 0) * 14), 1);
+  z-index: 5;
+  inset-block-end: 4.4rem;
+  inset-inline-start: 50%;
+  color: var(--text-secondary);
+}
+
+.hero-cue i {
+  display: block;
+  transform-origin: top;
+  animation: hero-cue 1.8s var(--ease-signal) infinite;
+  background: linear-gradient(var(--foreground), transparent);
+  inline-size: 1px;
+  block-size: 34px;
+}
+
+@keyframes hero-cue {
+  0% {
+    transform: scaleY(0);
+  }
+
+  60% {
+    transform: scaleY(1);
+  }
+
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 819px) {
+  [data-hero][data-pinned="true"] .hero-rolebar > span {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-copy {
+    max-inline-size: none;
+  }
+
+  .hero-beats,
+  .hero-ctas,
+  .hero-kicker {
+    max-inline-size: min(56rem, 62%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cue i {
+    animation: none;
+  }
+}
+
+@media print {
+  .hero-backdrop,
+  .hero-cue,
+  .hero-rolebar {
+    display: none !important;
+  }
+
+  [data-hero] .hero-copy {
+    block-size: auto !important;
+  }
+}

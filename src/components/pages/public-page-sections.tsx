@@ -18,7 +18,8 @@ import ContactContentSection from "@/components/(common)/contact-page/contact-co
 import AboutSection from "@/components/(common)/home-page/about-section";
 import ArticlesSection from "@/components/(common)/home-page/articles-section";
 import CaseStudiesSection from "@/components/(common)/home-page/case-studies-section";
-import HeroSection from "@/components/(common)/home-page/hero-section";
+import SiteHeroSection from "@/components/sections/site-hero-section";
+import { isScene3dEnabled } from "@/lib/motion/scene";
 import ProjectsSection from "@/components/(common)/home-page/projects-section";
 import VideosSection from "@/components/(common)/home-page/videos-section";
 import ArchitectureWorkflowSection from "@/components/sections/architecture-workflow-section";
@@ -88,7 +89,20 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
       } else
         switch (section.kind) {
           case "site-hero":
-            content = <HeroSection site={payload.site} />;
+            content = (
+              <SiteHeroSection
+                site={payload.site}
+                scene3d={isScene3dEnabled(
+                  { PUBLIC_3D_ENABLED: process.env.PUBLIC_3D_ENABLED },
+                  payload.site.experience.motion
+                )}
+                {...(payload.sections.some(
+                  (item) => item.kind === "process-steps"
+                )
+                  ? { processHref: "#working-process" }
+                  : {})}
+              />
+            );
             break;
           case "site-introduction":
             content =
@@ -127,7 +141,10 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
             break;
           case "github-profile":
             content = (
-              <GithubProfileSection site={payload.site} heading={section.heading} />
+              <GithubProfileSection
+                site={payload.site}
+                heading={section.heading}
+              />
             );
             break;
           case "metrics-strip":
