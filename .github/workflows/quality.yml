@@ -133,3 +133,74 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  smoothness:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'quit(db.adminCommand({ ping: 1 }).ok ? 0 : 2)'"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+
+    env:
+      DATABASE_URL: mongodb://127.0.0.1:27017/portfolio_smoothness
+      NEXT_PUBLIC_URL: http://127.0.0.1:3107
+      # The Motion lab (/lab/motion) is served by a production build only with this flag
+      MOTION_LAB: "1"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install pinned Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: Motion chunk budget and initial-script check
+        run: |
+          pnpm start --port 3107 &
+          for attempt in {1..60}; do
+            if curl -fsS http://127.0.0.1:3107/contact > /dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/measure-motion-chunk.mjs --base http://127.0.0.1:3107
+
+      - name: Smoothness harness (frame budgets, median of three runs)
+        run: >-
+          pnpm exec playwright test
+          tests/e2e/smoothness.spec.ts
+          --project=chromium-desktop
+          --project=chromium-mobile
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3107
+
+      - name: Upload smoothness diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: smoothness-diagnostics
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
