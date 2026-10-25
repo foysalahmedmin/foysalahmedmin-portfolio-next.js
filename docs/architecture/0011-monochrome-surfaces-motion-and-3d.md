@@ -64,11 +64,29 @@ What removed about 326 KB (measured one change at a time; the rest of the 350 KB
 
 **Amendments recorded.** Fonts are self-hosted latin variable woff2 files loaded with `next/font/local` (the same files `next/font/google` would serve, but the build needs no network). `@reduxjs/toolkit` and `react-redux` are removed. The admin stays pixel-identical: 24 authenticated screenshots (12 workspaces, both themes) of the final build against the Phase 0 build on the same database state differ only inside the dashboard's "Refreshed <time>" label.
 
+## Phase 2 outcome (2026-10-25)
+
+**Deferred enhancement JavaScript.** The motion chunk (GSAP 3.15.0 with ScrollTrigger and SplitText, Lenis 1.3.26, and the behaviours) is **53.8 KB gzip** against the 60 KB budget (`scripts/measure-motion-chunk.mjs`, which also fails when the chunk appears in any route's initial scripts). It loads after hydration and idle, only for full motion, a fine pointer and tier 2 or above. Reduced, off and touch visitors never download it; a failed load leaves the server markup untouched and reports one privacy-safe `engine_load_failed` event. The enhancements chunk (route shutter, scroll restoration, cursor, engine host) is about 2.8 KB, the command palette about 2.6 KB and the perf overlay 1.0 KB, all deferred.
+
+**Initial-route JavaScript** moved by 1.5 to 1.7 KB gzip on public routes (home family 174.8 to 176.5 KB, `/case-studies` 178.0, `/articles` 188.0, `/projects` 190.2) and by 0.5 KB on the admin sign-in (160.1 KB) through the shared reveal applier. The 180 KB budget stands; `/projects` and `/articles` keep their Phase 6 gate; the console row is still to be amended in Phase 7.
+
+**Boundary enforced.** `tests/unit/bundle-boundary.test.ts` walks the import graph: only `src/lib/motion/engine/*` imports GSAP or Lenis, nothing the admin or `components/ui` can reach touches the engine, the engine is imported dynamically by one file, and the public layout reaches it only through the deferred enhancements. Components receive the live engine through `useEngine()` and import only its types.
+
+**Amendments recorded.**
+
+- Touch visitors are excluded from the engine (the acceptance line, and plan 3.16 already said no Lenis on touch). They keep CSS reveals, the route shutter where View Transitions exist, the palette and the rail.
+- Pinned scenes are CSS `position: sticky` tracks; a ScrollTrigger fixed pin measured as a 0.95 layout shift at each start and end.
+- The Motion lab is a public-surface route (`/lab/motion`, served in development and with `MOTION_LAB=1`), because the admin may not import animation libraries.
+- The route transition is a feature-detected manual `startViewTransition` wrapper, not `experimental.viewTransition`; `@gsap/react` is not adopted.
+- The smoothness harness gates in CI (desktop and 4x-CPU mobile, median of three) and carries a self-test. Measured on the production build: p95 frame interval 16.7 to 16.8 ms, dropped frames at most 0.18 %, no long animation frames, layout shift at most 0.0009, interaction p75 32 to 40 ms, on `/`, `/about`, `/projects` and the all-effects Motion lab.
+
+Full evidence: [`docs/baseline/phase-2-findings.md`](../baseline/phase-2-findings.md).
+
 ## Verification
 
 - Bundle boundary test and build-output scan (admin and `components/ui` free of the engine libraries).
 - Per-route initial JS and deferred chunk sizes asserted in CI against the table above.
-- The smoothness harness (first version: `scripts/measure-baseline.mjs`) runs on every phase from Phase 2.
+- The smoothness harness (`tests/e2e/smoothness.spec.ts`, the `smoothness` CI job) gates every phase from Phase 2; `scripts/measure-baseline.mjs` records the load metrics.
 
 ## Rollback implication
 
