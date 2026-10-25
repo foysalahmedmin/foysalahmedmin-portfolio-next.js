@@ -211,9 +211,11 @@ export function HeroCanvas({ enabled }: { enabled: boolean }) {
           light: document.documentElement.classList.contains("light"),
         });
         controller.resize(element.clientWidth, element.clientHeight);
-        controller.canvas.addEventListener("webglcontextlost", (event) => {
+        const instance = controller;
+        instance.canvas.addEventListener("webglcontextlost", (event) => {
           event.preventDefault();
-          demote(1);
+          // Disposing the scene loses its context on purpose; only a live scene losing it is a failure
+          if (!cancelled && instance === controller) demote(1);
         });
         unsubscribe = subscribeFrames(engine, onFrame);
       } catch {
