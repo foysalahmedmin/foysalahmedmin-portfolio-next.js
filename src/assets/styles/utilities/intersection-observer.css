@@ -92,3 +92,70 @@ html[data-motion="full"]
 .delay-1000 {
   --reveal-delay: 1000ms;
 }
+
+/*
+ * Reveal v2 (public surface). Blocks that start below the first screen are marked ready by
+ * AnimationApplier and rise 16 px or less while fading in, on the shared tokens; the first screen is
+ * never marked, so nothing is hidden before or while JavaScript loads (docs plan 3.7, rule 5).
+ */
+html[data-surface="public"] {
+  --reveal-distance: 16px;
+}
+
+html[data-motion="full"][data-surface="public"]
+  [data-reveal][data-reveal-ready="true"] {
+  opacity: 0;
+  transition-delay: var(--reveal-delay, 0ms);
+  transition-duration: var(--dur-base);
+  transition-property: transform, opacity;
+  transition-timing-function: var(--ease-signal);
+  will-change: opacity, transform;
+}
+
+/*
+ * Media wipe (M08): a cover panel in the page colour retracts over the media. It is a transform on a
+ * pseudo-element, not a clip-path on the element, because an observer treats a fully clipped element as
+ * never intersecting and the reveal would never fire. Use it on a wrapper around the media, not on an img.
+ */
+html[data-motion="full"][data-surface="public"]
+  [data-reveal="wipe"][data-reveal-ready="true"] {
+  position: relative;
+  transform: none;
+  opacity: 1;
+  transition: none;
+}
+
+html[data-motion="full"][data-surface="public"]
+  [data-reveal="wipe"][data-reveal-ready="true"]::after {
+  position: absolute;
+  transform: scaleY(1);
+  transform-origin: 50% 100%;
+  z-index: 1;
+  transition: transform var(--dur-slow) var(--ease-snap)
+    var(--reveal-delay, 0ms);
+  inset: 0;
+  background: var(--background);
+  pointer-events: none;
+  content: "";
+}
+
+html[data-motion="full"][data-surface="public"]
+  [data-reveal="wipe"][data-reveal-ready="true"][data-reveal-visible="true"]::after {
+  transform: scaleY(0);
+}
+
+html[data-motion="full"][data-surface="public"]
+  [data-reveal][data-reveal-ready="true"][data-reveal-visible="true"] {
+  opacity: 1;
+  clip-path: inset(0);
+  will-change: auto;
+}
+
+/* Print and forced colours always show the end state */
+@media print, (forced-colors: active) {
+  [data-reveal] {
+    transform: none !important;
+    opacity: 1 !important;
+    clip-path: none !important;
+  }
+}

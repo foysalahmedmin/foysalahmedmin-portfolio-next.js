@@ -25,3 +25,19 @@
 [data-surface] [data-skeleton] {
   background-color: color-mix(in oklab, var(--foreground) 9%, transparent);
 }
+
+/* Skeleton breathe (M33): opacity eases between 0.55 and 1. Reduced and off motion render it still. */
+@keyframes skeleton-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+[data-surface] [data-skeleton] {
+  animation: skeleton-breathe 1.4s var(--ease-settle, ease) infinite;
+}
