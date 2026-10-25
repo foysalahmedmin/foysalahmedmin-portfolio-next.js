@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { settle } from "./support/settle";
 
 test.describe.configure({ mode: "serial" });
 
@@ -48,6 +49,8 @@ for (const theme of ["dark", "light"] as const) {
       await expect(page.locator("footer")).toBeVisible();
       await assertNoHorizontalOverflow(page);
 
+      await settle(page);
+      await settle(page);
       const result = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
         .analyze();
@@ -64,11 +67,15 @@ for (const route of ["/about", "/contact"] as const) {
     page,
   }) => {
     await page.goto(route);
+    // Dynamic routes stream behind a skeleton; wait for the single, settled main
+    await expect(page.locator("main")).toHaveCount(1);
+    await expect(page.locator("main")).not.toHaveAttribute("aria-busy", "true");
     await expect(page.locator("main")).toBeVisible();
     await expect(page.locator("header[data-chrome]")).toBeVisible();
     await expect(page.locator("footer")).toBeVisible();
     await assertNoHorizontalOverflow(page);
 
+    await settle(page);
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();
@@ -100,9 +107,20 @@ test("explicit motion preference persists and becomes effective", async ({
   page,
 }) => {
   await page.goto("/contact");
-  const control = page.getByLabel("Motion preference");
-  await control.selectOption("off");
+  const motion = page.getByRole("group", { name: "Motion" });
+  // The radio is visually hidden behind its label, so choose it by its label like a visitor does
+  await motion.getByText("Off", { exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-motion", "off");
   await page.reload();
-  await expect(control).toHaveValue("off");
+  await expect(motion.getByRole("radio", { name: "Off" })).toBeChecked();
+  await expect(page.locator("html")).toHaveAttribute("data-motion", "off");
+});
+
+test("the 3D scene preference persists", async ({ page }) => {
+  await page.goto("/contact");
+  const scene = page.getByRole("group", { name: "3D scene" });
+  await scene.getByText("Still", { exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-scene", "still");
+  await page.reload();
+  await expect(scene.getByRole("radio", { name: "Still" })).toBeChecked();
 });

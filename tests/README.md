@@ -8,6 +8,14 @@
 - `pnpm test:integration` runs database/API integration tests.
 - `pnpm test:coverage` writes coverage artifacts to `coverage/`.
 
+## Browser tests
+
+Playwright specs live in `tests/e2e`. `pnpm test:e2e` starts the dev server itself; point `PLAYWRIGHT_BASE_URL` at a running production server (`pnpm build`, then `pnpm start -p 3107`) to test the real bundle. The motion and smoothness specs also need the Motion lab (`/lab/motion`), which a production build serves only with `MOTION_LAB=1`.
+
+- `pnpm test:motion` runs the engine, palette, route-transition and harness self-test specs.
+- `pnpm test:smoothness` runs the frame-budget gate (about four minutes: ten seconds per run, three runs per route, desktop and 4x-CPU mobile). Run it against a production build.
+- Axe judges whatever frame it lands on, so specs call `settle(page)` (`tests/e2e/support/settle.ts`) first to let reveal transitions finish.
+
 ## Database safety
 
 Tests default to `mongodb://127.0.0.1:27017/foysalahmedmin_test`.
