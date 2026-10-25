@@ -60,7 +60,7 @@ const sections: ReadonlyArray<{
   {
     id: "motion",
     title: "Motion lab",
-    lede: "Duration and easing tokens. The full effect registry lands with the motion engine.",
+    lede: "Duration and easing tokens, the effect registry with each effect's reduced variant, and the way into the live sandbox.",
     content: <MotionSection />,
   },
 ];
