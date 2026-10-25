@@ -1,5 +1,6 @@
 "use client";
 
+import { measureThenMutate } from "@/lib/dom/frame-batch";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
@@ -48,19 +49,25 @@ export function TraceRail({
 
     // Progress is written straight to a CSS variable on the next frame; React is not involved
     let frame = 0;
-    const update = () => {
-      frame = 0;
+    const readProgress = () => {
       const scrollable =
         document.documentElement.scrollHeight - window.innerHeight;
       const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
-      const value = Math.min(1, Math.max(0, progress)).toFixed(4);
+      return Math.min(1, Math.max(0, progress)).toFixed(4);
+    };
+    const writeProgress = (value: string) => {
       element.style.setProperty("--trace-progress", value);
       bar.current?.style.setProperty("--trace-progress", value);
+    };
+    // While scrolling the layout is clean, so the read is free; at mount and on resize it is batched
+    const update = () => {
+      frame = 0;
+      writeProgress(readProgress());
     };
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
     };
-    update();
+    measureThenMutate(readProgress, writeProgress);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
 

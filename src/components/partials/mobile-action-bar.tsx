@@ -2,6 +2,7 @@
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { RollLabel } from "@/components/ui/roll-label";
+import { measureThenMutate } from "@/lib/dom/frame-batch";
 import { openPalette } from "@/lib/palette/shortcut";
 import type { TPublicShellLink } from "@/lib/site/public-shell";
 import { cn } from "@/lib/utils";
@@ -63,7 +64,13 @@ export function MobileActionBar({ cta }: { cta: TPublicShellLink }) {
       : null;
     if (footer) observer?.observe(footer);
 
-    onScroll();
+    measureThenMutate(
+      () => window.scrollY > SHOW_AFTER_PX,
+      (past) => {
+        pastFold = past;
+        apply();
+      }
+    );
     window.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("focusin", onFocusIn);
     document.addEventListener("focusout", onFocusOut);
