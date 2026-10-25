@@ -15,6 +15,8 @@ export type SceneQuality = Readonly<{
   segments: number;
   /** Sprites in the pulse trail. */
   trail: number;
+  /** Small lights running along the conduits (one instanced mesh). */
+  packets: number;
   /** The camera follows the pointer (fine pointers on tier 3). */
   pointerRig: boolean;
 }>;
@@ -28,6 +30,7 @@ export const QUALITY: Readonly<Record<"full" | "simplified", SceneQuality>> = {
     shadowMapSize: 2048,
     segments: 4,
     trail: 7,
+    packets: 44,
     pointerRig: true,
   },
   simplified: {
@@ -38,6 +41,7 @@ export const QUALITY: Readonly<Record<"full" | "simplified", SceneQuality>> = {
     shadowMapSize: 1024,
     segments: 2,
     trail: 3,
+    packets: 16,
     pointerRig: false,
   },
 };

@@ -45,14 +45,23 @@ export type ThemedParts = Readonly<{
   gridMaterial: { color: Color; opacity: number };
   pulseSprites: readonly SpriteMaterial[];
   dot: MeshBasicMaterial;
+  packets: MeshBasicMaterial;
   ring: MeshBasicMaterial;
   keyLight: { intensity: number };
   scene: { environmentIntensity: number };
 }>;
 
 export function applyTheme(parts: ThemedParts, light: boolean) {
-  const { materials, pulseSprites, dot, ring, keyLight, scene, gridMaterial } =
-    parts;
+  const {
+    materials,
+    pulseSprites,
+    dot,
+    packets,
+    ring,
+    keyLight,
+    scene,
+    gridMaterial,
+  } = parts;
   materials.body.color.set(light ? 0xd4d4d4 : 0x2c2c2c);
   materials.core.color.set(light ? 0x4a4a4a : 0x9a9a9a);
   keyLight.intensity = light ? 1.55 : 2.4;
@@ -63,6 +72,7 @@ export function applyTheme(parts: ThemedParts, light: boolean) {
   materials.edge.emissive.set(ink);
   gridMaterial.color.set(ink);
   dot.color.set(ink);
+  packets.color.set(ink);
   ring.color.set(ink);
   for (const sprite of pulseSprites) {
     // Additive light on ink; plain ink on clay
