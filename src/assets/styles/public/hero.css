@@ -31,6 +31,8 @@
 
 [data-hero][data-pinned="true"] .hero-backdrop {
   position: absolute;
+  /* Stretch to the grid area: start alignment would shrink an absolutely placed box to its (absolute) content, i.e. nothing */
+  align-self: stretch;
   inset: 0;
   block-size: auto;
 }
@@ -66,7 +68,17 @@
 .hero-poster {
   display: block;
   position: absolute;
+  transition: opacity var(--dur-slow) var(--ease-signal);
   inset: 0;
+}
+
+/* Once the live scene is drawing, the poster steps aside: the camera moves and the poster does not,
+   so the two would show the system twice, at different sizes, one through the other. */
+.hero-backdrop:has(
+    .hero-canvas:is([data-scene-state="live"], [data-scene-state="paused"])
+  )
+  .hero-poster {
+  opacity: 0;
 }
 
 .hero-poster img {

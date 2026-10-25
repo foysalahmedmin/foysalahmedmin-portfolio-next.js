@@ -70,6 +70,20 @@ const expectBeatAt = (page: Page, progress: number, beat: string) =>
     )
     .toBe(beat);
 
+/** The poster and the canvas must fill the first screen: a box with no height draws nothing and no other check notices. */
+const expectFillsFirstScreen = async (page: Page, selector: string) => {
+  const viewport = page.viewportSize()!;
+  await expect
+    .poll(
+      async () =>
+        (await page.locator(selector).first().boundingBox())?.height ?? 0,
+      {
+        timeout: 10_000,
+      }
+    )
+    .toBeGreaterThanOrEqual(viewport.height * 0.9);
+};
+
 async function openHome(page: Page, query = "") {
   await page.goto(`/${query}`);
   await expect(page.locator("main")).toHaveCount(1);
@@ -180,6 +194,7 @@ test.describe("live canvas (T2 and T3)", () => {
     });
     expect(chunks.length).toBeGreaterThan(0);
     await expect(canvasHost(page).locator("canvas")).toHaveCount(1);
+    await expectFillsFirstScreen(page, "[data-hero-canvas] canvas");
     const counts = await canvasHost(page).evaluate((element) => ({
       calls: Number(element.getAttribute("data-scene-calls")),
       triangles: Number(element.getAttribute("data-scene-triangles")),
@@ -289,6 +304,7 @@ test.describe("no WebGL (software renderer)", () => {
 
     // The engine is already running, so the pinned story works over the poster
     await expect(hero(page)).toHaveAttribute("data-pinned", "true");
+    await expectFillsFirstScreen(page, ".hero-poster--dark");
     for (const [progress, beat] of [
       [0.02, "0"],
       [0.5, "1"],
