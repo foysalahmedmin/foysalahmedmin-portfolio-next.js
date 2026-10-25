@@ -58,3 +58,28 @@ export function getFallbackMedia(
 ): string {
   return getFallbackMediaPresentation(kind, pillar).src;
 }
+
+const HERO_ART_BASE: Record<PillarKey, string> = {
+  system_architect: "system-architect",
+  software_developer: "software-developer",
+  ai_automation: "ai-automation",
+};
+
+/** The generated hero art for a role, in the optimised sizes (desktop 1600x900, mobile 1080x1350). */
+export function getHeroArt(pillar: PillarKey) {
+  const name = `/images/hero/derivatives/${HERO_ART_BASE[pillar]}`;
+  return {
+    desktop: {
+      avif: `${name}.desktop.q55.avif`,
+      webp: `${name}.desktop.q82.webp`,
+      width: 1600,
+      height: 900,
+    },
+    mobile: {
+      avif: `${name}.mobile.q52.avif`,
+      webp: `${name}.mobile.q78.webp`,
+      width: 1080,
+      height: 1350,
+    },
+  } as const;
+}

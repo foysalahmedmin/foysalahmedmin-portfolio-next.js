@@ -60,9 +60,10 @@ const AboutSection = ({ site }: { site: TPublicSiteDto }) => {
                   key={pillar.key}
                   className="border-border flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-bold"
                 >
-                  <span className="text-primary text-xs tabular-nums">
-                    {String(pillar.order).padStart(2, "0")}
-                  </span>
+                  <span
+                    className="bg-foreground size-1.5 shrink-0 rounded-full"
+                    aria-hidden="true"
+                  />
                   {pillar.label}
                 </li>
               ))}

@@ -3,6 +3,8 @@ import type { TPublicFAQDto } from "@/app/api/faqs/faq.type";
 import type { TPublicTestimonialDto } from "@/app/api/testimonials/testimonial.type";
 import type { TPublicTimelineEntryDto } from "@/app/api/timeline/timeline-entry.type";
 import TrustedRichText from "@/components/content/trusted-rich-text";
+import { SectionHead } from "@/components/sections/signal/section-head";
+import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import {
   Description,
@@ -213,117 +215,46 @@ export const FAQSection = ({
   faqs,
   unavailable,
   heading,
-  layout = "accordion",
 }: {
   faqs: readonly TPublicFAQDto[];
   unavailable?: boolean;
   heading?: string;
   layout?: string;
-}) => {
-  const isOpenList = layout === "list";
-
-  return (
-    <section
-      className={cn(
-        "py-[var(--space-section)]",
-        isOpenList && "bg-surface-subtle"
-      )}
-      aria-labelledby="faq-title"
-    >
-      <div
-        className={cn(
-          "container",
-          isOpenList
-            ? "grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start"
-            : "max-w-5xl"
-        )}
-      >
-        <div className={cn(isOpenList && "lg:sticky lg:top-28")}>
-          <SectionTitle
-            variant={isOpenList ? "start" : "center"}
-            className={cn(isOpenList && "mb-8")}
-          >
-            <Subtitle>Useful before a conversation</Subtitle>
-            <Title id="faq-title">
-              {heading || "Frequently asked questions"}
-            </Title>
-            <Description className={cn(isOpenList && "mx-0")}>
-              Clear expectations make the first call sharper: scope, delivery,
-              security, communication, and proof all get answered before a
-              project starts.
-            </Description>
-          </SectionTitle>
-
-          {isOpenList && (
-            <div className="border-border bg-background rounded-[var(--radius-xl-token)] border p-5 shadow-[var(--shadow-xs)]">
-              <div className="flex items-start gap-3">
-                <span className="bg-primary/10 text-primary grid size-11 shrink-0 place-items-center rounded-xl">
-                  <HelpCircle className="size-5" aria-hidden />
-                </span>
-                <div>
-                  <p className="font-black">No hidden sales theatre</p>
-                  <p className="text-muted-foreground mt-1 text-sm leading-6">
-                    These answers come from published FAQ records, so the
-                    homepage can stay useful without hardcoded promises.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+}) => (
+  <section className="py-[var(--space-section)]" aria-labelledby="faq-title">
+    <div className="container">
+      <div className="mx-auto grid max-w-3xl gap-10">
+        <SectionHead
+          align="center"
+          eyebrow="Useful before a conversation"
+          title={heading || "Questions before we start"}
+          titleId="faq-title"
+          lead="Clear expectations make the first call sharper: scope, delivery, security, communication and proof, answered before a project starts."
+        />
 
         {faqs.length ? (
-          isOpenList ? (
-            <ol className="space-y-4">
-              {faqs.map((faq, index) => (
-                <li key={faq.slug}>
-                  <article className="border-border bg-card rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-xs)]">
-                    <div className="text-primary flex items-center gap-2 text-xs font-black tracking-wide uppercase">
-                      <ShieldCheck className="size-4" aria-hidden />
-                      Answer {String(index + 1).padStart(2, "0")}
-                    </div>
-                    <h3 className="mt-4 text-xl leading-tight font-black">
-                      {faq.question}
-                    </h3>
-                    <TrustedRichText
-                      html={faq.answer}
-                      className="editorial text-muted-foreground mt-4 max-w-none whitespace-pre-line"
-                    />
-                  </article>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <div className="space-y-3">
-              {faqs.map((faq) => (
-                <details
-                  key={faq.slug}
-                  className="border-border bg-card group rounded-xl border p-1"
-                >
-                  <summary className="focus-visible:ring-primary flex min-h-14 cursor-pointer list-none items-center justify-between gap-5 rounded-xl px-5 py-3 font-bold focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
-                    {faq.question}
-                    <span
-                      className="text-primary text-xl transition-transform group-open:rotate-45 motion-reduce:transition-none"
-                      aria-hidden
-                    >
-                      +
-                    </span>
-                  </summary>
-                  <TrustedRichText
-                    html={faq.answer}
-                    className="editorial text-muted-foreground max-w-none px-5 pt-2 pb-5 whitespace-pre-line"
-                  />
-                </details>
-              ))}
-            </div>
-          )
+          <Accordion>
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={faq.slug}
+                name="faq"
+                title={faq.question}
+                open={index === 0}
+              >
+                <TrustedRichText
+                  html={faq.answer}
+                  className="editorial text-fg-secondary max-w-none whitespace-pre-line"
+                />
+              </AccordionItem>
+            ))}
+          </Accordion>
         ) : (
           <EmptyEvidence title="FAQs" unavailable={unavailable} />
         )}
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export const TestimonialsSection = ({
   testimonials,
