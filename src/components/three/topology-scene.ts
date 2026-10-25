@@ -323,6 +323,61 @@ export function createTopologyScene(options: SceneOptions): SceneController {
   group.add(conduits);
   conduitPieces.forEach((piece) => piece.dispose());
 
+  // Packets: small lights that run along every conduit, so the system looks busy. One instanced mesh; each packet shrinks to nothing at the ends of its conduit.
+  const packetLines = CONDUITS.map((path) => {
+    const points = path.map(([x, z]) => new Vector3(x, 0.2, z));
+    const cumulative = [0];
+    for (let index = 1; index < points.length; index += 1) {
+      cumulative.push(
+        cumulative[index - 1]! + points[index]!.distanceTo(points[index - 1]!)
+      );
+    }
+    return { points, cumulative, length: cumulative[cumulative.length - 1]! };
+  });
+  const packetMaterial = new MeshBasicMaterial({ color: 0xffffff });
+  const packets = new InstancedMesh(
+    new SphereGeometry(0.075, 8, 6),
+    packetMaterial,
+    quality.packets
+  );
+  packets.frustumCulled = false;
+  scene.add(packets);
+  const packetState = Array.from({ length: quality.packets }, (_, index) => ({
+    line: index % packetLines.length,
+    phase: (index * 0.618) % 1,
+    speed: 0.5 + ((index * 7) % 5) * 0.13,
+  }));
+  const packetAt = new Vector3();
+  const placePackets = (clock: number) => {
+    packetState.forEach((packet, index) => {
+      const line = packetLines[packet.line]!;
+      const t = (packet.phase + (clock * packet.speed) / line.length) % 1;
+      const distance = t * line.length;
+      let segment = 1;
+      while (
+        segment < line.cumulative.length - 1 &&
+        line.cumulative[segment]! < distance
+      ) {
+        segment += 1;
+      }
+      const from = line.points[segment - 1]!;
+      const to = line.points[segment]!;
+      const span = line.cumulative[segment]! - line.cumulative[segment - 1]!;
+      packetAt
+        .copy(from)
+        .lerp(
+          to,
+          (distance - line.cumulative[segment - 1]!) / Math.max(0.0001, span)
+        );
+      const size = Math.sqrt(Math.sin(Math.PI * t));
+      matrix.makeScale(size, size, size).setPosition(packetAt);
+      packets.setMatrixAt(index, matrix);
+    });
+    packets.instanceMatrix.needsUpdate = true;
+  };
+  placePackets(2.3);
+  let packetClock = 2.3;
+
   // The pulse: a glow head, a dot and a short trail of fading sprites
   const glow: Texture = createGlowTexture();
   const pulse = new Group();
@@ -368,6 +423,7 @@ export function createTopologyScene(options: SceneOptions): SceneController {
     gridMaterial,
     pulseSprites,
     dot: dot.material as MeshBasicMaterial,
+    packets: packetMaterial,
     ring: ring.material as MeshBasicMaterial,
     keyLight: key,
     scene,
@@ -480,6 +536,9 @@ export function createTopologyScene(options: SceneOptions): SceneController {
     (ring.material as MeshBasicMaterial).opacity = 0.75 * automation;
     ring.scale.setScalar(1 + 0.04 * Math.sin(timeMs * 0.0024) * automation);
 
+    packetClock += dt * (1 + velocity * 3 + automation * 0.8);
+    placePackets(still ? 2.3 : packetClock);
+
     pulseTime += dt * (0.075 + velocity * 0.22 + automation * 0.09);
     const head3 = pointAt(still ? 0.1 : pulseTime, scratch);
     pulse.position.copy(head3);
@@ -558,6 +617,7 @@ export function createTopologyScene(options: SceneOptions): SceneController {
         else material?.dispose?.();
       });
       slabs.dispose();
+      packets.dispose();
       glow.dispose();
       environment.dispose();
       renderer.dispose();
