@@ -16,7 +16,7 @@
 - **The architecture chapter is a flow diagram** (request, gateway, services, AI agent, human review, delivered) with a travelling pulse and current, above three even columns. The open-code chapter is the year of GitHub contributions as dots, and is always the last chapter, just above the closing contact band.
 - **Light theme is a tinted page with white cards** (page `mono-100`, surface `#e6e6e6`, cards white with a soft shadow), public surface only.
 - **The poster is static, not Managed Media**, so the hero renders when the database does not; it steps aside (fades out) once the live scene draws, because the camera moves and it does not.
-- **Phase 3 acceptance moved from "met" to "met with one open item":** Home TBT on the constrained profile is 267 ms against 200. Findings section 5.
+- **Layout reads at mount go through one frame.** Effects that measure the page (tone, rail, nav indicator, header, card row) use `measureThenMutate` so the page is laid out once; a read after a write forces a full layout, and six of them cost Home 600 ms of blocking time on the constrained profile. Findings section 5.
 
 ### Revision 1.5: what Phase 2 changed in the plan (2026-10-25)
 

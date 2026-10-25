@@ -1,271 +1,153 @@
 {
-  "measured_at": "2026-10-25T19:59:21.910Z",
-  "base": "http://127.0.0.1:3107",
-  "node": "v24.15.0",
-  "results": [
-    {
-      "profile": "desktop",
-      "route": "/",
-      "html_kb": 17.4,
-      "js_kb_transferred": 272.5,
-      "js_requests": 23,
-      "fcp_ms": 124,
-      "lcp_ms": 124,
-      "cls": 0.026,
-      "tbt_ms": 0,
-      "doc_height_px": 8008,
-      "smoothness": {
-        "frames": 599,
-        "p50_ms": 16.7,
-        "p95_ms": 16.7,
-        "max_ms": 33.4,
-        "dropped_pct": 0.2,
-        "long_animation_frames_over_50ms": 0
+  "measured_at": "2026-10-26",
+  "build": "production, throwaway database holding the full launch content; Phase 2 (e5b2b2b) built and measured beside it on the same data",
+  "constrained_mobile_5_run_medians": {
+    "profile": "360x800 DPR 2, 4x CPU, 150 ms RTT, 1.6 Mbps down",
+    "/": {
+      "phase2": {
+        "lcp_ms": 1132,
+        "tbt_ms": 735
+      },
+      "phase3": {
+        "lcp_ms": 1244,
+        "tbt_ms": 118
       }
     },
-    {
-      "profile": "desktop",
-      "route": "/about",
-      "html_kb": 17.1,
-      "js_kb_transferred": 272.5,
-      "js_requests": 23,
-      "fcp_ms": 104,
-      "lcp_ms": 104,
-      "cls": 0.004,
-      "tbt_ms": 0,
-      "doc_height_px": 5784,
-      "smoothness": {
-        "frames": 600,
-        "p50_ms": 16.7,
-        "p95_ms": 16.8,
-        "max_ms": 16.8,
-        "dropped_pct": 0,
-        "long_animation_frames_over_50ms": 0
+    "/about": {
+      "phase2": {
+        "lcp_ms": 936,
+        "tbt_ms": 108
+      },
+      "phase3": {
+        "lcp_ms": 1056,
+        "tbt_ms": 71
       }
     },
-    {
-      "profile": "desktop",
-      "route": "/contact",
-      "html_kb": 14.5,
-      "js_kb_transferred": 272.5,
-      "js_requests": 23,
-      "fcp_ms": 116,
-      "lcp_ms": 116,
-      "cls": 0.004,
-      "tbt_ms": 0,
-      "doc_height_px": 3206
-    },
-    {
-      "profile": "desktop",
-      "route": "/projects",
-      "html_kb": 19.9,
-      "js_kb_transferred": 303.3,
-      "js_requests": 26,
-      "fcp_ms": 160,
-      "lcp_ms": 160,
-      "cls": 0.004,
-      "tbt_ms": 0,
-      "doc_height_px": 3007
-    },
-    {
-      "profile": "desktop",
-      "route": "/case-studies",
-      "html_kb": 20.7,
-      "js_kb_transferred": 289.7,
-      "js_requests": 25,
-      "fcp_ms": 96,
-      "lcp_ms": 96,
-      "cls": 0.004,
-      "tbt_ms": 0,
-      "doc_height_px": 3087,
-      "smoothness": {
-        "frames": 600,
-        "p50_ms": 16.7,
-        "p95_ms": 16.7,
-        "max_ms": 16.8,
-        "dropped_pct": 0,
-        "long_animation_frames_over_50ms": 0
+    "/projects": {
+      "phase2": {
+        "lcp_ms": 948,
+        "tbt_ms": 180
+      },
+      "phase3": {
+        "lcp_ms": 988,
+        "tbt_ms": 19
       }
     },
-    {
-      "profile": "desktop",
-      "route": "/articles",
-      "html_kb": 19.5,
-      "js_kb_transferred": 301.2,
-      "js_requests": 26,
-      "fcp_ms": 96,
-      "lcp_ms": 96,
-      "cls": 0.004,
-      "tbt_ms": 0,
-      "doc_height_px": 3136
-    },
-    {
-      "profile": "desktop",
-      "route": "/videos",
-      "html_kb": 20.4,
-      "js_kb_transferred": 289.7,
-      "js_requests": 25,
-      "fcp_ms": 92,
-      "lcp_ms": 92,
-      "cls": 0.004,
-      "tbt_ms": 0,
-      "doc_height_px": 3177
-    },
-    {
-      "profile": "desktop",
-      "route": "/privacy",
-      "html_kb": 13.1,
-      "js_kb_transferred": 272.5,
-      "js_requests": 23,
-      "fcp_ms": 88,
-      "lcp_ms": 88,
-      "cls": 0.004,
-      "tbt_ms": 0,
-      "doc_height_px": 1900
-    },
-    {
-      "profile": "desktop",
-      "route": "/terms",
-      "html_kb": 13.1,
-      "js_kb_transferred": 272.5,
-      "js_requests": 23,
-      "fcp_ms": 80,
-      "lcp_ms": 80,
-      "cls": 0.004,
-      "tbt_ms": 0,
-      "doc_height_px": 1995
-    },
-    {
-      "profile": "mobile",
-      "route": "/",
-      "html_kb": 17.4,
-      "js_kb_transferred": 215.7,
-      "js_requests": 21,
-      "fcp_ms": 1136,
-      "lcp_ms": 1136,
-      "cls": 0.013,
-      "tbt_ms": 267,
-      "doc_height_px": 7931,
-      "smoothness": {
-        "frames": 600,
-        "p50_ms": 16.7,
-        "p95_ms": 16.8,
-        "max_ms": 16.8,
-        "dropped_pct": 0,
-        "long_animation_frames_over_50ms": 0
+    "/contact": {
+      "phase2": {
+        "lcp_ms": 944,
+        "tbt_ms": 23
+      },
+      "phase3": {
+        "lcp_ms": 984,
+        "tbt_ms": 16
       }
-    },
-    {
-      "profile": "mobile",
-      "route": "/about",
-      "html_kb": 17.1,
-      "js_kb_transferred": 215.7,
-      "js_requests": 21,
-      "fcp_ms": 1020,
-      "lcp_ms": 1020,
-      "cls": 0.003,
-      "tbt_ms": 125,
-      "doc_height_px": 6893,
-      "smoothness": {
-        "frames": 601,
-        "p50_ms": 16.7,
-        "p95_ms": 16.7,
-        "max_ms": 16.8,
-        "dropped_pct": 0,
-        "long_animation_frames_over_50ms": 0
-      }
-    },
-    {
-      "profile": "mobile",
-      "route": "/contact",
-      "html_kb": 14.5,
-      "js_kb_transferred": 215.7,
-      "js_requests": 21,
-      "fcp_ms": 1008,
-      "lcp_ms": 1008,
-      "cls": 0.003,
-      "tbt_ms": 104,
-      "doc_height_px": 4277
-    },
-    {
-      "profile": "mobile",
-      "route": "/projects",
-      "html_kb": 19.9,
-      "js_kb_transferred": 246.6,
-      "js_requests": 24,
-      "fcp_ms": 1016,
-      "lcp_ms": 1016,
-      "cls": 0.002,
-      "tbt_ms": 120,
-      "doc_height_px": 3090
-    },
-    {
-      "profile": "mobile",
-      "route": "/case-studies",
-      "html_kb": 20.7,
-      "js_kb_transferred": 232.9,
-      "js_requests": 23,
-      "fcp_ms": 1000,
-      "lcp_ms": 1000,
-      "cls": 0.013,
-      "tbt_ms": 102,
-      "doc_height_px": 3504,
-      "smoothness": {
-        "frames": 601,
-        "p50_ms": 16.7,
-        "p95_ms": 16.8,
-        "max_ms": 16.8,
-        "dropped_pct": 0,
-        "long_animation_frames_over_50ms": 0
-      }
-    },
-    {
-      "profile": "mobile",
-      "route": "/articles",
-      "html_kb": 19.5,
-      "js_kb_transferred": 244.4,
-      "js_requests": 24,
-      "fcp_ms": 1004,
-      "lcp_ms": 1004,
-      "cls": 0.003,
-      "tbt_ms": 114,
-      "doc_height_px": 3525
-    },
-    {
-      "profile": "mobile",
-      "route": "/videos",
-      "html_kb": 20.4,
-      "js_kb_transferred": 232.9,
-      "js_requests": 23,
-      "fcp_ms": 996,
-      "lcp_ms": 996,
-      "cls": 0.004,
-      "tbt_ms": 93,
-      "doc_height_px": 3531
-    },
-    {
-      "profile": "mobile",
-      "route": "/privacy",
-      "html_kb": 13.1,
-      "js_kb_transferred": 215.7,
-      "js_requests": 21,
-      "fcp_ms": 992,
-      "lcp_ms": 992,
-      "cls": 0.003,
-      "tbt_ms": 68,
-      "doc_height_px": 2502
-    },
-    {
-      "profile": "mobile",
-      "route": "/terms",
-      "html_kb": 13.1,
-      "js_kb_transferred": 215.7,
-      "js_requests": 21,
-      "fcp_ms": 992,
-      "lcp_ms": 992,
-      "cls": 0.003,
-      "tbt_ms": 57,
-      "doc_height_px": 2502
     }
-  ]
+  },
+  "lighthouse_default_mobile_home_3_runs": {
+    "phase2": {
+      "performance": 60,
+      "tbt_ms": 1624,
+      "lcp_ms": 4106,
+      "cls": 0
+    },
+    "phase3": {
+      "performance": 83,
+      "tbt_ms": 154,
+      "lcp_ms": 4236,
+      "cls": 0.012
+    }
+  },
+  "initial_js_gzip_kb": {
+    "/": 179.96,
+    "/about": 179.96,
+    "/projects": 193.7,
+    "/articles": 191.5
+  },
+  "three_chunk_gzip_kb": 138.0,
+  "motion_chunk_gzip_kb": 53.9,
+  "smoothness_harness": {
+    "constrained-about": {
+      "frames": 631,
+      "p95_ms": 16.8,
+      "dropped_percent": 0.79,
+      "long_frames_over_50ms": 5,
+      "cls": 0,
+      "interaction_p75_ms": 64
+    },
+    "constrained-home": {
+      "frames": 636,
+      "p95_ms": 16.8,
+      "dropped_percent": 1.26,
+      "long_frames_over_50ms": 5,
+      "cls": 0,
+      "interaction_p75_ms": 88
+    },
+    "constrained-lab-motion": {
+      "frames": 550,
+      "p95_ms": 16.7,
+      "dropped_percent": 0,
+      "long_frames_over_50ms": 0,
+      "cls": 0,
+      "interaction_p75_ms": 32
+    },
+    "constrained-projects": {
+      "frames": 647,
+      "p95_ms": 16.7,
+      "dropped_percent": 0.62,
+      "long_frames_over_50ms": 1,
+      "cls": 0,
+      "interaction_p75_ms": 40
+    },
+    "desktop-about": {
+      "frames": 606,
+      "p95_ms": 16.8,
+      "dropped_percent": 0.66,
+      "long_frames_over_50ms": 0,
+      "cls": 0,
+      "interaction_p75_ms": 48
+    },
+    "desktop-home": {
+      "frames": 608,
+      "p95_ms": 16.7,
+      "dropped_percent": 1.64,
+      "long_frames_over_50ms": 1,
+      "cls": 0,
+      "interaction_p75_ms": 48
+    },
+    "desktop-lab-motion": {
+      "frames": 532,
+      "p95_ms": 16.8,
+      "dropped_percent": 0,
+      "long_frames_over_50ms": 0,
+      "cls": 0.0006,
+      "interaction_p75_ms": 40
+    },
+    "desktop-projects": {
+      "frames": 607,
+      "p95_ms": 16.8,
+      "dropped_percent": 0.49,
+      "long_frames_over_50ms": 0,
+      "cls": 0,
+      "interaction_p75_ms": 48
+    }
+  },
+  "live_canvas_on_gpu": {
+    "desktop": {
+      "p95_ms": 16.7,
+      "dropped_percent": 0.33,
+      "long_frames": 1
+    },
+    "constrained": {
+      "p95_ms": 16.8,
+      "dropped_percent": 0.66,
+      "long_frames": 1,
+      "max_frame_ms": 117
+    }
+  },
+  "tests": {
+    "pnpm_test": "211 files, 1349 tests (unit and integration, replica-set database)",
+    "unit_final": "204 files, 1316 tests",
+    "browser": "171 passed on the full set, 125 passed on the final re-run; one live-canvas contrast spec flaked under three workers and passed alone"
+  }
 }
