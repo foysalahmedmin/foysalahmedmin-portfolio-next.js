@@ -13,7 +13,7 @@
 
 - **No numbers in cards.** The public site shows no 01, 02, "Answer 01", "Role 1 of 3" or numbered badges in any card, and titles the content numbers itself are shown without the number. This replaces the numbered step and trace-label treatments in sections 3.5 and 4.
 - **Home sections are one head and three layouts**, not sticky text beside a list: full-screen stacked panels (sticky, with the role's art drifting behind), a card row moved by the standard arrow pair, and a centred accordion. Variation comes from the layout, never from a new card style.
-- **The architecture chapter is a flow diagram** (request, gateway, services, AI agent, human review, delivered) with a travelling pulse and current, above three even columns. The open-code chapter is the year of GitHub contributions as dots, and always closes the page.
+- **The architecture chapter is a flow diagram** (request, gateway, services, AI agent, human review, delivered) with a travelling pulse and current, above three even columns. The open-code chapter is the year of GitHub contributions as dots, and is always the last chapter, just above the closing contact band.
 - **Light theme is a tinted page with white cards** (page `mono-100`, surface `#e6e6e6`, cards white with a soft shadow), public surface only.
 - **The poster is static, not Managed Media**, so the hero renders when the database does not; it steps aside (fades out) once the live scene draws, because the camera moves and it does not.
 - **Phase 3 acceptance moved from "met" to "met with one open item":** Home TBT on the constrained profile is 267 ms against 200. Findings section 5.

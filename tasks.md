@@ -1671,6 +1671,8 @@ Updated as work lands, one tick per finished item. The acceptance gate is plan s
 - [x] Docs: `phase-3-findings.md` and results JSON, plan revision 1.6, ADR 0011 Phase 3 outcome (`.env.example` note for `PUBLIC_3D_ENABLED` and the CI browser job are done)
 - [x] Checks on the final build: typecheck, lint, 1,307 unit tests, 151 browser specs on desktop and phone (hero, sections, chrome tone, quality, motion, consistency, contact), production build. Still to do before the push is final: `pnpm test` against a replica-set database and the clean-checkout CI simulation
 - [ ] Open finding for SG9 (not caused by Phase 3): every public page, including the static ones, ships its finished content in a hidden Suspense segment that an inline script moves into place (the `loading.tsx` boundary), so a visitor with JavaScript off sees the skeleton. The hero is complete in the server HTML and the spec asserts that; showing it without JavaScript is a routing decision (drop `loading.tsx` on static routes, or partial prerendering)
+- [x] Owner review round 2026-10-26 (findings 6a): one-column About and contact band, Videos and Case studies in the header, role drawings for projects without a picture, empty evidence sections hidden, About gains sections (seed draft and `scripts/launch-content.ts`), three hero clips in `seed-assets/videos/`
+- [ ] Owner: run `scripts/launch-content.ts` against their own database (publishes the Site nav, the About page and the content; additive and repeatable); upload the three clips in Admin; give the facts for timeline, credentials and testimonials
 - [ ] Close the Home TBT item (per-component hydration profile; split the hero's client shell; defer the shell's non-critical effects to idle)
 - [ ] Owner review, then SG4
 

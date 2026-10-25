@@ -69,9 +69,23 @@ What is known: it is hydration work, not the scene (it is the same at `?tier=1`,
 - **Poster and canvas share one framing** (virtual 16:9 and 9:16 frames cropped like `object-fit: cover`), so the poster can fade out with no jump. The posters are static files in `public/images/hero/`, not Managed Media: the hero must render when the database does not. Say so if the plan's "ingest through ManagedMedia" should win instead.
 - **Hero art kept, renamed by role.** `frontend` and `backend` are kept as `software-developer-frontend` and `-backend`; the Software Developer role absorbed those lanes.
 - **The GitHub calendar comes from a public mirror** read on the server and cached for six hours, because GitHub only serves the calendar to a signed-in client or to a token. If the mirror is down the section is the profile link alone. Replace it with the GraphQL API and a token when the owner wants to; nothing else changes.
-- **The open-code section is always last**, whatever order the page document lists it in.
+- **The open-code section is the last chapter**, whatever order the page document lists it in, just above the contact band that closes every page (the consistency spec requires the band to be last).
 - **The no-JavaScript skeleton is a routing decision**, not a hero one: either drop `loading.tsx` on the static routes (their content is prerendered anyway) or move to partial prerendering. Phase 9.
 - **Software renderers get the poster.** CI and headless runs report SwiftShader, so they exercise the poster path; the canvas path is exercised by `?tier=3` (software) and by the opt-in GPU spec.
+
+## 6a. Owner review round (2026-10-26)
+
+After looking at the build in a browser the owner asked for the following; all of it is in the branch and verified against a throwaway database, none of it has been applied to the owner's own database.
+
+- **About and the home introduction are one column**: a short title, the statement as the lead, the three roles' art as a wide band (a portrait when the Site has one), the three areas, then the process. The picture is no longer a small image beside a long column of text.
+- **The closing contact band is one centred column** (heading, one line, the action and the email). It was a huge heading on one side and a button on the other.
+- **Videos and Case studies are in the header and footer** even when the Site document predates them (`getPublicShellLinks`); a link the owner turned off stays off.
+- **Projects without a picture get the drawing of their role** (system blueprint, application window, automation flow): one 4:3 monochrome frame, so a list reads as a set. The old fallback was coloured.
+- **Evidence sections with nothing in them are left out** of a public page (timeline, credentials, testimonials, FAQ); "no testimonials are published yet" was a note for the owner.
+- **About gains sections**: the role panels, services, the flow diagram, selected work, case studies and the open-code section are allowed on the About route and added to the seed draft and to `scripts/launch-content.ts` (additive, once, existing sections untouched). The GitHub section sits just above the closing contact band, because the consistency spec requires that band to be last.
+- **Three 3-second clips** of the live hero (1280x720 H.264 with posters) are in `seed-assets/videos/`. A video of type `upload` needs a Managed Media file and the media provider is a real service, so they are not in any database; the readme says how to publish them.
+
+What is still the owner's: running `scripts/launch-content.ts` against their own database (it publishes the Site, the About page and the content in one run and is safe to repeat), and the facts the timeline and credentials need (employers, dates, certificates, quotes). Those sections stay out of the page until they exist; nothing was invented.
 
 ## 7. Not done in Phase 3 (by design)
 
