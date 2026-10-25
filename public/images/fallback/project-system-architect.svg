@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="t d">
+  <title id="t">Abstract system blueprint</title>
+  <desc id="d">Connected services, a queue and a database drawn as a monochrome blueprint.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1b1b1b"/><stop offset="1" stop-color="#0c0c0c"/></linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#fff" stroke-opacity=".07"/></pattern>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect width="1200" height="900" fill="url(#grid)"/>
+
+  <g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="3">
+    <path d="M150 450H330M330 450V300H520M330 450V600H520M700 300H820V450H960M700 600H820V450"/>
+    <path d="M960 450H1050" stroke-dasharray="3 10" stroke-linecap="round"/>
+  </g>
+  <g stroke="#fff" stroke-width="3">
+    <rect x="90" y="410" width="120" height="80" rx="14" fill="#262626" stroke-opacity=".7"/>
+    <rect x="520" y="250" width="180" height="100" rx="16" fill="#2c2c2c" stroke-opacity=".8"/>
+    <rect x="520" y="550" width="180" height="100" rx="16" fill="#2c2c2c" stroke-opacity=".8"/>
+    <rect x="960" y="400" width="130" height="100" rx="16" fill="#e9e9e9" stroke-opacity="0"/>
+  </g>
+  <g fill="#fff" fill-opacity=".14" stroke="#fff" stroke-opacity=".5" stroke-width="2">
+    <rect x="545" y="272" width="130" height="14" rx="7"/><rect x="545" y="300" width="90" height="14" rx="7"/>
+    <rect x="545" y="572" width="130" height="14" rx="7"/><rect x="545" y="600" width="90" height="14" rx="7"/>
+  </g>
+  <g stroke="#fff" stroke-opacity=".8" stroke-width="3" fill="#262626">
+    <ellipse cx="330" cy="700" rx="70" ry="22"/><path d="M260 700v62c0 12 31 22 70 22s70-10 70-22v-62" fill="#262626"/>
+  </g>
+  <path d="M330 600V676" stroke="#fff" stroke-opacity=".5" stroke-width="3" stroke-dasharray="3 10" stroke-linecap="round" fill="none"/>
+  <g fill="url(#glow)"><circle cx="330" cy="380" r="26"/><circle cx="760" cy="300" r="26"/><circle cx="820" cy="520" r="26"/></g>
+  <g fill="#fff"><circle cx="330" cy="380" r="7"/><circle cx="760" cy="300" r="7"/><circle cx="820" cy="520" r="7"/><circle cx="1025" cy="450" r="6"/></g>
+  <path d="M985 450l18 18 36-40" fill="none" stroke="#111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

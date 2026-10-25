@@ -44,11 +44,20 @@ const heroFallbackByPillar: Record<PillarKey, FallbackMediaPresentation> = {
   },
 };
 
+// A project without a picture gets the drawing of its role: a system blueprint, an application window or an
+// automation flow. All three share one frame (4:3, monochrome on a grid), so a list of them reads as one set.
+const projectArtByPillar: Record<PillarKey, string> = {
+  system_architect: "/images/fallback/project-system-architect.svg",
+  software_developer: "/images/fallback/project-software-developer.svg",
+  ai_automation: "/images/fallback/project-ai-automation.svg",
+};
+
 export function getFallbackMediaPresentation(
   kind: FallbackMediaKind,
   pillar?: PillarKey
 ): FallbackMediaPresentation {
   if (kind === "hero" && pillar) return heroFallbackByPillar[pillar];
+  if (kind === "project" && pillar) return { src: projectArtByPillar[pillar] };
   return { src: fallbackByKind[kind] };
 }
 
