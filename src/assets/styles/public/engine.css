@@ -1,0 +1,284 @@
+/*
+ * Motion engine styles (docs plan 3.7): smooth scroll, the reticle cursor, the signal rail, pinned
+ * scenes, route transitions and the command palette. In @layer utilities so they outrank Tailwind's
+ * generated utilities. Only transform, opacity and clip-path animate (rule F1). Everything reads the
+ * motion tokens; the one literal is the 420 ms route shutter, mirrored by routeShutterMs in tokens.ts.
+ */
+
+/* ---------- Lenis (smooth scroll, desktop with full motion) ---------- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* ---------- Reticle cursor (M16) ---------- */
+[data-cursor] {
+  position: fixed;
+  opacity: 0;
+  z-index: calc(var(--z-toast) + 10);
+  transition:
+    opacity var(--dur-fast) var(--ease-signal),
+    scale var(--dur-fast) var(--ease-signal);
+  margin: -14px 0 0 -14px;
+  inset: 0 auto auto 0;
+  box-shadow: 0 0 0 1px var(--background);
+  border: 1.5px solid var(--foreground);
+  border-radius: 50%;
+  inline-size: 28px;
+  block-size: 28px;
+  pointer-events: none;
+}
+
+[data-cursor][data-cursor-visible="true"] {
+  opacity: 0.9;
+}
+
+[data-cursor][data-cursor-state="link"] {
+  scale: 1.7;
+}
+
+[data-cursor][data-cursor-state="field"] {
+  opacity: 0;
+}
+
+@media (hover: none), (pointer: coarse), (forced-colors: active) {
+  [data-cursor] {
+    display: none;
+  }
+}
+
+/* ---------- Signal rail (M06) ---------- */
+[data-trace-rail] {
+  display: none;
+  position: fixed;
+  translate: 0 -50%;
+  z-index: var(--z-rail);
+  inset-block-start: 50%;
+  inset-inline-start: 1.25rem;
+}
+
+@media (min-width: 1280px) {
+  [data-trace-rail] {
+    display: block;
+  }
+}
+
+[data-trace-rail] ol {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-trace-rail] a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-block-size: 1.5rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+[data-trace-tick] {
+  display: block;
+  transition:
+    inline-size var(--dur-fast) var(--ease-signal),
+    background-color var(--dur-fast) var(--ease-signal);
+  background: var(--line-4);
+  inline-size: 0.75rem;
+  block-size: 1px;
+}
+
+[data-trace-rail] a[data-active] {
+  color: var(--foreground);
+}
+
+[data-trace-rail] a[data-active] [data-trace-tick] {
+  background: var(--foreground);
+  inline-size: 1.75rem;
+}
+
+/* The label is real text for assistive technology; sighted users get it on hover, focus or when current */
+[data-trace-label] {
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-signal);
+  font-size: var(--step--2);
+  font-family: var(--ff-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+[data-trace-rail]
+  a:is(:hover, :focus-visible, [data-active])
+  [data-trace-label] {
+  opacity: 1;
+}
+
+[data-trace-line] {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  background: var(--line-2);
+  inline-size: 1px;
+  pointer-events: none;
+}
+
+[data-trace-fill] {
+  display: block;
+  transform: scaleY(var(--trace-progress, 0));
+  transform-origin: top;
+  background: var(--foreground);
+  block-size: 100%;
+}
+
+/* Reduced and off motion keep the ticks and the current mark, and drop the moving fill */
+html:not([data-motion="full"]) [data-trace-fill] {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  [data-trace-tick],
+  [data-trace-fill] {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+}
+
+/* ---------- Pinned scenes (3.7.4) ----------
+   Unpinned (reduced, off, touch, no JavaScript) the beats stack as a plain list. Pinned, the track is
+   `--pin-length` screens taller than one screen and the stage sticks to the top for that distance;
+   beats share the stage and cross-fade by position: a beat holds for 70% of its span and changes over
+   30%. Sticky, not a fixed-position pin: see the pinScene behaviour. */
+[data-pin-scene][data-pinned="true"] {
+  block-size: calc(100svh + var(--pin-length, 240) * 1svh);
+}
+
+[data-pin-scene][data-pinned="true"] > [data-pin-stage] {
+  position: sticky;
+  inset-block-start: 0;
+  block-size: 100svh;
+  overflow: clip;
+}
+
+[data-pin-scene][data-pinned="true"] [data-pin-beat] {
+  position: absolute;
+  opacity: clamp(
+    0,
+    calc((0.5 - abs(var(--pin-position, 0) - var(--beat, 0) - 0.5)) / 0.15),
+    1
+  );
+  inset: 0;
+}
+
+/* ---------- Route transitions (M18) and page enter ---------- */
+html[data-vt="running"] [data-chrome] {
+  view-transition-name: site-chrome;
+}
+
+::view-transition-group(site-chrome) {
+  animation-duration: 0s;
+}
+
+html[data-vt="running"]::view-transition-old(root) {
+  animation: none;
+}
+
+html[data-vt="running"]::view-transition-new(root) {
+  animation: route-shutter 420ms var(--ease-snap) both;
+}
+
+@keyframes route-shutter {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  to {
+    clip-path: inset(0);
+  }
+}
+
+/* Without view transitions, a settled page eases in; a skeleton never does */
+html[data-nav="enter"] main[data-archetype]:not([aria-busy="true"]) {
+  animation: page-enter var(--dur-base) var(--ease-signal) both;
+}
+
+@keyframes page-enter {
+  from {
+    transform: translate3d(0, 8px, 0);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ---------- Command palette (M20) ---------- */
+[data-palette-scrim] {
+  animation: palette-fade var(--dur-fast) var(--ease-signal) both;
+}
+
+[data-palette] {
+  animation: palette-in var(--dur-fast) var(--ease-signal) both;
+}
+
+@keyframes palette-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes palette-in {
+  from {
+    transform: translate3d(0, 8px, 0) scale(0.98);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+[data-palette-option][aria-selected="true"] {
+  box-shadow: inset 2px 0 0 var(--foreground);
+  background: var(--surface-raised);
+}
+
+/* ---------- Motion preferences (segmented controls) ---------- */
+[data-motion-preferences] input:checked + span {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+[data-motion-preferences] input:focus-visible + span {
+  outline: 2px solid var(--focus-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus-paper);
+}
