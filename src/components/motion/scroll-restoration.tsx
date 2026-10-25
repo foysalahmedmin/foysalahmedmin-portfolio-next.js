@@ -4,8 +4,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useEngine } from "./engine-provider";
 
-/** How long to wait for the restored page to grow tall enough, in animation frames (about a second). */
-const MAX_WAIT_FRAMES = 60;
+/**
+ * How long to wait for the restored page to grow tall enough, in milliseconds. Wall-clock, not frames:
+ * a page that is re-fetched on a slow or busy machine renders late and frames come slowly, and giving up
+ * early would clamp the position to the short page that is there at that moment.
+ */
+const MAX_WAIT_MS = 4_000;
 
 /**
  * Back and forward return to the exact scroll position (docs plan 3.7.1, "Navigation feel"), with or
@@ -88,10 +92,10 @@ export function ScrollRestoration() {
     // `popping` is cleared when the position is applied, not here, so a repeated effect run (React
     // strict mode in development) restores again instead of finding nothing to do
     let frame = 0;
-    let frames = 0;
+    const deadline = performance.now() + MAX_WAIT_MS;
     const settle = () => {
       const room = document.documentElement.scrollHeight - window.innerHeight;
-      if (room < target - 1 && frames++ < MAX_WAIT_FRAMES) {
+      if (room < target - 1 && performance.now() < deadline) {
         frame = window.requestAnimationFrame(settle);
         return;
       }
