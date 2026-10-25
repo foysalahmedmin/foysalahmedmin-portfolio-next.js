@@ -46,6 +46,17 @@ describe("ArchitectureWorkflowSection", () => {
         name: "System map of the three roles in canonical order",
       })
     ).toBeInTheDocument();
+    // The flow diagram is decoration with a text equivalent; nothing in the section is numbered
+    expect(container.querySelector("svg")).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
+    expect(
+      screen.getByRole("figure", {
+        name: "How a request moves through the system",
+      })
+    ).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/\b0[1-9]\b/);
     expect(
       screen.getByRole("list", {
         name: "AI automation workflow with human review boundaries",

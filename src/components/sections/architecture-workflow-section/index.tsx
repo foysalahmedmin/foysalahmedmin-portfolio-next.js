@@ -1,15 +1,11 @@
 import type { TPublicSiteDto } from "@/app/api/site/site.type";
-import {
-  Description,
-  SectionTitle,
-  Subtitle,
-  Title,
-} from "@/components/ui/section-title";
+import { SectionHead } from "@/components/sections/signal/section-head";
 import { PILLAR_KEYS } from "@/lib/content/pillars";
+import { stripLeadingNumber } from "@/lib/text/strip-number";
 import { cn } from "@/lib/utils";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-
-type ArchitectureWorkflowLayout = "default" | "bento" | "compact" | string;
+import type { CSSProperties } from "react";
 
 const GUARDRAILS = [
   {
@@ -54,14 +50,77 @@ const RELATED_INSIGHT_LINKS = [
   },
 ] as const;
 
+/**
+ * The path a request takes, drawn once. The coordinates, the distance of each stage along the path
+ * (for when it lights up) and the full length are fixed here so the markup needs no measuring script.
+ */
+const FLOW_PATH = "M60 120 H500 V64 H640 V120 H930";
+const FLOW_LENGTH = 982;
+const FLOW_SECONDS = 10;
+const FLOW_STAGES = [
+  { label: "Request", x: 60, y: 120, at: 0 },
+  { label: "Gateway", x: 230, y: 120, at: 170 },
+  { label: "Services", x: 400, y: 120, at: 340 },
+  { label: "AI agent", x: 570, y: 64, at: 566 },
+  { label: "Human review", x: 740, y: 120, at: 792 },
+  { label: "Delivered", x: 930, y: 120, at: 982 },
+] as const;
+
+const FlowDiagram = () => (
+  <figure className="flow" aria-label="How a request moves through the system">
+    <svg
+      className="flow-svg"
+      viewBox="0 0 1000 190"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path className="flow-wire" d={FLOW_PATH} />
+      <path className="flow-current" d={FLOW_PATH} />
+      {FLOW_STAGES.map((stage) => (
+        <g
+          key={stage.label}
+          className="flow-node"
+          style={
+            {
+              "--delay": `${((stage.at / FLOW_LENGTH) * FLOW_SECONDS).toFixed(2)}s`,
+            } as CSSProperties
+          }
+        >
+          <rect
+            x={stage.x - 22}
+            y={stage.y - 22}
+            width="44"
+            height="44"
+            rx="6"
+          />
+          <circle cx={stage.x} cy={stage.y} r="5" />
+          <text x={stage.x} y={stage.y + 46} textAnchor="middle">
+            {stage.label}
+          </text>
+        </g>
+      ))}
+      <g className="flow-pulse" style={{ offsetPath: `path("${FLOW_PATH}")` }}>
+        <circle className="flow-halo" r="16" />
+        <circle className="flow-trail" cx="-16" r="4" />
+        <circle className="flow-trail" cx="-30" r="3" />
+        <circle className="flow-trail" cx="-42" r="2" />
+        <circle className="flow-core" r="6" />
+      </g>
+    </svg>
+    <figcaption className="sr-only">
+      A request enters at the gateway, passes through the services, is handled
+      by the AI agent, waits at a human review gate and is delivered.
+    </figcaption>
+  </figure>
+);
+
 export default function ArchitectureWorkflowSection({
   site,
   heading,
-  layout = "default",
 }: {
   site: TPublicSiteDto;
   heading?: string;
-  layout?: ArchitectureWorkflowLayout;
+  layout?: string;
 }) {
   const pillarsByKey = new Map<
     TPublicSiteDto["pillars"][number]["key"],
@@ -77,184 +136,135 @@ export default function ArchitectureWorkflowSection({
     return pillar ? [pillar] : [];
   });
   const processSteps = site.process.filter((step) => step.enabled).slice(0, 4);
-  const compact = layout === "compact";
 
   return (
     <section
       id="architecture-workflow"
       aria-labelledby="architecture-workflow-heading"
-      className="relative overflow-hidden py-[var(--space-section)]"
+      className="bg-surface-subtle relative overflow-hidden py-[var(--space-section)]"
     >
-      <div className="container">
-        <SectionTitle className="lg:mb-16">
-          <Subtitle>Architecture · AI automation · delivery</Subtitle>
-          <Title id="architecture-workflow-heading">
-            {heading || "Solutions that stay reliable after launch"}
-          </Title>
-          <Description>
-            Every solution is shaped around three connected roles. The same
-            structure guides the work: decisions written down first, automation
-            with human review, and operational guardrails before launch.
-          </Description>
-        </SectionTitle>
+      <div className="container grid gap-10 lg:gap-14">
+        <SectionHead
+          align="center"
+          eyebrow="Architecture, AI automation and delivery"
+          title={heading || "Solutions that stay reliable after launch"}
+          titleId="architecture-workflow-heading"
+          lead="Every solution is shaped around three connected roles. The same structure guides the work: decisions written down first, automation with human review, and operational guardrails before launch."
+        />
 
-        <div
-          className={cn(
-            "grid gap-5",
-            compact
-              ? "lg:grid-cols-3"
-              : "lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]"
-          )}
-        >
+        <FlowDiagram />
+
+        <div className="grid gap-4 lg:grid-cols-3">
           <section
-            className="border-border bg-card relative overflow-hidden rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-sm)] lg:p-8"
+            className="flow-card"
             aria-labelledby="architecture-system-map-heading"
           >
-            <div
-              className="bg-primary/10 absolute -top-24 -right-20 size-72 rounded-full blur-[110px]"
-              aria-hidden="true"
-            />
-            <div className="relative">
-              <p className="type-label text-primary">System map</p>
-              <h3
-                id="architecture-system-map-heading"
-                className="mt-4 text-2xl leading-tight font-black"
-              >
-                Three roles feeding one delivery loop.
-              </h3>
-              <p className="text-muted-foreground mt-4 max-w-2xl text-sm leading-7">
-                Architecture, software development, and AI automation stay
-                connected so performance, data, security, and user experience
-                are not solved in separate silos.
-              </p>
-
-              <ol
-                className={cn(
-                  "mt-8 grid gap-3",
-                  pillars.length % 2 === 0 && "sm:grid-cols-2"
-                )}
-                aria-label="System map of the three roles in canonical order"
-              >
-                {pillars.map((pillar, index) => (
-                  <li
-                    key={pillar.key}
-                    className="border-border bg-background/70 rounded-xl border p-4"
-                  >
-                    <span className="text-muted-foreground text-xs font-black tracking-[0.16em] uppercase">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <h4 className="mt-2 text-sm font-black">{pillar.label}</h4>
-                    <p className="text-muted-foreground mt-2 line-clamp-3 text-xs leading-5">
-                      {pillar.summary ||
-                        pillar.seo_summary ||
-                        "Capability copy is managed through the Site profile."}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            </div>
+            <h3 id="architecture-system-map-heading" className="t-eyebrow">
+              System map
+            </h3>
+            <ul
+              className="grid gap-4"
+              role="list"
+              aria-label="System map of the three roles in canonical order"
+            >
+              {pillars.map((pillar) => (
+                <li key={pillar.key}>
+                  <h4 className="font-semibold">{pillar.label}</h4>
+                  <p className="text-fg-secondary mt-1 line-clamp-3 text-sm leading-6">
+                    {pillar.summary ||
+                      pillar.seo_summary ||
+                      "Capability copy is managed through the Site profile."}
+                  </p>
+                </li>
+              ))}
+            </ul>
           </section>
 
-          <div className="grid gap-5">
-            <section
-              className="border-border bg-surface-raised rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-xs)]"
-              aria-labelledby="architecture-ai-lane-heading"
+          <section
+            className="flow-card"
+            aria-labelledby="architecture-ai-lane-heading"
+          >
+            <h3 id="architecture-ai-lane-heading" className="t-eyebrow">
+              AI automation lane
+            </h3>
+            <p className="font-semibold">
+              Helpful automation stays inside a reviewable system.
+            </p>
+            <ul
+              className="grid gap-3"
+              role="list"
+              aria-label="AI automation workflow with human review boundaries"
             >
-              <p className="type-label text-primary">AI automation lane</p>
-              <h3
-                id="architecture-ai-lane-heading"
-                className="mt-4 text-xl leading-tight font-black"
-              >
-                Helpful automation stays inside a reviewable system.
-              </h3>
-              <ol
-                className="mt-6 space-y-3"
-                aria-label="AI automation workflow with human review boundaries"
-              >
-                {AUTOMATION_STEPS.map((step, index) => (
-                  <li key={step} className="flex gap-3 text-sm leading-6">
-                    <span className="bg-primary text-primary-foreground mt-0.5 inline-grid size-6 shrink-0 place-items-center rounded-full text-[0.65rem] font-black">
-                      {index + 1}
-                    </span>
-                    <span className="text-muted-foreground">{step}</span>
-                  </li>
-                ))}
-              </ol>
-            </section>
+              {AUTOMATION_STEPS.map((step) => (
+                <li key={step} className="flex gap-3 text-sm leading-6">
+                  <ArrowRight
+                    className="text-fg-secondary mt-1 size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-fg-secondary">{step}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-            <section
-              className="border-border bg-background rounded-[var(--radius-xl-token)] border p-6 shadow-[var(--shadow-xs)]"
-              aria-labelledby="architecture-guardrails-heading"
-            >
-              <p className="type-label text-primary">Delivery guardrails</p>
-              <div id="architecture-guardrails-heading" className="sr-only">
-                Delivery guardrails
-              </div>
-              <div className="mt-5 grid gap-3" role="list">
-                {GUARDRAILS.map((guardrail) => (
-                  <article
-                    key={guardrail.key}
-                    className="border-border rounded-xl border p-4"
-                    role="listitem"
-                  >
-                    <h3 className="text-sm font-black">{guardrail.title}</h3>
-                    <p className="text-muted-foreground mt-2 text-xs leading-5">
-                      {guardrail.copy}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          </div>
+          <section
+            className="flow-card"
+            aria-labelledby="architecture-guardrails-heading"
+          >
+            <h3 id="architecture-guardrails-heading" className="t-eyebrow">
+              Delivery guardrails
+            </h3>
+            <ul className="grid gap-4" role="list">
+              {GUARDRAILS.map((guardrail) => (
+                <li key={guardrail.key}>
+                  <h4 className="font-semibold">{guardrail.title}</h4>
+                  <p className="text-fg-secondary mt-1 text-sm leading-6">
+                    {guardrail.copy}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
 
         {processSteps.length > 0 && (
-          <div className="border-border bg-card/70 mt-5 rounded-[var(--radius-xl-token)] border p-5 shadow-[var(--shadow-xs)]">
-            <p className="type-label text-muted-foreground">
-              Current delivery sequence
-            </p>
-            <ol className="mt-4 grid gap-3 md:grid-cols-4">
+          <div className="flow-sequence">
+            <p className="t-eyebrow">Current delivery sequence</p>
+            <ul role="list">
               {processSteps.map((step, index) => (
-                <li key={step.key} className="text-sm leading-6">
-                  <span className="text-primary text-xs font-black">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <p className="mt-1 font-bold">{step.title}</p>
+                <li key={step.key}>
+                  {index > 0 && (
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  )}
+                  <span>{stripLeadingNumber(step.title)}</span>
                 </li>
               ))}
-            </ol>
+            </ul>
           </div>
         )}
 
         <nav
-          className="border-border mt-5 rounded-[var(--radius-xl-token)] border p-5"
+          className="grid gap-4 md:grid-cols-3"
           aria-label="Related technical insight paths"
         >
-          <p className="type-label text-muted-foreground">
-            Continue into related insights
-          </p>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            {RELATED_INSIGHT_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="border-border bg-card hover:border-primary focus-visible:ring-primary group rounded-xl border p-4 focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <span className="flex items-center justify-between gap-3 text-sm font-black">
-                  {link.label}
-                  <span
-                    className="text-primary transition-transform group-hover:translate-x-1"
-                    aria-hidden
-                  >
-                    →
-                  </span>
-                </span>
-                <span className="text-muted-foreground mt-2 block text-xs leading-5">
-                  {link.summary}
-                </span>
-              </Link>
-            ))}
-          </div>
+          {RELATED_INSIGHT_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn("flow-link group")}
+            >
+              <span className="flex items-center justify-between gap-3 font-semibold">
+                {link.label}
+                <ArrowUpRight
+                  className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  aria-hidden="true"
+                />
+              </span>
+              <span className="text-fg-secondary mt-1 block text-sm leading-6">
+                {link.summary}
+              </span>
+            </Link>
+          ))}
         </nav>
       </div>
     </section>
