@@ -1,5 +1,5 @@
 import type { TPublicSiteDto } from "@/app/api/site/site.type";
-import MotionControl from "@/components/ui/motion-control";
+import MotionPreferences from "@/components/ui/motion-preferences";
 import {
   getPrimaryPublicCta,
   getPublicShellLinks,
@@ -138,7 +138,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
               "Custom-designed and engineered portfolio."}
           </p>
           <div className="flex flex-wrap items-center gap-4">
-            <MotionControl />
+            <MotionPreferences />
             {legal.map((link) => (
               <FooterLink
                 key={link.key}

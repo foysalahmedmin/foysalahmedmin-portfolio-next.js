@@ -10,9 +10,18 @@ import {
   getPublicShellLinks,
   type TPublicShellLink,
 } from "@/lib/site/public-shell";
+import { openPalette } from "@/lib/palette/shortcut";
 import { cn } from "@/lib/utils";
 import { toggleTheme, useSetting } from "@/state/setting-store";
-import { ArrowUpRight, Menu, Monitor, Moon, Sun, X } from "lucide-react";
+import {
+  ArrowUpRight,
+  Menu,
+  Monitor,
+  Moon,
+  Search,
+  Sun,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -294,6 +303,17 @@ const Header = ({ site, className }: HeaderProps) => {
                 )}
               </PublicLink>
             )}
+            <Button
+              type="button"
+              variant="ghost"
+              shape="icon"
+              onClick={openPalette}
+              aria-label="Open command palette"
+              aria-haspopup="dialog"
+              aria-keyshortcuts="Control+K Meta+K"
+            >
+              <Search className="size-5" aria-hidden="true" />
+            </Button>
             <ThemeToggle />
             <Button
               type="button"
