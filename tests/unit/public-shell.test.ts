@@ -77,9 +77,74 @@ describe("public shell projection", () => {
         legal: [],
       },
     };
-    expect(getPublicShellLinks(site, "header")).toEqual([
-      { key: "safe", label: "Safe", href: "/safe", external: false },
+    expect(
+      getPublicShellLinks(site, "header").map((link) => link.href)
+    ).toEqual(["/safe", "/case-studies", "/videos"]);
+  });
+
+  it("adds the library pages beside the pages they belong to, unless the Site document names them", () => {
+    const site = createEmergencyPublicSite();
+    const link = (
+      key: string,
+      label: string,
+      href: string,
+      enabled = true
+    ) => ({
+      key,
+      label,
+      kind: "internal" as const,
+      href,
+      enabled,
+    });
+    const withNavigation = (header: ReturnType<typeof link>[]) => ({
+      ...site,
+      content_source: "published" as const,
+      navigation: { header, footer: [], legal: [] },
+    });
+
+    const hrefs = (header: ReturnType<typeof link>[]) =>
+      getPublicShellLinks(withNavigation(header), "header").map((l) => l.href);
+
+    // A document from before the libraries existed
+    expect(
+      hrefs([
+        link("home", "Home", "/"),
+        link("projects", "Projects", "/projects"),
+        link("articles", "Articles", "/articles"),
+        link("contact", "Contact", "/contact"),
+      ])
+    ).toEqual([
+      "/",
+      "/projects",
+      "/case-studies",
+      "/articles",
+      "/videos",
+      "/contact",
     ]);
+
+    // A link the owner turned off stays off, and one that is already there is not repeated
+    expect(
+      hrefs([
+        link("projects", "Projects", "/projects"),
+        link("videos", "Videos", "/videos", false),
+        link("cs", "Case studies", "/case-studies"),
+      ])
+    ).toEqual(["/projects", "/case-studies"]);
+
+    // Legal links never get them
+    expect(
+      getPublicShellLinks(
+        {
+          ...withNavigation([]),
+          navigation: {
+            header: [],
+            footer: [],
+            legal: [link("p", "Privacy", "/privacy")],
+          },
+        },
+        "legal"
+      ).map((l) => l.href)
+    ).toEqual(["/privacy"]);
   });
 
   it("allows only credential-free public HTTPS social URLs", () => {

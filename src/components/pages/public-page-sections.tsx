@@ -77,13 +77,38 @@ const asSkillGroups = (
       : []
   );
 
-/** The open-code section always closes the page, whatever order the page document lists it in. */
+/**
+ * The open-code section is the last chapter of a page, whatever order the page document lists it in. The
+ * contact band still closes the page (every page ends on it before the footer), so it sits just above it.
+ */
 export const withGithubLast = (
   sections: TResolvedPublishedPagePayload["sections"]
-) => [
-  ...sections.filter((section) => section.kind !== "github-profile"),
-  ...sections.filter((section) => section.kind === "github-profile"),
-];
+) => {
+  const github = sections.filter(
+    (section) => section.kind === "github-profile"
+  );
+  const rest = sections.filter((section) => section.kind !== "github-profile");
+  if (github.length === 0) return rest;
+  const closing = rest.reduce(
+    (found, section, index) => (section.kind === "contact-cta" ? index : found),
+    -1
+  );
+  return closing === -1
+    ? [...rest, ...github]
+    : [...rest.slice(0, closing), ...github, ...rest.slice(closing)];
+};
+
+/**
+ * Evidence sections with nothing to show are left out of a public page: "no testimonials are published
+ * yet" is a note for the owner (the admin has it), not something a visitor should read. A section whose
+ * data could not be read keeps its notice.
+ */
+const EMPTY_HIDDEN_KINDS: ReadonlySet<TPageSectionKind> = new Set([
+  "timeline",
+  "credential-collection",
+  "testimonial-collection",
+  "faq-list",
+]);
 
 export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
   <>
@@ -91,6 +116,15 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
       const unavailable = section.health.status === "unavailable";
       let content: ReactNode = null;
       const override = sectionOverrides?.[section.kind];
+
+      if (
+        !override &&
+        !unavailable &&
+        EMPTY_HIDDEN_KINDS.has(section.kind) &&
+        section.items.length === 0
+      ) {
+        return null;
+      }
 
       if (override) {
         content = override({ payload, section });

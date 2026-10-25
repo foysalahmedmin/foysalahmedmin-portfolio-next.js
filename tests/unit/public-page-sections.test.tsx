@@ -28,7 +28,11 @@ vi.mock("@/components/(common)/home-page/projects-section", () => ({
       project_by_pillar?: { software_developer?: { url?: string } };
     };
   }) => (
-    <section data-project-fallback={fallbacks?.project_by_pillar?.software_developer?.url}>
+    <section
+      data-project-fallback={
+        fallbacks?.project_by_pillar?.software_developer?.url
+      }
+    >
       projects:{projects.map(({ name }) => name).join(",")}
     </section>
   ),
@@ -44,7 +48,9 @@ vi.mock("@/components/(common)/home-page/articles-section", () => ({
     };
   }) => (
     <section
-      data-article-fallback={fallbacks?.article_by_pillar?.system_architect?.url}
+      data-article-fallback={
+        fallbacks?.article_by_pillar?.system_architect?.url
+      }
     >
       articles:{articles.map(({ name }) => name).join(",")}
     </section>
@@ -100,6 +106,46 @@ const section = (
 describe("PublicPageSections", () => {
   afterEach(cleanup);
 
+  it("leaves out evidence sections that have nothing to show, but keeps one whose data could not be read", () => {
+    const site = createEmergencyPublicSite();
+    const payload = {
+      page: {
+        route_key: "about",
+        route_path: "/about",
+        locale: "en",
+        schema_version: 1,
+        contract_version: 1,
+        published_revision: 1,
+        published_at: "2026-07-15T00:00:00.000Z",
+        seo: { noindex: false },
+      },
+      site,
+      sections: [
+        section("timeline", "timeline"),
+        section("credentials", "credential-collection"),
+        section("trust", "testimonial-collection"),
+        section("faqs", "faq-list"),
+        {
+          ...section("broken", "timeline"),
+          health: { status: "unavailable" },
+        },
+      ],
+      health: {
+        status: "healthy",
+        total_sections: 5,
+        healthy_sections: 5,
+        degraded_sections: 0,
+        resolved_records: 0,
+        omitted_records: 0,
+      },
+    } as unknown as TResolvedPublishedPagePayload;
+
+    const { container } = render(<PublicPageSections payload={payload} />);
+    // The three empty ones render nothing; the unreadable one keeps its notice
+    expect(container.querySelectorAll("section")).toHaveLength(1);
+    expect(container.textContent).toBe("timeline");
+  });
+
   it("renders primary content in the exact published Page order", () => {
     const site = createEmergencyPublicSite();
     site.fallbacks.project_by_pillar.software_developer = {
@@ -131,7 +177,7 @@ describe("PublicPageSections", () => {
         section("articles", "article-collection", [
           { _id: "article-1", name: "First insight" },
         ]),
-        { ...section("faqs", "faq-list"), layout: "list" },
+        { ...section("faqs", "faq-list", [{ _id: "faq-1" }]), layout: "list" },
         { ...section("process", "process-steps"), layout: "numbered" },
         section("trust", "testimonial-collection"),
         section("contact", "contact-cta"),
@@ -148,7 +194,7 @@ describe("PublicPageSections", () => {
 
     const { container } = render(<PublicPageSections payload={payload} />);
     expect(container.textContent).toBe(
-      "projects:First case studyheroarchitecturearticles:First insightfaqsprocesstestimonialscontact"
+      "projects:First case studyheroarchitecturearticles:First insightfaqsprocesscontact"
     );
     expect(container.querySelector("[data-project-fallback]")).toHaveAttribute(
       "data-project-fallback",
