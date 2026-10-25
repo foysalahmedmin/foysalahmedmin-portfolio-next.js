@@ -156,9 +156,11 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
           </div>
         </div>
       </div>
-      <div className="footer-wordmark container" aria-hidden="true">
-        <span>{wordmark}</span>
-      </div>
+      <div
+        className="footer-wordmark container"
+        aria-hidden="true"
+        data-wordmark={wordmark}
+      />
     </footer>
   );
 };
