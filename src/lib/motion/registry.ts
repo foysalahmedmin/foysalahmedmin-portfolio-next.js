@@ -40,6 +40,11 @@ export type MotionEffect = Readonly<{
   built: boolean;
   /** Repo-relative file that implements it, once built. */
   implementation?: string;
+  /**
+   * Where it can be seen when it lives in the real shell or hero rather than in the Motion lab
+   * (a route, for example "/"). Built effects need either this or a lab demo.
+   */
+  demoRoute?: string;
 }>;
 
 const tiers = (t3: TierSupport, t2: TierSupport, t1: TierSupport) => ({
@@ -65,7 +70,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, C),
     reduced: "Instant, final grid",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/assets/styles/public/hero.css",
+    demoRoute: "/",
   },
   {
     id: "M02",
@@ -94,7 +101,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Poster only",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/three/hero-canvas.tsx",
+    demoRoute: "/",
   },
   {
     id: "M04",
@@ -108,7 +117,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Fixed still camera",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/three/rig.ts",
+    demoRoute: "/",
   },
   {
     id: "M05",
@@ -122,7 +133,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, N, C),
     reduced: "None",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/three/hero-canvas.tsx",
+    demoRoute: "/",
   },
   {
     id: "M06",
@@ -266,7 +279,7 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     eases: [],
     tiers: tiers(R, N, N),
     reduced: "Static edge highlight",
-    phase: 3,
+    phase: 5,
     built: false,
   },
   {
@@ -354,7 +367,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Instant swap",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/lib/motion/theme-flip.ts",
+    demoRoute: "/",
   },
   {
     id: "M22",
@@ -368,7 +383,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Static wordmark",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/assets/styles/public/marks.css",
+    demoRoute: "/",
   },
   {
     id: "M23",
@@ -382,7 +399,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, N, N),
     reduced: "None",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/three/hero-canvas.tsx",
+    demoRoute: "/",
   },
   {
     id: "M24",
@@ -439,7 +458,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, N, N),
     reduced: "Colour-free state swap, no roll",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/ui/roll-label.tsx",
+    demoRoute: "/",
   },
   {
     id: "M28",
@@ -453,7 +474,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, R),
     reduced: "Instant",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/partials/Header/use-header-chrome.ts",
+    demoRoute: "/",
   },
   {
     id: "M29",
@@ -552,7 +575,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, R),
     reduced: "Header always visible",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/partials/Header/use-header-chrome.ts",
+    demoRoute: "/",
   },
   {
     id: "M36",
@@ -566,7 +591,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, R),
     reduced: "Roles stacked as a plain list",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/sections/site-hero-section/index.tsx",
+    demoRoute: "/",
   },
   {
     id: "M37",
@@ -580,7 +607,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Poster still",
     phase: 3,
-    built: false,
+    built: true,
+    implementation: "src/components/three/topology-scene.ts",
+    demoRoute: "/",
   },
   {
     id: "M38",

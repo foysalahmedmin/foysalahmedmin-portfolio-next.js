@@ -10,7 +10,7 @@ export function isMotionLabEnabled(
   return env.NODE_ENV !== "production" || env.MOTION_LAB === "1";
 }
 
-/** Effects that have a live demo in the sandbox. `tests/unit/motion-registry.test.ts` keeps this in step with the registry. */
+/** Effects that have a live demo in the sandbox (those built into the real hero and shell are seen on `/` instead; see `demoRoute` in the registry). `tests/unit/motion-registry.test.ts` keeps this in step with the registry. */
 export const LAB_DEMO_IDS = [
   "M02",
   "M06",
