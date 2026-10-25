@@ -82,6 +82,12 @@ What removed about 326 KB (measured one change at a time; the rest of the 350 KB
 
 Full evidence: [`docs/baseline/phase-2-findings.md`](../baseline/phase-2-findings.md).
 
+## Phase 3 outcome (2026-10-26)
+
+Full evidence: [`docs/baseline/phase-3-findings.md`](../baseline/phase-3-findings.md).
+
+The shell, the three-role hero and the vanilla Three.js scene are built. The scene is one dynamic import (138.0 KB gzip, budget 170), created only after the engine settles and only when the tier, the GPU probe and the two kill switches (`PUBLIC_3D_ENABLED`, site motion `off`) allow it; it pauses off screen, is released after four seconds, and falls back to the static poster, which is rendered from the same scene. On a real GPU the live hero holds p95 16.7 ms on desktop and 16.8 ms on the phone profile. Initial JS is 179.7 KB (budget 180), Home LCP 1,136 ms and CLS 0.013 on the constrained profile. **Open:** Home TBT is 267 ms against 200 ms (Phase 2: 165); the cause is one hydration task, not the scene, and the next step is a per-component profile. The browser caught a hero scene with no height on a real GPU, a context-lost handler that blocked the scene from coming back, and a poster that stayed under the live canvas; all three are fixed and now asserted by `hero.spec.ts`.
+
 ## Verification
 
 - Bundle boundary test and build-output scan (admin and `components/ui` free of the engine libraries).
