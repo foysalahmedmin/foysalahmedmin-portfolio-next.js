@@ -126,15 +126,34 @@ describe("GithubProfileSection with a calendar", () => {
 });
 
 describe("page order", () => {
-  it("always closes the page with the open-code section, keeping the rest in order", () => {
-    const sections = ["a", "github-profile", "b", "c"].map((kind) => ({
-      kind,
-    })) as unknown as Parameters<typeof withGithubLast>[0];
-    expect(withGithubLast(sections).map((section) => section.kind)).toEqual([
+  const order = (kinds: string[]) =>
+    withGithubLast(
+      kinds.map((kind) => ({ kind })) as unknown as Parameters<
+        typeof withGithubLast
+      >[0]
+    ).map((section) => section.kind);
+
+  it("puts the open-code section last, just above the contact band that closes every page", () => {
+    expect(order(["a", "github-profile", "b", "contact-cta", "c"])).toEqual([
       "a",
       "b",
+      "github-profile",
+      "contact-cta",
       "c",
+    ]);
+    expect(order(["a", "contact-cta", "github-profile"])).toEqual([
+      "a",
+      "github-profile",
+      "contact-cta",
+    ]);
+  });
+
+  it("puts it at the end when the page has no contact band, and leaves pages without it alone", () => {
+    expect(order(["github-profile", "a", "b"])).toEqual([
+      "a",
+      "b",
       "github-profile",
     ]);
+    expect(order(["a", "b"])).toEqual(["a", "b"]);
   });
 });

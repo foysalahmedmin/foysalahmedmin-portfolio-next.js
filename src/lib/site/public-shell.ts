@@ -92,16 +92,60 @@ const uniqueLinks = (links: readonly TPublicShellLink[]) => {
   });
 };
 
+/**
+ * The library pages the site always has. A Site document written before they existed does not list them,
+ * which left Videos and Case studies unreachable from the header. They are added after the page they
+ * belong beside, unless the document already names them (a link the owner turned off stays off).
+ */
+const CORE_MODULE_LINKS = [
+  {
+    key: "case-studies",
+    label: "Case studies",
+    href: "/case-studies",
+    after: "/projects",
+  },
+  { key: "videos", label: "Videos", href: "/videos", after: "/articles" },
+] as const;
+
+const withCoreModuleLinks = (
+  links: readonly TPublicShellLink[],
+  declared: readonly { key: string; href?: string }[]
+): readonly TPublicShellLink[] => {
+  const next = [...links];
+  for (const core of CORE_MODULE_LINKS) {
+    if (
+      declared.some(
+        (entry) => entry.key === core.key || entry.href === core.href
+      )
+    ) {
+      continue;
+    }
+    const index = next.findIndex((link) => link.href === core.after);
+    next.splice(index === -1 ? next.length : index + 1, 0, {
+      key: core.key,
+      label: core.label,
+      href: core.href,
+      external: false,
+    });
+  }
+  return next;
+};
+
 export const getPublicShellLinks = (
   site: TPublicSiteDto,
   location: "header" | "footer" | "legal"
 ): readonly TPublicShellLink[] => {
+  const declared = site.navigation[location];
   const links = uniqueLinks(
-    site.navigation[location]
+    declared
       .map((link) => resolvePublicSiteLink(link, site))
       .filter((link): link is TPublicShellLink => Boolean(link))
   );
-  if (links.length || site.content_source === "published") return links;
+  if (links.length || site.content_source === "published") {
+    return location === "legal" || links.length === 0
+      ? links
+      : withCoreModuleLinks(links, declared);
+  }
   if (location === "legal") {
     return [
       { key: "privacy", label: "Privacy", href: "/privacy", external: false },
