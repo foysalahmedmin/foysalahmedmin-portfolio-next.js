@@ -9,6 +9,15 @@
 | **Decision** | Needs ADR 0011 (amends ADR 0002 dependencies and ADR 0009 budgets). Drafted in Appendix C, not yet accepted.                                             |
 | **Handoff**  | On approval, each phase in section 7 gets its own task-level implementation plan (writing-plans format) before any code.                                 |
 
+### Revision 1.6: what Phase 3 changed in the plan (2026-10-26)
+
+- **No numbers in cards.** The public site shows no 01, 02, "Answer 01", "Role 1 of 3" or numbered badges in any card, and titles the content numbers itself are shown without the number. This replaces the numbered step and trace-label treatments in sections 3.5 and 4.
+- **Home sections are one head and three layouts**, not sticky text beside a list: full-screen stacked panels (sticky, with the role's art drifting behind), a card row moved by the standard arrow pair, and a centred accordion. Variation comes from the layout, never from a new card style.
+- **The architecture chapter is a flow diagram** (request, gateway, services, AI agent, human review, delivered) with a travelling pulse and current, above three even columns. The open-code chapter is the year of GitHub contributions as dots, and always closes the page.
+- **Light theme is a tinted page with white cards** (page `mono-100`, surface `#e6e6e6`, cards white with a soft shadow), public surface only.
+- **The poster is static, not Managed Media**, so the hero renders when the database does not; it steps aside (fades out) once the live scene draws, because the camera moves and it does not.
+- **Phase 3 acceptance moved from "met" to "met with one open item":** Home TBT on the constrained profile is 267 ms against 200. Findings section 5.
+
 ### Revision 1.5: what Phase 2 changed in the plan (2026-10-25)
 
 Built Phase 2 (motion engine, interaction primitives, smoothness harness). Changes the build forced on the text of this plan; the evidence is in [`docs/baseline/phase-2-findings.md`](../baseline/phase-2-findings.md) and the engine is documented in [`docs/design-system/motion.md`](../design-system/motion.md).

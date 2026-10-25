@@ -1,0 +1,271 @@
+{
+  "measured_at": "2026-10-25T19:59:21.910Z",
+  "base": "http://127.0.0.1:3107",
+  "node": "v24.15.0",
+  "results": [
+    {
+      "profile": "desktop",
+      "route": "/",
+      "html_kb": 17.4,
+      "js_kb_transferred": 272.5,
+      "js_requests": 23,
+      "fcp_ms": 124,
+      "lcp_ms": 124,
+      "cls": 0.026,
+      "tbt_ms": 0,
+      "doc_height_px": 8008,
+      "smoothness": {
+        "frames": 599,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 33.4,
+        "dropped_pct": 0.2,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/about",
+      "html_kb": 17.1,
+      "js_kb_transferred": 272.5,
+      "js_requests": 23,
+      "fcp_ms": 104,
+      "lcp_ms": 104,
+      "cls": 0.004,
+      "tbt_ms": 0,
+      "doc_height_px": 5784,
+      "smoothness": {
+        "frames": 600,
+        "p50_ms": 16.7,
+        "p95_ms": 16.8,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/contact",
+      "html_kb": 14.5,
+      "js_kb_transferred": 272.5,
+      "js_requests": 23,
+      "fcp_ms": 116,
+      "lcp_ms": 116,
+      "cls": 0.004,
+      "tbt_ms": 0,
+      "doc_height_px": 3206
+    },
+    {
+      "profile": "desktop",
+      "route": "/projects",
+      "html_kb": 19.9,
+      "js_kb_transferred": 303.3,
+      "js_requests": 26,
+      "fcp_ms": 160,
+      "lcp_ms": 160,
+      "cls": 0.004,
+      "tbt_ms": 0,
+      "doc_height_px": 3007
+    },
+    {
+      "profile": "desktop",
+      "route": "/case-studies",
+      "html_kb": 20.7,
+      "js_kb_transferred": 289.7,
+      "js_requests": 25,
+      "fcp_ms": 96,
+      "lcp_ms": 96,
+      "cls": 0.004,
+      "tbt_ms": 0,
+      "doc_height_px": 3087,
+      "smoothness": {
+        "frames": 600,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/articles",
+      "html_kb": 19.5,
+      "js_kb_transferred": 301.2,
+      "js_requests": 26,
+      "fcp_ms": 96,
+      "lcp_ms": 96,
+      "cls": 0.004,
+      "tbt_ms": 0,
+      "doc_height_px": 3136
+    },
+    {
+      "profile": "desktop",
+      "route": "/videos",
+      "html_kb": 20.4,
+      "js_kb_transferred": 289.7,
+      "js_requests": 25,
+      "fcp_ms": 92,
+      "lcp_ms": 92,
+      "cls": 0.004,
+      "tbt_ms": 0,
+      "doc_height_px": 3177
+    },
+    {
+      "profile": "desktop",
+      "route": "/privacy",
+      "html_kb": 13.1,
+      "js_kb_transferred": 272.5,
+      "js_requests": 23,
+      "fcp_ms": 88,
+      "lcp_ms": 88,
+      "cls": 0.004,
+      "tbt_ms": 0,
+      "doc_height_px": 1900
+    },
+    {
+      "profile": "desktop",
+      "route": "/terms",
+      "html_kb": 13.1,
+      "js_kb_transferred": 272.5,
+      "js_requests": 23,
+      "fcp_ms": 80,
+      "lcp_ms": 80,
+      "cls": 0.004,
+      "tbt_ms": 0,
+      "doc_height_px": 1995
+    },
+    {
+      "profile": "mobile",
+      "route": "/",
+      "html_kb": 17.4,
+      "js_kb_transferred": 215.7,
+      "js_requests": 21,
+      "fcp_ms": 1136,
+      "lcp_ms": 1136,
+      "cls": 0.013,
+      "tbt_ms": 267,
+      "doc_height_px": 7931,
+      "smoothness": {
+        "frames": 600,
+        "p50_ms": 16.7,
+        "p95_ms": 16.8,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/about",
+      "html_kb": 17.1,
+      "js_kb_transferred": 215.7,
+      "js_requests": 21,
+      "fcp_ms": 1020,
+      "lcp_ms": 1020,
+      "cls": 0.003,
+      "tbt_ms": 125,
+      "doc_height_px": 6893,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.7,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/contact",
+      "html_kb": 14.5,
+      "js_kb_transferred": 215.7,
+      "js_requests": 21,
+      "fcp_ms": 1008,
+      "lcp_ms": 1008,
+      "cls": 0.003,
+      "tbt_ms": 104,
+      "doc_height_px": 4277
+    },
+    {
+      "profile": "mobile",
+      "route": "/projects",
+      "html_kb": 19.9,
+      "js_kb_transferred": 246.6,
+      "js_requests": 24,
+      "fcp_ms": 1016,
+      "lcp_ms": 1016,
+      "cls": 0.002,
+      "tbt_ms": 120,
+      "doc_height_px": 3090
+    },
+    {
+      "profile": "mobile",
+      "route": "/case-studies",
+      "html_kb": 20.7,
+      "js_kb_transferred": 232.9,
+      "js_requests": 23,
+      "fcp_ms": 1000,
+      "lcp_ms": 1000,
+      "cls": 0.013,
+      "tbt_ms": 102,
+      "doc_height_px": 3504,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 16.8,
+        "max_ms": 16.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/articles",
+      "html_kb": 19.5,
+      "js_kb_transferred": 244.4,
+      "js_requests": 24,
+      "fcp_ms": 1004,
+      "lcp_ms": 1004,
+      "cls": 0.003,
+      "tbt_ms": 114,
+      "doc_height_px": 3525
+    },
+    {
+      "profile": "mobile",
+      "route": "/videos",
+      "html_kb": 20.4,
+      "js_kb_transferred": 232.9,
+      "js_requests": 23,
+      "fcp_ms": 996,
+      "lcp_ms": 996,
+      "cls": 0.004,
+      "tbt_ms": 93,
+      "doc_height_px": 3531
+    },
+    {
+      "profile": "mobile",
+      "route": "/privacy",
+      "html_kb": 13.1,
+      "js_kb_transferred": 215.7,
+      "js_requests": 21,
+      "fcp_ms": 992,
+      "lcp_ms": 992,
+      "cls": 0.003,
+      "tbt_ms": 68,
+      "doc_height_px": 2502
+    },
+    {
+      "profile": "mobile",
+      "route": "/terms",
+      "html_kb": 13.1,
+      "js_kb_transferred": 215.7,
+      "js_requests": 21,
+      "fcp_ms": 992,
+      "lcp_ms": 992,
+      "cls": 0.003,
+      "tbt_ms": 57,
+      "doc_height_px": 2502
+    }
+  ]
+}
