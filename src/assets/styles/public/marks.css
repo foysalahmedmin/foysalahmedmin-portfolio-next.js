@@ -207,8 +207,10 @@ nav[data-indicator="ready"] [data-nav-indicator] {
   user-select: none;
 }
 
-.footer-wordmark > span {
+/* Pure decoration (WCAG 1.4.3 incidental text): the name is drawn from data-wordmark so it is not page text */
+.footer-wordmark::before {
   display: block;
+  content: attr(data-wordmark);
   color: var(--mono-800);
   font-weight: 800;
   font-stretch: 125%;
@@ -218,12 +220,12 @@ nav[data-indicator="ready"] [data-nav-indicator] {
   white-space: nowrap;
 }
 
-html.light .footer-wordmark > span {
+html.light .footer-wordmark::before {
   color: var(--mono-200);
 }
 
 @supports (animation-timeline: view()) {
-  html[data-motion="full"] .footer-wordmark > span {
+  html[data-motion="full"] .footer-wordmark::before {
     animation: wordmark-rise linear both;
     animation-timeline: view();
     animation-range: entry 0% cover 55%;
