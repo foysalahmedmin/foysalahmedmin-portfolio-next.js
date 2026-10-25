@@ -1,12 +1,11 @@
 import { JsonLdScript } from "@/components/content/json-ld-script";
 import Footer from "@/components/partials/footer";
 import Header from "@/components/partials/Header";
-import { ChromeToneController } from "@/components/surface/chrome-tone-controller";
-import { SurfaceMarker } from "@/components/surface/surface-marker";
+import { PublicSurface } from "@/components/surface/public-surface";
 import ScrollToTop from "@/components/ui/scroll-to-top";
 import { buildWebSiteJsonLd } from "@/lib/metadata/json-ld";
+import { buildPaletteCommands } from "@/lib/palette/build";
 import { readPublishedSite } from "@/lib/site/published-site";
-import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 import { publicFontVariables } from "./fonts";
 
@@ -14,16 +13,10 @@ const CommonLayout = async ({ children }: { children: ReactNode }) => {
   const site = await readPublishedSite();
 
   return (
-    <div
-      data-surface="public"
-      data-density="comfortable"
-      className={cn(
-        publicFontVariables,
-        "bg-background text-foreground font-text min-h-dvh"
-      )}
+    <PublicSurface
+      fontClassNames={publicFontVariables}
+      commands={buildPaletteCommands(site)}
     >
-      <SurfaceMarker surface="public" fontClassNames={publicFontVariables} />
-      <ChromeToneController />
       <JsonLdScript data={buildWebSiteJsonLd(site)} />
       <a
         href="#main-content"
@@ -37,8 +30,7 @@ const CommonLayout = async ({ children }: { children: ReactNode }) => {
       </div>
       <Footer site={site} />
       <ScrollToTop />
-      <div className="grain" aria-hidden="true" />
-    </div>
+    </PublicSurface>
   );
 };
 
