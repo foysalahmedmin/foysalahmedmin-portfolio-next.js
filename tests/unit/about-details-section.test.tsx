@@ -72,4 +72,53 @@ describe("AboutDetailsSection", () => {
       )
     );
   });
+
+  it("reads as one column: a short title, the statement as the lead, the three roles' art when there is no portrait, and no numbers", () => {
+    const site = createEmergencyPublicSite();
+    site.positioning = {
+      ...site.positioning,
+      compact: "Connected product engineering",
+      long: "I start with the problem, then design, build and automate the simplest fix.",
+      long_bio: "Longer biography paragraph.",
+    };
+    const { container } = render(<AboutDetailsSection site={site} />);
+
+    expect(
+      screen.getByRole("heading", { name: "Connected product engineering" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "I start with the problem, then design, build and automate the simplest fix."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText("Longer biography paragraph.")).toBeInTheDocument();
+    expect(
+      Array.from(container.querySelectorAll(".about-art img")).map((image) =>
+        image.getAttribute("src")
+      )
+    ).toEqual([
+      "/images/hero/derivatives/system-architect.desktop.q82.webp",
+      "/images/hero/derivatives/software-developer.desktop.q82.webp",
+      "/images/hero/derivatives/ai-automation.desktop.q82.webp",
+    ]);
+    expect(container.querySelector("ol")).toBeNull();
+    expect(container.textContent).not.toMatch(/\b0[1-9]\b/);
+  });
+
+  it("uses the portrait when there is one, and the compact form drops the process", () => {
+    const site = createEmergencyPublicSite();
+    site.brand.profile = {
+      id: "507f1f77bcf86cd799439099",
+      url: "https://cdn.example.com/portrait.webp",
+      alt_text: "Portrait",
+    };
+    site.process = [{ key: "a", title: "Step A", summary: "x", enabled: true }];
+    const { container } = render(
+      <AboutDetailsSection site={site} compact id="about" />
+    );
+    expect(container.querySelector(".about-art")).toBeNull();
+    expect(container.querySelector("img")).toHaveAttribute("alt", "Portrait");
+    expect(container.querySelector("#about")).not.toBeNull();
+    expect(screen.queryByText("Operating principles")).not.toBeInTheDocument();
+  });
 });
