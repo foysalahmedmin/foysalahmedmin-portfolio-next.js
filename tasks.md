@@ -1666,10 +1666,11 @@ Updated as work lands, one tick per finished item. The acceptance gate is plan s
 - [x] Hero art renamed after the three roles and kept in one folder, `public/images/hero/` (`system-architect`, `software-developer`, `ai-automation`; the absorbed frontend and backend lanes are kept as `software-developer-frontend` and `software-developer-backend`)
 - [x] Unit and component tests: story, scene decision, framing, hero markup and CSS contract, shell hooks, theme flip, mobile bar, chapter rail, poster budgets, three bundle boundary
 - [x] Re-render the posters after the glow texture change (same composition, 20 draw calls, 33k triangles, all within budget)
-- [ ] Playwright specs: tier-forced hero (T0 to T3), 3D smoke, no-JS hero, glass contrast sampling over the canvas, axe, visual poster; fix the existing specs the new header and hero affect
+- [x] Playwright specs (`tests/e2e/hero.spec.ts`, in the CI browser job): tier-forced T0 to T3, live canvas budget, pause, release and return, beat-by-beat story over the canvas and over the poster, phone canvas without the engine, glass contrast sampling over the canvas, axe; existing specs fixed (chrome tone follows streamed bands, footer wordmark is decoration, engine policy accepts the probe's tier). The visual spec still generates its baselines per platform
 - [ ] Measurements: initial JS against the 176.5 KB home baseline, 3D chunk at or under 170 KB gzip, Lighthouse mobile five-run medians against Phase 2, smoothness harness, CLS
-- [ ] Docs: `phase-3-findings.md` and results JSON, plan revision 1.6, ADR 0011 Phase 3 outcome, `.env.example` note for `PUBLIC_3D_ENABLED`, CI browser job lists the new specs
+- [ ] Docs: `phase-3-findings.md` and results JSON, plan revision 1.6, ADR 0011 Phase 3 outcome, (`.env.example` note for `PUBLIC_3D_ENABLED` and the CI browser job are done)
 - [ ] Full checks: typecheck, lint, `pnpm test` with a replica-set database, production build and e2e, clean-checkout simulation
+- [ ] Open finding for SG9 (not caused by Phase 3): every public page, including the static ones, ships its finished content in a hidden Suspense segment that an inline script moves into place (the `loading.tsx` boundary), so a visitor with JavaScript off sees the skeleton. The hero is complete in the server HTML and the spec asserts that; showing it without JavaScript is a routing decision (drop `loading.tsx` on static routes, or partial prerendering)
 - [ ] Owner review, then SG4
 
 ## Deferred ideas — only after the core release
