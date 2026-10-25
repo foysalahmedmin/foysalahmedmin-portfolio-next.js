@@ -25,6 +25,7 @@ export function TraceRail({
   className,
 }: TraceRailProps) {
   const nav = useRef<HTMLElement>(null);
+  const bar = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(items[0]?.id ?? "");
 
   useEffect(() => {
@@ -52,10 +53,9 @@ export function TraceRail({
       const scrollable =
         document.documentElement.scrollHeight - window.innerHeight;
       const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
-      element.style.setProperty(
-        "--trace-progress",
-        Math.min(1, Math.max(0, progress)).toFixed(4)
-      );
+      const value = Math.min(1, Math.max(0, progress)).toFixed(4);
+      element.style.setProperty("--trace-progress", value);
+      bar.current?.style.setProperty("--trace-progress", value);
     };
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
@@ -87,35 +87,40 @@ export function TraceRail({
   };
 
   return (
-    <nav
-      ref={nav}
-      aria-label={label}
-      data-trace-rail=""
-      className={cn(className)}
-    >
-      <ol role="list">
-        {items.map((item, index) => (
-          <li key={item.id}>
-            <a
-              href={`#${item.id}`}
-              data-active={item.id === active || undefined}
-              aria-current={item.id === active ? "location" : undefined}
-              onClick={(event) => focusChapter(event, item.id)}
-            >
-              <span aria-hidden="true" data-trace-tick="" />
-              <span data-trace-label="">
-                <span aria-hidden="true" className="tabular-nums">
-                  {String(index + 1).padStart(2, "0")}
-                </span>{" "}
-                {item.label}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ol>
-      <span aria-hidden="true" data-trace-line="">
-        <span data-trace-fill="" />
-      </span>
-    </nav>
+    <>
+      <nav
+        ref={nav}
+        aria-label={label}
+        data-trace-rail=""
+        className={cn(className)}
+      >
+        <ol role="list">
+          {items.map((item, index) => (
+            <li key={item.id}>
+              <a
+                href={`#${item.id}`}
+                data-active={item.id === active || undefined}
+                aria-current={item.id === active ? "location" : undefined}
+                onClick={(event) => focusChapter(event, item.id)}
+              >
+                <span aria-hidden="true" data-trace-tick="" />
+                <span data-trace-label="">
+                  <span aria-hidden="true" className="tabular-nums">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>{" "}
+                  {item.label}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <span aria-hidden="true" data-trace-line="">
+          <span data-trace-fill="" />
+        </span>
+      </nav>
+      <div ref={bar} data-trace-progressbar="" aria-hidden="true">
+        <span />
+      </div>
+    </>
   );
 }

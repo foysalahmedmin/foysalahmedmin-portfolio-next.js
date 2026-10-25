@@ -28,7 +28,7 @@ const ScrollToTop = () => {
   return (
     <div
       className={cn(
-        "fixed bottom-8 right-8 z-50 transition-all duration-500 ease-in-out",
+        "fixed right-4 bottom-24 z-50 transition-all duration-500 ease-in-out xl:right-8 xl:bottom-8",
         isVisible
           ? "translate-y-0 opacity-100"
           : "-translate-y-[120vh] opacity-0"
@@ -39,7 +39,7 @@ const ScrollToTop = () => {
         shape="icon"
         size="lg"
         onClick={scrollToTop}
-        className="size-12 rounded-full shadow-2xl shadow-primary/20 hover:-translate-y-1"
+        className="shadow-primary/20 size-12 rounded-full shadow-2xl hover:-translate-y-1"
         aria-label="Scroll to top"
       >
         <ArrowUp className="size-6" />

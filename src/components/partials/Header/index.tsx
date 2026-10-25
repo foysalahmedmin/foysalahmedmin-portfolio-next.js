@@ -3,16 +3,17 @@
 import type { TPublicSiteDto } from "@/app/api/site/site.type";
 import { Button, buttonVariants } from "@/components/ui/button";
 import OptimizedMedia from "@/components/ui/optimized-media";
+import { RollLabel } from "@/components/ui/roll-label";
 import { useDialogFocus } from "@/hooks/ui/use-dialog-focus";
-import { useScrollPosition } from "@/hooks/ui/use-scroll-position";
+import { flipTheme } from "@/lib/motion/theme-flip";
+import { openPalette } from "@/lib/palette/shortcut";
 import {
   getPrimaryPublicCta,
   getPublicShellLinks,
   type TPublicShellLink,
 } from "@/lib/site/public-shell";
-import { openPalette } from "@/lib/palette/shortcut";
 import { cn } from "@/lib/utils";
-import { toggleTheme, useSetting } from "@/state/setting-store";
+import { useSetting } from "@/state/setting-store";
 import {
   ArrowUpRight,
   Menu,
@@ -24,12 +25,24 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentProps,
+  type MouseEvent,
+} from "react";
+import { useHeaderHide, useNavIndicator } from "./use-header-chrome";
 
 type HeaderProps = {
   site: TPublicSiteDto;
   className?: string;
 };
+
+/** The shell's own call to action wording (docs plan 4.0); where it goes comes from the site's configured CTA. */
+const SHELL_CTA_LABEL = "Start a project";
 
 const isActivePath = (pathname: string, href: string): boolean =>
   href === "/"
@@ -41,12 +54,16 @@ const PublicLink = ({
   className,
   onClick,
   children,
+  ...rest
 }: {
   link: TPublicShellLink;
-  className?: string;
-  onClick?: () => void;
+  className?: string | undefined;
+  onClick?: (() => void) | undefined;
   children?: React.ReactNode;
-}) => {
+} & Omit<
+  ComponentProps<"a">,
+  "href" | "target" | "rel" | "className" | "onClick" | "children"
+>) => {
   if (link.external) {
     return (
       <a
@@ -55,13 +72,14 @@ const PublicLink = ({
         onClick={onClick}
         target={link.href.startsWith("https:") ? "_blank" : undefined}
         rel={link.href.startsWith("https:") ? "noopener noreferrer" : undefined}
+        {...rest}
       >
         {children ?? link.label}
       </a>
     );
   }
   return (
-    <Link href={link.href} className={className} onClick={onClick}>
+    <Link href={link.href} className={className} onClick={onClick} {...rest}>
       {children ?? link.label}
     </Link>
   );
@@ -82,18 +100,32 @@ const ThemeToggle = () => {
     <Monitor className="size-5" aria-hidden="true" />
   );
 
+  const onClick = (event: MouseEvent<HTMLButtonElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    flipTheme({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
+  };
+
   return (
     <Button
       type="button"
       variant="ghost"
       shape="icon"
-      onClick={toggleTheme}
+      onClick={onClick}
       aria-label="Change color theme"
     >
       {icon}
     </Button>
   );
 };
+
+const subscribeNothing = () => () => undefined;
+/** `⌘` on Apple platforms, `Ctrl` elsewhere; nothing until the client knows, so server and client agree. */
+const useShortcutHint = () =>
+  useSyncExternalStore(
+    subscribeNothing,
+    () => (/Mac|iPhone|iPad/i.test(navigator.platform) ? "⌘K" : "Ctrl K"),
+    () => ""
+  );
 
 const Brand = ({ site }: { site: TPublicSiteDto }) => {
   const name =
@@ -109,7 +141,7 @@ const Brand = ({ site }: { site: TPublicSiteDto }) => {
   return (
     <Link
       href="/"
-      className="focus-visible:ring-primary flex min-h-11 min-w-0 items-center gap-3 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
+      className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl"
       aria-label={`${name} home`}
     >
       <span className="border-border bg-surface-subtle relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border">
@@ -148,11 +180,13 @@ const MobileNavigation = ({
   open,
   links,
   site,
+  cta,
   onClose,
 }: {
   open: boolean;
   links: readonly TPublicShellLink[];
   site: TPublicSiteDto;
+  cta: TPublicShellLink | null;
   onClose: () => void;
 }) => {
   const pathname = usePathname();
@@ -170,7 +204,7 @@ const MobileNavigation = ({
       inert={!open}
       tabIndex={-1}
       className={cn(
-        "bg-background/95 fixed inset-0 z-[calc(var(--z-header)+1)] overflow-y-auto px-6 py-6 backdrop-blur-2xl transition-[opacity,visibility] duration-[var(--motion-standard)] motion-reduce:transition-none xl:hidden",
+        "bg-background/95 fixed inset-0 z-[calc(var(--z-header)+1)] overflow-y-auto px-6 py-6 backdrop-blur-2xl transition-[opacity,visibility] duration-[var(--dur-base)] motion-reduce:transition-none xl:hidden",
         open ? "visible opacity-100" : "pointer-events-none invisible opacity-0"
       )}
     >
@@ -178,7 +212,7 @@ const MobileNavigation = ({
         <div className="flex items-center justify-between gap-5">
           <p
             id="public-mobile-navigation-title"
-            className="text-sm font-black tracking-[0.18em] uppercase"
+            className="t-eyebrow tracking-[0.18em]"
           >
             Navigation
           </p>
@@ -203,8 +237,9 @@ const MobileNavigation = ({
                   <PublicLink
                     link={link}
                     onClick={onClose}
+                    aria-current={active ? "page" : undefined}
                     className={cn(
-                      "focus-visible:ring-primary group flex min-h-16 items-center justify-between rounded-xl px-4 text-2xl font-black tracking-tight focus-visible:ring-2 focus-visible:outline-none sm:text-3xl",
+                      "group flex min-h-16 items-center justify-between rounded-xl px-4 text-2xl font-black tracking-tight sm:text-3xl",
                       active ? "bg-primary/10 text-primary" : "hover:bg-muted"
                     )}
                   >
@@ -223,10 +258,29 @@ const MobileNavigation = ({
             })}
           </ul>
         </nav>
-        <p className="text-muted-foreground border-border border-t pt-6 text-sm leading-6">
-          {site.positioning.canonical ||
-            "Frontend · Backend · AI Automation · System Design · Full-Stack"}
-        </p>
+        <div className="border-border flex flex-col gap-4 border-t pt-6">
+          {cta && (
+            <PublicLink
+              link={cta}
+              onClick={onClose}
+              className={cn(buttonVariants({ size: "lg" }), "w-full")}
+            >
+              {SHELL_CTA_LABEL}
+            </PublicLink>
+          )}
+          {site.contact.public_email && (
+            <a
+              href={`mailto:${site.contact.public_email}`}
+              className="text-muted-foreground inline-flex min-h-11 items-center text-sm font-semibold"
+            >
+              {site.contact.public_email}
+            </a>
+          )}
+          <p className="text-muted-foreground text-sm leading-6">
+            {site.positioning.canonical ||
+              "Frontend · Backend · AI Automation · System Design · Full-Stack"}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -234,35 +288,42 @@ const MobileNavigation = ({
 
 const Header = ({ site, className }: HeaderProps) => {
   const pathname = usePathname();
-  const { scrollTop, scrollDirection } = useScrollPosition();
+  const header = useRef<HTMLElement>(null);
+  const nav = useRef<HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const links = getPublicShellLinks(site, "header");
-  const cta = getPrimaryPublicCta(site);
+  const cta = getPrimaryPublicCta(site) ?? {
+    key: "start",
+    label: SHELL_CTA_LABEL,
+    href: "/contact",
+    external: false,
+  };
+  const hint = useShortcutHint();
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
+  useHeaderHide(header, mobileOpen);
+  useNavIndicator(nav, pathname);
   useEffect(() => closeMobile(), [closeMobile, pathname]);
 
   return (
     <>
       <header
+        ref={header}
         data-chrome
         className={cn(
-          "bg-background/85 text-foreground sticky top-0 z-[var(--z-header)] h-20 border-b backdrop-blur-xl transition-[background-color,box-shadow,transform,border-color] duration-[var(--motion-standard)] motion-reduce:transform-none motion-reduce:transition-none",
-          scrollTop > 24 ? "border-border shadow-sm" : "border-transparent",
-          scrollDirection === "down" && scrollTop > 160 && !mobileOpen
-            ? "-translate-y-full"
-            : "translate-y-0",
+          "glass-1 border-line-2 text-foreground sticky top-0 z-[var(--z-header)] h-20 border-b",
           className
         )}
       >
-        <div className="container mx-auto flex h-full items-center justify-between gap-4 px-6">
+        <div className="container flex h-full items-center justify-between gap-4">
           <Brand site={site} />
           {links.length > 0 && (
             <nav
-              className="hidden min-w-0 items-center justify-center xl:flex"
+              ref={nav}
+              className="relative hidden min-w-0 items-center justify-center xl:flex"
               aria-label="Primary navigation"
             >
-              <ul className="flex items-center gap-1" role="list">
+              <ul className="relative flex items-center gap-1" role="list">
                 {links.map((link) => {
                   const active =
                     !link.external && isActivePath(pathname, link.href);
@@ -270,21 +331,21 @@ const Header = ({ site, className }: HeaderProps) => {
                     <li key={link.key}>
                       <PublicLink
                         link={link}
+                        data-nav-link=""
+                        aria-current={active ? "page" : undefined}
                         className={cn(
-                          "focus-visible:ring-primary relative flex min-h-11 items-center rounded-xl px-3 text-xs font-bold tracking-[0.12em] uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none",
+                          "t-eyebrow relative flex min-h-11 items-center rounded-xl px-3 font-bold tracking-[0.12em] transition-colors",
                           active
-                            ? "text-primary"
+                            ? "text-foreground"
                             : "text-muted-foreground hover:text-foreground"
                         )}
                       >
                         {link.label}
-                        {active && (
-                          <span className="bg-primary absolute right-3 bottom-1 left-3 h-0.5 rounded-full" />
-                        )}
                       </PublicLink>
                     </li>
                   );
                 })}
+                <span data-nav-indicator="" aria-hidden="true" />
               </ul>
             </nav>
           )}
@@ -294,10 +355,10 @@ const Header = ({ site, className }: HeaderProps) => {
                 link={cta}
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "hidden 2xl:inline-flex"
+                  "mr-1 hidden xl:inline-flex"
                 )}
               >
-                {cta.label}
+                <RollLabel>{SHELL_CTA_LABEL}</RollLabel>
                 {cta.external && (
                   <ArrowUpRight className="size-4" aria-hidden="true" />
                 )}
@@ -306,13 +367,19 @@ const Header = ({ site, className }: HeaderProps) => {
             <Button
               type="button"
               variant="ghost"
-              shape="icon"
+              shape={hint ? "default" : "icon"}
+              className={hint ? "gap-2 px-3" : undefined}
               onClick={openPalette}
               aria-label="Open command palette"
               aria-haspopup="dialog"
               aria-keyshortcuts="Control+K Meta+K"
             >
               <Search className="size-5" aria-hidden="true" />
+              {hint ? (
+                <kbd className="t-eyebrow border-line-3 hidden border px-1.5 py-0.5 lg:inline">
+                  {hint}
+                </kbd>
+              ) : null}
             </Button>
             <ThemeToggle />
             <Button
@@ -334,6 +401,7 @@ const Header = ({ site, className }: HeaderProps) => {
         open={mobileOpen}
         links={links}
         site={site}
+        cta={cta}
         onClose={closeMobile}
       />
     </>

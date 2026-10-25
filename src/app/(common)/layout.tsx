@@ -1,10 +1,12 @@
 import { JsonLdScript } from "@/components/content/json-ld-script";
 import Footer from "@/components/partials/footer";
 import Header from "@/components/partials/Header";
+import { MobileActionBar } from "@/components/partials/mobile-action-bar";
 import { PublicSurface } from "@/components/surface/public-surface";
 import ScrollToTop from "@/components/ui/scroll-to-top";
 import { buildWebSiteJsonLd } from "@/lib/metadata/json-ld";
 import { buildPaletteCommands } from "@/lib/palette/build";
+import { getPrimaryPublicCta } from "@/lib/site/public-shell";
 import { readPublishedSite } from "@/lib/site/published-site";
 import type { ReactNode } from "react";
 import { publicFontVariables } from "./fonts";
@@ -30,6 +32,16 @@ const CommonLayout = async ({ children }: { children: ReactNode }) => {
       </div>
       <Footer site={site} />
       <ScrollToTop />
+      <MobileActionBar
+        cta={
+          getPrimaryPublicCta(site) ?? {
+            key: "start",
+            label: "Start a project",
+            href: "/contact",
+            external: false,
+          }
+        }
+      />
     </PublicSurface>
   );
 };

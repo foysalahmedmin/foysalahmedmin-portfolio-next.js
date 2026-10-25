@@ -124,3 +124,149 @@
     transform: translateX(calc(100cqw - 2rem));
   }
 }
+
+/* ---------- Label roll (M27) and press feedback ---------- */
+.roll-label {
+  display: inline-grid;
+  overflow: clip;
+  line-height: 1.25;
+}
+
+.roll-label > span {
+  grid-area: 1 / 1;
+  transition: transform var(--dur-micro) var(--ease-signal);
+}
+
+.roll-label > span:last-child {
+  transform: translateY(110%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(a, button):is(:hover, :focus-visible) > .roll-label > span:first-child {
+    transform: translateY(-110%);
+  }
+
+  :is(a, button):is(:hover, :focus-visible) > .roll-label > span:last-child {
+    transform: none;
+  }
+}
+
+/* Reduced and off motion: the plain label, no copy underneath */
+html:not([data-motion="full"]) .roll-label > span:last-child {
+  display: none;
+}
+
+html:not([data-motion="full"]) .roll-label > span:first-child {
+  transform: none;
+}
+
+/* ---------- Header chrome: hide and show (M35), nav indicator (M28) ---------- */
+header[data-chrome] {
+  transition: transform var(--dur-base) var(--ease-snap);
+}
+
+header[data-chrome][data-hidden="true"] {
+  transform: translateY(-100%);
+}
+
+html:not([data-motion="full"]) header[data-chrome][data-hidden="true"] {
+  transform: none;
+}
+
+[data-nav-indicator] {
+  position: absolute;
+  transform: translateX(var(--ind-x, 0px)) scaleX(var(--ind-w, 0));
+  transform-origin: left;
+  inset-block-end: 0.4rem;
+  inset-inline-start: 0;
+  background: var(--foreground);
+  inline-size: 1px;
+  block-size: 2px;
+  pointer-events: none;
+}
+
+nav[data-indicator="ready"] [data-nav-indicator] {
+  transition: transform var(--dur-base) var(--ease-settle);
+}
+
+@media (forced-colors: active) {
+  [data-nav-indicator] {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+}
+
+/* ---------- Footer wordmark (M22): a cropped giant name that rises as the footer arrives ---------- */
+.footer-wordmark {
+  margin-block-start: 3rem;
+  block-size: 0.74em;
+  overflow: clip;
+  pointer-events: none;
+  font-size: clamp(4.5rem, 1.5rem + 15vw, 17rem);
+  line-height: 0.8;
+  user-select: none;
+}
+
+.footer-wordmark > span {
+  display: block;
+  color: var(--mono-800);
+  font-weight: 800;
+  font-stretch: 125%;
+  font-family: var(--ff-display-125, var(--ff-display, inherit));
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+html.light .footer-wordmark > span {
+  color: var(--mono-200);
+}
+
+@supports (animation-timeline: view()) {
+  html[data-motion="full"] .footer-wordmark > span {
+    animation: wordmark-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 55%;
+  }
+
+  @keyframes wordmark-rise {
+    from {
+      transform: translateY(46%);
+    }
+
+    to {
+      transform: none;
+    }
+  }
+}
+
+@media print {
+  .footer-wordmark {
+    display: none;
+  }
+}
+
+/* ---------- Thumb-zone bar (phones and tablets) ---------- */
+[data-mobile-bar] {
+  transform: translateY(100%);
+  transition: transform var(--dur-base) var(--ease-signal);
+}
+
+[data-mobile-bar][data-visible="true"] {
+  transform: none;
+}
+
+/* Hidden bars take no focus */
+[data-mobile-bar][data-visible="false"] {
+  visibility: hidden;
+}
+
+html:not([data-motion="full"]) [data-mobile-bar] {
+  transition: none;
+}
+
+@media print {
+  [data-mobile-bar] {
+    display: none;
+  }
+}

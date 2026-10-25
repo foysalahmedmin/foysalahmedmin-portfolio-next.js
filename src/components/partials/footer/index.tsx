@@ -41,6 +41,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
   const socials = getPublicSocialLinks(site.social_links);
   const cta = getPrimaryPublicCta(site);
   const name = site.identity.public_name || "Engineering Portfolio";
+  const wordmark = site.identity.short_name || name;
   const tagline =
     site.footer.tagline ||
     site.positioning.compact ||
@@ -50,7 +51,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
   return (
     <footer
       data-footer
-      className="bg-background text-foreground border-line-2 border-t pt-16 pb-10"
+      className="bg-background text-foreground border-line-2 overflow-clip border-t pt-16"
     >
       <div className="container mx-auto px-6">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_0.8fr_1fr]">
@@ -154,6 +155,9 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
             )}
           </div>
         </div>
+      </div>
+      <div className="footer-wordmark container" aria-hidden="true">
+        <span>{wordmark}</span>
       </div>
     </footer>
   );
