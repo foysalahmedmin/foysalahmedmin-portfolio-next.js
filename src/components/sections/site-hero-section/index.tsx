@@ -134,9 +134,7 @@ export default function SiteHeroSection({
                 } as CSSProperties
               }
             >
-              <p className="hero-eyebrow t-eyebrow">
-                Role {index + 1} of {roleCount} · {HERO_COPY.roleEyebrow}
-              </p>
+              <p className="hero-eyebrow t-eyebrow">{HERO_COPY.roleEyebrow}</p>
               <h2 className="hero-title">
                 {role.lines.map((line, lineIndex) => (
                   <span

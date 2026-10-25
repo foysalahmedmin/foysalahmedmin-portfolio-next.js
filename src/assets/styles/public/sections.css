@@ -1,0 +1,513 @@
+/*
+ * Home sections (public surface). Three layouts share one head and one card language:
+ *  - stack: full-screen panels that slide over each other (position: sticky), with a drifting image;
+ *  - rail: a horizontal row of cards with the standard arrows;
+ *  - centred reading column (the FAQ accordion).
+ * Nothing here hides content: the drift is a scroll-driven animation that only runs for full motion.
+ */
+
+.section-head {
+  max-inline-size: 46rem;
+}
+
+.section-head[data-align="center"] {
+  margin-inline: auto;
+}
+
+/* Section titles sit one step below the page-level display sizes */
+.section-head h2,
+.stack-body h3 {
+  font-size: clamp(2rem, 1.05rem + 2.7vw, 3.5rem);
+  line-height: 1.04;
+}
+
+.section-head .t-lead,
+.stack-body .t-lead {
+  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem);
+}
+
+/* ---------- Stack: panels that slide over each other ---------- */
+.stack {
+  --stack-top: 5.75rem;
+
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stack-panel {
+  display: grid;
+  position: sticky;
+  align-items: end;
+  inset-block-start: calc(var(--stack-top) + var(--i, 0) * 0.85rem);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg, 1rem);
+  background: var(--card);
+  isolation: isolate;
+  block-size: min(42rem, calc(100svh - var(--stack-top) - 2rem));
+  overflow: clip;
+}
+
+.stack-media {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+}
+
+.stack-media img {
+  display: block;
+  transform: scale(1.12);
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: 72% 50%;
+}
+
+.stack-scrim {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      var(--background) 0%,
+      color-mix(in oklab, var(--background) 78%, transparent) 38%,
+      color-mix(in oklab, var(--background) 18%, transparent) 100%
+    ),
+    linear-gradient(
+      0deg,
+      color-mix(in oklab, var(--background) 70%, transparent) 0%,
+      transparent 45%
+    );
+}
+
+.stack-body {
+  display: grid;
+  gap: 2rem;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  max-inline-size: 44rem;
+}
+
+.stack-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  border: 1px solid var(--line-3);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--background) 60%, transparent);
+  padding: 0.25rem 0.7rem;
+  color: var(--fg-secondary);
+  font-size: var(--step--1);
+}
+
+@supports (animation-timeline: view()) {
+  html[data-motion="full"] .stack-media img {
+    animation: stack-drift linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 60%;
+  }
+
+  @keyframes stack-drift {
+    from {
+      transform: translateY(-7%) scale(1.12);
+    }
+
+    to {
+      transform: translateY(0) scale(1.12);
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .stack-panel {
+    block-size: auto;
+    min-block-size: min(36rem, calc(100svh - var(--stack-top) - 1.5rem));
+  }
+
+  .stack-body {
+    gap: 1.25rem;
+  }
+
+  .stack-scrim {
+    background: linear-gradient(
+      0deg,
+      var(--background) 0%,
+      color-mix(in oklab, var(--background) 82%, transparent) 55%,
+      color-mix(in oklab, var(--background) 35%, transparent) 100%
+    );
+  }
+}
+
+/* ---------- Rail: cards on a row, standard arrows ---------- */
+.rail {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.rail-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.rail-track {
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.25rem 0 0.5rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.rail-track::-webkit-scrollbar {
+  display: none;
+}
+
+.rail-card {
+  display: grid;
+  flex: 0 0 min(23rem, 84vw);
+  align-content: start;
+  gap: 1rem;
+  transition:
+    border-color var(--dur-base, 200ms) var(--ease-signal, ease),
+    transform var(--dur-base, 200ms) var(--ease-signal, ease);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg, 1rem);
+  background: var(--card);
+  padding: 1.5rem;
+  scroll-snap-align: start;
+}
+
+@media (hover: hover) {
+  html[data-motion="full"] .rail-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--line-4, var(--line-3));
+  }
+}
+
+.rail-card-output {
+  border-block-start: 1px solid var(--line-2);
+  padding-block-start: 1rem;
+  color: var(--fg-secondary);
+  font-size: var(--step--1);
+}
+
+.rail-card-output strong {
+  display: block;
+  margin-block-end: 0.25rem;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.rail-card h3 {
+  font-weight: 700;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+/* ---------- System flow: a request moving through the system ---------- */
+.flow {
+  margin: 0;
+}
+
+.flow-svg {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  max-block-size: 20rem;
+  overflow: visible;
+}
+
+.flow-wire,
+.flow-current {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.flow-wire {
+  stroke: var(--line-3);
+  stroke-width: 1.5;
+}
+
+/* The current in the wire: dashes that travel with the pulse (still, and dim, unless motion is on) */
+.flow-current {
+  opacity: 0.55;
+  stroke: var(--foreground);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 14;
+  stroke-linecap: round;
+}
+
+.flow-node rect {
+  fill: var(--card);
+  stroke: var(--line-3);
+  stroke-width: 1.5;
+}
+
+.flow-node circle {
+  fill: var(--fg-secondary);
+}
+
+.flow-node text {
+  fill: var(--fg-secondary);
+  font-size: 11px;
+  font-family: var(--ff-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flow-pulse,
+.flow-halo,
+.flow-trail,
+.flow-core {
+  fill: var(--foreground);
+}
+
+.flow-halo {
+  opacity: 0.18;
+}
+
+.flow-trail {
+  opacity: 0.45;
+}
+
+.flow-pulse {
+  display: none;
+}
+
+html[data-motion="full"] .flow-pulse {
+  display: block;
+  offset-rotate: auto;
+  animation: flow-travel 10s linear infinite;
+}
+
+html[data-motion="full"] .flow-current {
+  animation: flow-current 1.1s linear infinite;
+}
+
+html[data-motion="full"] .flow-node rect,
+html[data-motion="full"] .flow-node circle {
+  animation: flow-light 10s linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes flow-travel {
+  from {
+    offset-distance: 0%;
+  }
+
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes flow-current {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@keyframes flow-light {
+  0% {
+    stroke: var(--foreground);
+    fill: var(--foreground);
+  }
+
+  14% {
+    stroke: var(--line-3);
+  }
+}
+
+.flow-card {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  box-shadow: var(--card-shadow, none);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg, 1rem);
+  background: var(--card);
+  padding: 1.5rem;
+}
+
+.flow-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+}
+
+.flow-sequence ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flow-sequence li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--fg-secondary);
+  font-size: 0.95rem;
+}
+
+.flow-sequence li span {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.flow-link {
+  display: block;
+  transition: border-color var(--dur-fast) var(--ease-signal);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg, 1rem);
+  background: var(--card);
+  padding: 1.25rem 1.5rem;
+}
+
+.flow-link:hover {
+  border-color: var(--foreground);
+}
+
+/* ---------- Contribution dots ---------- */
+.dots {
+  margin: 0;
+  box-shadow: var(--card-shadow, none);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg, 1rem);
+  background: var(--card);
+  padding: clamp(1rem, 2.5vw, 2rem);
+}
+
+.dots-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.dots-frame {
+  display: grid;
+  gap: 0.6rem;
+  min-inline-size: 40rem;
+}
+
+.dots-months,
+.dots-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--weeks), minmax(0, 1fr));
+  gap: clamp(2px, 0.35vw, 5px);
+}
+
+.dots-months {
+  color: var(--fg-secondary);
+  font-size: 0.7rem;
+  font-family: var(--ff-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dots-months span {
+  white-space: nowrap;
+}
+
+.dots-grid {
+  grid-template-rows: repeat(7, auto);
+  grid-auto-flow: column;
+}
+
+.dot,
+.dot-gap {
+  display: block;
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+.dot {
+  transition: transform var(--dur-fast) var(--ease-signal);
+  background: color-mix(in oklab, var(--foreground) 10%, transparent);
+}
+
+.dot[data-level="1"] {
+  background: color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+
+.dot[data-level="2"] {
+  background: color-mix(in oklab, var(--foreground) 52%, transparent);
+}
+
+.dot[data-level="3"] {
+  background: color-mix(in oklab, var(--foreground) 76%, transparent);
+}
+
+.dot[data-level="4"] {
+  background: var(--foreground);
+}
+
+@media (hover: hover) {
+  .dots-grid .dot:hover {
+    transform: scale(1.6);
+  }
+}
+
+/* The year draws in from the left as the section scrolls into view (full motion only) */
+@supports (animation-timeline: view()) {
+  html[data-motion="full"] .dots-grid .dot {
+    animation: dot-in linear both;
+    animation-timeline: view();
+    animation-range: entry calc(var(--w) * 0.6%) entry
+      calc(30% + var(--w) * 0.9%);
+  }
+
+  @keyframes dot-in {
+    from {
+      transform: scale(0.2);
+      opacity: 0;
+    }
+
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+}
+
+.dots-legend {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+  margin-block-start: 1rem;
+  color: var(--fg-secondary);
+  font-size: 0.75rem;
+}
+
+.dots-legend .dot {
+  inline-size: 0.75rem;
+}
+
+/* ---------- Light theme balance: tinted page, white cards ---------- */
+html.light[data-surface="public"] {
+  --background: var(--mono-100);
+  --surface-subtle: #e6e6e6;
+  --card-shadow:
+    0 1px 2px rgb(0 0 0 / 0.05), 0 14px 30px -14px rgb(0 0 0 / 0.16);
+}
+
+.stack-panel,
+.rail-card,
+.flow-link {
+  box-shadow: var(--card-shadow, none);
+}

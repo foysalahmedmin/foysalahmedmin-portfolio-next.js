@@ -61,7 +61,8 @@ describe("SiteHeroSection: the whole story is in the HTML", () => {
       expect(capabilities[0]!.textContent).toBe(
         site.pillars[index]!.capabilities[0]
       );
-      expect(beat.textContent).toContain(`Role ${index + 1} of 3`);
+      // The public site numbers nothing in its cards
+      expect(beat.textContent).not.toMatch(/\b\d+ of \d+\b/);
     });
   });
 

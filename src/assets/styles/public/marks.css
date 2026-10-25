@@ -199,11 +199,11 @@ nav[data-indicator="ready"] [data-nav-indicator] {
 /* ---------- Footer wordmark (M22): a cropped giant name that rises as the footer arrives ---------- */
 .footer-wordmark {
   margin-block-start: 3rem;
-  block-size: 0.74em;
+  block-size: 0.86em;
   overflow: clip;
   pointer-events: none;
   font-size: clamp(4.5rem, 1.5rem + 15vw, 17rem);
-  line-height: 0.8;
+  line-height: 0.86;
   user-select: none;
 }
 
@@ -211,7 +211,8 @@ nav[data-indicator="ready"] [data-nav-indicator] {
 .footer-wordmark::before {
   display: block;
   content: attr(data-wordmark);
-  color: var(--mono-800);
+  /* Readable as a name, quiet as a mark: 42% of the foreground over the page */
+  color: color-mix(in oklab, var(--foreground) 42%, var(--background));
   font-weight: 800;
   font-stretch: 125%;
   font-family: var(--ff-display-125, var(--ff-display, inherit));
@@ -220,15 +221,12 @@ nav[data-indicator="ready"] [data-nav-indicator] {
   white-space: nowrap;
 }
 
-html.light .footer-wordmark::before {
-  color: var(--mono-200);
-}
-
 @supports (animation-timeline: view()) {
   html[data-motion="full"] .footer-wordmark::before {
     animation: wordmark-rise linear both;
     animation-timeline: view();
-    animation-range: entry 0% cover 55%;
+    /* Done by the time the name is fully on screen: at the bottom of the page the element never gets past that */
+    animation-range: entry 0% entry 100%;
   }
 
   @keyframes wordmark-rise {
