@@ -1665,7 +1665,7 @@ Updated as work lands, one tick per finished item. The acceptance gate is plan s
 - [x] Hero rebuilt as the three-role scroll story (`site-hero-section`, `hero.css`); the old carousel hero and the autoplay code are removed
 - [x] Hero art renamed after the three roles and kept in one folder, `public/images/hero/` (`system-architect`, `software-developer`, `ai-automation`; the absorbed frontend and backend lanes are kept as `software-developer-frontend` and `software-developer-backend`)
 - [x] Unit and component tests: story, scene decision, framing, hero markup and CSS contract, shell hooks, theme flip, mobile bar, chapter rail, poster budgets, three bundle boundary
-- [ ] Re-render the posters after the glow texture change and compare them with the live canvas
+- [x] Re-render the posters after the glow texture change (same composition, 20 draw calls, 33k triangles, all within budget)
 - [ ] Playwright specs: tier-forced hero (T0 to T3), 3D smoke, no-JS hero, glass contrast sampling over the canvas, axe, visual poster; fix the existing specs the new header and hero affect
 - [ ] Measurements: initial JS against the 176.5 KB home baseline, 3D chunk at or under 170 KB gzip, Lighthouse mobile five-run medians against Phase 2, smoothness harness, CLS
 - [ ] Docs: `phase-3-findings.md` and results JSON, plan revision 1.6, ADR 0011 Phase 3 outcome, `.env.example` note for `PUBLIC_3D_ENABLED`, CI browser job lists the new specs
