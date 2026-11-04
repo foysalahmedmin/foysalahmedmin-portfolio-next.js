@@ -38,7 +38,13 @@ const ContributionDots = ({
     className="dots"
     aria-label={`${calendar.total.toLocaleString("en")} public contributions by ${handle} in the last year`}
   >
-    <div className="dots-scroll">
+    {/* the calendar scrolls sideways on narrow screens, so keyboard users must be able to reach it */}
+    <div
+      className="dots-scroll"
+      tabIndex={0}
+      role="region"
+      aria-label="Contribution calendar"
+    >
       <div className="dots-frame">
         <div
           className="dots-months"

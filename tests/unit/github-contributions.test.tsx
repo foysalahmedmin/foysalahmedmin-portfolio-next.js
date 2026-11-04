@@ -110,6 +110,10 @@ describe("GithubProfileSection with a calendar", () => {
       "aria-hidden",
       "true"
     );
+    // The calendar scrolls sideways on narrow screens: keyboard users can reach it (axe: scrollable-region-focusable)
+    expect(
+      screen.getByRole("region", { name: "Contribution calendar" })
+    ).toHaveAttribute("tabindex", "0");
     expect(
       screen.getByRole("link", { name: /View @foysalahmedmin on GitHub/ })
     ).toHaveAttribute("href", "https://github.com/foysalahmedmin");

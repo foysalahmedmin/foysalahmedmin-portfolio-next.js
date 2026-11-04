@@ -44,11 +44,18 @@ test("the role panels slide over each other", async ({ page }, testInfo) => {
     );
   // Scrolled well into the section, the first panel is held at the top while the third arrives
   await page.evaluate((y) => window.scrollTo(0, y + 1400), top);
-  const held = await panels
-    .nth(0)
-    .evaluate((element) => element.getBoundingClientRect().top);
-  expect(held).toBeGreaterThan(60);
-  expect(held).toBeLessThan(160);
+  // The smooth scroller may still be easing toward the target, so wait for the hold rather than read once
+  await expect
+    .poll(
+      async () => {
+        const held = await panels
+          .nth(0)
+          .evaluate((element) => element.getBoundingClientRect().top);
+        return held > 60 && held < 160;
+      },
+      { message: "the first role panel is held near the top" }
+    )
+    .toBe(true);
 });
 
 test("the process row moves with the arrows and stops at its ends", async ({
