@@ -138,6 +138,10 @@ const COLLECTION_REGISTRY = Object.freeze({
     domain: "service",
     definition: serviceDefinition,
   },
+  "problem-index": {
+    domain: "service",
+    definition: serviceDefinition,
+  },
   "skill-group-collection": {
     domain: "skill-group",
     definition: skillGroupDefinition,

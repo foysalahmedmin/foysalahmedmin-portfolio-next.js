@@ -6,12 +6,37 @@ import {
   PILLAR_KEYS,
 } from "@/lib/content/pillars";
 import { z } from "zod";
+import {
+  optionalSafeText,
+  requiredText,
+  safeKeySchema,
+  safePlainText,
+  siteCommitmentSchema,
+  siteDeliverableSampleSchema,
+  siteEngagementModelSchema,
+  siteFinderSchema,
+  siteFitSchema,
+  siteNextStepSchema,
+  siteWorkflowExampleSchema,
+  slugSchema,
+  uniqueKeys,
+  verificationSchema,
+} from "./site-content.validation";
 import { getPillarInvariantIssues, SiteDomainError } from "./site.policy";
 import {
+  SITE_DELIVERABLE_KINDS,
   SITE_SNAPSHOT_MAX_BYTES,
+  SITE_WORKFLOW_NODE_KINDS,
+  type TSiteCommitment,
+  type TSiteDeliverableSample,
   type TSiteDraftSnapshot,
+  type TSiteEngagementModel,
+  type TSiteFinder,
+  type TSiteFit,
   type TSiteLink,
+  type TSiteNextStep,
   type TSiteProcessStep,
+  type TSiteWorkflowExample,
 } from "./site.type";
 
 export const siteObjectIdSchema = z
@@ -31,25 +56,6 @@ const sitePillarFileMapSchema = z
   )
   .strict()
   .default({});
-
-const safeKeySchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .min(1)
-  .max(64)
-  .regex(/^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$/);
-
-const requiredText = (minimum: number, maximum: number) =>
-  z.string().trim().min(minimum).max(maximum);
-
-const safePlainText = (minimum: number, maximum: number) =>
-  requiredText(minimum, maximum).refine(
-    (value) =>
-      !/[<>\u0000-\u001f\u007f]/.test(value) &&
-      !/(?:javascript|data|vbscript)\s*:/i.test(value),
-    "Use plain text without markup or executable content"
-  );
 
 const optionalText = (minimum: number, maximum: number) =>
   z.preprocess(
@@ -143,9 +149,6 @@ export const siteLinkSchema: z.ZodType<TSiteLink> = z
       });
     }
   });
-
-const uniqueKeys = <T extends { key: string }>(values: readonly T[]): boolean =>
-  new Set(values.map((value) => value.key)).size === values.length;
 
 const linkList = (maximum: number) =>
   z
@@ -250,6 +253,7 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
     positioning: z
       .object({
         canonical: optionalText(2, 240),
+        headline: optionalText(2, 90),
         compact: optionalText(2, 160),
         mobile: optionalText(2, 120),
         long: optionalText(2, 500),
@@ -308,6 +312,7 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
           .datetime({ offset: true })
           .optional(),
         response_promise: optionalText(2, 240),
+        working_hours: optionalText(2, 160),
         map_policy: z.enum(["hidden", "city_only"]),
       })
       .strict(),
@@ -414,13 +419,54 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
             key: safeKeySchema,
             label: requiredText(1, 80),
             value: optionalText(1, 80),
-            verification: z.enum(["unverified", "derived", "verified"]),
+            verification: verificationSchema,
             enabled: z.boolean(),
+            source_slug: slugSchema.optional(),
+            as_of: z
+              .string()
+              .regex(/^\d{4}-\d{2}-\d{2}$/)
+              .refine(
+                (value) => !Number.isNaN(Date.parse(`${value}T00:00:00Z`)),
+                "Use a real calendar date"
+              )
+              .optional(),
           })
           .strict()
       )
       .max(12)
       .refine(uniqueKeys, "Metric keys must be unique"),
+    engagement_models: z
+      .array(siteEngagementModelSchema)
+      .max(4)
+      .refine(uniqueKeys, "Engagement model keys must be unique")
+      .default([]),
+    commitments: z
+      .array(siteCommitmentSchema)
+      .max(6)
+      .refine(uniqueKeys, "Commitment keys must be unique")
+      .default([]),
+    workflow_example: siteWorkflowExampleSchema.optional(),
+    deliverable_samples: z
+      .array(siteDeliverableSampleSchema)
+      .max(6)
+      .refine(uniqueKeys, "Deliverable sample keys must be unique")
+      .default([]),
+    next_steps: z
+      .array(siteNextStepSchema)
+      .max(4)
+      .refine(uniqueKeys, "Next step keys must be unique")
+      .default([]),
+    fit: siteFitSchema.default({ enabled: false, segments: [], not_a_fit: [] }),
+    principles: z
+      .array(siteCommitmentSchema)
+      .max(6)
+      .refine(uniqueKeys, "Principle keys must be unique")
+      .default([]),
+    finder: siteFinderSchema.default({
+      enabled: false,
+      steps: [],
+      outcomes: [],
+    }),
   })
   .strict()
   .superRefine((snapshot, context) => {

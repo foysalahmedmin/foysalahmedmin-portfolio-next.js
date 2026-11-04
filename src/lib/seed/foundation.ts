@@ -11,9 +11,17 @@ import {
   PILLAR_CONTRACT,
   PILLAR_ICON_KEYS,
   PILLAR_KEYS,
-  pillarKeySchema,
 } from "../content/pillars.ts";
+import { pillarKeySchema } from "../content/pillars.schema.ts";
 import { SeedError } from "./errors.ts";
+import {
+  SITE_METRICS,
+  SITE_POSITIONING_HEADLINE,
+  createSiteContentV8,
+  siteContentShape,
+  siteMetricSchema,
+} from "./foundation-site-content.ts";
+import { launchCaseStudySlug } from "./launch-library-content.ts";
 import type {
   SeedActor,
   SeedManifest,
@@ -21,7 +29,7 @@ import type {
   SeedTruthMarker,
 } from "./types.ts";
 
-export const FOUNDATION_SEED_VERSION = 7 as const;
+export const FOUNDATION_SEED_VERSION = 8 as const;
 
 const foundationTruth = Object.freeze({
   content_tier: "foundation",
@@ -101,6 +109,7 @@ const sitePayloadSchema = z
         positioning: z
           .object({
             canonical: z.string().min(2).max(240),
+            headline: z.string().min(2).max(90),
             compact: z.string().min(2).max(160),
             mobile: z.string().min(2).max(120),
             long: z.string().min(2).max(500),
@@ -137,7 +146,7 @@ const sitePayloadSchema = z
           .strict(),
         experience: z
           .object({
-            theme: z.literal("system"),
+            theme: z.literal("dark"),
             motion: z.literal("reduced"),
             accent: z.literal("cyan"),
             feature_flags: z
@@ -165,19 +174,8 @@ const sitePayloadSchema = z
               .strict()
           )
           .max(12),
-        metrics: z
-          .array(
-            z
-              .object({
-                key: z.string().min(1).max(64),
-                label: z.string().min(1).max(80),
-                value: z.string().min(1).max(80).optional(),
-                verification: z.enum(["unverified", "derived", "verified"]),
-                enabled: z.boolean(),
-              })
-              .strict()
-          )
-          .max(12),
+        metrics: z.array(siteMetricSchema).max(12),
+        ...siteContentShape,
       })
       .strict(),
     published: z.null(),
@@ -300,7 +298,29 @@ const baseRepeatableSchema = z
   })
   .passthrough();
 
+const serviceProblemSchema = z
+  .object({
+    key: z
+      .string()
+      .regex(/^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$/)
+      .max(64),
+    pain: z.string().min(2).max(200),
+    approach: z.string().min(2).max(500),
+    deliverable: z.string().min(2).max(240).optional(),
+    outcome: z.string().min(2).max(300).optional(),
+    case_slug: z
+      .string()
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+      .max(96)
+      .optional(),
+  })
+  .strict();
+
 const servicePayloadSchema = baseRepeatableSchema.extend({
+  problems: z
+    .array(serviceProblemSchema)
+    .max(5)
+    .refine((rows) => new Set(rows.map((row) => row.key)).size === rows.length),
   outcome: z.string().trim().min(1).max(600),
   capabilities: z.array(z.string()).min(1),
   deliverables: z.array(z.string()),
@@ -535,6 +555,7 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
       identity: { locale: "en", timezone: "Asia/Dhaka" },
       positioning: {
         canonical: PILLAR_CONTRACT.map((pillar) => pillar.label).join(" · "),
+        headline: SITE_POSITIONING_HEADLINE,
         compact:
           "I turn business problems into clear architectures, working software, and dependable automation.",
         mobile:
@@ -600,7 +621,7 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
         allow_indexing: false,
       },
       experience: {
-        theme: "system",
+        theme: "dark",
         motion: "reduced",
         accent: "cyan",
         feature_flags: {
@@ -660,29 +681,8 @@ const createSiteRecord = (actor: SeedActor): SeedRecordDefinition => ({
           enabled: true,
         },
       ],
-      metrics: [
-        {
-          key: "core_roles",
-          label: "Core roles",
-          value: String(PILLAR_CONTRACT.length),
-          verification: "derived",
-          enabled: true,
-        },
-        {
-          key: "delivery_stages",
-          label: "Defined delivery stages",
-          value: "6",
-          verification: "derived",
-          enabled: true,
-        },
-        {
-          key: "guardrail_tracks",
-          label: "Guardrail tracks",
-          value: "3",
-          verification: "derived",
-          enabled: true,
-        },
-      ],
+      metrics: SITE_METRICS.map((metric) => ({ ...metric })),
+      ...createSiteContentV8(),
     },
     published: null,
   },
@@ -755,6 +755,9 @@ const automatic = (
 
 const system = { mode: "system" as const };
 
+// The home chapters in the order of the plan (section 4.1). Tier 2 sections
+// (fit check, finder, "How I think") are composed but hidden: their copy needs
+// the owner's confirmation first, and a section with no public data hides itself.
 const pageDrafts = {
   home: {
     seo: { noindex: true },
@@ -763,14 +766,14 @@ const pageDrafts = {
         key: "hero",
         kind: "site-hero",
         visible: true,
-        layout: "immersive",
+        layout: "topology",
         source: system,
       },
       {
         key: "metrics",
         kind: "metrics-strip",
         visible: true,
-        layout: "default",
+        layout: "evidence",
         source: system,
       },
       {
@@ -782,81 +785,94 @@ const pageDrafts = {
         source: system,
       },
       {
-        key: "architecture-workflow",
-        kind: "architecture-workflow",
+        key: "triage",
+        kind: "problem-index",
         visible: true,
-        heading: "How every solution stays reliable, reviewable, and safe",
-        layout: "bento",
-        source: system,
+        heading: "What is slowing your business down?",
+        layout: "default",
+        item_limit: PILLAR_CONTRACT.length,
+        source: automatic({ featured: true }),
       },
       {
         key: "services",
         kind: "service-collection",
         visible: true,
-        heading: "How I can help",
-        layout: "cards",
+        heading: "Three layers. Take one, or all.",
+        layout: "stack",
         item_limit: PILLAR_CONTRACT.length,
         source: automatic({ featured: true }),
       },
       {
-        key: "skills",
-        kind: "skill-group-collection",
+        key: "architecture-workflow",
+        kind: "architecture-workflow",
         visible: true,
-        heading: "The toolkit behind the solutions",
-        layout: "matrix",
-        item_limit: PILLAR_CONTRACT.length,
-        source: automatic({ featured: true }),
-      },
-      {
-        key: "projects",
-        kind: "project-collection",
-        visible: true,
-        heading: "Problems solved",
-        layout: "featured",
-        item_limit: 6,
-        source: automatic({ featured: true }),
+        heading: "Automation you can trust, one step at a time",
+        layout: "pipeline",
+        source: system,
       },
       {
         key: "case-studies",
         kind: "case-study-collection",
         visible: true,
         heading: "Problems solved, start to finish",
-        layout: "featured",
+        layout: "files",
         item_limit: 3,
         source: automatic({ featured: true }),
       },
       {
-        key: "videos",
-        kind: "video-collection",
+        key: "deliverables",
+        kind: "deliverable-samples",
         visible: true,
-        heading: "See the thinking behind the work",
-        layout: "grid",
-        item_limit: 3,
-        source: automatic({ aspect_ratio: "landscape" }),
+        heading: "What you actually receive",
+        layout: "default",
+        source: system,
       },
       {
-        key: "reels",
-        kind: "video-collection",
+        key: "process",
+        kind: "process-steps",
         visible: true,
-        heading: "Short clips, straight to the point",
-        layout: "grid",
-        item_limit: 4,
-        source: automatic({ aspect_ratio: "reel" }),
+        heading: "How a project runs",
+        layout: "wire",
+        source: system,
       },
       {
-        key: "articles",
-        kind: "article-collection",
+        key: "engagement",
+        kind: "engagement-models",
         visible: true,
-        heading: "Notes on solving real problems",
-        layout: "featured",
-        item_limit: 6,
+        heading: "Ways to work together",
+        layout: "default",
+        source: system,
+      },
+      {
+        key: "fit",
+        kind: "fit-check",
+        visible: false,
+        heading: "Who this is for",
+        layout: "default",
+        source: system,
+      },
+      {
+        key: "finder",
+        kind: "starting-point",
+        visible: false,
+        heading: "Not sure where to start?",
+        layout: "default",
+        source: system,
+      },
+      {
+        key: "skills",
+        kind: "skill-group-collection",
+        visible: true,
+        heading: "The tools behind the solutions",
+        layout: "registry",
+        item_limit: PILLAR_CONTRACT.length,
         source: automatic({ featured: true }),
       },
       {
-        key: "github",
-        kind: "github-profile",
+        key: "commitments",
+        kind: "commitments",
         visible: true,
-        heading: "See how I build, in the open",
+        heading: "How I keep projects safe",
         layout: "default",
         source: system,
       },
@@ -870,21 +886,38 @@ const pageDrafts = {
         source: automatic({ featured: true }),
       },
       {
+        key: "github",
+        kind: "github-profile",
+        visible: true,
+        heading: "See how I build, in the open",
+        layout: "default",
+        source: system,
+      },
+      {
+        key: "principles",
+        kind: "commitments",
+        visible: false,
+        heading: "How I think",
+        layout: "principles",
+        source: system,
+      },
+      {
+        key: "articles",
+        kind: "article-collection",
+        visible: true,
+        heading: "Field notes",
+        layout: "notes",
+        item_limit: 3,
+        source: automatic({ featured: true }),
+      },
+      {
         key: "faqs",
         kind: "faq-list",
         visible: true,
         heading: "Questions before we start",
         layout: "list",
-        item_limit: 6,
+        item_limit: 8,
         source: automatic({ featured: true }),
-      },
-      {
-        key: "process",
-        kind: "process-steps",
-        visible: true,
-        heading: "How we work together",
-        layout: "numbered",
-        source: system,
       },
       {
         key: "contact",
@@ -906,12 +939,71 @@ const pageDrafts = {
         source: system,
       },
       {
+        key: "pillars",
+        kind: "pillar-showcase",
+        visible: true,
+        heading: "Three ways I help you move forward",
+        layout: "sticky",
+        source: system,
+      },
+      {
+        key: "services",
+        kind: "service-collection",
+        visible: true,
+        heading: "How I can help",
+        layout: "cards",
+        item_limit: PILLAR_CONTRACT.length,
+        source: automatic({ featured: true }),
+      },
+      {
+        key: "architecture-workflow",
+        kind: "architecture-workflow",
+        visible: true,
+        heading: "How every solution stays reliable, reviewable, and safe",
+        layout: "bento",
+        source: system,
+      },
+      {
+        key: "projects",
+        kind: "project-collection",
+        visible: true,
+        heading: "Work behind the words",
+        layout: "featured",
+        item_limit: 3,
+        source: automatic({ featured: true }),
+      },
+      {
+        key: "case-studies",
+        kind: "case-study-collection",
+        visible: true,
+        heading: "Problems solved, start to finish",
+        layout: "featured",
+        item_limit: 3,
+        source: automatic({ featured: true }),
+      },
+      {
         key: "skills",
         kind: "skill-group-collection",
         visible: true,
         layout: "matrix",
         item_limit: PILLAR_CONTRACT.length,
         source: automatic(),
+      },
+      {
+        key: "principles",
+        kind: "commitments",
+        visible: false,
+        heading: "How I think",
+        layout: "principles",
+        source: system,
+      },
+      {
+        key: "fit",
+        kind: "fit-check",
+        visible: false,
+        heading: "Who this is for",
+        layout: "default",
+        source: system,
       },
       {
         key: "timeline",
@@ -936,6 +1028,14 @@ const pageDrafts = {
         layout: "accordion",
         item_limit: 8,
         source: automatic(),
+      },
+      {
+        key: "github",
+        kind: "github-profile",
+        visible: true,
+        heading: "See how I build, in the open",
+        layout: "default",
+        source: system,
       },
       {
         key: "contact",
@@ -1112,6 +1212,26 @@ const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
         "Docker",
         "GitHub Actions",
       ],
+      problems: [
+        {
+          key: "software-keeps-breaking",
+          pain: "Our software keeps breaking as we grow.",
+          approach:
+            "Map the failure points, redesign data and service boundaries, migrate in safe steps.",
+          deliverable: "Architecture review, decision record, migration plan",
+          outcome:
+            "A system that scales on purpose, with the risks written down.",
+          case_slug: launchCaseStudySlug("migrations"),
+        },
+        {
+          key: "unknown-cost",
+          pain: "Nobody can tell us what this will cost to build or run.",
+          approach:
+            "Compare realistic options and costs; choose the simplest that works.",
+          deliverable: "Option comparison with cost and risk notes",
+          outcome: "A decision you can defend.",
+        },
+      ],
       primary_pillar: "system_architect" as const,
       sequence: 0,
     },
@@ -1133,6 +1253,25 @@ const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
         "Handover documentation for your team",
       ],
       technologies: ["Next.js", "React", "TypeScript", "Node.js", "MongoDB"],
+      problems: [
+        {
+          key: "idea-to-product",
+          pain: "We have an idea, or a spreadsheet, that needs to become a real product.",
+          approach:
+            "Define the smallest useful version and build it end to end in reviewable releases.",
+          deliverable: "Working product, tests, handover documentation",
+          outcome: "Something real in users' hands that your team can extend.",
+        },
+        {
+          key: "manual-internal-tools",
+          pain: "Our internal tools are slow, manual or held together by spreadsheets.",
+          approach:
+            "Replace the weakest workflow first with a small, tested internal tool.",
+          deliverable: "Admin panel or internal tool in production",
+          outcome: "Staff stop working around the system.",
+          case_slug: launchCaseStudySlug("publishing"),
+        },
+      ],
       primary_pillar: "software_developer" as const,
       sequence: 1,
     },
@@ -1154,6 +1293,34 @@ const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
         "Runbook for your team",
       ],
       technologies: ["Node.js", "TypeScript", "Python", "Redis", "RabbitMQ"],
+      problems: [
+        {
+          key: "repetitive-error-prone-steps",
+          pain: "My team spends hours on repetitive, error-prone steps.",
+          approach:
+            "Find the manual steps and automate them with monitoring and a switch-off.",
+          deliverable: "Automated workflow in production, runbook",
+          outcome:
+            "Fewer manual steps and fewer errors, measured against a baseline we agree.",
+          case_slug: launchCaseStudySlug("upkeep"),
+        },
+        {
+          key: "ai-demo-not-workflow",
+          pain: "We tried AI and it works in a demo but not in the real workflow.",
+          approach:
+            "Add human review, logging and fallbacks so the output can be trusted.",
+          deliverable: "LLM-assisted feature with review gate and monitoring",
+          outcome: "AI that your team can trust, audit and turn off.",
+        },
+        {
+          key: "tools-do-not-talk",
+          pain: "Our tools do not talk to each other.",
+          approach:
+            "Connect them with reliable integrations and background jobs.",
+          deliverable: "Integrations with failure alerts",
+          outcome: "Data moves once, correctly, without copy and paste.",
+        },
+      ],
       primary_pillar: "ai_automation" as const,
       sequence: 2,
     },
@@ -1175,6 +1342,7 @@ const createServiceRecords = (actor: SeedActor): SeedRecordDefinition[] => {
       capabilities: service.capabilities,
       deliverables: service.deliverables,
       technologies: service.technologies,
+      problems: service.problems,
       primary_pillar: service.primary_pillar,
       secondary_pillars: [],
       sequence: service.sequence,
@@ -1483,6 +1651,37 @@ const createFAQRecords = (actor: SeedActor): SeedRecordDefinition[] => {
       keywords: ["support", "maintenance", "operations"],
       sequence: 5,
     },
+    {
+      slug: "ai-gets-it-wrong",
+      title: "What if the AI gets it wrong?",
+      answer:
+        "Anything risky waits for a person to approve it before it goes out. Every step is logged, so you can see what the automation did. When the AI cannot decide, the work falls back to the manual path, and one switch turns the whole thing off.",
+      category: "technical" as const,
+      keywords: ["ai", "review", "fallbacks"],
+      sequence: 6,
+    },
+    // These two state a stance (plan C-18), so they stay off until the owner approves them.
+    // Cost, duration, ownership and time-zone answers wait for C-14 to C-17 and C-06.
+    {
+      slug: "no-code-or-chatgpt",
+      title: "Why not a no-code tool or ChatGPT?",
+      answer:
+        "Often you should, and I will say so. A custom build pays off when you need reliability, security or integration with the systems you already run. If a simpler tool solves the problem, that is the better answer.",
+      category: "engagement" as const,
+      keywords: ["no-code", "chatgpt", "fit"],
+      sequence: 7,
+      enabled: false,
+    },
+    {
+      slug: "existing-code-or-team",
+      title: "Can you work with our team or existing code?",
+      answer:
+        "Yes. A common first step is a short review of the existing code and how your team works, so the next step fits what is already there.",
+      category: "engagement" as const,
+      keywords: ["existing code", "team", "legacy"],
+      sequence: 8,
+      enabled: false,
+    },
   ];
 
   return faqs.map((faq) => {
@@ -1502,7 +1701,7 @@ const createFAQRecords = (actor: SeedActor): SeedRecordDefinition[] => {
         sequence: faq.sequence,
         status: "draft" as const,
         is_featured: false,
-        enabled: true,
+        enabled: faq.enabled ?? true,
         claim_verification: "unverified" as const,
         secondary_pillars: [],
         answer: faq.answer,

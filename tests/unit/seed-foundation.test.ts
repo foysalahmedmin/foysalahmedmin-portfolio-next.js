@@ -24,10 +24,10 @@ describe("truthful foundation seed", () => {
     expect(getSeedManifestChecksum(manifest)).toBe(
       getSeedManifestChecksum(otherActorManifest)
     );
-    // 1 Site + 9 Pages + 6 FAQs + 2 legal documents, plus per role: a
+    // 1 Site + 9 Pages + 9 FAQs + 2 legal documents, plus per role: a
     // service, a skill group, 5 skills and a hero intent.
     expect(manifest.records).toHaveLength(
-      1 + PAGE_ROUTE_KEYS.length + 6 + 2 + PILLAR_CONTRACT.length * 8 + 1
+      1 + PAGE_ROUTE_KEYS.length + 9 + 2 + PILLAR_CONTRACT.length * 8 + 1
     );
     expect(manifest.media).toHaveLength(PILLAR_CONTRACT.length + 1);
   });
@@ -176,7 +176,7 @@ describe("truthful foundation seed", () => {
           sections: Array<{ key: string; layout: string }>;
         }
       ).sections.find((section) => section.key === "process")?.layout
-    ).toBe("numbered");
+    ).toBe("wire");
   });
 
   it("omits every unverified claim collection and records pending media truthfully", () => {

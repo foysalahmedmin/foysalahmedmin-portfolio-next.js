@@ -108,6 +108,7 @@ export function Skeleton({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       aria-hidden="true"
+      data-skeleton=""
       className={cn(
         "bg-muted rounded-[var(--radius-sm-token)] motion-safe:animate-pulse",
         className

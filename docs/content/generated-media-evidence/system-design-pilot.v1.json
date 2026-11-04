@@ -6,20 +6,20 @@
   "state": "generated_candidate",
   "approved": false,
   "source": {
-    "local_path": "seed-assets/heroes/system-design-pilot.master.png",
-    "raw_local_path": "seed-assets/heroes/system-design-pilot.raw.png",
+    "local_path": "seed-assets/heroes/system-architect.master.png",
+    "raw_local_path": "seed-assets/heroes/system-architect.raw.png",
     "width": 2400,
     "height": 1350,
     "sha256": "cff50878cfd638fe5252238a2e517a463bc679958503b7971d8d03437087a937",
     "raw_width": 1672,
     "raw_height": 941,
     "raw_sha256": "78940c005788982bc7bc92f17191dd5db0b0e57b498e8631bc255fc26bba2347",
-    "public_path": "public/images/heroes/system-design-pilot.master.png",
-    "repository_policy": "source/master assets are tracked under seed-assets; public preview copies are tracked under public/images/heroes"
+    "public_path": "public/images/hero/system-architect.master.png",
+    "repository_policy": "source/master assets are tracked under seed-assets; public preview copies are tracked under public/images/hero"
   },
   "derivatives": {
     "desktop_webp": {
-      "local_path": "seed-assets/heroes/derivatives/system-design-pilot.desktop.q82.webp",
+      "local_path": "seed-assets/heroes/derivatives/system-architect.desktop.q82.webp",
       "width": 1600,
       "height": 900,
       "quality": 82,
@@ -29,7 +29,7 @@
       "budget_gate": "pass"
     },
     "mobile_webp": {
-      "local_path": "seed-assets/heroes/derivatives/system-design-pilot.mobile.q78.webp",
+      "local_path": "seed-assets/heroes/derivatives/system-architect.mobile.q78.webp",
       "width": 1080,
       "height": 1350,
       "quality": 78,

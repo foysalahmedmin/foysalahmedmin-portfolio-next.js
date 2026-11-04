@@ -1,10 +1,13 @@
 import { z } from "zod";
 import {
+  CASE_STUDY_CONSTRAINT_LIMITS,
   CASE_STUDY_ENGAGEMENT_TYPES,
   CASE_STUDY_LINK_VISIBILITIES,
   CASE_STUDY_OUTCOME_STATES,
+  parseCaseStudyArchitecture,
 } from "@/lib/content/case-study-contract";
-import { PILLAR_KEYS, pillarKeySchema } from "@/lib/content/pillars";
+import { PILLAR_KEYS } from "@/lib/content/pillars";
+import { pillarKeySchema } from "@/lib/content/pillars.schema";
 import { isAllowedPublicProjectUrl } from "@/lib/content/portfolio-contract";
 
 const idSchema = z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
@@ -27,6 +30,16 @@ const urlSchema = z
 
 const listSchema = (maxLength: number, maxItems: number) =>
   z.array(z.string().trim().min(1).max(maxLength)).max(maxItems);
+
+// The contract parser is the single implementation; this only maps its issues onto Zod paths.
+export const architectureSchema = z.unknown().transform((value, context) => {
+  const result = parseCaseStudyArchitecture(value);
+  if (result.ok) return result.value;
+  for (const { path, message } of result.issues) {
+    context.addIssue({ code: "custom", path: [...path], message });
+  }
+  return z.NEVER;
+});
 
 const outcomeSchema = z
   .object({
@@ -75,6 +88,11 @@ const contentFields = {
   approach: z.string().trim().max(8_000).optional(),
   solution: z.string().trim().max(8_000).optional(),
   key_decisions: listSchema(2_000, 50).optional(),
+  constraints: listSchema(
+    CASE_STUDY_CONSTRAINT_LIMITS.length,
+    CASE_STUDY_CONSTRAINT_LIMITS.items
+  ).optional(),
+  architecture: architectureSchema.nullish(),
   results_summary: z.string().trim().max(3_000).optional(),
   outcomes: z.array(outcomeSchema).max(20).optional(),
   tech_stack: listSchema(60, 40).optional(),

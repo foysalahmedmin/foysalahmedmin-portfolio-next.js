@@ -1,4 +1,5 @@
 import type {
+  CaseStudyArchitecture,
   CaseStudyLinkVisibility,
   CaseStudyOutcome,
 } from "@/lib/content/case-study-contract";
@@ -50,6 +51,8 @@ export type TCaseStudy = {
   approach?: string;
   solution?: string;
   key_decisions?: string[];
+  constraints?: string[];
+  architecture?: CaseStudyArchitecture | null;
   results_summary?: string;
   outcomes?: CaseStudyOutcome[];
   tech_stack?: string[];

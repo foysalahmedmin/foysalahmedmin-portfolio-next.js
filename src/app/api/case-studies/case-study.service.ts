@@ -2,6 +2,7 @@ import AppError from "@/builder/app-error";
 import connectDB from "@/lib/db";
 import {
   getCaseStudyPublishReadiness,
+  type CaseStudyArchitecture,
   type CaseStudyLinkVisibility,
   type CaseStudyOutcome,
 } from "@/lib/content/case-study-contract";
@@ -59,6 +60,8 @@ export type TCaseStudyContentFields = {
   approach?: string;
   solution?: string;
   key_decisions?: string[];
+  constraints?: string[];
+  architecture?: CaseStudyArchitecture | null;
   results_summary?: string;
   outcomes?: CaseStudyOutcome[];
   tech_stack?: string[];
@@ -370,6 +373,8 @@ export const updateCaseStudyById = async (
   const previousImages = toIdArray(caseStudy.images);
 
   const updateData: Record<string, unknown> = { ...payload };
+  // null clears the diagram; undefined makes Mongoose $unset it instead of storing null.
+  if (payload.architecture === null) updateData.architecture = undefined;
   if (payload.status === "published" && caseStudy.status !== "published") {
     assertCaseStudyPublishable({ ...caseStudy.toObject(), ...payload });
   }

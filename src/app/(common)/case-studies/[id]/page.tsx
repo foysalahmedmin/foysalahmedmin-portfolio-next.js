@@ -1,3 +1,4 @@
+import { StoryLayout } from "@/components/templates";
 import * as CaseStudyService from "@/app/api/case-studies/case-study.service";
 import CaseStudyDetailsSection from "@/components/(common)/case-studies-page/case-study-details-section";
 import { JsonLdScript } from "@/components/content/json-ld-script";
@@ -121,11 +122,13 @@ export default async function CaseStudyDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <CaseStudyDetailsSection
-        caseStudy={caseStudy}
-        related={related}
-        fallbacks={site.fallbacks}
-      />
+      <StoryLayout route="case-study" site={site}>
+        <CaseStudyDetailsSection
+          caseStudy={caseStudy}
+          related={related}
+          fallbacks={site.fallbacks}
+        />
+      </StoryLayout>
     </>
   );
 }

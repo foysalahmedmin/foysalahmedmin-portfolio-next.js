@@ -183,4 +183,35 @@ describe("CaseStudyForm", () => {
       evidence_reference: "ticket-42",
     });
   });
+
+  it("maps constraints and the architecture JSON, and blocks an invalid diagram", async () => {
+    const onSubmit = vi.fn();
+    const architecture = {
+      alt: "Browser calls an API",
+      layers: ["Edge"],
+      nodes: [{ key: "a", label: "A", layer: "Edge", kind: "client" }],
+      edges: [],
+      steps: [],
+    };
+    render(<CaseStudyForm onSubmit={onSubmit} onCancel={vi.fn()} />);
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText("Title"), "A story");
+    await waitFor(() => expect(screen.getByRole("option", { name: "Platform builds" })).toBeInTheDocument());
+    await user.selectOptions(screen.getByLabelText("Category"), "507f1f77bcf86cd799439022");
+    await user.type(screen.getByLabelText("Constraints"), "No downtime{enter}One person");
+    fireEvent.change(screen.getByLabelText("Architecture (JSON)"), {
+      target: { value: JSON.stringify({ ...architecture, nodes: [] }) },
+    });
+    await user.click(screen.getByRole("button", { name: "Create Case Study" }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getAllByRole("alert")[0]).toHaveTextContent(/nodes/);
+    fireEvent.change(screen.getByLabelText("Architecture (JSON)"), {
+      target: { value: JSON.stringify(architecture) },
+    });
+    await user.click(screen.getByRole("button", { name: "Create Case Study" }));
+    expect(onSubmit.mock.calls[0]![0]).toMatchObject({
+      constraints: ["No downtime", "One person"],
+      architecture,
+    });
+  });
 });

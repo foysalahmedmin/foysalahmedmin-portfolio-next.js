@@ -113,6 +113,34 @@ describe("repeatable admin workspace contracts", () => {
     });
   });
 
+  it("parses a json field on submit and reports a parse error on the field", () => {
+    const workspace = REPEATABLE_ADMIN_WORKSPACES.services;
+    const problems = [{ key: "slow", pain: "Slow pages", approach: "Measure" }];
+    const values = {
+      ...buildRepeatableFormValues(workspace),
+      title: "Performance",
+      outcome: "Faster pages",
+      capabilities: "Profiling",
+    };
+    expect(
+      buildRepeatableFormValues(workspace, { problems } as never).problems
+    ).toBe(JSON.stringify(problems, null, 2));
+    expect(
+      buildRepeatablePayload(workspace, values, "create").problems
+    ).toEqual([]);
+
+    const valid = { ...values, problems: JSON.stringify(problems) };
+    expect(validateRepeatableForm(workspace, valid, true)).toEqual({});
+    expect(
+      buildRepeatablePayload(workspace, valid, "edit", 3).problems
+    ).toEqual(problems);
+
+    const invalid = { ...values, problems: '[{"key": "slow",}]' };
+    expect(validateRepeatableForm(workspace, invalid, true).problems).toMatch(
+      /^Enter valid JSON/
+    );
+  });
+
   it("enforces testimonial consent and preserves optimistic versioning", () => {
     const workspace = REPEATABLE_ADMIN_WORKSPACES.testimonials;
     const values = {

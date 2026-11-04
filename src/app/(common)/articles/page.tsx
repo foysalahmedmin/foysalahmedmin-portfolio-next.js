@@ -1,3 +1,4 @@
+import ArticlesContentSection from "@/components/(common)/articles-page/articles-content-section";
 import { PublicRoutePage } from "@/components/pages/public-route-page";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
 import { getPublicPagePayloadOrFallback } from "@/lib/pages/public-page-fallback";
@@ -40,5 +41,11 @@ export default async function ArticlesPage({
   });
   if (discovery?.redirect_to) redirect(discovery.redirect_to);
 
-  return <PublicRoutePage payload={payload} discovery={discovery} />;
+  return (
+    <PublicRoutePage
+      payload={payload}
+      discovery={discovery}
+      discoveryRenderers={{ articles: ArticlesContentSection }}
+    />
+  );
 }

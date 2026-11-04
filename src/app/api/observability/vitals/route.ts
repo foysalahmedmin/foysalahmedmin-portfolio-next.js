@@ -42,6 +42,18 @@ const metricSchema = z
   })
   .strict();
 
+const engineEventSchema = z
+  .object({
+    event: z.literal("engine_load_failed"),
+    target: z.enum(["gsap", "palette"]),
+    device_class: z.enum(["mobile", "desktop"]),
+    release: z
+      .string()
+      .trim()
+      .regex(/^[A-Za-z0-9._-]{1,64}$/),
+  })
+  .strict();
+
 const readBoundedJson = async (request: Request): Promise<unknown> => {
   if (!request.body) throw new Error("missing_body");
   const reader = request.body.getReader();
@@ -89,7 +101,21 @@ export async function POST(request: Request) {
   }
 
   try {
-    const metric = metricSchema.parse(await readBoundedJson(request));
+    const body = await readBoundedJson(request);
+    if (typeof body === "object" && body !== null && "event" in body) {
+      // A reliability event, not a metric: which enhancement chunk failed to load (no identifiers)
+      const event = engineEventSchema.parse(body);
+      logServerEvent("warn", "motion.engine.load_failed", {
+        target: event.target,
+        device_class: event.device_class,
+        release: event.release,
+      });
+      return new NextResponse(null, {
+        status: 204,
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
+    const metric = metricSchema.parse(body);
     logServerEvent("info", "web.vital.measured", {
       metric: metric.name,
       value: metric.value,

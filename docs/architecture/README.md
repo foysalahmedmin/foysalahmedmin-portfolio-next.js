@@ -15,6 +15,8 @@ This directory contains the accepted architecture baseline for the portfolio tra
 | [0007](./0007-production-topology-rate-limits-and-outbox.md) | Production topology, rate limits, idempotency, and outbox | Accepted |
 | [0008](./0008-migrations-and-audit-events.md)                | Migrations and audit events                               | Accepted |
 | [0009](./0009-browser-support-and-quality-profile.md)        | Browser support, runtime target, and quality profile      | Accepted |
+| [0010](./0010-case-studies-and-videos.md)                    | Case studies and videos                                   | Accepted |
+| [0011](./0011-monochrome-surfaces-motion-and-3d.md)          | Monochrome surfaces, motion engine, and 3D budget         | Accepted |
 
 ## Record rules
 

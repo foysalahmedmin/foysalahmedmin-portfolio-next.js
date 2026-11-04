@@ -1,0 +1,272 @@
+/*
+ * Status marks, link underline, accordion glyph and surface-scoped state treatments.
+ * State is never colour (docs plan 3.6): every mark is a shape plus a visible text label.
+ */
+
+.status-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.2;
+}
+
+.status-mark__glyph {
+  display: inline-block;
+  position: relative;
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  color: currentColor;
+}
+
+.status-mark[data-glyph="draft"] .status-mark__glyph {
+  border: 1.5px solid currentColor;
+}
+
+.status-mark[data-glyph="published"] .status-mark__glyph {
+  background: currentColor;
+}
+
+.status-mark[data-glyph="pending"] .status-mark__glyph {
+  border: 1.5px solid currentColor;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
+
+.status-mark[data-glyph="warning"] .status-mark__glyph {
+  transform: rotate(45deg) scale(0.85);
+  border: 1.5px solid currentColor;
+}
+
+.status-mark[data-glyph="error"] .status-mark__glyph {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: currentColor;
+}
+
+.status-mark[data-glyph="success"] .status-mark__glyph {
+  border: 1.5px solid currentColor;
+}
+
+.status-mark[data-glyph="success"] .status-mark__glyph::after {
+  position: absolute;
+  top: -0.05rem;
+  left: 0.18rem;
+  transform: rotate(40deg);
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  width: 0.2rem;
+  height: 0.42rem;
+  content: "";
+}
+
+.status-mark[data-glyph="archived"] .status-mark__glyph {
+  border: 1.5px dashed currentColor;
+}
+
+/* Error reads heavier than the others, so it survives a monochrome table */
+.status-mark[data-state="error"] .status-mark__label {
+  font-weight: 700;
+}
+
+@media (forced-colors: active) {
+  .status-mark__glyph {
+    color: CanvasText;
+    forced-color-adjust: none;
+  }
+}
+
+/* ---------- Link underline draw (M26) ---------- */
+.link-draw {
+  transition: background-size var(--dur-base) var(--ease-signal);
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-size: 0 1px;
+  background-repeat: no-repeat;
+  text-decoration: none;
+}
+
+.link-draw:hover,
+.link-draw:focus-visible {
+  background-size: 100% 1px;
+}
+
+@media (hover: none) {
+  .link-draw {
+    background-size: 100% 1px;
+  }
+}
+
+@media (forced-colors: active) {
+  .link-draw {
+    background-image: none;
+    text-decoration: underline;
+  }
+}
+
+/* ---------- Accordion ---------- */
+.accordion-item[open] .accordion-glyph {
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accordion-glyph,
+  .link-draw {
+    transition: none;
+  }
+}
+
+/* System lab easing previews */
+@keyframes lab-slide {
+  0% {
+    transform: translateX(0);
+  }
+  60%,
+  100% {
+    transform: translateX(calc(100cqw - 2rem));
+  }
+}
+
+/* ---------- Label roll (M27) and press feedback ---------- */
+.roll-label {
+  display: inline-grid;
+  overflow: clip;
+  line-height: 1.25;
+}
+
+.roll-label > span {
+  grid-area: 1 / 1;
+  transition: transform var(--dur-micro) var(--ease-signal);
+}
+
+.roll-label > span:last-child {
+  transform: translateY(110%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(a, button):is(:hover, :focus-visible) > .roll-label > span:first-child {
+    transform: translateY(-110%);
+  }
+
+  :is(a, button):is(:hover, :focus-visible) > .roll-label > span:last-child {
+    transform: none;
+  }
+}
+
+/* Reduced and off motion: the plain label, no copy underneath */
+html:not([data-motion="full"]) .roll-label > span:last-child {
+  display: none;
+}
+
+html:not([data-motion="full"]) .roll-label > span:first-child {
+  transform: none;
+}
+
+/* ---------- Header chrome: hide and show (M35), nav indicator (M28) ---------- */
+header[data-chrome] {
+  transition: transform var(--dur-base) var(--ease-snap);
+}
+
+header[data-chrome][data-hidden="true"] {
+  transform: translateY(-100%);
+}
+
+html:not([data-motion="full"]) header[data-chrome][data-hidden="true"] {
+  transform: none;
+}
+
+[data-nav-indicator] {
+  position: absolute;
+  transform: translateX(var(--ind-x, 0px)) scaleX(var(--ind-w, 0));
+  transform-origin: left;
+  inset-block-end: 0.4rem;
+  inset-inline-start: 0;
+  background: var(--foreground);
+  inline-size: 1px;
+  block-size: 2px;
+  pointer-events: none;
+}
+
+nav[data-indicator="ready"] [data-nav-indicator] {
+  transition: transform var(--dur-base) var(--ease-settle);
+}
+
+@media (forced-colors: active) {
+  [data-nav-indicator] {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+}
+
+/* ---------- Footer wordmark (M22): a cropped giant name that rises as the footer arrives ---------- */
+.footer-wordmark {
+  margin-block-start: 3rem;
+  block-size: 0.86em;
+  overflow: clip;
+  pointer-events: none;
+  font-size: clamp(4.5rem, 1.5rem + 15vw, 17rem);
+  line-height: 0.86;
+  user-select: none;
+}
+
+/* Pure decoration (WCAG 1.4.3 incidental text): the name is drawn from data-wordmark so it is not page text */
+.footer-wordmark::before {
+  display: block;
+  content: attr(data-wordmark);
+  /* Readable as a name, quiet as a mark: 42% of the foreground over the page */
+  color: color-mix(in oklab, var(--foreground) 42%, var(--background));
+  font-weight: 800;
+  font-stretch: 125%;
+  font-family: var(--ff-display-125, var(--ff-display, inherit));
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@supports (animation-timeline: view()) {
+  html[data-motion="full"] .footer-wordmark::before {
+    animation: wordmark-rise linear both;
+    animation-timeline: view();
+    /* Done by the time the name is fully on screen: at the bottom of the page the element never gets past that */
+    animation-range: entry 0% entry 100%;
+  }
+
+  @keyframes wordmark-rise {
+    from {
+      transform: translateY(46%);
+    }
+
+    to {
+      transform: none;
+    }
+  }
+}
+
+@media print {
+  .footer-wordmark {
+    display: none;
+  }
+}
+
+/* ---------- Thumb-zone bar (phones and tablets) ---------- */
+[data-mobile-bar] {
+  transform: translateY(100%);
+  transition: transform var(--dur-base) var(--ease-signal);
+}
+
+[data-mobile-bar][data-visible="true"] {
+  transform: none;
+}
+
+/* Hidden bars take no focus */
+[data-mobile-bar][data-visible="false"] {
+  visibility: hidden;
+}
+
+html:not([data-motion="full"]) [data-mobile-bar] {
+  transition: none;
+}
+
+@media print {
+  [data-mobile-bar] {
+    display: none;
+  }
+}

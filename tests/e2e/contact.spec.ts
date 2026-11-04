@@ -6,6 +6,13 @@ test.describe.configure({ mode: "serial" });
 const contactStatusRegion = (page: Page) =>
   page.locator("#contact-form-status");
 
+/** The dev server streams a skeleton first, so two mains (and two form status regions) can coexist briefly. */
+const openContact = async (page: Page) => {
+  await page.goto("/contact");
+  await expect(page.locator("main")).toHaveCount(1);
+  await expect(page.locator("main")).not.toHaveAttribute("aria-busy", "true");
+};
+
 test("contact submission reports success only after a stored receipt response", async ({
   page,
 }) => {
@@ -24,7 +31,7 @@ test("contact submission reports success only after a stored receipt response", 
     });
   });
 
-  await page.goto("/contact");
+  await openContact(page);
   await page.getByLabel("Full Name").fill("Test Visitor");
   await page.getByLabel("Email Address").fill("visitor@example.test");
   await page.getByLabel("Subject").fill("Architecture review");
@@ -48,7 +55,7 @@ test("contact submission reports success only after a stored receipt response", 
 test("contact validation focuses the visitor on actionable field errors", async ({
   page,
 }) => {
-  await page.goto("/contact");
+  await openContact(page);
   await page.getByRole("button", { name: /send message/i }).click();
   await expect(contactStatusRegion(page)).toHaveAttribute("role", "alert");
   await expect(contactStatusRegion(page)).toContainText("highlighted fields");
@@ -66,7 +73,7 @@ test("contact timeout remains retryable without changing the submission key", as
     await route.abort();
   });
 
-  await page.goto("/contact");
+  await openContact(page);
   await page.getByLabel("Full Name").fill("Test Visitor");
   await page.getByLabel("Email Address").fill("visitor@example.test");
   await page.getByLabel("Subject").fill("Retry semantics");

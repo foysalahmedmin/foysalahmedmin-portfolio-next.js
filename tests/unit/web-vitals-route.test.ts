@@ -66,4 +66,41 @@ describe("Web Vitals endpoint", () => {
     ).toBe(403);
     expect((await POST(createRequest(body))).status).toBe(400);
   });
+
+  it("accepts the privacy-safe engine failure event and logs only coarse fields", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const { POST } = await import("@/app/api/observability/vitals/route");
+    const response = await POST(
+      createRequest(
+        JSON.stringify({
+          event: "engine_load_failed",
+          target: "gsap",
+          device_class: "desktop",
+          release: "release-1",
+        })
+      )
+    );
+    expect(response.status).toBe(204);
+    const logged = String(warn.mock.calls[0]?.[0]);
+    expect(logged).toContain("motion.engine.load_failed");
+    expect(logged).not.toContain("visitor");
+  });
+
+  it("rejects an engine event with extra fields or an unknown target", async () => {
+    const { POST } = await import("@/app/api/observability/vitals/route");
+    for (const extra of [{ visitor_id: "x" }, { target: "three" }]) {
+      const response = await POST(
+        createRequest(
+          JSON.stringify({
+            event: "engine_load_failed",
+            target: "gsap",
+            device_class: "desktop",
+            release: "release-1",
+            ...extra,
+          })
+        )
+      );
+      expect(response.status).toBe(400);
+    }
+  });
 });

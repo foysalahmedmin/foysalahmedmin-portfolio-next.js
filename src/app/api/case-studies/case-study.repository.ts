@@ -126,6 +126,8 @@ export const PUBLIC_CASE_STUDY_DETAIL_FIELDS: Array<keyof TCaseStudy> = [
   "approach",
   "solution",
   "key_decisions",
+  "constraints",
+  "architecture",
   "results_summary",
   "services",
   "learnings",

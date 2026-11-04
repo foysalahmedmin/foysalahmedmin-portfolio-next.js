@@ -1,76 +1,96 @@
 import { createEmergencyPublicSite } from "@/app/api/site/site.policy";
-import { resolveMediaAlt } from "@/lib/media/presentation";
-import { buildPublicHero } from "@/lib/site/public-hero";
 import { PILLAR_CONTRACT } from "@/lib/content/pillars";
+import {
+  HERO_COPY,
+  buildPublicHero,
+  splitRoleTitle,
+} from "@/lib/site/public-hero";
 import { describe, expect, it } from "vitest";
 
 describe("public hero projection", () => {
-  it("always follows the exact canonical pillar order", () => {
+  it("is one beat per role, in the canonical order", () => {
     const hero = buildPublicHero(createEmergencyPublicSite());
-    expect(hero.slides.map((slide) => slide.key)).toEqual(
+    expect(hero.roles.map((role) => role.key)).toEqual(
       PILLAR_CONTRACT.map(({ key }) => key)
     );
-    expect(hero.slides.filter((slide) => slide.priority)).toHaveLength(1);
+    expect(hero.roles).toHaveLength(3);
+    expect(hero.kicker).toBe(HERO_COPY.kicker);
   });
 
-  it("uses published Site content, visual metadata, and pillar CTA", () => {
+  it("reads each role from Site.pillars: label, headline and the first three capabilities", () => {
     const site = createEmergencyPublicSite();
-    site.content_source = "published";
-    site.positioning.mobile = "One positioning source";
     site.pillars[0] = {
       ...site.pillars[0],
-      headline: "Accessible product interfaces",
-      summary: "A published summary",
-      client_outcome: "A published outcome",
-      capabilities: ["Design systems"],
-      cta: {
-        key: "frontend-work",
-        label: "See frontend work",
-        kind: "internal",
-        href: "/projects?pillar=frontend",
-        enabled: true,
-      },
-      visual: {
-        id: "507f1f77bcf86cd799439011",
-        url: "https://res.cloudinary.com/demo/image/upload/frontend.png",
-        alt_text: "Abstract interface layers",
-        focal_point: { x: 0.7, y: 0.4 },
-        dominant_color: "#102a43",
-        blur_data_url: "data:image/webp;base64,UklGRg==",
-      },
+      headline: "Get the design right before it gets expensive",
+      capabilities: ["One", "Two", "Three", "Four"],
     };
-
-    const hero = buildPublicHero(site);
-    expect(hero.eyebrow).toBe("One positioning source");
-    expect(hero.slides[0]).toMatchObject({
-      headline: "Accessible product interfaces",
-      summary: "A published summary",
-      outcome: "A published outcome",
-      image: expect.objectContaining({
-        url: "https://res.cloudinary.com/demo/image/upload/frontend.png",
-        focal_point: { x: 0.7, y: 0.4 },
-        dominant_color: "#102a43",
-      }),
-      cta: { href: "/projects?pillar=frontend" },
+    const [first] = buildPublicHero(site).roles;
+    expect(first).toMatchObject({
+      label: site.pillars[0].label,
+      headline: "Get the design right before it gets expensive",
+      capabilities: ["One", "Two", "Three"],
     });
-    expect(resolveMediaAlt(hero.slides[0].image)).toBe(
-      "Abstract interface layers"
+  });
+
+  it("falls back to the label when a role has no headline", () => {
+    const site = createEmergencyPublicSite();
+    site.pillars[1] = { ...site.pillars[1], headline: "  " };
+    expect(buildPublicHero(site).roles[1]!.headline).toBe(
+      site.pillars[1].label
     );
   });
 
-  it("uses File purpose as the sole decorative-alt authority", () => {
+  it("sends the primary action where the site's call to action goes, with the hero's words", () => {
     const site = createEmergencyPublicSite();
-    site.pillars[0] = {
-      ...site.pillars[0],
-      visual: {
-        id: "507f1f77bcf86cd799439011",
-        url: "https://cdn.example.com/frontend.webp",
-        alt_text: "Contradictory legacy copy",
-        is_decorative: true,
+    site.primary_ctas = [
+      {
+        key: "start",
+        label: "Contact me",
+        kind: "internal",
+        href: "/contact?topic=hero",
+        enabled: true,
       },
-    };
+    ];
+    const hero = buildPublicHero(site, { processHref: "#working-process" });
+    expect(hero.primary).toMatchObject({
+      label: HERO_COPY.primary,
+      href: "/contact?topic=hero",
+    });
+    expect(hero.secondary).toMatchObject({
+      label: HERO_COPY.secondary,
+      href: "#working-process",
+      external: false,
+    });
+  });
 
-    const hero = buildPublicHero(site);
-    expect(resolveMediaAlt(hero.slides[0].image)).toBe("");
+  it("still has a primary action when the site configures none", () => {
+    const site = createEmergencyPublicSite();
+    site.primary_ctas = [];
+    expect(buildPublicHero(site).primary.href).toBe("/contact");
+    expect(buildPublicHero(site).secondary.href).toBe("/about");
+  });
+
+  it("refuses a site that does not have exactly the three roles", () => {
+    const site = createEmergencyPublicSite();
+    site.pillars = site.pillars.slice(0, 2);
+    expect(() => buildPublicHero(site)).toThrow(/exactly 3/);
+  });
+});
+
+describe("splitRoleTitle", () => {
+  it("drops the last word to the second line", () => {
+    expect(splitRoleTitle("System Architect")).toEqual(["System", "Architect"]);
+    expect(splitRoleTitle("Software Developer")).toEqual([
+      "Software",
+      "Developer",
+    ]);
+    expect(splitRoleTitle("AI Automation Developer")).toEqual([
+      "AI Automation",
+      "Developer",
+    ]);
+  });
+
+  it("keeps a single word on one line and trims", () => {
+    expect(splitRoleTitle("  Architect ")).toEqual(["Architect"]);
   });
 });

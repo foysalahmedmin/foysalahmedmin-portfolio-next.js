@@ -1,12 +1,12 @@
 import type { TPublicSiteDto } from "@/app/api/site/site.type";
-import MotionControl from "@/components/ui/motion-control";
+import MotionPreferences from "@/components/ui/motion-preferences";
 import {
   getPrimaryPublicCta,
   getPublicShellLinks,
   getPublicSocialLinks,
   type TPublicShellLink,
 } from "@/lib/site/public-shell";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 const FooterLink = ({
@@ -41,6 +41,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
   const socials = getPublicSocialLinks(site.social_links);
   const cta = getPrimaryPublicCta(site);
   const name = site.identity.public_name || "Engineering Portfolio";
+  const wordmark = site.identity.short_name || name;
   const tagline =
     site.footer.tagline ||
     site.positioning.compact ||
@@ -48,35 +49,14 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
     "Architecture, software, and automation";
 
   return (
-    <footer className="bg-card border-border border-t pt-20 pb-10">
+    <footer
+      data-footer
+      className="bg-background text-foreground border-line-2 overflow-clip border-t pt-16"
+    >
       <div className="container mx-auto px-6">
-        <div className="border-border mb-16 grid gap-8 border-b pb-16 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div className="max-w-3xl">
-            <p className="text-primary text-sm font-bold tracking-[0.2em] uppercase">
-              Build with intent
-            </p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-              Turn a complex goal into a clear engineering path.
-            </h2>
-            <p className="text-muted-foreground mt-5 max-w-2xl text-lg leading-8">
-              {site.positioning.client_promise ||
-                "Share the outcome and constraints; the system can be shaped from interface through operations."}
-            </p>
-          </div>
-          {cta && (
-            <FooterLink
-              link={cta}
-              className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex min-h-12 items-center justify-center gap-3 rounded-2xl px-6 text-sm font-black tracking-wide focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            />
-          )}
-        </div>
-
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_0.8fr_1fr]">
           <div>
-            <Link
-              href="/"
-              className="inline-flex min-h-11 items-center text-xl font-black tracking-tight"
-            >
+            <Link href="/" className="t-h4 inline-flex min-h-11 items-center">
               {name}
             </Link>
             <p className="text-muted-foreground mt-4 max-w-sm text-sm leading-7">
@@ -90,9 +70,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
           </div>
 
           <div>
-            <h3 className="text-xs font-black tracking-[0.16em] uppercase">
-              Navigate
-            </h3>
+            <h3 className="t-eyebrow text-fg-secondary">Navigate</h3>
             {navigation.length ? (
               <ul className="mt-5 space-y-3" role="list">
                 {navigation.map((link) => (
@@ -112,9 +90,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
           </div>
 
           <div>
-            <h3 className="text-xs font-black tracking-[0.16em] uppercase">
-              Connect
-            </h3>
+            <h3 className="t-eyebrow text-fg-secondary">Connect</h3>
             {socials.length || site.contact.public_email ? (
               <ul className="mt-5 space-y-3" role="list">
                 {socials.map((link) => (
@@ -144,9 +120,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
           </div>
 
           <div>
-            <h3 className="text-xs font-black tracking-[0.16em] uppercase">
-              Practice
-            </h3>
+            <h3 className="t-eyebrow text-fg-secondary">Practice</h3>
             <ol
               className="text-muted-foreground mt-5 space-y-2 text-sm leading-6"
               role="list"
@@ -165,7 +139,7 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
               "Custom-designed and engineered portfolio."}
           </p>
           <div className="flex flex-wrap items-center gap-4">
-            <MotionControl />
+            <MotionPreferences />
             {legal.map((link) => (
               <FooterLink
                 key={link.key}
@@ -182,6 +156,11 @@ const Footer = ({ site }: { site: TPublicSiteDto }) => {
           </div>
         </div>
       </div>
+      <div
+        className="footer-wordmark container"
+        aria-hidden="true"
+        data-wordmark={wordmark}
+      />
     </footer>
   );
 };

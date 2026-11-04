@@ -61,8 +61,8 @@ export const LAUNCH_PROJECTS: readonly LaunchProject[] = [
     performance_reliability:
       "Public pages are cached and revalidated on publish. Rate limits fall back to per-instance counting instead of taking sign-in offline when the shared store is unavailable.",
     outcomes: [
-      { label: "Automated tests passing", value: "860" },
-      { label: "Schema migrations applied from an empty database", value: "15" },
+      { label: "Automated tests passing", value: "1,440" },
+      { label: "Schema migrations applied from an empty database", value: "16" },
     ],
     learnings: [
       "A seed needs its own tests: one that fails its own schema stays hidden until the first real run.",
@@ -86,7 +86,7 @@ export const LAUNCH_PROJECTS: readonly LaunchProject[] = [
     architecture:
       "An ordered registry of versioned migrations. Each has a dry-run summary, a checksum, and an exclusive lease so two runs can never overlap.",
     decisions: [
-      "Require a dry run before any change",
+      "Offer a dry run before any change",
       "Block destructive steps unless a fresh backup reference is supplied",
       "Record the checksum of every applied migration",
     ],
@@ -97,7 +97,7 @@ export const LAUNCH_PROJECTS: readonly LaunchProject[] = [
     performance_reliability:
       "Each step is idempotent, so a repeat run reports 'skipped' instead of changing anything.",
     outcomes: [
-      { label: "Migrations in the registry", value: "15" },
+      { label: "Migrations in the registry", value: "16" },
       { label: "Applied cleanly to an empty database in a single run", value: "Yes" },
     ],
     learnings: [

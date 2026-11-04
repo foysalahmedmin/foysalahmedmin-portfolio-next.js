@@ -29,6 +29,7 @@ describe("ServicesSection", () => {
             capabilities: ["Architecture boundaries"],
             deliverables: ["RFC", "Release checklist"],
             technologies: ["Next.js", "MongoDB"],
+            problems: [],
           },
         ]}
       />

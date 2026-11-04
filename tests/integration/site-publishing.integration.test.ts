@@ -186,4 +186,51 @@ describe.skipIf(!TEST_MONGODB_URI)(SUITE_NAME, () => {
     await expect(SiteCacheInvalidation.countDocuments()).resolves.toBe(1);
     await expect(AuditEvent.countDocuments()).resolves.toBe(4);
   });
+  it("round-trips Phase 4 commercial content: draft edit, publish gate, public read", async () => {
+    await createSite(context);
+    const draft = buildPublishableSiteDraft();
+    draft.positioning.headline = "Business problems in. Reliable systems out.";
+    draft.engagement_models = [
+      {
+        key: "review",
+        name: "Architecture review",
+        best_when: "A system is hurting.",
+        you_get: ["Written architecture"],
+        how_it_runs: "Fixed scope.",
+        price_label: "From 1,000",
+        verification: "derived",
+        enabled: true,
+      },
+    ];
+    const edited = await updateSiteDraft(
+      { expected_revision: 1, draft },
+      context
+    );
+    expect(edited.draft.engagement_models).toHaveLength(1);
+
+    await expect(
+      publishSite({ expected_revision: 2 }, context)
+    ).rejects.toMatchObject({
+      status: 422,
+      code: "SITE_NOT_PUBLISHABLE",
+      sources: ["engagement_models.0.price_label"],
+    });
+    expect((await readPublishedSiteUncached()).content_source).toBe(
+      "emergency"
+    );
+
+    draft.engagement_models[0]!.verification = "verified";
+    await updateSiteDraft({ expected_revision: 2, draft }, context);
+    await publishSite({ expected_revision: 3 }, context);
+
+    const published = await readPublishedSiteUncached();
+    expect(published.positioning.headline).toBe(
+      "Business problems in. Reliable systems out."
+    );
+    expect(published.engagement_models).toEqual([
+      expect.objectContaining({ key: "review", price_label: "From 1,000" }),
+    ]);
+    expect(published.commitments).toEqual([]);
+    expect(published).not.toHaveProperty("fit");
+  });
 });

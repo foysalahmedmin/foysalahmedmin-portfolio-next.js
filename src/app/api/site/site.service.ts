@@ -14,6 +14,7 @@ import {
   createEmergencyPublicSite,
   createNeutralSiteDraft,
   getSitePublishIssues,
+  isSiteMetricFresh,
   SiteDomainError,
   toPublicSiteMedia,
   uniqueSiteFileIds,
@@ -682,6 +683,9 @@ const toPublicDto = (
       ...(draft.contact.response_promise
         ? { response_promise: draft.contact.response_promise }
         : {}),
+      ...(draft.contact.working_hours
+        ? { working_hours: draft.contact.working_hours }
+        : {}),
       ...(draft.contact.email_visibility === "public" &&
       draft.contact.public_email
         ? { public_email: draft.contact.public_email }
@@ -711,21 +715,39 @@ const toPublicDto = (
     fallbacks: {
       emergency_visual_key: draft.fallbacks.emergency_visual_key,
       project: media(draft.fallbacks.project_file),
-      project_by_pillar: mediaByPillar(
-        draft.fallbacks.project_files_by_pillar
-      ),
+      project_by_pillar: mediaByPillar(draft.fallbacks.project_files_by_pillar),
       article: media(draft.fallbacks.article_file),
-      article_by_pillar: mediaByPillar(
-        draft.fallbacks.article_files_by_pillar
-      ),
+      article_by_pillar: mediaByPillar(draft.fallbacks.article_files_by_pillar),
       profile: media(draft.fallbacks.profile_file),
     },
     process: draft.process.filter((step) => step.enabled),
     metrics: draft.experience.feature_flags.show_metrics
       ? draft.metrics.filter(
-          (metric) => metric.enabled && metric.verification !== "unverified"
+          (metric) =>
+            metric.enabled &&
+            metric.verification !== "unverified" &&
+            isSiteMetricFresh(metric.as_of)
         )
       : [],
+    engagement_models: draft.engagement_models
+      .filter((model) => model.enabled && model.verification !== "unverified")
+      .map(({ price_label: priceLabel, ...model }) => ({
+        ...model,
+        ...(model.verification === "verified" && priceLabel
+          ? { price_label: priceLabel }
+          : {}),
+      })),
+    commitments: draft.commitments.filter((item) => item.enabled),
+    ...(draft.workflow_example
+      ? { workflow_example: draft.workflow_example }
+      : {}),
+    deliverable_samples: draft.deliverable_samples.filter(
+      (sample) => sample.enabled && sample.verification !== "unverified"
+    ),
+    next_steps: draft.next_steps.filter((step) => step.enabled),
+    ...(draft.fit.enabled ? { fit: draft.fit } : {}),
+    principles: draft.principles.filter((item) => item.enabled),
+    ...(draft.finder.enabled ? { finder: draft.finder } : {}),
   };
 };
 

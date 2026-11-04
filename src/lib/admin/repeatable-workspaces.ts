@@ -55,6 +55,11 @@ export type RepeatableAdminField =
       placeholder?: string;
     })
   | (BaseField & {
+      type: "json";
+      rows?: number;
+      placeholder?: string;
+    })
+  | (BaseField & {
       type: "multi-select";
       options: readonly RepeatableAdminOption[];
     })
@@ -263,6 +268,13 @@ const WORKSPACES = {
         label: "Technologies",
         type: "list",
         placeholder: "One technology per line",
+      },
+      {
+        name: "problems",
+        label: "Problems",
+        type: "json",
+        help: 'Up to 5 entries, each {"key": "slow-checkout", "pain": "…", "approach": "…", "deliverable": "…", "outcome": "…", "case_slug": "…"}. key (lowercase, unique), pain and approach are required; the rest are optional. Plain text only; leave blank for none.',
+        rows: 12,
       },
       {
         name: "icon_key",

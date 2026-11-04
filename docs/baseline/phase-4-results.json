@@ -1,0 +1,25 @@
+{
+  "measured_at": "2026-11-04",
+  "build": "production build on a throwaway replica set; Phase 3 (e5b4474) built beside it for the size comparison",
+  "seed": {
+    "version": 8,
+    "empty_database_dry_run": { "create": 46, "pending_source": 4 },
+    "second_dry_run_after_apply": { "unchanged": 46 },
+    "migrations_applied_from_empty": 16
+  },
+  "tests": {
+    "files": 217,
+    "tests": 1440,
+    "integration_database": "local replica set"
+  },
+  "initial_js_gzip_bytes": {
+    "phase3": 184274,
+    "phase4_first_build": 184363,
+    "phase4_final": 184292,
+    "budget": 184320,
+    "headroom_final": 28,
+    "routes": ["/", "/about", "/contact"]
+  },
+  "truth_manifest": { "version": "1.1.0", "new_claims": 21, "new_blockers": 3 },
+  "case_file_diagrams": { "nodes": [9, 10, 13, 12] }
+}

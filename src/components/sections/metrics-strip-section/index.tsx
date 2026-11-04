@@ -1,4 +1,5 @@
 import type { TSiteMetric } from "@/app/api/site/site.type";
+import { StatusMark } from "@/components/ui/status-mark";
 import { cn } from "@/lib/utils";
 
 export default function MetricsStripSection({
@@ -56,7 +57,7 @@ export default function MetricsStripSection({
           {visible.map((metric) => (
             <div
               key={metric.key}
-              className="border-border bg-background/75 rounded-2xl border p-5 shadow-[var(--shadow-xs)]"
+              className="border-border bg-background/75 rounded-xl border p-5 shadow-[var(--shadow-xs)]"
             >
               <dt className="text-muted-foreground text-xs tracking-wider uppercase">
                 {metric.label}
@@ -64,9 +65,17 @@ export default function MetricsStripSection({
               <dd className="text-primary font-display mt-3 text-4xl leading-none font-bold tracking-tight">
                 {metric.value}
               </dd>
-              <span className="text-muted-foreground mt-4 inline-flex text-[0.65rem] font-black tracking-widest uppercase">
-                {metric.verification === "verified" ? "✓ verified" : "derived"}
-              </span>
+              <dd className="t-eyebrow text-muted-foreground mt-4">
+                <StatusMark
+                  state={
+                    metric.verification === "verified" ? "verified" : "derived"
+                  }
+                >
+                  {metric.verification === "verified"
+                    ? "Verified"
+                    : "Derived from code"}
+                </StatusMark>
+              </dd>
             </div>
           ))}
         </dl>

@@ -1,3 +1,4 @@
+import ProjectsContentSection from "@/components/(common)/projects-page/projects-content-section";
 import { PublicRoutePage } from "@/components/pages/public-route-page";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
 import { getPublicPagePayloadOrFallback } from "@/lib/pages/public-page-fallback";
@@ -40,5 +41,11 @@ export default async function ProjectsPage({
   });
   if (discovery?.redirect_to) redirect(discovery.redirect_to);
 
-  return <PublicRoutePage payload={payload} discovery={discovery} />;
+  return (
+    <PublicRoutePage
+      payload={payload}
+      discovery={discovery}
+      discoveryRenderers={{ projects: ProjectsContentSection }}
+    />
+  );
 }

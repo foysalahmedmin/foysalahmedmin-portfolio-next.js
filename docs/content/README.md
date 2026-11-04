@@ -6,6 +6,7 @@ This directory is the committed, redacted source of truth for deciding what the 
 
 - `content-truth.schema.json` defines the machine-readable contract and the only allowed truth statuses.
 - `content-truth.v1.json` is the versioned audit of the public source at repository revision `91dddac18ee2` on 2026-07-15.
+  Version `1.1.0` (2026-11-04) is a minor bump: it adds 21 claims for the Site fields, samples and metrics of seed version 8 (IDs `site.*`, new categories `engagement`, `method` and `evidence`) and three blockers, and sets the schema version to `1.1.0`. The 88 original claims are unchanged. Derived metrics carry their derivation rule, an `as_of` date and a 180-day freshness window; engagement models, deliverable samples, the fit check, the finder and the voice-dependent copy are `needs-owner-verification` and stay off in the seed until the owner confirms them (plan section 8).
 - `generated-media-direction.md` locks the P12 visual direction, 17-master production manifest, prompt grammar, pilot/QA gates, provenance template, resolved ingestion prerequisites, and remaining binding/generation blockers without claiming that media has been generated or approved.
 - `generated-media-system-design-pilot.v1.json` stores the exact System Design pilot generation request and metadata checklist; it is not evidence that the pilot exists.
 - `generated-media-evidence/system-design-pilot.v1.json` records the generated System Design pilot candidate, tracked asset paths, checksums, and pending approval gates; it is not publication approval.

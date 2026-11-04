@@ -1,22 +1,32 @@
 "use client";
 
-import { useScrollPosition } from "@/hooks/ui/use-scroll-position";
 import { cn } from "@/lib/utils";
 import { ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 
+const SHOW_AFTER_PX = 400;
+
 const ScrollToTop = () => {
-  const { scrollTop } = useScrollPosition();
   const [isVisible, setIsVisible] = useState(false);
 
+  // One frame at a time, reading only the scroll offset (the page's size is not needed, and reading it
+  // lays the page out). A restored scroll position fires a scroll event, so there is no read at mount.
   useEffect(() => {
-    if (scrollTop > 400) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
-  }, [scrollTop]);
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      setIsVisible(window.scrollY > SHOW_AFTER_PX);
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -28,7 +38,7 @@ const ScrollToTop = () => {
   return (
     <div
       className={cn(
-        "fixed bottom-8 right-8 z-50 transition-all duration-500 ease-in-out",
+        "fixed right-4 bottom-24 z-50 transition-all duration-500 ease-in-out xl:right-8 xl:bottom-8",
         isVisible
           ? "translate-y-0 opacity-100"
           : "-translate-y-[120vh] opacity-0"
@@ -39,7 +49,7 @@ const ScrollToTop = () => {
         shape="icon"
         size="lg"
         onClick={scrollToTop}
-        className="size-12 rounded-full shadow-2xl shadow-primary/20 hover:-translate-y-1"
+        className="shadow-primary/20 size-12 rounded-full shadow-2xl hover:-translate-y-1"
         aria-label="Scroll to top"
       >
         <ArrowUp className="size-6" />

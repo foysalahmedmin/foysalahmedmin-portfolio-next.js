@@ -40,6 +40,11 @@ const fieldInitialValue = (
   if (field.type === "multi-select") {
     return Array.isArray(current) ? current.map(String) : [];
   }
+  if (field.type === "json") {
+    return current === undefined || current === null
+      ? ""
+      : JSON.stringify(current, null, 2);
+  }
   if (field.type === "legal-sections") {
     if (Array.isArray(current) && current.length) {
       return current.map((section) => {
@@ -207,6 +212,14 @@ export const validateRepeatableForm = (
         errors[field.name] = "Use 160 characters or fewer per item.";
       }
     }
+    if (field.type === "json" && asString(value)) {
+      try {
+        JSON.parse(asString(value));
+      } catch (error) {
+        errors[field.name] =
+          `Enter valid JSON: ${error instanceof Error ? error.message : "it could not be parsed"}.`;
+      }
+    }
     if (field.type === "multi-select") {
       const selected = asStringArray(value);
       if (
@@ -353,6 +366,9 @@ export const buildRepeatablePayload = (
         .slice(0, field.maxItems ?? 30);
     } else if (field.type === "multi-select") {
       payload[field.name] = asStringArray(value);
+    } else if (field.type === "json") {
+      // Already parse-checked by validateRepeatableForm; blank means an empty list.
+      payload[field.name] = asString(value) ? JSON.parse(asString(value)) : [];
     } else if (field.type === "legal-sections") {
       payload[field.name] = (
         Array.isArray(value) ? (value as LegalSectionDraft[]) : []

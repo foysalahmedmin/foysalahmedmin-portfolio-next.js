@@ -326,21 +326,29 @@ const RepeatableRecordEditor = ({
       </FieldFrame>
     );
 
-    if (field.type === "textarea" || field.type === "list") {
+    if (
+      field.type === "textarea" ||
+      field.type === "list" ||
+      field.type === "json"
+    ) {
+      const isJson = field.type === "json";
       return frame(
         <textarea
           id={id}
           name={field.name}
           value={typeof value === "string" ? value : ""}
-          rows={field.type === "textarea" ? (field.rows ?? 5) : 6}
+          rows={field.type === "list" ? 6 : (field.rows ?? (isJson ? 10 : 5))}
           maxLength={field.type === "textarea" ? field.maxLength : undefined}
           placeholder={field.placeholder}
           required={field.required}
           disabled={submitting}
+          spellCheck={isJson ? false : undefined}
           aria-invalid={Boolean(error)}
           aria-describedby={describedBy(field)}
           onChange={(event) => setValue(field.name, event.target.value)}
-          className={textareaClassName}
+          className={
+            isJson ? `${textareaClassName} font-mono` : textareaClassName
+          }
         />
       );
     }
@@ -985,6 +993,7 @@ const RepeatableRecordEditor = ({
                 className={
                   field.type === "textarea" ||
                   field.type === "list" ||
+                  field.type === "json" ||
                   field.type === "multi-select" ||
                   field.type === "legal-sections"
                     ? "md:col-span-2"

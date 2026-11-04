@@ -371,4 +371,87 @@ describe("revisioned Site service", () => {
     expect(result.pillars[0]).not.toHaveProperty("visual_is_decorative");
     expect(serialized).not.toContain("verification");
   });
+  it("publishes only complete, verified commercial claims and fresh evidence", async () => {
+    const publishedDraft = buildPublishableSiteDraft();
+    publishedDraft.experience.feature_flags.show_metrics = true;
+    publishedDraft.metrics = [
+      {
+        key: "fresh",
+        label: "Fresh",
+        value: "1",
+        verification: "derived",
+        enabled: true,
+        as_of: new Date().toISOString().slice(0, 10),
+      },
+      {
+        key: "stale",
+        label: "Stale",
+        value: "2",
+        verification: "derived",
+        enabled: true,
+        as_of: "2020-01-01",
+      },
+    ];
+    publishedDraft.engagement_models = [
+      {
+        key: "priced",
+        name: "Priced",
+        best_when: "The problem is clear.",
+        you_get: ["Reviewable releases"],
+        how_it_runs: "Milestones.",
+        price_label: "From 1,000",
+        verification: "verified",
+        enabled: true,
+      },
+      {
+        key: "outline",
+        name: "Outline",
+        best_when: "The problem is vague.",
+        you_get: ["A written plan"],
+        how_it_runs: "Fixed scope.",
+        verification: "derived",
+        enabled: true,
+      },
+      {
+        key: "hidden",
+        name: "Hidden",
+        you_get: [],
+        verification: "unverified",
+        enabled: false,
+      },
+    ];
+    publishedDraft.fit = {
+      enabled: false,
+      segments: [
+        { key: "founders", label: "Founders", for_you_if: "An idea." },
+      ],
+      not_a_fit: [],
+    };
+    mocks.siteRepository.findPublished.mockResolvedValue(
+      siteRecord({
+        revision: 2,
+        draft: publishedDraft,
+        published: {
+          ...publishedDraft,
+          revision: 2,
+          published_at: new Date("2026-07-15T02:00:00.000Z"),
+          published_by: actor.id,
+        },
+      })
+    );
+    mocks.fileRepository.findManyByIds.mockResolvedValue([]);
+
+    const result = await readPublishedSiteUncached();
+
+    expect(result.content_source).toBe("published");
+    expect(result.metrics.map(({ key }) => key)).toEqual(["fresh"]);
+    expect(result.engagement_models.map(({ key }) => key)).toEqual([
+      "priced",
+      "outline",
+    ]);
+    expect(result.engagement_models[0]?.price_label).toBe("From 1,000");
+    expect(result.engagement_models[1]).not.toHaveProperty("price_label");
+    expect(result).not.toHaveProperty("fit");
+    expect(result).not.toHaveProperty("finder");
+  });
 });

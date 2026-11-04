@@ -7,6 +7,8 @@ import {
   getPublicRouteHeader,
   PublicRoutePage,
 } from "@/components/pages/public-route-page";
+import ArticlesContentSection from "@/components/(common)/articles-page/articles-content-section";
+import ProjectsContentSection from "@/components/(common)/projects-page/projects-content-section";
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -191,6 +193,7 @@ describe("shared public route renderer", () => {
             facets: { technologies: [], years: [] },
           },
         }}
+        discoveryRenderers={{ projects: ProjectsContentSection }}
       />
     );
     expect(projectResult.getByTestId("composition").textContent).toBe(
@@ -218,10 +221,42 @@ describe("shared public route renderer", () => {
             facets: { topics: [] },
           },
         }}
+        discoveryRenderers={{ articles: ArticlesContentSection }}
       />
     );
     expect(articleResult.getByTestId("composition").textContent).toBe(
       "contact-ctainteractive article discovery"
+    );
+  });
+
+  it("does not render discovery unless the route supplies its renderer (keeps client code off other routes)", () => {
+    const projects = payload("projects", ["project-collection"]);
+    const result = render(
+      <PublicRoutePage
+        payload={projects}
+        discovery={{
+          route_key: "projects",
+          props: {
+            initialProjects: [],
+            initialMeta: { total: 0, page: 1, limit: 9 },
+            initialQuery: {
+              search: "",
+              pillar: "all",
+              category: "all",
+              technology: "all",
+              type: "all",
+              year: null,
+              sort: "featured",
+              page: 1,
+            },
+            categories: [],
+            facets: { technologies: [], years: [] },
+          },
+        }}
+      />
+    );
+    expect(result.getByTestId("composition").textContent).toBe(
+      "project-collection"
     );
   });
 

@@ -60,8 +60,8 @@ export default function ServicesSection({
           </Title>
           <Description>
             Every service starts from a business outcome and works backwards to
-            the simplest system that delivers it: clear scope, working
-            software, and honest trade-offs.
+            the simplest system that delivers it: clear scope, working software,
+            and honest trade-offs.
           </Description>
         </SectionTitle>
 
@@ -83,16 +83,11 @@ export default function ServicesSection({
                 useCardsLayout && "lg:p-7"
               )}
             >
-              <div className="flex items-start justify-between gap-4">
-                <span className="text-primary type-label" aria-hidden="true">
-                  {String(item.order).padStart(2, "0")}
+              {item.pillar && (
+                <span className="bg-muted text-muted-foreground inline-block rounded-md px-2 py-1 text-xs font-bold">
+                  {getPillarLabel(item.pillar)}
                 </span>
-                {item.pillar && (
-                  <span className="bg-muted text-muted-foreground rounded-md px-2 py-1 text-xs font-bold">
-                    {getPillarLabel(item.pillar)}
-                  </span>
-                )}
-              </div>
+              )}
               <h3 className="mt-5 text-xl leading-tight font-black">
                 {item.label}
               </h3>

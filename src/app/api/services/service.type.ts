@@ -6,11 +6,23 @@ import type {
   TRepeatableRecord,
 } from "../repeatable-content/record.type";
 
+export const SERVICE_PROBLEMS_MAX = 5;
+
+export type TServiceProblem = {
+  key: string;
+  pain: string;
+  approach: string;
+  deliverable?: string;
+  outcome?: string;
+  case_slug?: string;
+};
+
 export type TService = TRepeatableRecord & {
   outcome: string;
   capabilities: string[];
   deliverables: string[];
   technologies: string[];
+  problems?: TServiceProblem[];
   icon_key?: TContentIconKey;
   visual_file?: unknown;
 };
@@ -20,6 +32,7 @@ export type TPublicServiceDto = TPublicRepeatableBaseDto & {
   capabilities: string[];
   deliverables: string[];
   technologies: string[];
+  problems: TServiceProblem[];
   icon_key?: TContentIconKey;
   visual?: TPublicMediaDto;
 };
@@ -29,6 +42,7 @@ export type TAdminServiceDto = TAdminRepeatableBaseDto & {
   capabilities: string[];
   deliverables: string[];
   technologies: string[];
+  problems: TServiceProblem[];
   icon_key?: TContentIconKey;
   visual_file?: string;
 };

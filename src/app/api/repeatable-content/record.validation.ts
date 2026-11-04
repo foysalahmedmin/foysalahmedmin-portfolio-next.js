@@ -1,9 +1,15 @@
-import { canonicalSlugSchema } from "@/lib/content/slug";
+import {
+  PLAIN_TEXT_MESSAGE,
+  SAFE_KEY_MAX_LENGTH,
+  SAFE_KEY_PATTERN,
+  isSafePlainText,
+} from "@/lib/content/plain-text";
+import { canonicalSlugSchema } from "@/lib/content/slug.schema";
 import {
   PILLAR_KEYS,
   normalizePillarRelationships,
-  pillarKeySchema,
 } from "@/lib/content/pillars";
+import { pillarKeySchema } from "@/lib/content/pillars.schema";
 import { SOFT_DELETE_SCOPES } from "@/lib/db/soft-delete";
 import { z } from "zod";
 import {
@@ -31,6 +37,21 @@ export const safeUrlSchema = z
       !parsed.hash
     );
   }, "Use a public HTTPS URL without credentials or fragments");
+
+export const safeKeySchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(SAFE_KEY_MAX_LENGTH)
+  .regex(SAFE_KEY_PATTERN);
+
+export const safePlainTextSchema = (minimum: number, maximum: number) =>
+  z
+    .string()
+    .trim()
+    .min(minimum)
+    .max(maximum)
+    .refine(isSafePlainText, PLAIN_TEXT_MESSAGE);
 
 const safeText = (maximum: number) => z.string().trim().min(1).max(maximum);
 
