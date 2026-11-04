@@ -8,20 +8,36 @@ import type {
   TSiteProcessStep,
   TSiteSocialLink,
 } from "@/app/api/site/site.type";
+import {
+  siteFinderSchema,
+  siteFitSchema,
+  siteWorkflowExampleSchema,
+} from "@/app/api/site/site.validation";
 import { Button } from "@/components/ui/button";
 import { FileUploader } from "@/components/ui/file-uploader";
 import {
-  EditorialField,
   EditorialErrorSummary,
   EditorialNotice,
   EditorialPanel,
   EditorialStatus,
   EditorialStickyActions,
   EditorialWorkspaceHeader,
-  editorialInputClassName,
-  editorialTextareaClassName,
   type TEditorErrors,
 } from "@/components/admin/editorial-editor-primitives";
+import {
+  CheckField,
+  SelectField,
+  TextareaField,
+  TextField,
+  fieldError,
+  optional,
+} from "@/components/admin/site/site-fields";
+import {
+  DeliverableSamplesEditor,
+  EngagementModelsEditor,
+  TitledRowsEditor,
+} from "@/components/admin/site/site-list-editors";
+import { ValidatedJsonEditor } from "@/components/admin/site/validated-json-editor";
 import {
   getPillarLabel,
   PILLAR_ACCENTS,
@@ -57,8 +73,20 @@ type SiteAdminEditorProps = Readonly<{
   canPublish: boolean;
 }>;
 
-const cloneDraft = (draft: TSiteDraftSnapshot): TSiteDraftSnapshot =>
-  structuredClone(draft);
+// A stored snapshot that predates the engagement and home-proof fields lacks them; the form starts them empty.
+const cloneDraft = (draft: TSiteDraftSnapshot): TSiteDraftSnapshot => {
+  const next = structuredClone(draft);
+  return {
+    ...next,
+    engagement_models: next.engagement_models ?? [],
+    commitments: next.commitments ?? [],
+    deliverable_samples: next.deliverable_samples ?? [],
+    next_steps: next.next_steps ?? [],
+    principles: next.principles ?? [],
+    fit: next.fit ?? { enabled: false, segments: [], not_a_fit: [] },
+    finder: next.finder ?? { enabled: false, steps: [], outcomes: [] },
+  };
+};
 
 const sourceMap = (error: EditorialRequestError): TEditorErrors =>
   Object.fromEntries(
@@ -75,177 +103,6 @@ const sourceMap = (error: EditorialRequestError): TEditorErrors =>
       ];
     })
   );
-
-const fieldError = (errors: TEditorErrors, path: string) => errors[path];
-const describedBy = (errors: TEditorErrors, path: string, hint = false) =>
-  [hint ? `${path}-hint` : "", errors[path] ? `${path}-error` : ""]
-    .filter(Boolean)
-    .join(" ") || undefined;
-
-const optional = (value: string): string | undefined =>
-  value.trim() ? value : undefined;
-
-function TextField({
-  path,
-  label,
-  value,
-  onChange,
-  errors,
-  disabled,
-  hint,
-  type = "text",
-  required,
-}: {
-  path: string;
-  label: string;
-  value?: string;
-  onChange: (value: string) => void;
-  errors: TEditorErrors;
-  disabled: boolean;
-  hint?: string;
-  type?: "text" | "email" | "url" | "tel" | "datetime-local";
-  required?: boolean;
-}) {
-  const error = fieldError(errors, path);
-  return (
-    <EditorialField
-      path={path}
-      label={label}
-      hint={hint}
-      error={error}
-      required={required}
-    >
-      <input
-        id={path}
-        type={type}
-        value={value ?? ""}
-        onChange={(event) => onChange(event.target.value)}
-        disabled={disabled}
-        required={required}
-        aria-invalid={Boolean(error)}
-        aria-describedby={describedBy(errors, path, Boolean(hint))}
-        className={editorialInputClassName}
-      />
-    </EditorialField>
-  );
-}
-
-function TextareaField({
-  path,
-  label,
-  value,
-  onChange,
-  errors,
-  disabled,
-  hint,
-  rows = 4,
-}: {
-  path: string;
-  label: string;
-  value?: string;
-  onChange: (value: string) => void;
-  errors: TEditorErrors;
-  disabled: boolean;
-  hint?: string;
-  rows?: number;
-}) {
-  const error = fieldError(errors, path);
-  return (
-    <EditorialField path={path} label={label} hint={hint} error={error}>
-      <textarea
-        id={path}
-        value={value ?? ""}
-        onChange={(event) => onChange(event.target.value)}
-        disabled={disabled}
-        rows={rows}
-        aria-invalid={Boolean(error)}
-        aria-describedby={describedBy(errors, path, Boolean(hint))}
-        className={editorialTextareaClassName}
-      />
-    </EditorialField>
-  );
-}
-
-function SelectField({
-  path,
-  label,
-  value,
-  onChange,
-  options,
-  errors,
-  disabled,
-  hint,
-}: {
-  path: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: readonly Readonly<{ value: string; label: string }>[];
-  errors: TEditorErrors;
-  disabled: boolean;
-  hint?: string;
-}) {
-  const error = fieldError(errors, path);
-  return (
-    <EditorialField path={path} label={label} hint={hint} error={error}>
-      <select
-        id={path}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        disabled={disabled}
-        aria-invalid={Boolean(error)}
-        aria-describedby={describedBy(errors, path, Boolean(hint))}
-        className={editorialInputClassName}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </EditorialField>
-  );
-}
-
-function CheckField({
-  path,
-  label,
-  checked,
-  onChange,
-  disabled,
-  hint,
-}: {
-  path: string;
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  disabled: boolean;
-  hint?: string;
-}) {
-  return (
-    <label
-      htmlFor={path}
-      className="border-border bg-background flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-sm has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
-    >
-      <input
-        id={path}
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        disabled={disabled}
-        className="mt-0.5 size-4 accent-current"
-      />
-      <span>
-        <span className="block font-bold">{label}</span>
-        {hint ? (
-          <span className="text-muted-foreground mt-1 block text-xs leading-5">
-            {hint}
-          </span>
-        ) : null}
-      </span>
-    </label>
-  );
-}
 
 function ManagedFileReferenceField({
   path,
@@ -709,6 +566,25 @@ function MetricsEditor({
               errors={errors}
               disabled={disabled}
             />
+            <TextField
+              path={`${prefix}.source_slug`}
+              label="Source case study slug"
+              value={metric.source_slug}
+              onChange={(value) =>
+                update(index, { source_slug: optional(value) })
+              }
+              errors={errors}
+              disabled={disabled}
+            />
+            <TextField
+              path={`${prefix}.as_of`}
+              label="As of"
+              value={metric.as_of}
+              onChange={(value) => update(index, { as_of: optional(value) })}
+              errors={errors}
+              disabled={disabled}
+              hint="YYYY-MM-DD. A stale value is not shown."
+            />
             <div className="flex items-end gap-2">
               <CheckField
                 path={`${prefix}.enabled`}
@@ -941,7 +817,15 @@ export default function SiteAdminEditor({
   const [busy, setBusy] = useState<
     "create" | "save" | "publish" | "reload" | null
   >(null);
-  const [errors, setErrors] = useState<TEditorErrors>({});
+  const [serverErrors, setErrors] = useState<TEditorErrors>({});
+  // Parse and schema failures of the JSON editors; they block saving until fixed.
+  const [jsonErrors, setJsonErrors] = useState<TEditorErrors>({});
+  // Bumped whenever the draft is replaced, so the JSON editors restart from the new value.
+  const [epoch, setEpoch] = useState(0);
+  const errors = useMemo(
+    () => ({ ...serverErrors, ...jsonErrors }),
+    [serverErrors, jsonErrors]
+  );
   const [notice, setNotice] = useState<{
     tone: "success" | "warning" | "danger";
     title: string;
@@ -953,10 +837,19 @@ export default function SiteAdminEditor({
       Boolean(
         draft &&
           savedDraft &&
-          JSON.stringify(draft) !== JSON.stringify(savedDraft)
+          (JSON.stringify(draft) !== JSON.stringify(savedDraft) ||
+            Object.keys(jsonErrors).length)
       ),
-    [draft, savedDraft]
+    [draft, savedDraft, jsonErrors]
   );
+  const setJsonError = (path: string, message: string | undefined) =>
+    setJsonErrors((current) =>
+      message === undefined
+        ? Object.fromEntries(
+            Object.entries(current).filter(([key]) => key !== path)
+          )
+        : { ...current, [path]: message }
+    );
   const disabled = !canEdit || Boolean(busy);
 
   useEffect(() => {
@@ -971,6 +864,8 @@ export default function SiteAdminEditor({
     setDraft(cloneDraft(next.draft));
     setSavedDraft(cloneDraft(next.draft));
     setErrors({});
+    setJsonErrors({});
+    setEpoch((value) => value + 1);
     setConflictRevision(null);
     setNotice({ tone: "success", title: message });
     router.refresh();
@@ -1021,6 +916,14 @@ export default function SiteAdminEditor({
   };
   const save = async () => {
     if (!site || !draft || !dirty) return;
+    if (Object.keys(jsonErrors).length) {
+      setNotice({
+        tone: "danger",
+        title: "Fix the JSON editors before saving.",
+        detail: Object.keys(jsonErrors).join(", "),
+      });
+      return;
+    }
     setBusy("save");
     setNotice(null);
     setErrors({});
@@ -1214,6 +1117,23 @@ export default function SiteAdminEditor({
           />
         </div>
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <TextField
+            path="positioning.headline"
+            label="Page headline"
+            value={draft.positioning.headline}
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                positioning: {
+                  ...draft.positioning,
+                  headline: optional(value),
+                },
+              })
+            }
+            errors={errors}
+            disabled={disabled}
+            hint="Plain text, up to 90 characters. The problem-first h1; the longer forms stay below it."
+          />
           {(
             [
               "canonical",
@@ -1638,6 +1558,20 @@ export default function SiteAdminEditor({
             errors={errors}
             disabled={disabled}
           />
+          <TextField
+            path="contact.working_hours"
+            label="Working hours"
+            value={draft.contact.working_hours}
+            onChange={(value) =>
+              setDraft({
+                ...draft,
+                contact: { ...draft.contact, working_hours: optional(value) },
+              })
+            }
+            errors={errors}
+            disabled={disabled}
+            hint="Plain text, up to 160 characters."
+          />
         </div>
       </EditorialPanel>
 
@@ -1769,7 +1703,7 @@ export default function SiteAdminEditor({
               />
             )
           )}
-          <div className="border-border/70 md:col-span-2 xl:col-span-4 border-t pt-5">
+          <div className="border-border/70 border-t pt-5 md:col-span-2 xl:col-span-4">
             <h3 className="font-black">Project fallbacks by pillar</h3>
             <p className="text-muted-foreground mt-1 text-sm leading-6">
               A matching pillar asset takes priority over the legacy generic
@@ -1799,7 +1733,7 @@ export default function SiteAdminEditor({
               disabled={disabled}
             />
           ))}
-          <div className="border-border/70 md:col-span-2 xl:col-span-4 border-t pt-5">
+          <div className="border-border/70 border-t pt-5 md:col-span-2 xl:col-span-4">
             <h3 className="font-black">Article fallbacks by pillar</h3>
             <p className="text-muted-foreground mt-1 text-sm leading-6">
               A matching pillar asset takes priority over the legacy generic
@@ -2140,6 +2074,126 @@ export default function SiteAdminEditor({
         />
       </EditorialPanel>
 
+      <EditorialPanel
+        id="site-engagement"
+        title="Engagement models"
+        description="Commercial terms are claims: an enabled model must be complete and not unverified, and its price stays hidden until verified."
+      >
+        <EngagementModelsEditor
+          models={draft.engagement_models}
+          disabled={disabled}
+          errors={errors}
+          onChange={(engagement_models) =>
+            setDraft({ ...draft, engagement_models })
+          }
+        />
+      </EditorialPanel>
+
+      <EditorialPanel
+        id="site-commitments"
+        title="Commitments, principles & next steps"
+        description="Short titled statements for the home chapters. Array order is the public order; disabled rows stay private draft material."
+      >
+        <div className="space-y-8">
+          <TitledRowsEditor
+            rows={draft.commitments}
+            path="commitments"
+            title="Commitments"
+            description="Up to six promises about how work is delivered."
+            noun="Commitment"
+            maximum={6}
+            disabled={disabled}
+            errors={errors}
+            onChange={(commitments) => setDraft({ ...draft, commitments })}
+          />
+          <TitledRowsEditor
+            rows={draft.principles}
+            path="principles"
+            title="Principles"
+            description="Up to six statements on how the work is approached."
+            noun="Principle"
+            maximum={6}
+            disabled={disabled}
+            errors={errors}
+            onChange={(principles) => setDraft({ ...draft, principles })}
+          />
+          <TitledRowsEditor
+            rows={draft.next_steps}
+            path="next_steps"
+            title="Next steps"
+            description="Up to four ordered steps shown after the call to action."
+            noun="Next step"
+            maximum={4}
+            disabled={disabled}
+            errors={errors}
+            onChange={(next_steps) => setDraft({ ...draft, next_steps })}
+          />
+        </div>
+      </EditorialPanel>
+
+      <EditorialPanel
+        id="site-deliverables"
+        title="Deliverable samples"
+        description="Inspectable excerpts from real artifacts, shown as plain text."
+      >
+        <DeliverableSamplesEditor
+          samples={draft.deliverable_samples}
+          disabled={disabled}
+          errors={errors}
+          onChange={(deliverable_samples) =>
+            setDraft({ ...draft, deliverable_samples })
+          }
+        />
+      </EditorialPanel>
+
+      <EditorialPanel
+        id="site-structured"
+        title="Workflow example, fit check & starting-point finder"
+        description="Nested structures edited as JSON and checked against the same schema the server enforces. Nothing invalid reaches the draft, and saving is blocked until each editor is valid."
+      >
+        <div className="grid gap-6 xl:grid-cols-3">
+          <ValidatedJsonEditor
+            key={`workflow_example-${epoch}`}
+            path="workflow_example"
+            label="Workflow example"
+            value={draft.workflow_example}
+            schema={siteWorkflowExampleSchema}
+            onChange={(workflow_example) =>
+              setDraft({ ...draft, workflow_example })
+            }
+            onError={setJsonError}
+            errors={errors}
+            disabled={disabled}
+            allowEmpty
+            hint='Illustrative only ("illustrative": true) with 2 to 8 nodes. Leave empty to remove it.'
+          />
+          <ValidatedJsonEditor
+            key={`fit-${epoch}`}
+            path="fit"
+            label="Fit check"
+            value={draft.fit}
+            schema={siteFitSchema}
+            onChange={(fit) => fit && setDraft({ ...draft, fit })}
+            onError={setJsonError}
+            errors={errors}
+            disabled={disabled}
+            hint='"enabled", up to six "segments" and up to six "not_a_fit" lines. Enabling needs at least one segment.'
+          />
+          <ValidatedJsonEditor
+            key={`finder-${epoch}`}
+            path="finder"
+            label="Starting-point finder"
+            value={draft.finder}
+            schema={siteFinderSchema}
+            onChange={(finder) => finder && setDraft({ ...draft, finder })}
+            onError={setJsonError}
+            errors={errors}
+            disabled={disabled}
+            hint='"enabled", up to four "steps" (2 to 6 tagged options each) and "outcomes" that point at enabled engagement model keys.'
+          />
+        </div>
+      </EditorialPanel>
+
       <EditorialStickyActions
         dirty={dirty}
         busy={Boolean(busy)}
@@ -2148,6 +2202,8 @@ export default function SiteAdminEditor({
         onReset={() => {
           setDraft(cloneDraft(savedDraft));
           setErrors({});
+          setJsonErrors({});
+          setEpoch((value) => value + 1);
           setNotice(null);
         }}
       >

@@ -10,12 +10,14 @@ import SiteAdminEditor from "@/components/admin/site-admin-editor";
 import {
   EditorialRequestError,
   createAdminPagePreviewClient,
+  publishAdminSiteClient,
   updateAdminPageClient,
   updateAdminSiteClient,
 } from "@/services/site-page-admin.service";
 import type * as SitePageAdminServiceModule from "@/services/site-page-admin.service";
 import {
   cleanup,
+  fireEvent,
   render,
   screen,
   waitFor,
@@ -99,6 +101,7 @@ describe("Site and Page admin editor interactions", () => {
   beforeEach(() => {
     mocks.refresh.mockReset();
     vi.mocked(updateAdminSiteClient).mockReset();
+    vi.mocked(publishAdminSiteClient).mockReset();
     vi.mocked(updateAdminPageClient).mockReset();
     vi.mocked(createAdminPagePreviewClient).mockReset();
   });
@@ -232,6 +235,227 @@ describe("Site and Page admin editor interactions", () => {
       )
     );
     expect(await screen.findByText("Site draft saved.")).toBeVisible();
+  });
+
+  it("starts the engagement and home-proof editors empty for a snapshot that predates them", async () => {
+    const user = userEvent.setup();
+    const legacy: Partial<TSiteDraftSnapshot> = buildPublishableSiteDraft();
+    for (const key of [
+      "engagement_models",
+      "commitments",
+      "deliverable_samples",
+      "next_steps",
+      "principles",
+      "fit",
+      "finder",
+      "workflow_example",
+    ] as const) {
+      delete legacy[key];
+    }
+    vi.mocked(updateAdminSiteClient).mockImplementation(
+      async (_revision, draft) => siteDto(draft, 4)
+    );
+    render(
+      <SiteAdminEditor
+        initialSite={siteDto(legacy as TSiteDraftSnapshot)}
+        canEdit
+        canPublish={false}
+      />
+    );
+
+    expect(screen.getByText("Draft matches the saved revision")).toBeVisible();
+    expect(screen.getByText(/No engagement models configured/)).toBeVisible();
+    expect(screen.getByLabelText("Workflow example")).toHaveValue("");
+    expect(
+      JSON.parse(
+        (screen.getByLabelText("Fit check") as HTMLTextAreaElement).value
+      )
+    ).toEqual({ enabled: false, segments: [], not_a_fit: [] });
+
+    await user.type(
+      screen.getByLabelText("Page headline"),
+      "Systems that ship"
+    );
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() =>
+      expect(updateAdminSiteClient).toHaveBeenCalledWith(
+        3,
+        expect.objectContaining({
+          positioning: expect.objectContaining({
+            headline: "Systems that ship",
+          }),
+          engagement_models: [],
+          commitments: [],
+          deliverable_samples: [],
+          next_steps: [],
+          principles: [],
+          fit: { enabled: false, segments: [], not_a_fit: [] },
+          finder: { enabled: false, steps: [], outcomes: [] },
+        })
+      )
+    );
+  });
+
+  it("adds an engagement model and saves it in the payload", async () => {
+    const user = userEvent.setup();
+    vi.mocked(updateAdminSiteClient).mockImplementation(
+      async (_revision, draft) => siteDto(draft, 4)
+    );
+    render(
+      <SiteAdminEditor initialSite={siteDto()} canEdit canPublish={false} />
+    );
+
+    const panel = screen.getByRole("region", { name: "Engagement models" });
+    await user.click(
+      within(panel).getByRole("button", { name: "Add engagement model" })
+    );
+    await user.type(within(panel).getByLabelText(/Model name/), "Sprint");
+    await user.type(
+      within(panel).getByLabelText("You get"),
+      "Design document{Enter}Runbook"
+    );
+    await user.selectOptions(
+      within(panel).getByLabelText("Verification"),
+      "verified"
+    );
+    await user.type(within(panel).getByLabelText("Price label"), "From $4k");
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+
+    await waitFor(() =>
+      expect(updateAdminSiteClient).toHaveBeenCalledWith(
+        3,
+        expect.objectContaining({
+          engagement_models: [
+            {
+              key: "engagement-model-1",
+              name: "Sprint",
+              you_get: ["Design document", "Runbook"],
+              price_label: "From $4k",
+              verification: "verified",
+              enabled: false,
+            },
+          ],
+        })
+      )
+    );
+  });
+
+  it("blocks saving while a JSON editor holds invalid text and clears a removed workflow example", async () => {
+    const user = userEvent.setup();
+    const draft = buildPublishableSiteDraft();
+    draft.workflow_example = {
+      title: "Intake flow",
+      caption: "How a request moves.",
+      illustrative: true,
+      nodes: [
+        {
+          key: "in",
+          kind: "input",
+          label: "Request",
+          summary: "A request arrives.",
+        },
+        {
+          key: "out",
+          kind: "output",
+          label: "Answer",
+          summary: "A reply is sent.",
+        },
+      ],
+    };
+    vi.mocked(updateAdminSiteClient).mockImplementation(
+      async (_revision, next) => siteDto(next, 4)
+    );
+    render(
+      <SiteAdminEditor
+        initialSite={siteDto(draft)}
+        canEdit
+        canPublish={false}
+      />
+    );
+
+    const fit = screen.getByLabelText("Fit check");
+    fireEvent.change(fit, { target: { value: "{ not json" } });
+    await waitFor(() =>
+      expect(document.getElementById("fit-error")).toHaveTextContent(
+        /Invalid JSON/
+      )
+    );
+    expect(fit).toHaveAttribute("aria-invalid", "true");
+
+    fireEvent.change(fit, {
+      target: { value: '{"enabled":"yes","segments":[],"not_a_fit":[]}' },
+    });
+    await waitFor(() =>
+      expect(document.getElementById("fit-error")).toHaveTextContent(
+        /enabled: /
+      )
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    expect(
+      await screen.findByText("Fix the JSON editors before saving.")
+    ).toBeVisible();
+    expect(updateAdminSiteClient).not.toHaveBeenCalled();
+
+    fireEvent.change(fit, {
+      target: {
+        value:
+          '{"enabled":false,"segments":[],"not_a_fit":["Fixed-scope bids"]}',
+      },
+    });
+    fireEvent.change(screen.getByLabelText("Workflow example"), {
+      target: { value: "" },
+    });
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+
+    await waitFor(() => expect(updateAdminSiteClient).toHaveBeenCalledTimes(1));
+    const saved = vi.mocked(updateAdminSiteClient).mock.calls[0]![1];
+    expect(saved.workflow_example).toBeUndefined();
+    expect(saved.fit.not_a_fit).toEqual(["Fixed-scope bids"]);
+  });
+
+  it("shows a publish issue next to the engagement model it names", async () => {
+    const user = userEvent.setup();
+    const draft = buildPublishableSiteDraft();
+    const model = {
+      you_get: ["A written plan"],
+      best_when: "The scope is unclear.",
+      how_it_runs: "Weekly reviews.",
+      enabled: true,
+    };
+    draft.engagement_models = [
+      { ...model, key: "audit", name: "Audit", verification: "verified" },
+      { ...model, key: "build", name: "Build", verification: "unverified" },
+    ];
+    vi.mocked(publishAdminSiteClient).mockRejectedValue(
+      new EditorialRequestError({
+        status: 422,
+        code: "SITE_PUBLISH_INVALID",
+        message: "The Site is not ready to publish.",
+        sources: [
+          {
+            path: "engagement_models.1.verification",
+            message: "This field is invalid or unsupported.",
+          },
+        ],
+      })
+    );
+    render(<SiteAdminEditor initialSite={siteDto(draft)} canEdit canPublish />);
+
+    await user.click(screen.getByRole("button", { name: "Publish revision" }));
+
+    const second = await screen.findByRole("group", { name: /Model 02/ });
+    expect(
+      within(second).getByText("This field is invalid or unsupported.")
+    ).toBeVisible();
+    expect(within(second).getByLabelText("Verification")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    );
+    const first = screen.getByRole("group", { name: /Model 01/ });
+    expect(
+      within(first).queryByText("This field is invalid or unsupported.")
+    ).not.toBeInTheDocument();
   });
 
   it("supports keyboard-equivalent ordering, revision save and public-renderer preview", async () => {
