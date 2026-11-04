@@ -100,6 +100,13 @@ export const createNeutralSiteDraft = (): TSiteDraftSnapshot => ({
   },
   process: [],
   metrics: [],
+  engagement_models: [],
+  commitments: [],
+  deliverable_samples: [],
+  next_steps: [],
+  fit: { enabled: false, segments: [], not_a_fit: [] },
+  principles: [],
+  finder: { enabled: false, steps: [], outcomes: [] },
 });
 
 export const getPillarInvariantIssues = (
@@ -128,8 +135,66 @@ export const getPillarInvariantIssues = (
   return [...new Set(issues)];
 };
 
+/** A measured value older than this is no longer shown (the evidence strip is re-derived each release). */
+export const SITE_METRIC_FRESH_DAYS = 180;
+
+export const isSiteMetricFresh = (
+  asOf: string | undefined,
+  now: Date = new Date()
+): boolean =>
+  !asOf ||
+  now.getTime() - Date.parse(`${asOf}T00:00:00Z`) <=
+    SITE_METRIC_FRESH_DAYS * 86_400_000;
+
 const isPresent = (value: string | undefined): boolean =>
   Boolean(value && value.trim());
+
+/**
+ * An engagement model is a commercial claim: it is public only when it is complete and its terms are not
+ * unverified, and a price is shown only when the owner verified it.
+ */
+const getEngagementIssues = (draft: TSiteDraftSnapshot): string[] => {
+  const issues: string[] = [];
+  draft.engagement_models.forEach((model, index) => {
+    const path = `engagement_models.${index}`;
+    if (model.price_label && model.verification !== "verified") {
+      issues.push(`${path}.price_label`);
+    }
+    if (!model.enabled) return;
+    if (model.verification === "unverified")
+      issues.push(`${path}.verification`);
+    if (!isPresent(model.best_when)) issues.push(`${path}.best_when`);
+    if (!model.you_get.length) issues.push(`${path}.you_get`);
+    if (!isPresent(model.how_it_runs)) issues.push(`${path}.how_it_runs`);
+  });
+  return issues;
+};
+
+const getFinderIssues = (draft: TSiteDraftSnapshot): string[] => {
+  if (!draft.finder.enabled) return [];
+  const issues: string[] = [];
+  if (!draft.finder.steps.length) issues.push("finder.steps");
+  const offered = new Set(
+    draft.engagement_models
+      .filter((model) => model.enabled)
+      .map((model) => model.key)
+  );
+  const tags = new Set(
+    draft.finder.steps.flatMap((step) =>
+      step.options.flatMap((option) => option.tags)
+    )
+  );
+  if (!draft.finder.outcomes.length) issues.push("finder.outcomes");
+  draft.finder.outcomes.forEach((outcome, index) => {
+    if (!offered.has(outcome.engagement_key)) {
+      issues.push(`finder.outcomes.${index}.engagement_key`);
+    }
+    if (outcome.when_tags.some((tag) => !tags.has(tag))) {
+      issues.push(`finder.outcomes.${index}.when_tags`);
+    }
+  });
+  return issues;
+};
 
 export const getSitePublishIssues = (draft: TSiteDraftSnapshot): string[] => {
   const issues = getPillarInvariantIssues(draft.pillars);
@@ -248,6 +313,16 @@ export const getSitePublishIssues = (draft: TSiteDraftSnapshot): string[] => {
     if (!isPresent(step.deliverable))
       issues.push(`process.${index}.deliverable`);
   });
+  issues.push(...getEngagementIssues(draft));
+  draft.deliverable_samples.forEach((sample, index) => {
+    if (sample.enabled && sample.verification === "unverified") {
+      issues.push(`deliverable_samples.${index}.verification`);
+    }
+  });
+  if (draft.fit.enabled && !draft.fit.segments.length) {
+    issues.push("fit.segments");
+  }
+  issues.push(...getFinderIssues(draft));
 
   const size = Buffer.byteLength(JSON.stringify(draft), "utf8");
   if (size > SITE_SNAPSHOT_MAX_BYTES) issues.push("snapshot.size");
@@ -388,4 +463,9 @@ export const createEmergencyPublicSite = (): TPublicSiteDto => ({
   },
   process: [],
   metrics: [],
+  engagement_models: [],
+  commitments: [],
+  deliverable_samples: [],
+  next_steps: [],
+  principles: [],
 });

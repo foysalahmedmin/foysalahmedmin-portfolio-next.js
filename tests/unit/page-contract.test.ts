@@ -96,6 +96,62 @@ describe("fixed-route Page composition contract", () => {
     ).toThrow();
   });
 
+  it("accepts the Phase 4 kinds and layouts only on the routes that allow them", () => {
+    const section = (kind: string, layout: string, collection = false) => ({
+      key: kind,
+      kind,
+      visible: true,
+      layout,
+      ...(collection
+        ? {
+            item_limit: 6,
+            source: { mode: "automatic", filter: {} },
+          }
+        : { source: { mode: "system" } }),
+    });
+    const draft = (...sections: unknown[]) => ({
+      seo: { noindex: false },
+      sections,
+    });
+
+    expect(
+      parsePageDraftSnapshot(
+        "home",
+        draft(
+          section("site-hero", "topology"),
+          section("metrics-strip", "evidence"),
+          section("problem-index", "default", true),
+          section("service-collection", "stack", true),
+          section("architecture-workflow", "pipeline"),
+          section("case-study-collection", "files", true),
+          section("skill-group-collection", "registry", true),
+          section("process-steps", "wire"),
+          section("deliverable-samples", "default"),
+          section("engagement-models", "default"),
+          section("commitments", "principles"),
+          section("fit-check", "default"),
+          section("starting-point", "default"),
+          section("article-collection", "notes", true)
+        )
+      ).sections
+    ).toHaveLength(14);
+    expect(
+      parsePageDraftSnapshot(
+        "about",
+        draft(
+          section("commitments", "principles"),
+          section("fit-check", "default")
+        )
+      ).sections
+    ).toHaveLength(2);
+    expect(() =>
+      parsePageDraftSnapshot("contact", draft(section("fit-check", "default")))
+    ).toThrow();
+    expect(() =>
+      parsePageDraftSnapshot("home", draft(section("commitments", "wire")))
+    ).toThrow();
+  });
+
   it("bounds item limits and curated references without content bodies", () => {
     const invalid = homeDraft();
     invalid.sections[1] = {
@@ -153,13 +209,22 @@ describe("case study and video Page sections", () => {
 
   it("filters videos by shape and rejects shapes that do not exist", () => {
     expect(
-      parsePageDraftSnapshot("home", section("video-collection", { aspect_ratio: "reel" }))
+      parsePageDraftSnapshot(
+        "home",
+        section("video-collection", { aspect_ratio: "reel" })
+      )
     ).toBeDefined();
     expect(() =>
-      parsePageDraftSnapshot("home", section("video-collection", { aspect_ratio: "square" }))
+      parsePageDraftSnapshot(
+        "home",
+        section("video-collection", { aspect_ratio: "square" })
+      )
     ).toThrow();
     expect(() =>
-      parsePageDraftSnapshot("home", section("video-collection", { pillar: "system_architect" }))
+      parsePageDraftSnapshot(
+        "home",
+        section("video-collection", { pillar: "system_architect" })
+      )
     ).toThrow();
   });
 
@@ -167,11 +232,17 @@ describe("case study and video Page sections", () => {
     expect(
       parsePageDraftSnapshot(
         "case-studies",
-        section("case-study-collection", { featured: true, pillar: "ai_automation" })
+        section("case-study-collection", {
+          featured: true,
+          pillar: "ai_automation",
+        })
       )
     ).toBeDefined();
     expect(() =>
-      parsePageDraftSnapshot("case-studies", section("case-study-collection", { shape: "reel" }))
+      parsePageDraftSnapshot(
+        "case-studies",
+        section("case-study-collection", { shape: "reel" })
+      )
     ).toThrow();
   });
 
@@ -182,9 +253,14 @@ describe("case study and video Page sections", () => {
     expect(() =>
       parsePageDraftSnapshot("videos", section("case-study-collection", {}))
     ).toThrow();
-    expect(parsePageDraftSnapshot("videos", section("video-collection", {}))).toBeDefined();
     expect(
-      parsePageDraftSnapshot("home", section("case-study-collection", { featured: true }))
+      parsePageDraftSnapshot("videos", section("video-collection", {}))
+    ).toBeDefined();
+    expect(
+      parsePageDraftSnapshot(
+        "home",
+        section("case-study-collection", { featured: true })
+      )
     ).toBeDefined();
   });
 

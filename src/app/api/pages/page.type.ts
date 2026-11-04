@@ -54,6 +54,12 @@ export const PAGE_SECTION_KINDS = [
   "contact-form",
   "contact-cta",
   "github-profile",
+  "problem-index",
+  "engagement-models",
+  "commitments",
+  "deliverable-samples",
+  "fit-check",
+  "starting-point",
 ] as const;
 export type TPageSectionKind = (typeof PAGE_SECTION_KINDS)[number];
 

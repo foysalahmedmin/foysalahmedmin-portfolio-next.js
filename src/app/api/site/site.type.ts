@@ -72,6 +72,8 @@ export type TSiteIdentity = {
 
 export type TSitePositioning = {
   canonical?: string;
+  /** The page `h1`: the problem-first headline (the long forms stay below it). */
+  headline?: string;
   compact?: string;
   mobile?: string;
   long?: string;
@@ -98,6 +100,7 @@ export type TSiteContact = {
   availability_label?: string;
   availability_review_at?: string;
   response_promise?: string;
+  working_hours?: string;
   map_policy: "hidden" | "city_only";
 };
 
@@ -156,12 +159,110 @@ export type TSiteProcessStep = {
   enabled: boolean;
 };
 
+export type TSiteVerification = "unverified" | "derived" | "verified";
+
 export type TSiteMetric = {
   key: string;
   label: string;
   value?: string;
-  verification: "unverified" | "derived" | "verified";
+  verification: TSiteVerification;
   enabled: boolean;
+  /** Case study slug the value is derived from. */
+  source_slug?: string;
+  /** `YYYY-MM-DD` the value was measured; a value older than the freshness window is not shown. */
+  as_of?: string;
+};
+
+export type TSiteEngagementModel = {
+  key: string;
+  name: string;
+  best_when?: string;
+  you_get: string[];
+  how_it_runs?: string;
+  duration_label?: string;
+  /** Shown only when `verification` is `verified`. */
+  price_label?: string;
+  verification: TSiteVerification;
+  enabled: boolean;
+};
+
+/** A titled statement with one line of elaboration: commitments and "how I think" principles. */
+export type TSiteCommitment = {
+  key: string;
+  title: string;
+  summary: string;
+  enabled: boolean;
+};
+
+export const SITE_WORKFLOW_NODE_KINDS = [
+  "input",
+  "automation",
+  "agent",
+  "review",
+  "output",
+] as const;
+export type TSiteWorkflowNodeKind = (typeof SITE_WORKFLOW_NODE_KINDS)[number];
+
+export type TSiteWorkflowExample = {
+  title: string;
+  caption: string;
+  illustrative: true;
+  nodes: {
+    key: string;
+    kind: TSiteWorkflowNodeKind;
+    label: string;
+    summary: string;
+    on_failure?: string;
+  }[];
+  switch_off?: string;
+};
+
+export const SITE_DELIVERABLE_KINDS = [
+  "decision_record",
+  "diagram",
+  "runbook",
+  "report",
+  "dry_run",
+] as const;
+export type TSiteDeliverableKind = (typeof SITE_DELIVERABLE_KINDS)[number];
+
+export type TSiteDeliverableSample = {
+  key: string;
+  title: string;
+  kind: TSiteDeliverableKind;
+  /** Plain text, escaped at render. */
+  excerpt: string;
+  source_label: string;
+  source_slug?: string;
+  verification: TSiteVerification;
+  enabled: boolean;
+};
+
+export type TSiteNextStep = {
+  key: string;
+  title: string;
+  summary: string;
+  enabled: boolean;
+};
+
+export type TSiteFit = {
+  enabled: boolean;
+  segments: { key: string; label: string; for_you_if: string }[];
+  not_a_fit: string[];
+};
+
+export type TSiteFinder = {
+  enabled: boolean;
+  steps: {
+    key: string;
+    question: string;
+    options: { key: string; label: string; tags: string[] }[];
+  }[];
+  outcomes: {
+    engagement_key: string;
+    when_tags: string[];
+    reasoning: string;
+  }[];
 };
 
 export type TSiteDraftSnapshot = {
@@ -179,6 +280,14 @@ export type TSiteDraftSnapshot = {
   fallbacks: TSiteFallbacks;
   process: TSiteProcessStep[];
   metrics: TSiteMetric[];
+  engagement_models: TSiteEngagementModel[];
+  commitments: TSiteCommitment[];
+  workflow_example?: TSiteWorkflowExample;
+  deliverable_samples: TSiteDeliverableSample[];
+  next_steps: TSiteNextStep[];
+  fit: TSiteFit;
+  principles: TSiteCommitment[];
+  finder: TSiteFinder;
 };
 
 export type TSitePublishedSnapshot = TSiteDraftSnapshot & {
@@ -266,6 +375,7 @@ export type TPublicSiteDto = {
     | "availability"
     | "availability_label"
     | "response_promise"
+    | "working_hours"
     | "map_policy"
   > & {
     public_email?: string;
@@ -282,6 +392,14 @@ export type TPublicSiteDto = {
   fallbacks: TPublicSiteFallbacksDto;
   process: TSiteProcessStep[];
   metrics: TSiteMetric[];
+  engagement_models: TSiteEngagementModel[];
+  commitments: TSiteCommitment[];
+  workflow_example?: TSiteWorkflowExample;
+  deliverable_samples: TSiteDeliverableSample[];
+  next_steps: TSiteNextStep[];
+  fit?: TSiteFit;
+  principles: TSiteCommitment[];
+  finder?: TSiteFinder;
 };
 
 export type TSiteFileReferenceDescriptor = {

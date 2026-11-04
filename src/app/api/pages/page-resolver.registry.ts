@@ -39,6 +39,7 @@ export const readPageCompositionItems = async (
     case "video-collection":
       return asItems(await getPublicVideosForComposition(input));
     case "service-collection":
+    case "problem-index":
       return asItems(await ServiceService.getPublicForComposition(input));
     case "skill-group-collection":
       return asItems(await getPublicSkillGroupsForComposition(input));

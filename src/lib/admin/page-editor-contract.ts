@@ -40,7 +40,7 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
 > = {
   "site-hero": {
     label: "Site hero",
-    layouts: ["default", "split", "immersive"],
+    layouts: ["default", "split", "immersive", "topology"],
     source: "system",
     filterFields: [],
   },
@@ -58,13 +58,13 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
   },
   "architecture-workflow": {
     label: "Architecture and AI workflow",
-    layouts: ["default", "bento", "compact"],
+    layouts: ["default", "bento", "compact", "pipeline"],
     source: "system",
     filterFields: [],
   },
   "process-steps": {
     label: "Working process steps",
-    layouts: ["default", "numbered", "compact"],
+    layouts: ["default", "numbered", "compact", "wire"],
     source: "system",
     filterFields: [],
   },
@@ -76,7 +76,7 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
   },
   "metrics-strip": {
     label: "Proof metrics strip",
-    layouts: ["default", "compact"],
+    layouts: ["default", "compact", "evidence"],
     source: "system",
     filterFields: [],
   },
@@ -96,13 +96,13 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
   },
   "article-collection": {
     label: "Articles",
-    layouts: ["grid", "featured", "list"],
+    layouts: ["grid", "featured", "list", "notes"],
     source: "collection",
     filterFields: shared,
   },
   "case-study-collection": {
     label: "Case studies",
-    layouts: ["grid", "featured", "list"],
+    layouts: ["grid", "featured", "list", "files"],
     source: "collection",
     filterFields: shared,
   },
@@ -122,13 +122,13 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
   },
   "service-collection": {
     label: "Services",
-    layouts: ["grid", "cards", "list"],
+    layouts: ["grid", "cards", "list", "stack"],
     source: "collection",
     filterFields: shared,
   },
   "skill-group-collection": {
     label: "Skill groups",
-    layouts: ["grid", "matrix", "list"],
+    layouts: ["grid", "matrix", "list", "registry"],
     source: "collection",
     filterFields: shared,
   },
@@ -213,6 +213,42 @@ export const PAGE_SECTION_EDITOR_DEFINITIONS: Readonly<
     source: "system",
     filterFields: [],
   },
+  "problem-index": {
+    label: "Problem index",
+    layouts: ["default"],
+    source: "collection",
+    filterFields: shared,
+  },
+  "engagement-models": {
+    label: "Ways to work together",
+    layouts: ["default"],
+    source: "system",
+    filterFields: [],
+  },
+  commitments: {
+    label: "Commitments and principles",
+    layouts: ["default", "principles"],
+    source: "system",
+    filterFields: [],
+  },
+  "deliverable-samples": {
+    label: "Deliverable samples",
+    layouts: ["default"],
+    source: "system",
+    filterFields: [],
+  },
+  "fit-check": {
+    label: "Fit check",
+    layouts: ["default"],
+    source: "system",
+    filterFields: [],
+  },
+  "starting-point": {
+    label: "Starting-point finder",
+    layouts: ["default"],
+    source: "system",
+    filterFields: [],
+  },
 };
 
 export const PAGE_EDITOR_ROUTE_KINDS: Readonly<
@@ -234,6 +270,12 @@ export const PAGE_EDITOR_ROUTE_KINDS: Readonly<
     "github-profile",
     "faq-list",
     "contact-cta",
+    "problem-index",
+    "deliverable-samples",
+    "engagement-models",
+    "commitments",
+    "fit-check",
+    "starting-point",
   ],
   about: [
     "site-introduction",
@@ -250,6 +292,8 @@ export const PAGE_EDITOR_ROUTE_KINDS: Readonly<
     "github-profile",
     "faq-list",
     "contact-cta",
+    "commitments",
+    "fit-check",
   ],
   projects: ["project-collection", "contact-cta"],
   "case-studies": ["case-study-collection", "contact-cta"],

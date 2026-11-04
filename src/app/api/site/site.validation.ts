@@ -8,10 +8,19 @@ import {
 import { z } from "zod";
 import { getPillarInvariantIssues, SiteDomainError } from "./site.policy";
 import {
+  SITE_DELIVERABLE_KINDS,
   SITE_SNAPSHOT_MAX_BYTES,
+  SITE_WORKFLOW_NODE_KINDS,
+  type TSiteCommitment,
+  type TSiteDeliverableSample,
   type TSiteDraftSnapshot,
+  type TSiteEngagementModel,
+  type TSiteFinder,
+  type TSiteFit,
   type TSiteLink,
+  type TSiteNextStep,
   type TSiteProcessStep,
+  type TSiteWorkflowExample,
 } from "./site.type";
 
 export const siteObjectIdSchema = z
@@ -56,6 +65,13 @@ const optionalText = (minimum: number, maximum: number) =>
     (value) =>
       typeof value === "string" && value.trim() === "" ? undefined : value,
     z.string().trim().min(minimum).max(maximum).optional()
+  );
+
+const optionalSafeText = (minimum: number, maximum: number) =>
+  z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? undefined : value,
+    safePlainText(minimum, maximum).optional()
   );
 
 const isSafeInternalPath = (value: string): boolean => {
@@ -224,6 +240,154 @@ export const siteProcessStepSchema: z.ZodType<TSiteProcessStep> = z
   })
   .strict();
 
+const verificationSchema = z.enum(["unverified", "derived", "verified"]);
+
+const slugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1)
+  .max(96)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+
+/** An excerpt keeps its line breaks; every other control character and any markup opener is refused. */
+const excerptText = (minimum: number, maximum: number) =>
+  requiredText(minimum, maximum).refine(
+    (value) =>
+      !/[<\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value) &&
+      !/(?:javascript|data|vbscript)\s*:/i.test(value),
+    "Use plain text without markup or executable content"
+  );
+
+export const siteEngagementModelSchema: z.ZodType<TSiteEngagementModel> = z
+  .object({
+    key: safeKeySchema,
+    name: safePlainText(2, 80),
+    best_when: optionalSafeText(2, 300),
+    you_get: z.array(safePlainText(2, 200)).max(6).default([]),
+    how_it_runs: optionalSafeText(2, 300),
+    duration_label: optionalSafeText(2, 80),
+    price_label: optionalSafeText(2, 80),
+    verification: verificationSchema,
+    enabled: z.boolean(),
+  })
+  .strict();
+
+export const siteCommitmentSchema: z.ZodType<TSiteCommitment> = z
+  .object({
+    key: safeKeySchema,
+    title: safePlainText(2, 100),
+    summary: safePlainText(2, 300),
+    enabled: z.boolean(),
+  })
+  .strict();
+
+export const siteNextStepSchema: z.ZodType<TSiteNextStep> = z
+  .object({
+    key: safeKeySchema,
+    title: safePlainText(2, 80),
+    summary: safePlainText(2, 240),
+    enabled: z.boolean(),
+  })
+  .strict();
+
+export const siteWorkflowExampleSchema: z.ZodType<TSiteWorkflowExample> = z
+  .object({
+    title: safePlainText(2, 120),
+    caption: safePlainText(2, 300),
+    illustrative: z.literal(true),
+    nodes: z
+      .array(
+        z
+          .object({
+            key: safeKeySchema,
+            kind: z.enum(SITE_WORKFLOW_NODE_KINDS),
+            label: safePlainText(1, 40),
+            summary: safePlainText(2, 200),
+            on_failure: optionalSafeText(2, 160),
+          })
+          .strict()
+      )
+      .min(2)
+      .max(8)
+      .refine(uniqueKeys, "Workflow node keys must be unique"),
+    switch_off: optionalSafeText(2, 200),
+  })
+  .strict();
+
+export const siteDeliverableSampleSchema: z.ZodType<TSiteDeliverableSample> = z
+  .object({
+    key: safeKeySchema,
+    title: safePlainText(2, 100),
+    kind: z.enum(SITE_DELIVERABLE_KINDS),
+    excerpt: excerptText(2, 1_200),
+    source_label: safePlainText(2, 120),
+    source_slug: slugSchema.optional(),
+    verification: verificationSchema,
+    enabled: z.boolean(),
+  })
+  .strict();
+
+export const siteFitSchema: z.ZodType<TSiteFit> = z
+  .object({
+    enabled: z.boolean(),
+    segments: z
+      .array(
+        z
+          .object({
+            key: safeKeySchema,
+            label: safePlainText(1, 60),
+            for_you_if: safePlainText(2, 240),
+          })
+          .strict()
+      )
+      .max(6)
+      .refine(uniqueKeys, "Fit segment keys must be unique"),
+    not_a_fit: z.array(safePlainText(2, 200)).max(6),
+  })
+  .strict();
+
+export const siteFinderSchema: z.ZodType<TSiteFinder> = z
+  .object({
+    enabled: z.boolean(),
+    steps: z
+      .array(
+        z
+          .object({
+            key: safeKeySchema,
+            question: safePlainText(2, 140),
+            options: z
+              .array(
+                z
+                  .object({
+                    key: safeKeySchema,
+                    label: safePlainText(1, 80),
+                    tags: z.array(safeKeySchema).min(1).max(4),
+                  })
+                  .strict()
+              )
+              .min(2)
+              .max(6)
+              .refine(uniqueKeys, "Finder option keys must be unique"),
+          })
+          .strict()
+      )
+      .max(4)
+      .refine(uniqueKeys, "Finder step keys must be unique"),
+    outcomes: z
+      .array(
+        z
+          .object({
+            engagement_key: safeKeySchema,
+            when_tags: z.array(safeKeySchema).min(1).max(4),
+            reasoning: safePlainText(2, 240),
+          })
+          .strict()
+      )
+      .max(8),
+  })
+  .strict();
+
 export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
   .object({
     identity: z
@@ -250,6 +414,7 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
     positioning: z
       .object({
         canonical: optionalText(2, 240),
+        headline: optionalText(2, 90),
         compact: optionalText(2, 160),
         mobile: optionalText(2, 120),
         long: optionalText(2, 500),
@@ -308,6 +473,7 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
           .datetime({ offset: true })
           .optional(),
         response_promise: optionalText(2, 240),
+        working_hours: optionalText(2, 160),
         map_policy: z.enum(["hidden", "city_only"]),
       })
       .strict(),
@@ -414,13 +580,54 @@ export const siteDraftSnapshotSchema: z.ZodType<TSiteDraftSnapshot> = z
             key: safeKeySchema,
             label: requiredText(1, 80),
             value: optionalText(1, 80),
-            verification: z.enum(["unverified", "derived", "verified"]),
+            verification: verificationSchema,
             enabled: z.boolean(),
+            source_slug: slugSchema.optional(),
+            as_of: z
+              .string()
+              .regex(/^\d{4}-\d{2}-\d{2}$/)
+              .refine(
+                (value) => !Number.isNaN(Date.parse(`${value}T00:00:00Z`)),
+                "Use a real calendar date"
+              )
+              .optional(),
           })
           .strict()
       )
       .max(12)
       .refine(uniqueKeys, "Metric keys must be unique"),
+    engagement_models: z
+      .array(siteEngagementModelSchema)
+      .max(4)
+      .refine(uniqueKeys, "Engagement model keys must be unique")
+      .default([]),
+    commitments: z
+      .array(siteCommitmentSchema)
+      .max(6)
+      .refine(uniqueKeys, "Commitment keys must be unique")
+      .default([]),
+    workflow_example: siteWorkflowExampleSchema.optional(),
+    deliverable_samples: z
+      .array(siteDeliverableSampleSchema)
+      .max(6)
+      .refine(uniqueKeys, "Deliverable sample keys must be unique")
+      .default([]),
+    next_steps: z
+      .array(siteNextStepSchema)
+      .max(4)
+      .refine(uniqueKeys, "Next step keys must be unique")
+      .default([]),
+    fit: siteFitSchema.default({ enabled: false, segments: [], not_a_fit: [] }),
+    principles: z
+      .array(siteCommitmentSchema)
+      .max(6)
+      .refine(uniqueKeys, "Principle keys must be unique")
+      .default([]),
+    finder: siteFinderSchema.default({
+      enabled: false,
+      steps: [],
+      outcomes: [],
+    }),
   })
   .strict()
   .superRefine((snapshot, context) => {

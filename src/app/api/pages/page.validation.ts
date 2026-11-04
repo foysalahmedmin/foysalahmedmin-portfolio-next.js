@@ -130,32 +130,43 @@ const systemSection = <
     .strict();
 
 export const pageSectionSchema = z.discriminatedUnion("kind", [
-  systemSection("site-hero", ["default", "split", "immersive"]),
+  systemSection("site-hero", ["default", "split", "immersive", "topology"]),
   systemSection("site-introduction", ["default", "split"]),
   systemSection("pillar-showcase", ["default", "compact", "sticky"]),
-  systemSection("architecture-workflow", ["default", "bento", "compact"]),
-  systemSection("process-steps", ["default", "numbered", "compact"]),
-  systemSection("metrics-strip", ["default", "compact"]),
+  systemSection("architecture-workflow", [
+    "default",
+    "bento",
+    "compact",
+    "pipeline",
+  ]),
+  systemSection("process-steps", ["default", "numbered", "compact", "wire"]),
+  systemSection("metrics-strip", ["default", "compact", "evidence"]),
   collectionSection("project-collection", ["grid", "featured", "list"], {
     ...sharedContentFilter,
     project_type: z.enum(PROJECT_TYPES).optional(),
   }),
-  collectionSection("article-collection", ["grid", "featured", "list"], {
-    ...sharedContentFilter,
-  }),
-  collectionSection("case-study-collection", ["grid", "featured", "list"], {
-    ...sharedContentFilter,
-  }),
+  collectionSection(
+    "article-collection",
+    ["grid", "featured", "list", "notes"],
+    { ...sharedContentFilter }
+  ),
+  collectionSection(
+    "case-study-collection",
+    ["grid", "featured", "list", "files"],
+    { ...sharedContentFilter }
+  ),
   collectionSection("video-collection", ["grid", "featured", "list"], {
     featured: z.boolean().optional(),
     aspect_ratio: z.enum(VIDEO_ASPECT_RATIOS).optional(),
   }),
-  collectionSection("service-collection", ["grid", "cards", "list"], {
+  collectionSection("service-collection", ["grid", "cards", "list", "stack"], {
     ...sharedContentFilter,
   }),
-  collectionSection("skill-group-collection", ["grid", "matrix", "list"], {
-    ...sharedContentFilter,
-  }),
+  collectionSection(
+    "skill-group-collection",
+    ["grid", "matrix", "list", "registry"],
+    { ...sharedContentFilter }
+  ),
   collectionSection("timeline", ["timeline", "compact", "list"], {
     ...sharedContentFilter,
     type: z.enum(TIMELINE_ENTRY_TYPES).optional(),
@@ -178,6 +189,12 @@ export const pageSectionSchema = z.discriminatedUnion("kind", [
   systemSection("contact-form", ["default", "split"]),
   systemSection("contact-cta", ["default", "banner", "compact"]),
   systemSection("github-profile", ["default"]),
+  collectionSection("problem-index", ["default"], { ...sharedContentFilter }),
+  systemSection("engagement-models", ["default"]),
+  systemSection("commitments", ["default", "principles"]),
+  systemSection("deliverable-samples", ["default"]),
+  systemSection("fit-check", ["default"]),
+  systemSection("starting-point", ["default"]),
 ]);
 
 export const pageDraftSnapshotSchema: z.ZodType<TPageDraftSnapshot> = z
@@ -234,6 +251,12 @@ export const PAGE_ROUTE_SECTION_KINDS: Readonly<
     "github-profile",
     "faq-list",
     "contact-cta",
+    "problem-index",
+    "deliverable-samples",
+    "engagement-models",
+    "commitments",
+    "fit-check",
+    "starting-point",
   ],
   about: [
     "site-introduction",
@@ -250,6 +273,8 @@ export const PAGE_ROUTE_SECTION_KINDS: Readonly<
     "github-profile",
     "faq-list",
     "contact-cta",
+    "commitments",
+    "fit-check",
   ],
   projects: ["project-collection", "contact-cta"],
   "case-studies": ["case-study-collection", "contact-cta"],
