@@ -16,8 +16,27 @@ import type {
   TAdminServiceDto,
   TPublicServiceDto,
   TService,
+  TServiceProblem,
 } from "./service.type";
 import { createServiceSchema, updateServiceSchema } from "./service.validation";
+
+const toProblems = (value: unknown): TServiceProblem[] =>
+  Array.isArray(value)
+    ? value.map((item) => {
+        const problem = item as Record<string, unknown>;
+        const deliverable = optionalText(problem.deliverable);
+        const outcome = optionalText(problem.outcome);
+        const caseSlug = optionalText(problem.case_slug);
+        return {
+          key: String(problem.key),
+          pain: String(problem.pain),
+          approach: String(problem.approach),
+          ...(deliverable ? { deliverable } : {}),
+          ...(outcome ? { outcome } : {}),
+          ...(caseSlug ? { case_slug: caseSlug } : {}),
+        };
+      })
+    : [];
 
 export const serviceDefinition = {
   domain: "service",
@@ -33,6 +52,7 @@ export const serviceDefinition = {
     "capabilities",
     "deliverables",
     "technologies",
+    "problems",
     "icon_key",
   ],
   search_fields: ["title", "summary", "outcome", "capabilities"],
@@ -71,6 +91,7 @@ export const serviceDefinition = {
     capabilities: stringList(record.capabilities),
     deliverables: stringList(record.deliverables),
     technologies: stringList(record.technologies),
+    problems: toProblems(record.problems),
     ...(optionalText(record.icon_key)
       ? { icon_key: record.icon_key as TPublicServiceDto["icon_key"] }
       : {}),
@@ -86,6 +107,7 @@ export const serviceDefinition = {
     capabilities: stringList(record.capabilities),
     deliverables: stringList(record.deliverables),
     technologies: stringList(record.technologies),
+    problems: toProblems(record.problems),
     ...(optionalText(record.icon_key)
       ? { icon_key: record.icon_key as TAdminServiceDto["icon_key"] }
       : {}),

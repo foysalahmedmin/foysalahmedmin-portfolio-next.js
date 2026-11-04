@@ -42,6 +42,22 @@ describe("public case study projection", () => {
     expect(dto._id).toBe("507f1f77bcf86cd799439011");
     expect(dto.published_at).toBe("2026-01-01T00:00:00.000Z");
   });
+
+  it("passes the case file fields through, and leaves older records unchanged", () => {
+    const architecture = {
+      alt: "Browser calls an API",
+      layers: ["Edge"],
+      nodes: [{ key: "a", label: "A", layer: "Edge", kind: "client" }],
+      edges: [],
+      steps: [],
+    };
+    const dto = toPublicCaseStudyDto({ ...record, constraints: ["No downtime"], architecture });
+    expect(dto.constraints).toEqual(["No downtime"]);
+    expect(dto.architecture).toEqual(architecture);
+    const legacy = toPublicCaseStudyDto(record);
+    expect(legacy).not.toHaveProperty("constraints");
+    expect(legacy).not.toHaveProperty("architecture");
+  });
 });
 
 describe("public video projection", () => {

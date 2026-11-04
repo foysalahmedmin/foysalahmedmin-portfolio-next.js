@@ -6,18 +6,23 @@ import {
   FormSection,
   commaToList,
   fieldClass,
+  labelClass,
   linesToList,
   listToLines,
   toIsoDateTime,
   toLocalDateTime,
 } from "@/components/admin/content-form-fields";
+import CaseStudyArchitecturePreview from "@/components/admin/case-study-architecture-preview";
 import { Button } from "@/components/ui/button";
 import { FileGalleryUploader } from "@/components/ui/file-gallery-uploader";
 import { FileUploader } from "@/components/ui/file-uploader";
 import {
+  CASE_STUDY_CONSTRAINT_LIMITS,
   CASE_STUDY_ENGAGEMENT_LABELS,
   CASE_STUDY_ENGAGEMENT_TYPES,
   CASE_STUDY_OUTCOME_STATES,
+  getCaseStudyPublishRecommendations,
+  readCaseStudyArchitectureJson,
   type CaseStudyLinkVisibility,
   type CaseStudyOutcome,
 } from "@/lib/content/case-study-contract";
@@ -77,6 +82,8 @@ type TFormState = {
   challenge: string;
   approach: string;
   key_decisions: string;
+  constraints: string;
+  architecture: string;
   solution: string;
   results_summary: string;
   outcomes: TOutcomeRow[];
@@ -135,6 +142,10 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
     challenge: initialData?.challenge ?? "",
     approach: initialData?.approach ?? "",
     key_decisions: listToLines(initialData?.key_decisions),
+    constraints: listToLines(initialData?.constraints),
+    architecture: initialData?.architecture
+      ? JSON.stringify(initialData.architecture, null, 2)
+      : "",
     solution: initialData?.solution ?? "",
     results_summary: initialData?.results_summary ?? "",
     outcomes: (initialData?.outcomes ?? []).map((outcome) => ({
@@ -203,6 +214,20 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
     const next: Partial<Record<string, string>> = {};
     if (form.name.trim().length < 2) next.name = "Enter a title.";
     if (!form.category) next.category = "Select an active case study category.";
+    const constraints = linesToList(form.constraints);
+    const { items, length } = CASE_STUDY_CONSTRAINT_LIMITS;
+    if (
+      constraints.length > items ||
+      constraints.some((c) => c.length > length)
+    ) {
+      next.constraints = `Use at most ${items} constraints of ${length} characters or fewer.`;
+    }
+    const architecture = form.architecture.trim()
+      ? readCaseStudyArchitectureJson(form.architecture)
+      : null;
+    if (architecture && "message" in architecture) {
+      next.architecture = architecture.message;
+    }
     form.outcomes.forEach((row, index) => {
       if (!row.label.trim() || !row.value.trim()) {
         next.outcomes = `Result ${index + 1} needs both a value and a label.`;
@@ -246,6 +271,14 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
       challenge: form.challenge.trim(),
       approach: form.approach.trim(),
       key_decisions: linesToList(form.key_decisions),
+      constraints,
+      // null clears a stored diagram; a new record simply omits it.
+      architecture:
+        architecture && "value" in architecture
+          ? architecture.value
+          : initialData?.architecture
+            ? null
+            : undefined,
       solution: form.solution.trim(),
       results_summary: form.results_summary.trim(),
       outcomes: form.outcomes.map((row) => ({
@@ -271,6 +304,11 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
     };
     onSubmit(payload);
   };
+
+  const recommended = getCaseStudyPublishRecommendations({
+    constraints: linesToList(form.constraints),
+    architecture: form.architecture.trim() || null,
+  });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8" noValidate>
@@ -596,6 +634,51 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             className={cn(fieldClass, "min-h-24")}
           />
         </Field>
+      </FormSection>
+
+      <FormSection
+        title="Constraints and architecture"
+        description="What limited the work, and how the system was put together."
+      >
+        <Field
+          label="Constraints"
+          htmlFor="cs-constraints"
+          hint="One constraint per line."
+          error={errors.constraints}
+        >
+          <textarea
+            id="cs-constraints"
+            value={form.constraints}
+            onChange={(event) => set("constraints", event.target.value)}
+            className={cn(fieldClass, "min-h-24")}
+          />
+        </Field>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Field
+            label="Architecture (JSON)"
+            htmlFor="cs-architecture"
+            hint="alt, layers[], nodes[{key,label,layer,kind,note?}], edges[{from,to,label?}], steps[{title,focus[]}]. Plain text only."
+            error={errors.architecture}
+          >
+            <textarea
+              id="cs-architecture"
+              value={form.architecture}
+              onChange={(event) => set("architecture", event.target.value)}
+              spellCheck={false}
+              className={cn(fieldClass, "min-h-64 font-mono")}
+            />
+          </Field>
+          <div className="space-y-2">
+            <p className={labelClass}>Preview</p>
+            <CaseStudyArchitecturePreview source={form.architecture} />
+          </div>
+        </div>
+        {recommended.length ? (
+          <p className="text-muted-foreground text-xs">
+            Recommended before publishing: {recommended.join(", ")}. They do not
+            block publishing.
+          </p>
+        ) : null}
       </FormSection>
 
       <FormSection

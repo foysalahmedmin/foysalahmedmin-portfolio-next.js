@@ -2,10 +2,18 @@ import mongoose, { Schema } from "mongoose";
 import { applySoftDeletePlugin } from "@/lib/db/soft-delete";
 import { richContentSchema } from "@/lib/content/rich-content-schema";
 import {
+  CASE_STUDY_ARCHITECTURE_LIMITS as ARCH,
+  CASE_STUDY_ARCHITECTURE_NODE_KINDS,
+  CASE_STUDY_CONSTRAINT_LIMITS,
   CASE_STUDY_ENGAGEMENT_TYPES,
   CASE_STUDY_LINK_VISIBILITIES,
   CASE_STUDY_OUTCOME_STATES,
+  parseCaseStudyArchitecture,
 } from "@/lib/content/case-study-contract";
+import {
+  SAFE_KEY_MAX_LENGTH,
+  SAFE_KEY_PATTERN,
+} from "@/lib/content/plain-text";
 import { PILLAR_KEYS } from "@/lib/content/pillars";
 import { isAllowedPublicProjectUrl } from "@/lib/content/portfolio-contract";
 import { CONTENT_SLUG_PATTERN } from "@/lib/content/slug";
@@ -49,6 +57,73 @@ const listOf = (maxLength: number, maxItems: number) => ({
     message: `At most ${maxItems} entries are allowed`,
   },
 });
+
+const textField = (bounds: readonly [number, number], required = false) => ({
+  type: String,
+  trim: true,
+  required,
+  minlength: bounds[0],
+  maxlength: bounds[1],
+});
+const keyField = (required = true) => ({
+  type: String,
+  required,
+  trim: true,
+  maxlength: SAFE_KEY_MAX_LENGTH,
+  match: SAFE_KEY_PATTERN,
+});
+
+const architectureSchema = new Schema(
+  {
+    alt: textField(ARCH.alt, true),
+    layers: { type: [textField(ARCH.layer, true)], default: [] },
+    nodes: {
+      type: [
+        new Schema(
+          {
+            key: keyField(),
+            label: textField(ARCH.node_label, true),
+            layer: textField(ARCH.layer, true),
+            kind: {
+              type: String,
+              enum: CASE_STUDY_ARCHITECTURE_NODE_KINDS,
+              required: true,
+            },
+            note: textField(ARCH.node_note),
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
+    edges: {
+      type: [
+        new Schema(
+          {
+            from: keyField(),
+            to: keyField(),
+            label: textField(ARCH.edge_label),
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
+    steps: {
+      type: [
+        new Schema(
+          {
+            title: textField(ARCH.step_title, true),
+            focus: { type: [keyField()], default: [] },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
+  },
+  { _id: false }
+);
 
 const publicUrl = (label: string) => ({
   type: String,
@@ -122,6 +197,20 @@ const caseStudySchema = new Schema<TCaseStudyDocument>(
     approach: { type: String, trim: true, maxlength: 8_000 },
     solution: { type: String, trim: true, maxlength: 8_000 },
     key_decisions: listOf(2_000, 50),
+    constraints: listOf(
+      CASE_STUDY_CONSTRAINT_LIMITS.length,
+      CASE_STUDY_CONSTRAINT_LIMITS.items
+    ),
+    architecture: {
+      type: architectureSchema,
+      required: false,
+      // Limits and cross-references (layers, edges, focus) are checked once, by the shared contract parser.
+      validate: {
+        validator: (value?: { toObject(): unknown } | null) =>
+          !value || parseCaseStudyArchitecture(value.toObject()).ok,
+        message: "architecture does not satisfy the case study contract",
+      },
+    },
     results_summary: { type: String, trim: true, maxlength: 3_000 },
     outcomes: { type: [outcomeSchema], default: [] },
     tech_stack: listOf(60, 40),

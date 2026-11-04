@@ -2,6 +2,7 @@ import type { Document, Model, Types } from "mongoose";
 import type { PillarKey } from "@/lib/content/pillars";
 import type { RichContentDocument } from "@/lib/content/rich-content";
 import type {
+  CaseStudyArchitecture,
   CaseStudyLinkVisibility,
   CaseStudyOutcome,
 } from "@/lib/content/case-study-contract";
@@ -37,6 +38,8 @@ export type TCaseStudy = {
   approach?: string;
   solution?: string;
   key_decisions?: string[];
+  constraints?: string[];
+  architecture?: CaseStudyArchitecture;
   results_summary?: string;
   outcomes?: CaseStudyOutcome[];
   tech_stack?: string[];
