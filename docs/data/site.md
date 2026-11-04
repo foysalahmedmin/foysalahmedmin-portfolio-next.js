@@ -64,6 +64,55 @@ Resolution is deterministic: explicit content media, then the matching managed
 pillar fallback, then the legacy generic managed fallback. When none exists, the
 rendering component owns the final code-bundled SVG fallback.
 
+## Problem-first fields (plan 5.2, seed version 8)
+
+Every field below is optional or defaults to empty, so earlier drafts and
+published snapshots stay readable. Each list is capped, and the 256 KB snapshot
+limit stays far away.
+
+| Field                                      | Limit                             | Meaning                                                                                                                |
+| ------------------------------------------ | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `positioning.headline`                     | 90 characters                     | The page `h1`, for example "Business problems in. Reliable systems out."                                               |
+| `contact.working_hours`                    | 160 characters                    | Optional working-days line; unset until the owner supplies it (C-33).                                                  |
+| `metrics[].source_slug`, `metrics[].as_of` | slug, `YYYY-MM-DD`                | The case study a value comes from and the day it was measured.                                                         |
+| `engagement_models`                        | 4                                 | Name, best-when, what you get, how it runs, optional duration and price label, `verification`, `enabled`.              |
+| `commitments`                              | 6                                 | Method statements: a title and one line.                                                                               |
+| `workflow_example`                         | 2 to 8 nodes                      | The illustrative automation flow (`illustrative` is always `true`) with a failure line per node and a switch-off line. |
+| `deliverable_samples`                      | 6, excerpt up to 1,200 characters | Plain-text excerpts of real artifacts, with a source label, an optional case-study slug and a `verification`.          |
+| `next_steps`                               | 4                                 | The ordered steps after an enquiry.                                                                                    |
+| `fit`, `principles`, `finder`              | 6 segments, 6 principles, 4 steps | Tier 2: who the work is for, "How I think", and the starting-point rules (evaluated in the browser).                   |
+
+### Publish rules
+
+`getSitePublishIssues` rejects a publication when:
+
+- an enabled engagement model is `unverified`, or has no `best_when`, `you_get` or `how_it_runs`;
+- any engagement model carries a `price_label` without `verification: "verified"`;
+- an enabled deliverable sample is `unverified`;
+- the fit check is enabled with no segments;
+- the finder is enabled with no steps or outcomes, an outcome points at a model that is not enabled, or a rule uses a tag no option offers;
+- an enabled metric has no value or is `unverified`, or metrics are switched on and none qualifies.
+
+### Public DTO
+
+`GET /api/site` keeps the draft out and applies the same gates again:
+
+- engagement models appear only when enabled and not `unverified`; a price is included only when the model is `verified`;
+- deliverable samples appear only when enabled and not `unverified`;
+- metrics appear only when the `show_metrics` flag is on, the metric is enabled, not `unverified`, and its `as_of` is not older than 180 days (`SITE_METRIC_FRESH_DAYS`); a metric with no `as_of` never expires;
+- commitments, principles and next steps are filtered by `enabled`; `fit` and `finder` appear only when enabled; the workflow example is always included.
+
+### Seed version 8 content
+
+The foundation seed fills these fields as a draft (`src/lib/seed/foundation-site-content.ts`). Nothing that depends on an unconfirmed owner fact is switched on:
+
+- **On:** the headline, five derived metrics (migrations applied from an empty database, redeploys needed to change public content, and the three structural counts), five method commitments (no "You own the code", C-16), the illustrative workflow, three next steps.
+- **Off and unverified:** the three engagement models (no price, no duration; "how it runs" and, for the partnership, "you get" left empty, C-13 to C-15).
+- **Off:** the fit check (C-32), the finder (C-13), the principles (C-18), and every deliverable sample (derived from this repository, pending redaction approval, C-31).
+- **Unset:** `contact.working_hours` (C-33). `experience.theme` is `dark`.
+
+Each of these has a claim in `docs/content/content-truth.v1.json` (version 1.1.0), and `tests/unit/content-truth-gate.test.ts` fails when an enabled, not-unverified record has none.
+
 ## API and capabilities
 
 - `GET /api/site` returns the minimal published DTO or the compile-time emergency

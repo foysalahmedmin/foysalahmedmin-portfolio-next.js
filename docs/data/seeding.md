@@ -168,6 +168,24 @@ do not authorize fabricated production proof. Those collections remain empty
 until an owner-reviewed source supplies the required structured facts,
 verification state, consent, dates, and evidence references.
 
+## Version 8 (problem-first content)
+
+`FOUNDATION_SEED_VERSION` is 8; the checksum guard rejects the new content
+without it. Version 8 adds, as draft content only:
+
+- the Site fields described in [site.md](./site.md#problem-first-fields-plan-52-seed-version-8) (headline, metrics with a source and an `as_of` date, commitments, the illustrative workflow, next steps, and the switched-off engagement models, fit check, finder, principles and deliverable samples), and a `dark` default theme;
+- `problems` on the three services (seven rows in all);
+- three more FAQs, two of them disabled until the owner approves the stance;
+- a reordered home composition and the new kinds on About ([page-composition.md](./page-composition.md#section-kinds-layouts-and-the-route-matrix));
+- constraints and a verified architecture diagram for the four launch case studies, applied by `scripts/launch-content.ts` (which also backfills existing case studies once).
+
+Nothing is published by the seed. Re-apply it to a non-production database
+first (`pnpm seed:dry-run`, then `pnpm seed`); on a database that already holds
+version 7, the Site, the services, the FAQs and the Pages report `update` unless the owner
+edited them, in which case they report `conflict` and keep the edit. Production
+still needs `SEED_PRODUCTION_CONFIRM`. The truth rules behind each switched-off
+record are in `docs/content/content-truth.v1.json` (version 1.1.0).
+
 ## Verification and recovery
 
 Unit coverage exercises empty planning, rerun, partial adoption, edited-record

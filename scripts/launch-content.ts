@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 import { randomUUID } from "node:crypto";
 import { createArticle } from "../src/app/api/articles/article.service.ts";
 import { createArticleCategory } from "../src/app/api/article-categories/article-category.service.ts";
-import { createCaseStudy } from "../src/app/api/case-studies/case-study.service.ts";
+import {
+  createCaseStudy,
+  updateCaseStudyById,
+} from "../src/app/api/case-studies/case-study.service.ts";
 import { createCaseStudyCategory } from "../src/app/api/case-study-categories/case-study-category.service.ts";
 import { FAQService } from "../src/app/api/faqs/faq.service.ts";
 import { LegalDocumentService } from "../src/app/api/legal-documents/legal-document.service.ts";
@@ -360,12 +363,23 @@ for (const [index, study] of LAUNCH_CASE_STUDIES.entries()) {
   const categoryId = caseStudyCategories.get(study.category);
   if (!categoryId) continue;
   await step(`case study: ${study.name}`, async () => {
-    if (
-      await db
-        .collection("case_studies")
-        .findOne({ name: study.name, is_deleted: { $ne: true } })
-    )
+    const existing = await db
+      .collection("case_studies")
+      .findOne({ name: study.name, is_deleted: { $ne: true } });
+    if (existing) {
+      // Records from an earlier run gain the case-file fields once; anything the owner has edited is left alone.
+      if (!existing.architecture) {
+        await updateCaseStudyById(
+          existing._id.toString(),
+          {
+            constraints: [...study.constraints],
+            architecture: study.architecture,
+          },
+          actor
+        );
+      }
       return;
+    }
     await createCaseStudy(
       {
         name: study.name,
@@ -382,6 +396,8 @@ for (const [index, study] of LAUNCH_CASE_STUDIES.entries()) {
         challenge: study.challenge,
         approach: study.approach,
         key_decisions: [...study.decisions],
+        constraints: [...study.constraints],
+        architecture: study.architecture,
         solution: study.solution,
         results_summary: study.results,
         outcomes: study.outcomes.map((outcome) => ({
@@ -510,11 +526,11 @@ for (const route of PAGES) {
     };
     draft.seo = { ...(draft.seo ?? {}), noindex: false };
     if (route === "home") {
-      // Existing sites gain the case study and video sections once, ahead of
-      // the articles; sections the owner already has are left untouched.
+      // Existing sites gain the case study section once, ahead of the
+      // articles; sections the owner already has are left untouched.
       const additions = getFoundationPageDraft("home").sections.filter(
         (section) =>
-          ["case-studies", "videos", "reels"].includes(section.key) &&
+          section.key === "case-studies" &&
           !draft.sections.some((existing) => existing.key === section.key)
       );
       if (additions.length) {

@@ -21,7 +21,7 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "1.0.0"
+      "const": "1.1.0"
     },
     "manifest_version": {
       "type": "string",
@@ -183,7 +183,10 @@
             "social",
             "resume",
             "media",
-            "legal"
+            "legal",
+            "engagement",
+            "method",
+            "evidence"
           ]
         },
         "claim": {

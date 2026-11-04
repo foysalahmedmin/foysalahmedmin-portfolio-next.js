@@ -1,20 +1,23 @@
 {
   "$schema": "./content-truth.schema.json",
-  "schema_version": "1.0.0",
-  "manifest_version": "1.0.0",
+  "schema_version": "1.1.0",
+  "manifest_version": "1.1.0",
   "audit": {
-    "audited_at": "2026-07-15",
-    "repository_revision": "91dddac18ee2",
+    "audited_at": "2026-11-04",
+    "repository_revision": "b9e53e95eba2",
     "scope": [
       "Hardcoded identity, biography, availability, response-time, contact, positioning, capability, metric, testimonial, experience, education, course, social, resume, and legal claims rendered by public routes",
       "Repository-defined Project and Article records, public fallbacks, metadata, and publication assumptions",
-      "Current five-pillar coverage in public source code"
+      "Current five-pillar coverage in public source code",
+      "1.1.0: the Site draft fields, service problems and case-file diagrams added by seed version 8 (src/lib/seed/foundation-site-content.ts, src/lib/seed/foundation.ts, src/lib/seed/launch-library-content.ts)"
     ],
     "limitations": [
       "This is a source-code audit, not proof of a person's identity, employment, education, client relationship, account ownership, or consent.",
       "No production database export, private worksheet, resume contents, certificates, contracts, analytics, or testimonial consent records were available or inspected.",
       "Publicly rendered contact values are redacted here to avoid duplicating personal data; their source locations remain listed.",
-      "A repeated value in source code is not treated as independent real-world verification."
+      "A repeated value in source code is not treated as independent real-world verification.",
+      "1.1.0 adds claims only. The 88 claims of the 2026-07-15 audit at revision 91dddac18ee2 are carried forward unchanged and were not re-audited.",
+      "Derived metrics are measured on the date in their as_of field and are hidden by the public Site reader after 180 days; a release re-derives them."
     ]
   },
   "status_contract": {
@@ -1609,6 +1612,391 @@
       ],
       "reason": "The policy is not mapped to an actual data-flow/vendor/retention inventory and may overstate or omit processing.",
       "required_action": "Generate the policy from an approved data inventory, retention plan, processors, lawful basis, and rights workflow."
+    },
+    {
+      "id": "site.metric.schema_migrations",
+      "category": "stat",
+      "claim": "Evidence metric \"Schema migrations applied cleanly from an empty database\".",
+      "current_public_value": "16",
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_METRICS schema_migrations"
+        },
+        {
+          "path": "src/lib/db/migrations/registry.ts",
+          "symbol_or_context": "MIGRATION_REGISTRY"
+        }
+      ],
+      "reason": "A value counted from this repository, not a statement about a client.",
+      "required_action": "Re-derive it in the release checklist and update as_of; the public Site reader hides it 180 days after as_of. The owner approves the metrics and the refresh policy (C-30).",
+      "derivation_rule": "Count the entries of MIGRATION_REGISTRY, then run pnpm db:migrate against an empty replica-set database and confirm every entry is reported as applied. Record the date in as_of and link the migration case study through source_slug. Freshness: 180 days."
+    },
+    {
+      "id": "site.metric.content_redeploys",
+      "category": "stat",
+      "claim": "Evidence metric \"Redeploys needed to change public content\".",
+      "current_public_value": "None",
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_METRICS content_redeploys"
+        },
+        {
+          "path": "src/app/api/pages/page.cache.ts",
+          "symbol_or_context": "invalidatePublishedPageCache"
+        }
+      ],
+      "reason": "A value counted from this repository, not a statement about a client.",
+      "required_action": "Re-derive it in the release checklist and update as_of; the public Site reader hides it 180 days after as_of. The owner approves the metrics and the refresh policy (C-30).",
+      "derivation_rule": "True while publishing a Page or the Site refreshes the public cache by tag and needs no deployment: confirm with the publish round-trip integration test (tests/integration/site-publishing.integration.test.ts) and src/app/api/pages/page.cache.ts. Record the date in as_of and link the publishing case study through source_slug. Freshness: 180 days."
+    },
+    {
+      "id": "site.metric.core_roles",
+      "category": "stat",
+      "claim": "Evidence metric \"Core roles\".",
+      "current_public_value": "3",
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_METRICS core_roles"
+        },
+        {
+          "path": "src/lib/content/pillars.ts",
+          "symbol_or_context": "PILLAR_CONTRACT"
+        }
+      ],
+      "reason": "A value counted from this repository, not a statement about a client.",
+      "required_action": "Re-derive it in the release checklist and update as_of; the public Site reader hides it 180 days after as_of. The owner approves the metrics and the refresh policy (C-30).",
+      "derivation_rule": "PILLAR_CONTRACT.length. This counts roles in the information architecture; it is not proof of expertise. Freshness: 180 days."
+    },
+    {
+      "id": "site.metric.delivery_stages",
+      "category": "stat",
+      "claim": "Evidence metric \"Defined delivery stages\".",
+      "current_public_value": "6",
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_METRICS delivery_stages"
+        },
+        {
+          "path": "src/lib/seed/foundation.ts",
+          "symbol_or_context": "createSiteRecord process"
+        }
+      ],
+      "reason": "A value counted from this repository, not a statement about a client.",
+      "required_action": "Re-derive it in the release checklist and update as_of; the public Site reader hides it 180 days after as_of. The owner approves the metrics and the refresh policy (C-30).",
+      "derivation_rule": "The number of seeded process steps (draft.process). Freshness: 180 days."
+    },
+    {
+      "id": "site.metric.guardrail_tracks",
+      "category": "stat",
+      "claim": "Evidence metric \"Guardrail tracks\".",
+      "current_public_value": "3",
+      "status": "dynamic-derived",
+      "production_publish": "derive-only",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_METRICS guardrail_tracks"
+        },
+        {
+          "path": "src/components/sections/architecture-workflow-section/index.tsx",
+          "symbol_or_context": "GUARDRAILS"
+        }
+      ],
+      "reason": "A value counted from this repository, not a statement about a client.",
+      "required_action": "Re-derive it in the release checklist and update as_of; the public Site reader hides it 180 days after as_of. The owner approves the metrics and the refresh policy (C-30).",
+      "derivation_rule": "The number of guardrails listed in the architecture-workflow section (GUARDRAILS). Freshness: 180 days."
+    },
+    {
+      "id": "site.engagement-model.architecture-review",
+      "category": "engagement",
+      "claim": "The \"Architecture review\" engagement model is offered.",
+      "current_public_value": "Draft: best when and what you get only; disabled",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "ENGAGEMENT_MODELS architecture-review"
+        }
+      ],
+      "reason": "Which engagement models are offered, and their scope, duration and price, are unconfirmed (C-13, C-14, C-15). The seed keeps the record off and unverified, with no price, no duration and no how-it-runs text.",
+      "required_action": "Owner confirms the model (C-13), its scope and duration (C-15) and any price policy (C-14); only then is the record enabled with verification verified. A price is shown only when verified."
+    },
+    {
+      "id": "site.engagement-model.build-product-or-automation",
+      "category": "engagement",
+      "claim": "The \"Build a product or automation\" engagement model is offered.",
+      "current_public_value": "Draft: best when and what you get only; disabled",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "ENGAGEMENT_MODELS build-product-or-automation"
+        }
+      ],
+      "reason": "Which engagement models are offered, and their scope, duration and price, are unconfirmed (C-13, C-14, C-15). The seed keeps the record off and unverified, with no price, no duration and no how-it-runs text.",
+      "required_action": "Owner confirms the model (C-13), its scope and duration (C-15) and any price policy (C-14); only then is the record enabled with verification verified. A price is shown only when verified."
+    },
+    {
+      "id": "site.engagement-model.ongoing-partnership",
+      "category": "engagement",
+      "claim": "The \"Ongoing partnership\" engagement model is offered.",
+      "current_public_value": "Draft: best when only; what you get and how it runs are empty; disabled",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "ENGAGEMENT_MODELS ongoing-partnership"
+        }
+      ],
+      "reason": "Which engagement models are offered, and their scope, duration and price, are unconfirmed (C-13, C-14, C-15). The seed keeps the record off and unverified, with no price, no duration and no how-it-runs text.",
+      "required_action": "Owner confirms the model (C-13), its scope and duration (C-15) and any price policy (C-14); only then is the record enabled with verification verified. A price is shown only when verified."
+    },
+    {
+      "id": "site.deliverable-sample.decision-record",
+      "category": "evidence",
+      "claim": "Deliverable sample \"Decision record: migrations and audit events\" is an excerpt of a real artifact of this repository.",
+      "current_public_value": "Passages of ADR 0008",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_DELIVERABLE_SAMPLES decision-record"
+        },
+        {
+          "path": "docs/architecture/0008-migrations-and-audit-events.md",
+          "symbol_or_context": "excerpted passages"
+        }
+      ],
+      "reason": "The text is copied from this repository, so the sample is derived, but the owner has not yet approved what may be shown or how it is redacted (C-31). The seed keeps it off.",
+      "required_action": "Owner approves this excerpt and its redaction (C-31), checks that it holds no secret, host or personal data, then enables it. A unit test checks every passage against its source file."
+    },
+    {
+      "id": "site.deliverable-sample.architecture-diagram",
+      "category": "evidence",
+      "claim": "Deliverable sample \"Architecture diagram: live-database migrations\" is an excerpt of a real artifact of this repository.",
+      "current_public_value": "Text rendering of the migration case-file diagram",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_DELIVERABLE_SAMPLES architecture-diagram"
+        },
+        {
+          "path": "src/lib/seed/launch-library-content.ts",
+          "symbol_or_context": "excerpted passages"
+        }
+      ],
+      "reason": "The text is copied from this repository, so the sample is derived, but the owner has not yet approved what may be shown or how it is redacted (C-31). The seed keeps it off.",
+      "required_action": "Owner approves this excerpt and its redaction (C-31), checks that it holds no secret, host or personal data, then enables it. A unit test checks every passage against its source file."
+    },
+    {
+      "id": "site.deliverable-sample.runbook",
+      "category": "evidence",
+      "claim": "Deliverable sample \"Runbook: safe portfolio seeding\" is an excerpt of a real artifact of this repository.",
+      "current_public_value": "Passages of the seeding guide",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_DELIVERABLE_SAMPLES runbook"
+        },
+        {
+          "path": "docs/data/seeding.md",
+          "symbol_or_context": "excerpted passages"
+        }
+      ],
+      "reason": "The text is copied from this repository, so the sample is derived, but the owner has not yet approved what may be shown or how it is redacted (C-31). The seed keeps it off.",
+      "required_action": "Owner approves this excerpt and its redaction (C-31), checks that it holds no secret, host or personal data, then enables it. A unit test checks every passage against its source file."
+    },
+    {
+      "id": "site.deliverable-sample.test-report",
+      "category": "evidence",
+      "claim": "Deliverable sample \"Test report: seed and content-contract suites\" is an excerpt of a real artifact of this repository.",
+      "current_public_value": "Output of a unit test run",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_DELIVERABLE_SAMPLES test-report"
+        },
+        {
+          "path": "tests/unit/seed-v8-content.test.ts",
+          "symbol_or_context": "excerpted passages"
+        }
+      ],
+      "reason": "The text is copied from this repository, so the sample is derived, but the owner has not yet approved what may be shown or how it is redacted (C-31). The seed keeps it off.",
+      "required_action": "Owner approves this excerpt and its redaction (C-31), checks that it holds no secret, host or personal data, then enables it. A unit test checks every passage against its source file."
+    },
+    {
+      "id": "site.deliverable-sample.seed-dry-run",
+      "category": "evidence",
+      "claim": "Deliverable sample \"Seed dry run on an empty database\" is an excerpt of a real artifact of this repository.",
+      "current_public_value": "Output of pnpm seed:dry-run on a throwaway database",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_DELIVERABLE_SAMPLES seed-dry-run"
+        },
+        {
+          "path": "scripts/seed.ts",
+          "symbol_or_context": "excerpted passages"
+        }
+      ],
+      "reason": "The text is copied from this repository, so the sample is derived, but the owner has not yet approved what may be shown or how it is redacted (C-31). The seed keeps it off.",
+      "required_action": "Owner approves this excerpt and its redaction (C-31), checks that it holds no secret, host or personal data, then enables it. A unit test checks every passage against its source file."
+    },
+    {
+      "id": "site.positioning-headline",
+      "category": "tagline",
+      "claim": "The page headline reads: Business problems in. Reliable systems out.",
+      "current_public_value": "Business problems in. Reliable systems out.",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "SITE_POSITIONING_HEADLINE"
+        }
+      ],
+      "reason": "Owner-requested kicker line (design decision D-01); the wording and voice are pending approval (C-18).",
+      "required_action": "Owner approves the headline and the beat eyebrow wording (D-01, C-18)."
+    },
+    {
+      "id": "site.commitments",
+      "category": "method",
+      "claim": "Five method statements: small reviewable releases, every decision written down, tests on the critical paths, security built in from the start, handover documentation.",
+      "current_public_value": "Five enabled statements; the code-ownership statement is absent",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "COMMITMENTS"
+        }
+      ],
+      "reason": "Each statement restates copy already seeded in the process steps, services and FAQs, so none adds a new fact. They are the owner's voice and promises (C-18). Code and data ownership is a contract term and is not stated (C-16).",
+      "required_action": "Owner approves the wording (C-18). \"You own the code\" is added only after the contract terms are confirmed (C-16)."
+    },
+    {
+      "id": "site.principles",
+      "category": "method",
+      "claim": "Five working principles under the heading How I think.",
+      "current_public_value": "Five statements; all disabled",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "PRINCIPLES"
+        }
+      ],
+      "reason": "The wording and the stances are the owner's voice and need approval (C-18). The elaboration lines reuse copy already seeded.",
+      "required_action": "Owner approves each line and its elaboration (C-18), then enables the principles; About reads the same data."
+    },
+    {
+      "id": "site.workflow-example",
+      "category": "method",
+      "claim": "An illustrative five-step automation flow (input, automation, AI agent, review gate, output) with its failure behaviour and a single switch-off.",
+      "current_public_value": "Illustrative flow; not a client project",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "WORKFLOW_EXAMPLE"
+        }
+      ],
+      "reason": "The Site schema fixes illustrative to true, so the flow cannot be read as client work. The guardrails it shows (review gate, logging, fallback, switch-off) match the seeded services and FAQs. The voice is pending approval (C-18).",
+      "required_action": "Owner approves the wording (C-18). Keep the illustrative label; never present it as a delivered project."
+    },
+    {
+      "id": "site.next-steps",
+      "category": "engagement",
+      "claim": "Three steps follow an enquiry: you describe the problem, I reply with a straight answer, we agree a first small step.",
+      "current_public_value": "Three enabled steps; no response times stated",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "NEXT_STEPS"
+        }
+      ],
+      "reason": "A promise about how enquiries are handled, in the owner's voice (C-18). No time is stated; a response time is added only if one is confirmed (C-04).",
+      "required_action": "Owner confirms the three steps and the voice (C-18) and, if wanted, a response time (C-04)."
+    },
+    {
+      "id": "site.fit-check",
+      "category": "engagement",
+      "claim": "Who the work is for (four segments) and who it is probably not for (three lines).",
+      "current_public_value": "Draft segments and lines; disabled",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "FIT"
+        }
+      ],
+      "reason": "The segments and the not-a-fit lines are stances that need approval (C-32).",
+      "required_action": "Owner approves the segment wording and the not-a-fit lines (C-32), then enables the fit check."
+    },
+    {
+      "id": "site.finder",
+      "category": "engagement",
+      "claim": "The starting-point finder: three questions and three draft rules that suggest an engagement model.",
+      "current_public_value": "Draft questions and rules; disabled",
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "FINDER"
+        }
+      ],
+      "reason": "The rules point at engagement models that are themselves unconfirmed (C-13), so the finder stays off. It runs in the browser and stores nothing.",
+      "required_action": "Owner confirms the engagement models (C-13) and the rules, then enables the finder after the first confirmed enquiries."
+    },
+    {
+      "id": "site.working-hours",
+      "category": "availability",
+      "claim": "Working days and hours shown on the contact page.",
+      "current_public_value": null,
+      "status": "needs-owner-verification",
+      "production_publish": "block",
+      "sources": [
+        {
+          "path": "src/lib/seed/foundation-site-content.ts",
+          "symbol_or_context": "contact.working_hours (unset)"
+        },
+        {
+          "path": "src/app/api/site/site.validation.ts",
+          "symbol_or_context": "contact.working_hours"
+        }
+      ],
+      "reason": "Not seeded. The working days and hours are unknown (C-33), so contact.working_hours stays unset.",
+      "required_action": "Owner supplies the days and hours (C-33) and the time-zone display (C-06)."
     }
   ],
   "dynamic_record_contracts": [
@@ -1838,6 +2226,24 @@
       "severity": "high",
       "summary": "Published Article records default to expiring after 24 hours, which can silently remove seeded public articles and distort the content inventory.",
       "unblocker": "Make expiry explicit/optional and migrate existing records before approving article seeds."
+    },
+    {
+      "id": "content.engagement-terms-unconfirmed",
+      "severity": "high",
+      "summary": "Which engagement models are offered, their scope, duration, price policy, ownership terms and support terms are unconfirmed, so the engagement models, the fit check and the finder are seeded off.",
+      "unblocker": "Owner answers C-13 to C-17 and C-32; enable each record with verification verified. A price needs verification verified."
+    },
+    {
+      "id": "content.deliverable-sample-approval",
+      "severity": "medium",
+      "summary": "The deliverable samples are excerpts of this repository and a real dry run, but the owner has not approved what may be shown or how it is redacted.",
+      "unblocker": "Owner reviews each excerpt (C-31), then enables it. Excerpts are plain text copied from the source, never screenshots."
+    },
+    {
+      "id": "content.voice-approval",
+      "severity": "medium",
+      "summary": "The repositioned copy (headline, commitments, principles, next steps, illustrative flow, objection FAQs) is draft copy in the owner's voice.",
+      "unblocker": "Owner approves the voice and stances (C-18) before the Site and the Pages are published."
     }
   ]
 }
