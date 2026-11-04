@@ -9,6 +9,15 @@
 | **Decision** | Needs ADR 0011 (amends ADR 0002 dependencies and ADR 0009 budgets). Drafted in Appendix C, not yet accepted.                                             |
 | **Handoff**  | On approval, each phase in section 7 gets its own task-level implementation plan (writing-plans format) before any code.                                 |
 
+### Revision 1.7: what Phase 4 changed in the plan (2026-11-04)
+
+- **Draft-incomplete records.** Engagement models keep `best_when`, `you_get` and `how_it_runs` optional in the draft and require them at publish (the Process step pattern), so an unknown fact (C-13 to C-15) is left empty rather than written. `fit`, `finder` and the principles carry an `enabled` switch; the plan's `[CONFIRM]` rows are off in data, never in copy.
+- **Metrics carry their age.** `source_slug` and `as_of` are on every metric; a value older than 180 days is dropped from the public Site (C-30).
+- **Home draft composition.** `projects`, `videos` and `reels` leave the home draft as the plan says; `pillars` stays because Phase 3 built and the owner reviewed the stacked role panels. Phase 5 decides whether the Stack chapter absorbs it.
+- **Section sub-lines have no home yet.** Page sections carry a heading but no sub-line; Phase 5 chooses between an optional `subheading` on every section and fixed copy in the components.
+- **Client code must not import the server Site modules.** The Site editor's schemas live in `site-content.validation.ts` (Zod only); a boundary test enforces it. The initial-JS headroom is 28 bytes.
+- **Two claims in the launch case files were stronger than the code** (a dry run is offered, not enforced) or stale (test count); both corrected.
+
 ### Revision 1.6: what Phase 3 changed in the plan (2026-10-26)
 
 - **No numbers in cards.** The public site shows no 01, 02, "Answer 01", "Role 1 of 3" or numbered badges in any card, and titles the content numbers itself are shown without the number. This replaces the numbered step and trace-label treatments in sections 3.5 and 4.

@@ -88,6 +88,12 @@ Full evidence: [`docs/baseline/phase-3-findings.md`](../baseline/phase-3-finding
 
 The shell, the three-role hero and the vanilla Three.js scene are built, and every plan 6.2 budget is met on the constrained profile. The scene is one dynamic import (138.0 KB gzip, budget 170), created only after the engine settles and only when the tier, the GPU probe and the two kill switches (`PUBLIC_3D_ENABLED`, site motion `off`) allow it; it pauses off screen, is released after four seconds, and falls back to the static poster, which is rendered from the same scene. On a real GPU the live hero holds p95 16.7 ms on desktop and 16.8 ms on the phone profile; the harness is green on all routes. Initial JS is 179.96 KB (budget 180), Home LCP 1,244 ms, TBT 118 ms and CLS 0.012 on the constrained profile. The browser caught a hero scene with no height on a real GPU, a context-lost handler that kept the canvas from coming back, a poster left under the live canvas and, last, the cause of the blocking time: effects that each forced a full layout at mount. Layout reads at mount now go through one read-then-write frame (`src/lib/dom/frame-batch.ts`); Home TBT went from 735 ms in Phase 2, on the same data, to 118 ms.
 
+## Phase 4 outcome (2026-11-04)
+
+Full evidence: [`docs/baseline/phase-4-findings.md`](../baseline/phase-4-findings.md).
+
+The commercial and evidence content of the Site, the six new Page kinds, Service problems and the case-file constraints and diagrams are in the data model, the admin and seed v8, all additive with reader defaults so stored snapshots keep validating and no migration is needed. The truth gates from the plan are enforced in code, not by convention: publish refuses an enabled engagement model that is unverified or incomplete, a price that is not `verified` and an unverified deliverable sample; the public Site drops disabled and unverified records and metrics older than 180 days; the truth manifest is 1.1.0 and a test ties every enabled Site record to a claim. Facts that belong to the owner (C-13 to C-18, C-31 to C-33) are off in data. The one cost to the motion and 3D decisions above is the initial-JS headroom, now 28 bytes: a client component importing a server module changed the shared chunk graph, so the Site editor's schemas moved to a Zod-only module and a boundary test keeps client components away from the server Site modules.
+
 ## Verification
 
 - Bundle boundary test and build-output scan (admin and `components/ui` free of the engine libraries).
