@@ -12,7 +12,7 @@ import {
   siteFinderSchema,
   siteFitSchema,
   siteWorkflowExampleSchema,
-} from "@/app/api/site/site.validation";
+} from "@/app/api/site/site-content.validation";
 import { Button } from "@/components/ui/button";
 import { FileUploader } from "@/components/ui/file-uploader";
 import {

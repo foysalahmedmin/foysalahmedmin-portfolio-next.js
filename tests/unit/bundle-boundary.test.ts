@@ -214,4 +214,27 @@ describe("animation library boundary", () => {
     );
     expect(users).toEqual(["src/app/(lab)/lab/hero/poster/page.tsx"]);
   });
+  it("client components reach the Site schemas only through the zod-only content module", () => {
+    // site.validation imports the server policy (and with it the media code the public image component
+    // shares); a client import of it changed the shared chunk graph and cost the initial-JS budget 89 bytes.
+    const serverOnly = [
+      "src/app/api/site/site.validation.ts",
+      "src/app/api/site/site.policy.ts",
+      "src/app/api/site/site.service.ts",
+    ];
+    const clientFiles = sourceFiles.filter((file) =>
+      readFileSync(join(REPO_ROOT, file), "utf8")
+        .trimStart()
+        .startsWith('"use client"')
+    );
+    expect(clientFiles.length).toBeGreaterThan(0);
+    for (const file of clientFiles) {
+      expect(
+        readImports(file)
+          .filter((edge) => edge.target && serverOnly.includes(edge.target))
+          .map((edge) => `${file} -> ${edge.target}`),
+        file
+      ).toEqual([]);
+    }
+  });
 });
