@@ -2,4 +2,541 @@
  * Public inner pages: conversation (Phase 6). Owned by one slice; add rules here, not in sections.css.
  * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"], reduced motion
  * and no-JS show everything, no hover-only information.
+ *
+ * Prefix `cv-`: /contact (A6: .cv, .cv-aside, .cv-steps, .cv-facts, .cv-panel, .cv-chip, .cv-field ...) and the
+ * legal documents (A7: .cv-doc*).
  */
+
+/* ---------- /contact: an ink band holding the conversation ---------- */
+.cv {
+  position: relative;
+  isolation: isolate;
+  padding-block: var(--space-section-compact) var(--space-section);
+  overflow: clip;
+}
+
+/* The glass panel needs something to see through: a faded hairline grid behind the form */
+.cv-backdrop {
+  position: absolute;
+  opacity: 0.7;
+  z-index: -1;
+  mask-image: radial-gradient(70% 90% at 75% 35%, black, transparent);
+  inset: 0;
+  pointer-events: none;
+}
+
+.cv-grid {
+  display: grid;
+  align-items: start;
+  gap: clamp(2.5rem, 6vw, 6rem);
+}
+
+@media (min-width: 64rem) {
+  .cv-grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+
+  /* Nothing to say beside the form: it takes a centred reading width instead of the right column */
+  .cv-grid:not(:has(> .cv-aside)) {
+    grid-template-columns: minmax(0, 48rem);
+    justify-content: center;
+  }
+
+  .cv-aside {
+    position: sticky;
+    inset-block-start: calc(var(--header-offset) + 2rem);
+  }
+}
+
+/* ---------- Left column: what happens next, then the plain facts ---------- */
+.cv-steps {
+  --wire-inset: calc(0.3em + 0.375rem);
+
+  display: grid;
+  position: relative;
+  gap: 1.75rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The wire carries the order: no numerals, the nodes sit on one line */
+.cv-steps::before {
+  position: absolute;
+  mask-image: linear-gradient(to bottom, var(--foreground) 80%, transparent);
+  inset-block: var(--wire-inset) 0;
+  inset-inline-start: calc(0.375rem - 0.5px);
+  background: var(--line-4);
+  inline-size: 1px;
+  content: "";
+}
+
+.cv-steps > li {
+  display: grid;
+  position: relative;
+  gap: 0.35rem;
+  padding-inline-start: 2rem;
+}
+
+.cv-steps > li::before {
+  position: absolute;
+  inset-block-start: 0.3em;
+  inset-inline-start: 0;
+  border: 1.5px solid currentColor;
+  background: var(--background);
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  content: "";
+}
+
+/* The lit centre: it ignites as the wire reaches the node (see the motion rule below) */
+.cv-steps > li::after {
+  position: absolute;
+  inset-block-start: calc(0.3em + 0.1875rem);
+  inset-inline-start: 0.1875rem;
+  background: currentColor;
+  inline-size: 0.375rem;
+  block-size: 0.375rem;
+  content: "";
+}
+
+.cv-steps__title {
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.cv-steps__summary {
+  max-inline-size: 40ch;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.cv-facts {
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  border-block-start: 1px solid var(--line-2);
+}
+
+.cv-facts > div {
+  display: grid;
+  gap: 0.25rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 1rem;
+}
+
+.cv-facts dt {
+  color: var(--text-secondary);
+}
+
+.cv-facts dd {
+  margin: 0;
+  min-inline-size: 0;
+  line-height: 1.4;
+}
+
+/* ---------- The glass form panel ---------- */
+.cv-panel {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: var(--r-panel);
+  padding: clamp(1.25rem, 3.5vw, 3rem);
+}
+
+.cv-panel__lede {
+  margin: 0.75rem 0 0;
+  max-inline-size: 52ch;
+  color: var(--text-secondary);
+}
+
+.cv-form {
+  display: grid;
+  gap: 1.75rem;
+}
+
+/* ---------- Topic chips (M32): a chip inks in as it is chosen ---------- */
+.cv-topic {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.cv-topic legend {
+  margin-block-end: 0.75rem;
+  padding: 0;
+  color: var(--text-secondary);
+}
+
+.cv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cv-chip {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  gap: 0.65rem;
+  transition: color var(--dur-fast) var(--ease-signal);
+  cursor: pointer;
+  border: 1px solid var(--line-3);
+  isolation: isolate;
+  padding: 0.5rem 0.9rem;
+  min-block-size: 2.75rem;
+  line-height: 1.25;
+}
+
+.cv-chip:hover {
+  border-color: var(--line-4);
+}
+
+/* The fill wipes up from the bottom edge; chosen is also a filled dot and a heavier weight */
+.cv-chip::before {
+  position: absolute;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  z-index: -1;
+  transition: transform var(--dur-fast) var(--ease-signal);
+  inset: 0;
+  background: var(--foreground);
+  content: "";
+}
+
+.cv-chip:has(input:checked) {
+  border-color: var(--foreground);
+  color: var(--background);
+  font-weight: 600;
+}
+
+.cv-chip:has(input:checked)::before {
+  transform: scaleY(1);
+}
+
+.cv-chip input {
+  position: relative;
+  flex: none;
+  appearance: none;
+  cursor: pointer;
+  margin: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  inline-size: 1rem;
+  block-size: 1rem;
+  color: inherit;
+}
+
+.cv-chip input::after {
+  position: absolute;
+  transform: scale(0);
+  transition: transform var(--dur-fast) var(--ease-signal);
+  inset: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.cv-chip input:checked::after {
+  transform: scale(1);
+}
+
+/* The resolved topic: dashed because it is removable, solid when it is about to go */
+.cv-topic-chip {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  justify-self: start;
+  gap: 0.75rem;
+  transition: border-color var(--dur-fast) var(--ease-signal);
+  border: 1px dashed var(--line-4);
+  padding: 0.5rem 0.75rem;
+  max-inline-size: 100%;
+  min-block-size: 2.75rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.cv-topic-chip:hover {
+  border-style: solid;
+  border-color: var(--foreground);
+}
+
+.cv-topic-chip__text {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.cv-start {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* ---------- Fields (M32): the label brightens and a line draws under the focused field ---------- */
+.cv-row {
+  display: grid;
+  gap: 1.75rem;
+}
+
+@media (min-width: 40rem) {
+  .cv-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cv-field {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+}
+
+.cv-label {
+  transition: color var(--dur-fast) var(--ease-signal);
+  color: var(--text-secondary);
+}
+
+.cv-field:focus-within .cv-label {
+  color: var(--foreground);
+}
+
+.cv-control {
+  position: relative;
+}
+
+.cv-control::after {
+  position: absolute;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-signal);
+  inset-block-end: 0;
+  inset-inline: 0;
+  background: var(--foreground);
+  block-size: 2px;
+  pointer-events: none;
+  content: "";
+}
+
+.cv-control:focus-within::after {
+  transform: scaleX(1);
+}
+
+.cv-input {
+  display: block;
+  border: 0;
+  border-radius: 0;
+  border-block-end: 1px solid var(--line-4);
+  background: transparent;
+  padding: 0.75rem 0;
+  inline-size: 100%;
+  min-block-size: var(--control-h, 2.75rem);
+  color: inherit;
+  font: inherit;
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.cv-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+textarea.cv-input {
+  min-block-size: 9rem;
+  resize: none;
+}
+
+/* Browser autofill would paint its own fill: keep it on the palette */
+.cv-input:-webkit-autofill {
+  -webkit-text-fill-color: var(--foreground);
+  transition: background-color 600000s 0s;
+}
+
+.cv-hint {
+  margin: 0;
+  max-inline-size: 60ch;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+/* The wire draws top to bottom and each node lights as it arrives. Only under full motion: with it off,
+   reduced, or before the script runs, the wire is whole and every node is lit. */
+@keyframes cv-wire {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes cv-node {
+  from {
+    opacity: 0;
+  }
+}
+
+html[data-motion="full"] .cv-steps::before {
+  transform-origin: top;
+  animation: cv-wire 1.1s var(--ease-settle) 0.3s both;
+}
+
+html[data-motion="full"] .cv-steps > li::after {
+  animation: cv-node var(--dur-base) var(--ease-signal) both;
+  animation-delay: calc(0.3s + var(--t, 0) * 1.1s);
+}
+
+@media (forced-colors: active) {
+  .cv-steps::before {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+
+  .cv-chip::before {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+  .cv-chip:has(input:checked) {
+    color: HighlightText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-chip,
+  .cv-chip::before,
+  .cv-chip input::after,
+  .cv-topic-chip,
+  .cv-label,
+  .cv-control::after {
+    transition: none;
+  }
+}
+
+/* ---------- /privacy and /terms: typography only ---------- */
+.cv-doc__body {
+  display: grid;
+  gap: clamp(2rem, 6vw, 7rem);
+  padding-block: var(--space-section-compact) var(--space-section);
+}
+
+@media (min-width: 64rem) {
+  .cv-doc__body {
+    grid-template-columns: minmax(0, var(--container-prose)) minmax(
+        12rem,
+        15rem
+      );
+    justify-content: start;
+    align-items: start;
+  }
+}
+
+.cv-doc__text {
+  min-inline-size: 0;
+}
+
+.cv-doc__section {
+  border-block-start: 1px solid var(--line-2);
+  padding-block: clamp(1.75rem, 3vw, 2.5rem);
+  scroll-margin-block-start: calc(var(--header-offset) + 1rem);
+}
+
+.cv-doc__section:first-child {
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+
+.cv-doc__heading {
+  margin: 0;
+  font-weight: 650;
+  font-stretch: 100%;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.02em;
+}
+
+.cv-doc__prose {
+  margin: 1.25rem 0 0;
+  max-inline-size: none;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.cv-doc__contact {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  margin-block-start: clamp(1.75rem, 3vw, 2.5rem);
+  border-block-start: 1px solid var(--line-4);
+  padding-block-start: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.cv-doc__contact .cv-doc__prose {
+  margin: 0;
+}
+
+.cv-doc__toc {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .cv-doc__toc {
+    display: block;
+    position: sticky;
+    inset-block-start: calc(var(--header-offset) + 1.5rem);
+  }
+}
+
+.cv-doc__toc p {
+  margin: 0 0 1rem;
+  color: var(--text-secondary);
+}
+
+.cv-doc__toc ol {
+  display: grid;
+  margin: 0;
+  border-inline-start: 1px solid var(--line-2);
+  padding: 0 0 0 1rem;
+  list-style: none;
+}
+
+.cv-doc__toc a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.cv-doc__toc a:hover,
+.cv-doc__toc a:focus-visible {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media print {
+  .cv-doc .reading-progress,
+  .cv-doc__toc {
+    display: none;
+  }
+
+  .cv-doc__body {
+    display: block;
+    padding-block: 1rem 0;
+  }
+
+  .cv-doc__section {
+    break-inside: avoid;
+  }
+
+  .cv-doc__prose {
+    color: var(--foreground);
+  }
+}

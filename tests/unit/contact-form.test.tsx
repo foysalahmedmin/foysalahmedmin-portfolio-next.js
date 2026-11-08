@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import ContactContentSection from "@/components/(common)/contact-page/contact-content-section";
+import ContactForm from "@/components/(common)/contact-page/contact-content-section/contact-form";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-describe("ContactContentSection", () => {
+describe("ContactForm", () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
@@ -28,7 +28,7 @@ describe("ContactContentSection", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
     const user = userEvent.setup();
-    render(<ContactContentSection />);
+    render(<ContactForm topic={null} startLabels={[]} />);
 
     await user.type(screen.getByLabelText("Full Name"), "Ada Lovelace");
     await user.type(screen.getByLabelText("Email Address"), "ada@example.com");
@@ -63,7 +63,7 @@ describe("ContactContentSection", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     const user = userEvent.setup();
-    render(<ContactContentSection />);
+    render(<ContactForm topic={null} startLabels={[]} />);
 
     await user.click(screen.getByRole("button", { name: /send message/i }));
 
@@ -93,7 +93,7 @@ describe("ContactContentSection", () => {
       )
     );
     const user = userEvent.setup();
-    render(<ContactContentSection />);
+    render(<ContactForm topic={null} startLabels={[]} />);
 
     await user.type(screen.getByLabelText("Full Name"), "Ada Lovelace");
     await user.type(screen.getByLabelText("Email Address"), "ada@example.com");
@@ -115,7 +115,7 @@ describe("ContactContentSection", () => {
       vi.fn().mockRejectedValue(new DOMException("Timed out", "AbortError"))
     );
     const user = userEvent.setup();
-    render(<ContactContentSection />);
+    render(<ContactForm topic={null} startLabels={[]} />);
 
     await user.type(screen.getByLabelText("Full Name"), "Ada Lovelace");
     await user.type(screen.getByLabelText("Email Address"), "ada@example.com");

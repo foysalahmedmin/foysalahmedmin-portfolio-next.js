@@ -1,8 +1,14 @@
-import { JsonLdScript } from "@/components/content/json-ld-script";
+import ContactContentSection from "@/components/(common)/contact-page/contact-content-section";
+import { readTopicServices } from "@/components/(common)/contact-page/read-services";
 import {
-  getPublicRouteHeader,
-  PublicRoutePage,
-} from "@/components/pages/public-route-page";
+  resolveContactTopic,
+  resolveStartLabels,
+  type ContactSearchParams,
+} from "@/components/(common)/contact-page/topic";
+import { JsonLdScript } from "@/components/content/json-ld-script";
+import { getPublicRouteHeader } from "@/components/pages/public-route-page";
+import { PublicPageSections } from "@/components/pages/public-page-sections";
+import { ConversationLayout } from "@/components/templates";
 import {
   buildBreadcrumbJsonLd,
   buildWebPageJsonLd,
@@ -26,9 +32,22 @@ export const generateMetadata = async (): Promise<Metadata> => {
     : metadata;
 };
 
-const ContactPage = async () => {
-  const payload = await getPublicPagePayloadOrFallback("contact");
+const ContactPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<ContactSearchParams>;
+}) => {
+  const [payload, params] = await Promise.all([
+    getPublicPagePayloadOrFallback("contact"),
+    searchParams,
+  ]);
   const presentation = getPublicRouteHeader(payload);
+  const topic = await resolveContactTopic(
+    params.topic,
+    payload.site,
+    readTopicServices
+  );
+  const startLabels = resolveStartLabels(params.start, payload.site.finder);
   const title = presentation?.title || CONTACT_TITLE;
   const description =
     presentation?.description ||
@@ -49,7 +68,34 @@ const ContactPage = async () => {
           ]),
         ].filter((item) => item !== null)}
       />
-      <PublicRoutePage payload={payload} />
+      {/* The same composition as PublicRoutePage, with the form given what the URL resolved to */}
+      <ConversationLayout
+        route="contact"
+        revision={payload.page.published_revision || undefined}
+        site={payload.site}
+        header={
+          presentation
+            ? {
+                title: presentation.title,
+                lede: presentation.description,
+                path: presentation.breadcrumbs,
+              }
+            : null
+        }
+      >
+        <PublicPageSections
+          payload={payload}
+          sectionOverrides={{
+            "contact-form": () => (
+              <ContactContentSection
+                site={payload.site}
+                topic={topic}
+                startLabels={startLabels}
+              />
+            ),
+          }}
+        />
+      </ConversationLayout>
     </>
   );
 };

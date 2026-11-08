@@ -67,9 +67,11 @@ describe("published legal-document experience", () => {
       <LegalDocumentView document={documentFixture} site={site} />
     );
 
-    expect(screen.getAllByText("Privacy Policy").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Privacy Policy" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Version 2.1")).toBeInTheDocument();
-    expect(screen.getByText("Portfolio Owner")).toBeInTheDocument();
+    expect(screen.getByText(/Contact Portfolio Owner/)).toBeInTheDocument();
     expect(
       screen.getByText("Contact records are retained by policy.")
     ).toBeInTheDocument();
@@ -77,6 +79,42 @@ describe("published legal-document experience", () => {
     expect(
       screen.getByRole("link", { name: "owner@example.com" })
     ).toHaveAttribute("href", "mailto:owner@example.com");
+  });
+
+  it("renders the reading progress hairline once and the metadata as dates", () => {
+    const { container } = render(
+      <LegalDocumentView
+        document={documentFixture}
+        site={createEmergencyPublicSite()}
+      />
+    );
+
+    expect(container.querySelectorAll(".reading-progress")).toHaveLength(1);
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(
+      container.querySelector('time[datetime="2026-07-10T00:00:00.000Z"]')
+    ).toHaveTextContent("July 10, 2026");
+    expect(
+      container.querySelector('time[datetime="2026-07-09T00:00:00.000Z"]')
+    ).toHaveTextContent("July 9, 2026");
+    // No CtaBand (A7), and the contents list carries the order with no numerals
+    expect(container.querySelector("[data-cta-band]")).toBeNull();
+    expect(
+      screen.getByRole("navigation", { name: "In this document" })
+    ).toHaveTextContent("Retention");
+  });
+
+  it("falls back to the contact form link when no public email is published", () => {
+    render(
+      <LegalDocumentView
+        document={documentFixture}
+        site={createEmergencyPublicSite()}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Use the contact form" })
+    ).toHaveAttribute("href", "/contact");
   });
 
   it("shows an honest noindex-compatible fallback instead of invented copy", () => {
@@ -88,5 +126,11 @@ describe("published legal-document experience", () => {
     expect(
       screen.getByRole("link", { name: "Contact about this document" })
     ).toHaveAttribute("href", "/contact");
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Terms of Service unavailable",
+      })
+    ).toBeInTheDocument();
   });
 });

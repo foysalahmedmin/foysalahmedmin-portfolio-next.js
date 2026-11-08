@@ -53,6 +53,9 @@ vi.mock("@/components/pages/public-route-page", () => ({
 vi.mock("@/components/content/json-ld-script", () => ({
   JsonLdScript: () => null,
 }));
+vi.mock("@/components/(common)/contact-page/read-services", () => ({
+  readTopicServices: async () => [],
+}));
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
 }));
@@ -90,13 +93,6 @@ describe("fixed public route entrypoints", () => {
       },
     ],
     [
-      "contact",
-      async () => {
-        const Page = (await import("@/app/(common)/contact/page")).default;
-        return await Page();
-      },
-    ],
-    [
       "privacy",
       async () => {
         const Page = (await import("@/app/(common)/privacy/page")).default;
@@ -119,4 +115,19 @@ describe("fixed public route entrypoints", () => {
       ).toBeInTheDocument();
     }
   );
+
+  // The contact page composes ConversationLayout itself so the form can receive what `?topic=` resolved to
+  it("renders contact in the conversation layout, with or without a topic", async () => {
+    const Page = (await import("@/app/(common)/contact/page")).default;
+    for (const params of [{}, { topic: "unknown", start: "x" }]) {
+      const { container } = render(
+        await Page({ searchParams: Promise.resolve(params) })
+      );
+      const main = container.querySelector("main");
+      expect(main).toHaveAttribute("data-archetype", "A6");
+      expect(main).toHaveAttribute("data-public-route", "contact");
+      expect(container.querySelector("[data-cta-band]")).toBeNull();
+      cleanup();
+    }
+  });
 });

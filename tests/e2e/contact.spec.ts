@@ -36,7 +36,7 @@ test("contact submission reports success only after a stored receipt response", 
   await page.getByLabel("Email Address").fill("visitor@example.test");
   await page.getByLabel("Subject").fill("Architecture review");
   await page
-    .getByLabel("Message")
+    .getByLabel("Message", { exact: true })
     .fill("Please review the system boundaries and delivery constraints.");
   await page.getByRole("button", { name: /send message/i }).click();
 
@@ -78,7 +78,7 @@ test("contact timeout remains retryable without changing the submission key", as
   await page.getByLabel("Email Address").fill("visitor@example.test");
   await page.getByLabel("Subject").fill("Retry semantics");
   await page
-    .getByLabel("Message")
+    .getByLabel("Message", { exact: true })
     .fill("This message verifies timeout and safe retry behavior.");
   await page.getByRole("button", { name: /send message/i }).click();
   await expect(contactStatusRegion(page)).toContainText("timed out", {
