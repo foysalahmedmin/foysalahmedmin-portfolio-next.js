@@ -3,6 +3,7 @@ import { SplitText } from "gsap/SplitText";
 import { formatCount } from "../counter";
 import { activeBeat, storyTime } from "../story";
 import { dur, easeFn, scrubLag, staggerLine } from "../tokens";
+import { bindChapters } from "./chapters";
 import type {
   Cleanup,
   CounterOptions,
@@ -32,6 +33,8 @@ const MAX_PINS = 3;
 
 export function createBehaviors(host: BehaviorHost): EngineBehaviors {
   return {
+    chapters: bindChapters,
+
     textReveal(element) {
       if (isInView(element)) return noop;
 

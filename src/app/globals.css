@@ -253,6 +253,10 @@
   @import "../assets/styles/public/engine.css";
   @import "../assets/styles/public/hero.css";
   @import "../assets/styles/public/sections.css";
+  @import "../assets/styles/public/chapters-triage-stack.css";
+  @import "../assets/styles/public/chapters-pipeline-process.css";
+  @import "../assets/styles/public/chapters-evidence-files.css";
+  @import "../assets/styles/public/chapters-trust-close.css";
 
   .text-glow {
     text-shadow: 0 0 15px color-mix(in srgb, var(--primary) 50%, transparent);

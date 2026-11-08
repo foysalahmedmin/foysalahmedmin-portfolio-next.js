@@ -110,6 +110,7 @@ export default function ArticlesSection({
   unavailable?: boolean;
   heading?: string;
   fallbacks?: TPublicSiteFallbacksDto;
+  layout?: string;
 }) {
   return (
     <section id="articles" className="py-[var(--space-section)]">

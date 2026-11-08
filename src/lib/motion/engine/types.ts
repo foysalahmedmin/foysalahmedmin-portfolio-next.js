@@ -59,6 +59,8 @@ export type EngineBehaviors = {
   cursor(element: HTMLElement): Cleanup;
   /** Pin a scene and drive `--pin-progress` and `data-beat` from scroll (3.7.4). */
   pinScene(element: HTMLElement, options: PinSceneOptions): Cleanup;
+  /** Bind the `data-scroll-focus` and `data-scroll-progress` markers of every chapter (engine/chapters.ts). */
+  chapters(): Cleanup;
 };
 
 export type MotionEngine = Readonly<{

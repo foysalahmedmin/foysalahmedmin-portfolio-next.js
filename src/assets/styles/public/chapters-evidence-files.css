@@ -1,0 +1,5 @@
+/*
+ * Home chapters: evidence-files (Phase 5). Owned by one slice; add rules here, not in sections.css.
+ * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"],
+ * an unbound `--progress` is finished, reduced motion and no-JS show everything.
+ */

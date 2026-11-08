@@ -217,6 +217,14 @@ html:not([data-motion="full"]) [data-trace-fill] {
   inset: 0;
 }
 
+/* ---------- Chapter markers (src/lib/motion/engine/chapters.ts) ----------
+   The engine writes `--progress` on `[data-scroll-progress]` and `data-active` on the focused
+   `[data-focus-row]`. Unbound (reduced, off, touch, no JavaScript) the progress is finished and no row
+   is dimmed: chapter CSS dims or hides things only under `html[data-motion-engine="ready"]`. */
+[data-scroll-progress] {
+  --progress: 1;
+}
+
 /* ---------- Route transitions (M18) and page enter ---------- */
 html[data-vt="running"] [data-chrome] {
   view-transition-name: site-chrome;

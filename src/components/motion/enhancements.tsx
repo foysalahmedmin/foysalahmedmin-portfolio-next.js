@@ -5,6 +5,7 @@ import { getScenePreference } from "@/state/scene-store";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Cursor } from "./cursor";
+import { useEngine } from "./engine-provider";
 import { MotionEngineHost } from "./motion-engine-host";
 import { RouteTransitions } from "./route-transitions";
 import { ScrollRestoration } from "./scroll-restoration";
@@ -13,6 +14,13 @@ const CommandPalette = dynamic(() => import("./command-palette"), {
   ssr: false,
 });
 const PerfOverlay = dynamic(() => import("./perf-overlay"), { ssr: false });
+
+/** Binds the scroll-linked chapter markers (`data-scroll-focus`, `data-scroll-progress`) once the engine is ready. */
+function ChapterBindings() {
+  const engine = useEngine();
+  useEffect(() => engine?.behaviors.chapters(), [engine]);
+  return null;
+}
 
 type EnhancementsProps = {
   commands: readonly PaletteCommand[];
@@ -49,6 +57,7 @@ export default function Enhancements({
   return (
     <>
       <MotionEngineHost />
+      <ChapterBindings />
       <RouteTransitions />
       <ScrollRestoration />
       <Cursor />

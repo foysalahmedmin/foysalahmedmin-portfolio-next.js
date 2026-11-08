@@ -23,7 +23,11 @@ import { isScene3dEnabled } from "@/lib/motion/scene";
 import ProjectsSection from "@/components/(common)/home-page/projects-section";
 import VideosSection from "@/components/(common)/home-page/videos-section";
 import ArchitectureWorkflowSection from "@/components/sections/architecture-workflow-section";
+import CommitmentsSection from "@/components/sections/commitments-section";
 import ContactCTASection from "@/components/sections/contact-cta-section";
+import DeliverableSamplesSection from "@/components/sections/deliverable-samples-section";
+import EngagementModelsSection from "@/components/sections/engagement-models-section";
+import FitCheckSection from "@/components/sections/fit-check-section";
 import GithubProfileSection from "@/components/sections/github-profile-section/live";
 import MetricsStripSection from "@/components/sections/metrics-strip-section";
 import PillarShowcaseSection from "@/components/sections/pillar-showcase-section";
@@ -35,6 +39,8 @@ import {
   TimelineSection,
 } from "@/components/sections/evidence-sections";
 import ServicesSection from "@/components/sections/services-section";
+import StartingPointSection from "@/components/sections/starting-point-section";
+import TriageSection from "@/components/sections/triage-section";
 import SkillsSection, {
   type TPublicSkillGroupWithSkills,
 } from "@/components/sections/skills-section";
@@ -194,6 +200,7 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
               <MetricsStripSection
                 metrics={payload.site.metrics}
                 heading={section.heading}
+                layout={section.layout}
               />
             ) : null;
             break;
@@ -234,6 +241,7 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
                 fallbacks={payload.site.fallbacks}
                 unavailable={unavailable}
                 heading={section.heading}
+                layout={section.layout}
               />
             );
             break;
@@ -244,6 +252,7 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
                 fallbacks={payload.site.fallbacks}
                 unavailable={unavailable}
                 heading={section.heading}
+                layout={section.layout}
               />
             );
             break;
@@ -327,7 +336,55 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
             break;
           }
           case "contact-cta":
-            content = <ContactCTASection site={payload.site} />;
+            content = (
+              <ContactCTASection site={payload.site} layout={section.layout} />
+            );
+            break;
+          case "problem-index":
+            content = (
+              <TriageSection
+                services={asItems<TPublicServiceDto>(section.items)}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "engagement-models":
+            content = (
+              <EngagementModelsSection
+                site={payload.site}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "deliverable-samples":
+            content = (
+              <DeliverableSamplesSection
+                site={payload.site}
+                heading={section.heading}
+              />
+            );
+            break;
+          case "commitments":
+            content = (
+              <CommitmentsSection
+                site={payload.site}
+                heading={section.heading}
+                layout={section.layout}
+              />
+            );
+            break;
+          case "fit-check":
+            content = (
+              <FitCheckSection site={payload.site} heading={section.heading} />
+            );
+            break;
+          case "starting-point":
+            content = (
+              <StartingPointSection
+                site={payload.site}
+                heading={section.heading}
+              />
+            );
             break;
           default:
             content = null;

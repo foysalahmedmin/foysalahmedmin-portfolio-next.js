@@ -10,6 +10,7 @@ export default function MetricsStripSection({
   className?: string;
   metrics: readonly TSiteMetric[];
   heading?: string;
+  layout?: string;
 }) {
   const visible = metrics.filter(
     (metric) =>

@@ -20,6 +20,7 @@ const CaseStudiesSection = ({
   fallbacks?: TPublicSiteFallbacksDto;
   heading?: string;
   unavailable?: boolean;
+  layout?: string;
 }) => (
   <section id="case-studies" className="py-[var(--space-section)]">
     <div className="container">
