@@ -114,7 +114,14 @@ const inboxFilters: readonly TDataTableFilter<ContactInboxListItem>[] = [
   },
 ];
 
-const ContactInboxWorkspace = () => {
+type ContactInboxWorkspaceProps = Readonly<{
+  /** Filters carried by the URL (`?status=new`), already validated by the page. */
+  initialFilters?: Readonly<Record<string, string>>;
+}>;
+
+const ContactInboxWorkspace = ({
+  initialFilters,
+}: ContactInboxWorkspaceProps = {}) => {
   const [contacts, setContacts] = useState<ContactInboxListItem[]>([]);
   const [tableStatus, setTableStatus] = useState<TDataTableStatus>("loading");
   const [tableError, setTableError] = useState<string | null>(null);
@@ -123,7 +130,9 @@ const ContactInboxWorkspace = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [total, setTotal] = useState(0);
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filters, setFilters] = useState<Record<string, string>>(() => ({
+    ...initialFilters,
+  }));
   const [refreshVersion, setRefreshVersion] = useState(0);
 
   const [isDetailOpen, setIsDetailOpen] = useState(false);

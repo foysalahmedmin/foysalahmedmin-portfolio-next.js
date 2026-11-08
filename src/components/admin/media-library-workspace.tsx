@@ -69,7 +69,11 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type Props = Readonly<{ canPermanentDelete: boolean }>;
+type Props = Readonly<{
+  canPermanentDelete: boolean;
+  /** Filters carried by the URL (`?metadata_status=incomplete`), already validated by the page. */
+  initialFilters?: MediaLibraryQuery["filters"];
+}>;
 type ViewMode = "table" | "grid";
 type Notice = Readonly<{
   tone: "success" | "warning" | "error";
@@ -242,10 +246,14 @@ const MediaPreview = ({ file }: { file: TFilePopulated }) => {
   );
 };
 
-const MediaLibraryWorkspace = ({ canPermanentDelete }: Props) => {
-  const [query, setQuery] = useState<MediaLibraryQuery>(
-    DEFAULT_MEDIA_LIBRARY_QUERY
-  );
+const MediaLibraryWorkspace = ({
+  canPermanentDelete,
+  initialFilters,
+}: Props) => {
+  const [query, setQuery] = useState<MediaLibraryQuery>(() => ({
+    ...DEFAULT_MEDIA_LIBRARY_QUERY,
+    filters: { ...initialFilters },
+  }));
   const [searchInput, setSearchInput] = useState("");
   const [view, setView] = useState<ViewMode>("table");
   const [files, setFiles] = useState<TFilePopulated[]>([]);

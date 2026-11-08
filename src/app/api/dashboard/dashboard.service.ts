@@ -1,6 +1,7 @@
 import connectDB from "@/lib/db";
 import { getDashboardRawSnapshot } from "./dashboard.repository";
 import type {
+  TDashboardContentHealth,
   TDashboardCountRow,
   TDashboardRawSnapshot,
 } from "./dashboard.type";
@@ -30,6 +31,13 @@ const exactCounts = (
   return output;
 };
 
+const emptyHealth: TDashboardContentHealth = {
+  incomplete: 0,
+  stale_drafts: 0,
+  missing_media: 0,
+  broken_links: 0,
+};
+
 const sumCounts = (counts: Record<string, number>): number =>
   Object.values(counts).reduce((sum, value) => sum + value, 0);
 
@@ -54,6 +62,25 @@ export const normalizeDashboardSnapshot = (
     "published",
     "archived",
   ]);
+  const caseStudies = exactCounts(raw.case_study_statuses ?? [], [
+    "draft",
+    "pending",
+    "published",
+    "archived",
+  ]);
+  const videos = exactCounts(raw.video_statuses ?? [], [
+    "draft",
+    "pending",
+    "published",
+    "archived",
+  ]);
+  const caseStudyHealth = raw.case_study_health ?? emptyHealth;
+  const videoHealth = raw.video_health ?? emptyHealth;
+  const healthTotal = (key: keyof TDashboardContentHealth) =>
+    raw.article_health[key] +
+    raw.project_health[key] +
+    caseStudyHealth[key] +
+    videoHealth[key];
   const articlePillars = exactCounts(raw.article_pillars, PILLAR_KEYS);
   const projectPillars = exactCounts(raw.project_pillars, PILLAR_KEYS);
   const inboxStatuses = exactCounts(raw.inbox.statuses, [
@@ -113,6 +140,8 @@ export const normalizeDashboardSnapshot = (
       },
       articles: { total: sumCounts(articles), by_status: articles },
       projects: { total: sumCounts(projects), by_status: projects },
+      case_studies: { total: sumCounts(caseStudies), by_status: caseStudies },
+      videos: { total: sumCounts(videos), by_status: videos },
       pillar_coverage: Object.fromEntries(
         PILLAR_KEYS.map((key) => [
           key,
@@ -124,17 +153,15 @@ export const normalizeDashboardSnapshot = (
         ])
       ),
       health: {
-        incomplete:
-          raw.article_health.incomplete + raw.project_health.incomplete,
-        stale_drafts:
-          raw.article_health.stale_drafts + raw.project_health.stale_drafts,
-        missing_media:
-          raw.article_health.missing_media + raw.project_health.missing_media,
-        broken_links:
-          raw.article_health.broken_links + raw.project_health.broken_links,
+        incomplete: healthTotal("incomplete"),
+        stale_drafts: healthTotal("stale_drafts"),
+        missing_media: healthTotal("missing_media"),
+        broken_links: healthTotal("broken_links"),
         by_type: {
           articles: raw.article_health,
           projects: raw.project_health,
+          case_studies: caseStudyHealth,
+          videos: videoHealth,
         },
       },
     },
@@ -179,6 +206,8 @@ export const normalizeDashboardSnapshot = (
     },
   };
 };
+
+export type TDashboardSnapshot = ReturnType<typeof normalizeDashboardSnapshot>;
 
 export const getDashboardSnapshot = async () => {
   await connectDB();

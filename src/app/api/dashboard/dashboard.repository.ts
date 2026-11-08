@@ -1,9 +1,11 @@
 import Article from "@/app/api/articles/article.model";
+import CaseStudy from "@/app/api/case-studies/case-study.model";
 import AuditEvent from "@/app/api/audit-events/audit-event.model";
 import * as ContactRepository from "@/app/api/contacts/contact.repository";
 import File from "@/app/api/files/file.model";
 import OutboxEvent from "@/app/api/outbox-events/outbox-event.model";
 import Project from "@/app/api/projects/project.model";
+import Video from "@/app/api/videos/video.model";
 import Site from "@/app/api/site/site.model";
 import Contact from "@/app/api/contacts/contact.model";
 import { PILLAR_KEYS } from "@/lib/content/pillars";
@@ -17,7 +19,7 @@ import type {
 
 type TContentFacet = Readonly<{
   statuses: TDashboardCountRow[];
-  pillars: TDashboardCountRow[];
+  pillars?: TDashboardCountRow[];
   health: Array<TDashboardContentHealth>;
 }>;
 
@@ -26,6 +28,81 @@ const emptyHealth = (): TDashboardContentHealth => ({
   stale_drafts: 0,
   missing_media: 0,
   broken_links: 0,
+});
+
+// Soft-deleted records are not content anymore, so no count may include them.
+const notDeleted = { $match: { is_deleted: { $ne: true } } };
+
+const hasText = (field: string) => ({
+  $gt: [{ $strLenCP: { $ifNull: [field, ""] } }, 0],
+});
+
+const countWhen = (condition: unknown) => ({
+  $sum: { $cond: [condition, 1, 0] },
+});
+
+const staleDraft = (statusField: string, staleBefore: Date) =>
+  countWhen({
+    $and: [
+      { $in: [statusField, ["draft", "pending"]] },
+      { $lt: ["$updated_at", staleBefore] },
+    ],
+  });
+
+const missingThumbnail = (statusField: string) =>
+  countWhen({
+    $and: [
+      { $eq: [statusField, "published"] },
+      { $eq: [{ $ifNull: ["$thumbnail", null] }, null] },
+    ],
+  });
+
+// Case study "incomplete" mirrors `getCaseStudyPublishReadiness` (the fields that block publishing).
+// Videos have no editorial fields beyond their source, so their `incomplete` stays 0 (not measured).
+const hasResult = {
+  $or: [
+    hasText("$results_summary"),
+    {
+      $anyElementTrue: [
+        {
+          $map: {
+            input: { $ifNull: ["$outcomes", []] },
+            as: "outcome",
+            in: { $ne: ["$$outcome.verification_state", "unverified"] },
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const caseStudyIncomplete = countWhen({
+  $or: [
+    { $not: [hasText("$description")] },
+    { $not: [hasText("$primary_pillar")] },
+    { $not: [hasText("$engagement_type")] },
+    { $not: [hasText("$challenge")] },
+    { $not: [hasText("$approach")] },
+    { $not: [hasText("$solution")] },
+    { $not: [hasResult] },
+  ],
+});
+
+const caseStudyBrokenLinks = countWhen({
+  $or: [
+    {
+      $and: [
+        { $eq: ["$live_url_visibility", "public"] },
+        { $not: [hasText("$live_url")] },
+      ],
+    },
+    {
+      $and: [
+        { $eq: ["$source_url_visibility", "public"] },
+        { $not: [hasText("$source_url")] },
+      ],
+    },
+  ],
 });
 
 export const getDashboardRawSnapshot = async (
@@ -47,11 +124,14 @@ export const getDashboardRawSnapshot = async (
     latestAudit,
     recentInquiries,
     publishActivity,
+    caseStudySnapshot,
+    videoSnapshot,
   ] = await Promise.all([
     Site.findOne({ site_key: "primary" })
       .select("revision published.revision published.published_at updated_at")
       .lean(),
     Article.aggregate<TContentFacet>([
+      notDeleted,
       {
         $facet: {
           statuses: [{ $group: { _id: "$status", count: { $sum: 1 } } }],
@@ -151,6 +231,7 @@ export const getDashboardRawSnapshot = async (
       },
     ]).exec(),
     Project.aggregate<TContentFacet>([
+      notDeleted,
       {
         $facet: {
           statuses: [
@@ -368,6 +449,46 @@ export const getDashboardRawSnapshot = async (
       .sort({ created_at: -1, _id: -1 })
       .limit(8)
       .lean<TDashboardActivityRow[]>(),
+    CaseStudy.aggregate<TContentFacet>([
+      notDeleted,
+      {
+        $facet: {
+          statuses: [{ $group: { _id: "$status", count: { $sum: 1 } } }],
+          health: [
+            {
+              $group: {
+                _id: null,
+                incomplete: caseStudyIncomplete,
+                stale_drafts: staleDraft("$status", staleBefore),
+                missing_media: missingThumbnail("$status"),
+                broken_links: caseStudyBrokenLinks,
+              },
+            },
+            { $project: { _id: 0 } },
+          ],
+        },
+      },
+    ]).exec(),
+    Video.aggregate<TContentFacet>([
+      notDeleted,
+      {
+        $facet: {
+          statuses: [{ $group: { _id: "$status", count: { $sum: 1 } } }],
+          health: [
+            {
+              $group: {
+                _id: null,
+                incomplete: { $sum: 0 },
+                stale_drafts: staleDraft("$status", staleBefore),
+                missing_media: missingThumbnail("$status"),
+                broken_links: { $sum: 0 },
+              },
+            },
+            { $project: { _id: 0 } },
+          ],
+        },
+      },
+    ]).exec(),
   ]);
 
   const articles = articleSnapshot[0];
@@ -381,6 +502,10 @@ export const getDashboardRawSnapshot = async (
     project_pillars: projects?.pillars ?? [],
     article_health: articles?.health[0] ?? emptyHealth(),
     project_health: projects?.health[0] ?? emptyHealth(),
+    case_study_statuses: caseStudySnapshot[0]?.statuses ?? [],
+    case_study_health: caseStudySnapshot[0]?.health[0] ?? emptyHealth(),
+    video_statuses: videoSnapshot[0]?.statuses ?? [],
+    video_health: videoSnapshot[0]?.health[0] ?? emptyHealth(),
     inbox,
     media_providers: mediaProviders,
     media_lifecycle: mediaLifecycle,

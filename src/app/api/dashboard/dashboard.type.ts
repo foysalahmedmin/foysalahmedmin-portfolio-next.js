@@ -55,4 +55,9 @@ export type TDashboardRawSnapshot = Readonly<{
   audit_latest_at: Date | string | null;
   recent_inquiries: TDashboardInquiryRow[];
   publish_activity: TDashboardActivityRow[];
+  /** Optional so older snapshots (and fixtures) still type-check; absent means nothing was measured. */
+  case_study_statuses?: TDashboardCountRow[];
+  case_study_health?: TDashboardContentHealth;
+  video_statuses?: TDashboardCountRow[];
+  video_health?: TDashboardContentHealth;
 }>;

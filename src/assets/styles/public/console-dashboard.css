@@ -1,0 +1,536 @@
+/*
+ * Admin console: dashboard (Phase 7). Owned by one slice; add rules here.
+ * Rules: tokens only (no colour literals), no backdrop-filter outside overlays, no animation library, state is
+ * shape, weight and label (never colour), every control reachable by keyboard with visible focus.
+ * Scope every rule to [data-surface="console"] so the public site is untouched.
+ *
+ * Prefix: cd-. Hairline panels on a 12-column grid, Mono tabular numbers, no icon tiles, no card wall.
+ * The same file styles the "Review and publish" view (cd-review, cd-diff, cd-publish) and the Refresh control.
+ */
+
+/* ---------- Page head ---------- */
+[data-surface="console"] .cd-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+[data-surface="console"] .cd-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: var(--step-1);
+  line-height: 1.1;
+  font-family: var(--ff-display);
+  letter-spacing: -0.02em;
+}
+
+[data-surface="console"] .cd-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  min-height: var(--control-h-sm, 2rem);
+}
+
+[data-surface="console"] .cd-status__text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+/* ---------- Refresh: fixed boxes, so a new time or the pending state never shifts the layout ---------- */
+[data-surface="console"] .cd-refresh {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+[data-surface="console"] .cd-refresh__time {
+  display: inline-block;
+  min-width: 16ch;
+  color: var(--muted-foreground);
+  font-size: var(--step--1);
+  text-align: end;
+}
+
+[data-surface="console"] .cd-refresh__button {
+  min-width: 5.5rem;
+}
+
+/* ---------- Grid and panels (hairline, not cards) ---------- */
+[data-surface="console"] .cd-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  gap: 1rem;
+}
+
+[data-surface="console"] .cd-panel {
+  grid-column: 1 / -1;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-panel);
+  background: var(--card);
+  padding: 1rem 1.25rem;
+  min-width: 0;
+  color: var(--card-foreground);
+}
+
+@media (min-width: 64rem) {
+  [data-surface="console"] .cd-panel[data-span="4"] {
+    grid-column: span 4;
+  }
+
+  [data-surface="console"] .cd-panel[data-span="5"] {
+    grid-column: span 5;
+  }
+
+  [data-surface="console"] .cd-panel[data-span="7"] {
+    grid-column: span 7;
+  }
+
+  [data-surface="console"] .cd-panel[data-span="8"] {
+    grid-column: span 8;
+  }
+}
+
+[data-surface="console"] .cd-panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+[data-surface="console"] .cd-panel__title {
+  margin: 0;
+  font-weight: 600;
+}
+
+[data-surface="console"] .cd-num {
+  font-weight: 600;
+}
+
+[data-surface="console"] .cd-faint {
+  color: var(--muted-foreground);
+}
+
+[data-surface="console"] .cd-note,
+[data-surface="console"] .cd-empty,
+[data-surface="console"] .cd-figures {
+  margin: 0 0 0.75rem;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+[data-surface="console"] .cd-note {
+  color: var(--text-secondary);
+}
+
+[data-surface="console"] .cd-figures {
+  font-size: var(--step-0);
+}
+
+[data-surface="console"] .cd-empty {
+  border-block: 1px dashed var(--line-3);
+  padding: 0.75rem 0;
+}
+
+[data-surface="console"] .cd-link {
+  font-size: var(--step--1);
+}
+
+[data-surface="console"] .cd-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+/* ---------- Needs attention ---------- */
+[data-surface="console"] .cd-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-surface="console"] .cd-rows > li + li {
+  border-top: 1px solid var(--line-1);
+}
+
+[data-surface="console"] .cd-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  font-size: var(--step--1);
+}
+
+@media (max-width: 40rem) {
+  [data-surface="console"] .cd-row {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+  }
+
+  [data-surface="console"] .cd-row__link {
+    grid-column: 2;
+  }
+}
+
+/* Severity: a filled diamond for high, an outlined diamond for medium, always with the word */
+[data-surface="console"] .cd-sev {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-surface="console"] .cd-sev__glyph {
+  flex: none;
+  transform: rotate(45deg) scale(0.85);
+  border: 1.5px solid currentColor;
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+[data-surface="console"] .cd-sev[data-severity="high"] .cd-sev__glyph {
+  background: currentColor;
+}
+
+[data-surface="console"] .cd-sev[data-severity="high"] .cd-sev__label {
+  font-weight: 700;
+}
+
+/* ---------- Publishing pipeline: pattern fills, direct labels, never colour ---------- */
+[data-surface="console"] .cd-pipeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-surface="console"] .cd-pipe {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.5rem 1.5rem;
+  padding: 0.875rem 0;
+  font-size: var(--step--1);
+}
+
+[data-surface="console"] .cd-pipe + .cd-pipe {
+  border-top: 1px solid var(--line-1);
+}
+
+@media (max-width: 40rem) {
+  [data-surface="console"] .cd-pipe {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+[data-surface="console"] .cd-bar {
+  display: flex;
+  border: 1px solid var(--foreground);
+  border-radius: var(--r-sm);
+  height: 1rem;
+  overflow: hidden;
+}
+
+[data-surface="console"] .cd-bar[data-empty="true"] {
+  border-style: dashed;
+  border-color: var(--line-4);
+}
+
+[data-surface="console"] .cd-seg {
+  flex-basis: 0;
+  border-inline-start: 1px solid var(--foreground);
+  min-width: 0.375rem;
+  height: 100%;
+}
+
+[data-surface="console"] .cd-seg:first-child {
+  border-inline-start: 0;
+}
+
+[data-surface="console"] .cd-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-surface="console"] .cd-swatch {
+  display: inline-block;
+  margin-inline-end: 0.375rem;
+  border: 1px solid var(--foreground);
+  border-radius: var(--r-sm);
+  width: 0.875rem;
+  height: 0.625rem;
+}
+
+/* solid = published, hatch = pending, outline = draft, dots = archived */
+[data-surface="console"] .cd-seg[data-pattern="solid"],
+[data-surface="console"] .cd-swatch[data-pattern="solid"] {
+  background: var(--foreground);
+}
+
+[data-surface="console"] .cd-seg[data-pattern="hatch"],
+[data-surface="console"] .cd-swatch[data-pattern="hatch"] {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--foreground) 0 1.5px,
+    transparent 1.5px 5px
+  );
+}
+
+[data-surface="console"] .cd-seg[data-pattern="dots"],
+[data-surface="console"] .cd-swatch[data-pattern="dots"] {
+  background-image: radial-gradient(
+    circle,
+    var(--foreground) 1.1px,
+    transparent 1.3px
+  );
+  background-size: 5px 5px;
+}
+
+[data-surface="console"] .cd-seg[data-pattern="outline"],
+[data-surface="console"] .cd-swatch[data-pattern="outline"] {
+  background: transparent;
+}
+
+@media (forced-colors: active) {
+  [data-surface="console"] .cd-seg,
+  [data-surface="console"] .cd-swatch,
+  [data-surface="console"] .cd-sev__glyph {
+    forced-color-adjust: none;
+  }
+
+  [data-surface="console"] .cd-sev__glyph {
+    color: CanvasText;
+  }
+}
+
+/* ---------- Recent activity and System ---------- */
+[data-surface="console"] .cd-event {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  font-size: var(--step--1);
+}
+
+[data-surface="console"] .cd-facts {
+  margin: 0;
+}
+
+[data-surface="console"] .cd-fact {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  font-size: var(--step--1);
+}
+
+[data-surface="console"] .cd-fact + .cd-fact {
+  border-top: 1px solid var(--line-1);
+}
+
+[data-surface="console"] .cd-fact dt {
+  color: var(--muted-foreground);
+}
+
+[data-surface="console"] .cd-fact dd {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+[data-surface="console"] .cd-figures-line {
+  color: var(--text-secondary);
+}
+
+/* ---------- Workspace directory (roles without dashboard:read) ---------- */
+[data-surface="console"] .cd-workspace {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  font-size: var(--step--1);
+}
+
+@media (max-width: 40rem) {
+  [data-surface="console"] .cd-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.125rem;
+  }
+}
+
+/* ---------- Buttons (Refresh, Publish) ---------- */
+[data-surface="console"] .cd-btn,
+[data-surface="console"] .cd-refresh__button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color var(--dur-micro) ease;
+  cursor: pointer;
+  border: 1px solid var(--line-4);
+  border-radius: var(--r-control);
+  background-color: transparent;
+  padding: 0 0.75rem;
+  min-height: var(--control-h-sm, 2rem);
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--step--1);
+  white-space: nowrap;
+}
+
+@media (pointer: coarse) {
+  [data-surface="console"] .cd-btn,
+  [data-surface="console"] .cd-refresh__button {
+    min-height: var(--hit-area);
+  }
+}
+
+[data-surface="console"] .cd-btn:hover:not(:disabled),
+[data-surface="console"] .cd-refresh__button:hover:not(:disabled) {
+  background-color: var(--line-1);
+}
+
+[data-surface="console"] .cd-btn[data-variant="primary"] {
+  border-color: var(--foreground);
+  background-color: var(--foreground);
+  color: var(--background);
+  font-weight: 600;
+}
+
+[data-surface="console"] .cd-btn[data-variant="primary"]:hover:not(:disabled) {
+  background-color: var(--text-secondary);
+}
+
+/* Disabled and busy: faint text and a hatch fill, not just lower opacity */
+[data-surface="console"] .cd-btn:disabled,
+[data-surface="console"] .cd-refresh__button:disabled {
+  cursor: not-allowed;
+  border-color: var(--line-2);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--line-2) 0 1px,
+    transparent 1px 6px
+  );
+  background-color: transparent;
+  color: var(--text-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-surface="console"] .cd-btn,
+  [data-surface="console"] .cd-refresh__button {
+    transition: none;
+  }
+}
+
+/* ---------- Review and publish ---------- */
+[data-surface="console"] .cd-publish {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+[data-surface="console"] .cd-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid var(--foreground);
+  border-radius: var(--r-panel);
+  padding: 0.75rem 1rem;
+  max-width: 44rem;
+}
+
+[data-surface="console"] .cd-confirm .cd-note {
+  margin: 0;
+}
+
+/* Reserved height: the result line appears without moving what is below it */
+[data-surface="console"] .cd-notice {
+  min-height: 1.5rem;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+[data-surface="console"] .cd-diff {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  font-size: var(--step--1);
+}
+
+[data-surface="console"] .cd-diff th,
+[data-surface="console"] .cd-diff td {
+  vertical-align: top;
+  border-top: 1px solid var(--line-1);
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+[data-surface="console"] .cd-diff thead th {
+  border-top: 0;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  font-size: var(--step--2);
+  font-family: var(--ff-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-surface="console"] .cd-diff tbody th {
+  width: 26%;
+  font-weight: 600;
+}
+
+[data-surface="console"] .cd-diff th:nth-child(4),
+[data-surface="console"] .cd-diff td:nth-child(4) {
+  width: 9rem;
+}
+
+@media (max-width: 48rem) {
+  [data-surface="console"] .cd-diff,
+  [data-surface="console"] .cd-diff tbody,
+  [data-surface="console"] .cd-diff tr,
+  [data-surface="console"] .cd-diff th,
+  [data-surface="console"] .cd-diff td {
+    display: block;
+    width: auto;
+  }
+
+  [data-surface="console"] .cd-diff thead {
+    position: absolute;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  [data-surface="console"] .cd-diff tbody th {
+    border-top: 1px solid var(--line-1);
+    padding-bottom: 0;
+    width: auto;
+  }
+
+  [data-surface="console"] .cd-diff td {
+    border-top: 0;
+    padding: 0.125rem 0;
+  }
+
+  [data-surface="console"] .cd-diff td::before {
+    content: attr(data-label) ": ";
+    color: var(--muted-foreground);
+    font-size: var(--step--2);
+    font-family: var(--ff-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
