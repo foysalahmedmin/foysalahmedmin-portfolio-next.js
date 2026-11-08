@@ -156,7 +156,7 @@ describe("EngagementModelsSection", () => {
     expect(container.querySelector("[hidden], [inert]")).toBeNull();
   });
 
-  it("renders nothing when there are no models, or all are off (the seed ships them off)", () => {
+  it("renders nothing when there are no models, or all are off", () => {
     expect(
       render(<EngagementModelsSection site={siteWith([])} />).container
     ).toBeEmptyDOMElement();
@@ -164,14 +164,23 @@ describe("EngagementModelsSection", () => {
     expect(
       render(<EngagementModelsSection site={siteWith(off)} />).container
     ).toBeEmptyDOMElement();
+  });
 
+  it("renders the seeded models: the approved wording, no price and no duration", () => {
     const seeded = JSON.parse(
       JSON.stringify(createSiteContentV8().engagement_models)
     ) as TSiteEngagementModel[];
-    expect(seeded.length).toBeGreaterThan(0);
-    expect(
-      render(<EngagementModelsSection site={siteWith(seeded)} />).container
-    ).toBeEmptyDOMElement();
+    expect(seeded).toHaveLength(3);
+    const { container } = render(
+      <EngagementModelsSection site={siteWith(seeded)} />
+    );
+    expect(container.textContent).toContain("Architecture review");
+    expect(container.textContent).toContain("Ongoing partnership");
+    expect(container.textContent).toContain(
+      "A short review of your code, data and constraints"
+    );
+    expect(container.textContent).toContain("Scoped per project");
+    expect(container.textContent).not.toMatch(/\$|USD|per hour|per month/i);
   });
 
   it("is a server component", () => {
