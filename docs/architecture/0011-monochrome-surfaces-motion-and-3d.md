@@ -94,6 +94,12 @@ Full evidence: [`docs/baseline/phase-4-findings.md`](../baseline/phase-4-finding
 
 The commercial and evidence content of the Site, the six new Page kinds, Service problems and the case-file constraints and diagrams are in the data model, the admin and seed v8, all additive with reader defaults so stored snapshots keep validating and no migration is needed. The truth gates from the plan are enforced in code, not by convention: publish refuses an enabled engagement model that is unverified or incomplete, a price that is not `verified` and an unverified deliverable sample; the public Site drops disabled and unverified records and metrics older than 180 days; the truth manifest is 1.1.0 and a test ties every enabled Site record to a claim. Facts that belong to the owner (C-13 to C-18, C-31 to C-33) are off in data. The one cost to the motion and 3D decisions above is the initial-JS headroom, now 28 bytes: a client component importing a server module changed the shared chunk graph, so the Site editor's schemas moved to a Zod-only module and a boundary test keeps client components away from the server Site modules.
 
+## Phase 5 outcome (2026-11-08)
+
+Full evidence: [`docs/baseline/phase-5-findings.md`](../baseline/phase-5-findings.md).
+
+The home chapters are built from the Page composition and the Site data. Scroll-linked behaviour that is not a pinned scene is bound by the engine from data attributes (`data-scroll-focus`, `data-scroll-progress`), so it lives in the deferred motion chunk and the home route's initial JavaScript did not grow; the two pinned scenes (Stack, Pipeline) reuse `PinScene` and are driven from CSS. Chapter progress deliberately does not use ScrollTrigger: a trigger makes ScrollTrigger refresh the page, which left a visitor who had scrolled far partway down. The initial-JS cap is met again with 302 bytes of headroom, by retiring the client card-row `Rail` that no composition used. Every pinned scene has a skip link, and the home has three pins at most. Not repeated in this phase: Lighthouse, the smoothness harness and the visual snapshots.
+
 ## Verification
 
 - Bundle boundary test and build-output scan (admin and `components/ui` free of the engine libraries).

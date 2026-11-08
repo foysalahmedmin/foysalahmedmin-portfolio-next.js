@@ -87,3 +87,7 @@ Set a distinct, server-only `PAGE_PREVIEW_SECRET` of at least 32 characters in p
 Migration `202607150013-page-composition` creates the Page singleton, public-read, admin-order, and durable invalidation indexes. It is non-destructive and does not seed layouts or portfolio claims. Existing invalid/duplicate documents require explicit remediation.
 
 The server-only published resolution, section-health, query-budget, and cross-domain cache contract is documented in [Published Page resolver](./published-page-resolver.md).
+
+## Home chapters (Phase 5)
+
+The home draft lists the sixteen chapters of plan section 4.1 in order. `pillars` is present but `visible: false` (the hero and the Stack present the same three roles, and the home has a 24-screen budget); switch it on in the Pages editor to bring the stacked role panels back. `fit`, `finder` and `principles` are also hidden until their copy is confirmed. A section whose data is empty or not public renders nothing. Layout names a stored Page may still carry (`numbered`, `default` on `process-steps`) render the wire.

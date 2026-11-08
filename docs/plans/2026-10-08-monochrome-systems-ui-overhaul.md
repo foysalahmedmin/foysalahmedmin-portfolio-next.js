@@ -9,6 +9,17 @@
 | **Decision** | Needs ADR 0011 (amends ADR 0002 dependencies and ADR 0009 budgets). Drafted in Appendix C, not yet accepted.                                             |
 | **Handoff**  | On approval, each phase in section 7 gets its own task-level implementation plan (writing-plans format) before any code.                                 |
 
+### Revision 1.8: what Phase 5 changed in the plan (2026-11-08)
+
+- **The first hero role is complete at the top of the page.** The plain line and the three capabilities of System Architect are visible before any scroll (owner request); the other two roles still arrive with the scroll. Ch.0 above describes the capabilities of every role appearing one by one: the first one no longer does.
+- **`pillars` is off on the home** (a `visible: false` section the owner can switch on). The hero and the Stack present the same three roles, and the chapter table has no row for it; with it on the home was over the 24-screen budget.
+- **Section sub-lines are fixed copy in the components**, not a data field.
+- **The FAQ stays the centred accordion** the owner approved instead of the question/answer split in Ch.8.
+- **Stack pin is 170 svh** (not 250) so the home fits its length budget; Phase 9 tunes it on a real device.
+- **Scroll-linked chapters use engine markers, not components** (`data-scroll-focus`, `data-scroll-progress`), so the home route's initial JavaScript does not grow with each chapter. Progress is read per frame near the screen and does not use ScrollTrigger (a trigger refreshes the page and moved a visitor who had scrolled far).
+- **The card-row process layout and its client `Rail` are retired** (the wire replaces them), which is what brought the initial-JS cap back under 180 KB.
+- **Not built in this phase:** M09, M13, M15, M24, M29, the M30 morph and the evidence strip's digit roll.
+
 ### Revision 1.7: what Phase 4 changed in the plan (2026-11-04)
 
 - **Draft-incomplete records.** Engagement models keep `best_when`, `you_get` and `how_it_runs` optional in the draft and require them at publish (the Process step pattern), so an unknown fact (C-13 to C-15) is left empty rather than written. `fit`, `finder` and the principles carry an `enabled` switch; the plan's `[CONFIRM]` rows are off in data, never in copy.
@@ -1409,6 +1420,7 @@ Dependencies: P0 → P1 → P2 → (P3 ∥ P4 ∥ P7) → P5 → P6; P7 → P8; 
 ### Phase 5: Home chapters (L)
 
 - **Work:** tier 1: Evidence strip, Triage, Stack, Pipeline, Case files, Deliverables, Process wire and Engagement, Capability registry, Commitments and Trust, Field notes, FAQ, Next steps and CTA. Tier 2, built but `visible: false` until confirmed: Fit check, Starting-point finder, How I think. Page composition in the seed; per-section tests.
+- **Result (2026-11-08):** every acceptance line is met or recorded in [`docs/baseline/phase-5-findings.md`](../baseline/phase-5-findings.md), except the Lighthouse, harness and visual runs, which were not repeated. Home 22.8 screens (27.0 with Tier 2), initial JS 179.71 KB, three pins each with a skip link.
 - **Acceptance:** each section has a keyboard path and reduced parity; no pinned scene exceeds its length budget (max three on Home) and every beat is one screen or less; Home Lighthouse ≥ 90 and a11y ≥ 95 on the constrained profile; CLS ≤ 0.05; harness green; no hover-only information; Home length within the 4.1 budget (≤ 24 screens Tier 1, ≤ 27 with Tier 2); the evidence strip hides itself with fewer than three qualifying metrics; Tier 2 sections can be switched on from the admin without a deploy; the finder works with the network off.
 - **Tests:** component specs, home e2e journeys (triage → contact with topic; finder → contact), visual, axe, lhci, document-height check.
 
