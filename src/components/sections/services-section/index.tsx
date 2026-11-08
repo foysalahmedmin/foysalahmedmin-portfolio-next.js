@@ -9,6 +9,7 @@ import type { TPublicServiceDto } from "@/app/api/services/service.type";
 import { getPillarLabel } from "@/lib/content/pillars";
 import { getBalancedGridClass } from "@/lib/layout/balanced-grid";
 import { cn } from "@/lib/utils";
+import ServicesStack from "./stack";
 
 export default function ServicesSection({
   className,
@@ -46,6 +47,12 @@ export default function ServicesSection({
         technologies: pillar.technologies,
         pillar: pillar.key,
       }));
+
+  if (layout === "stack") {
+    return (
+      <ServicesStack className={className} heading={heading} items={items} />
+    );
+  }
 
   return (
     <section

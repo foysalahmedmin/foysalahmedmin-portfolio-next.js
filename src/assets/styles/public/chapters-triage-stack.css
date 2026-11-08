@@ -2,4 +2,618 @@
  * Home chapters: triage-stack (Phase 5). Owned by one slice; add rules here, not in sections.css.
  * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"],
  * an unbound `--progress` is finished, reduced motion and no-JS show everything.
+ *
+ * Ch.1 Triage (`triage-*`) is scroll-focused: the engine marks the row at mid-screen. Ch.2 Stack (`slab-*`)
+ * is a pinned scene driven only by `--pin-progress`. Class names avoid the legacy `.stack-*` panels in
+ * sections.css.
  */
+
+/* ======================================================================
+   Ch.1 Triage
+   ====================================================================== */
+
+.triage {
+  position: relative;
+  overflow: clip;
+}
+
+.triage-grid {
+  display: grid;
+  position: relative;
+  gap: 2.5rem;
+}
+
+.triage-aside {
+  position: relative;
+  isolation: isolate;
+}
+
+/* ---------- The index: one large sentence per pain ---------- */
+.triage-list {
+  margin: 0;
+  border-block-start: 1px solid var(--line-2);
+  padding: 0;
+  list-style: none;
+}
+
+.triage-row {
+  border-block-end: 1px solid var(--line-2);
+  padding-block: clamp(0.875rem, 1.8vw, 1.25rem);
+}
+
+.triage-tag {
+  margin: 0 0 0.5rem;
+  color: var(--text-secondary);
+}
+
+.triage-pain {
+  margin: 0;
+  max-inline-size: 26ch;
+  font-size: var(--step-2);
+  line-height: 1.08;
+}
+
+.triage-details {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.85rem 0 0;
+}
+
+.triage-line {
+  display: grid;
+  grid-template-columns: 6.75rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.15rem 1rem;
+}
+
+.triage-line dt {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.triage-line dd {
+  margin: 0;
+  max-inline-size: 52ch;
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.triage-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin: 0.85rem 0 0;
+  font-size: var(--step--1);
+}
+
+@media (max-width: 479px) {
+  .triage-line {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Group label and ghost glyph: desktop only, they follow the active pain ---------- */
+.triage-groups,
+.triage-ghost {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .triage-grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+    gap: clamp(2.5rem, 5vw, 5rem);
+  }
+
+  .triage-aside {
+    position: sticky;
+    inset-block-start: calc(var(--header-offset) + 2rem);
+  }
+
+  .triage-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 2.5rem 0 0;
+    color: var(--text-secondary);
+  }
+
+  .triage-groups > span {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* The rule is the mark for the current group (state is a glyph and a weight, never a colour) */
+  .triage-groups > span::before {
+    transform-origin: 0 50%;
+    background: currentcolor;
+    inline-size: 2.5rem;
+    block-size: 1px;
+    content: "";
+  }
+
+  .triage-ghost {
+    display: block;
+    position: absolute;
+    transform: translate3d(0, calc((0.5 - var(--progress, 1)) * 16svh), 0);
+    z-index: -1;
+    inset: -4rem -3rem -4rem -4rem;
+    pointer-events: none;
+  }
+
+  .triage-glyph {
+    position: absolute;
+    translate: 0 -50%;
+    opacity: 0;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    -webkit-text-stroke: 1px var(--line-2);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: 800;
+    font-size: clamp(16rem, 44vmin, 34rem);
+    line-height: 0.8;
+    font-family: var(--ff-display-125, var(--ff-display, inherit));
+    user-select: none;
+  }
+
+  .triage-glyph:first-child {
+    opacity: 1;
+  }
+}
+
+/* ---------- With the engine: the pain at mid-screen is full strength ---------- */
+/* Only the sentence is dimmed, to 50 %: every small label keeps its full contrast (WCAG AA 4.5:1) */
+html[data-motion-engine="ready"]
+  .triage-list[data-focus-index]
+  .triage-row
+  .triage-pain {
+  opacity: 0.5;
+  transition: opacity var(--dur-slow) var(--ease-signal);
+}
+
+html[data-motion-engine="ready"]
+  .triage-list[data-focus-index]
+  .triage-row:is([data-active="true"], :focus-within)
+  .triage-pain {
+  opacity: 1;
+}
+
+/* The detail lines keep their space and reveal one after another (--k), transform and opacity only */
+html[data-motion-engine="ready"]
+  .triage-list[data-focus-index]
+  .triage-row
+  .triage-reveal {
+  transform: translate3d(0, 0.75rem, 0);
+  opacity: 0;
+  transition:
+    opacity var(--dur-fast) var(--ease-signal),
+    transform var(--dur-fast) var(--ease-signal);
+  pointer-events: none;
+}
+
+html[data-motion-engine="ready"]
+  .triage-list[data-focus-index]
+  .triage-row:is([data-active="true"], :focus-within)
+  .triage-reveal {
+  transform: none;
+  opacity: 1;
+  transition-delay: calc(140ms + var(--k, 0) * 130ms);
+  transition-duration: var(--dur-slow);
+  pointer-events: auto;
+}
+
+/* A keyboard user must see the focused link at once, not after the stagger */
+html[data-motion-engine="ready"]
+  .triage-list[data-focus-index]
+  .triage-row:focus-within
+  .triage-reveal {
+  transition-delay: 0ms;
+}
+
+@media (min-width: 1024px) {
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group])
+    .triage-groups
+    > span {
+    opacity: 0.75;
+    transition: opacity var(--dur-base) var(--ease-signal);
+  }
+
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group])
+    .triage-groups
+    > span::before {
+    transform: scaleX(0.25);
+    transition: transform var(--dur-slow) var(--ease-signal);
+  }
+
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group="systems"])
+    .triage-groups
+    > [data-group-key="systems"],
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group="ai-automation"])
+    .triage-groups
+    > [data-group-key="ai-automation"] {
+    opacity: 1;
+    font-weight: 700;
+  }
+
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group="systems"])
+    .triage-groups
+    > [data-group-key="systems"]::before,
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group="ai-automation"])
+    .triage-groups
+    > [data-group-key="ai-automation"]::before {
+    transform: none;
+  }
+
+  /* The ghost glyph takes the texture of the active group (blueprint or dot matrix) */
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group])
+    .triage-glyph {
+    opacity: 0;
+    transition: opacity var(--dur-slow) var(--ease-signal);
+  }
+
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group="systems"])
+    .triage-glyph[data-glyph="systems"],
+  html[data-motion-engine="ready"]
+    .triage-grid:has([data-focus-group="ai-automation"])
+    .triage-glyph[data-glyph="ai-automation"] {
+    opacity: 1;
+  }
+}
+
+/* ======================================================================
+   Ch.2 Stack
+   Unpinned (the default): three plain panels in reading order, every spec visible. Pinned: the same
+   markup becomes the exploded view, all of it a function of --pin-progress.
+   ====================================================================== */
+
+.slab-inner {
+  padding-block: var(--space-section);
+}
+
+.slab-head {
+  margin-block-end: clamp(2rem, 4vw, 3.5rem);
+}
+
+.slab-list {
+  margin: 0;
+  border-block-start: 1px solid var(--line-2);
+  padding: 0;
+  list-style: none;
+}
+
+.slab {
+  display: grid;
+  grid-template-areas: "plate" "label" "a" "b";
+  gap: 1.25rem 2.5rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+@media (min-width: 900px) {
+  .slab {
+    grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "plate label label"
+      "plate a b";
+  }
+}
+
+.slab-plate {
+  position: relative;
+  grid-area: plate;
+  min-block-size: 3.5rem;
+  overflow: clip;
+}
+
+.slab-texture {
+  position: absolute;
+  inset: 0;
+}
+
+.slab-label {
+  grid-area: label;
+}
+
+.slab-label p {
+  margin: 0 0 0.35rem;
+  color: var(--text-secondary);
+}
+
+.slab-title {
+  margin: 0;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-size: var(--step-1);
+  line-height: 1.1;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.slab-a {
+  grid-area: a;
+}
+
+.slab-b {
+  grid-area: b;
+}
+
+.slab-a,
+.slab-b {
+  min-inline-size: 0;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.slab-specs {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.slab-spec dt {
+  color: var(--text-secondary);
+}
+
+.slab-spec dd {
+  margin: 0.35rem 0 0;
+}
+
+.slab-spec p {
+  margin: 0;
+}
+
+.slab-caps,
+.slab-dels {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Capabilities carry a solid square, deliverables a hollow one: the marks tell the lists apart */
+.slab-caps li,
+.slab-dels li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.slab-caps li::before,
+.slab-dels li::before {
+  flex: none;
+  translate: 0 -0.05em;
+  inline-size: 0.4rem;
+  block-size: 0.4rem;
+  content: "";
+}
+
+.slab-caps li::before {
+  background: var(--foreground);
+}
+
+.slab-dels li::before {
+  border: 1px solid var(--foreground);
+}
+
+.slab-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+  margin: 0;
+  padding: 0;
+  font-family: var(--ff-mono);
+  list-style: none;
+}
+
+.slab-tech li:not(:last-child)::after {
+  margin-inline-start: 0.5rem;
+  content: "/";
+  color: var(--text-faint);
+}
+
+/* ---------- Pinned exploded view: desktop-sized windows only ----------
+   Below 1200 px wide or 640 px tall the specs would not fit one screen, so the stage stays a plain
+   list even while the engine runs; the pin itself is neutralised here (the track is not taller). */
+@media (max-width: 1199px), (max-height: 639px) {
+  .slab-scene[data-pin-scene][data-pinned="true"] {
+    block-size: auto;
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] > [data-pin-stage] {
+    position: static;
+    block-size: auto;
+    overflow: visible;
+  }
+}
+
+@media (min-width: 1200px) and (min-height: 640px) {
+  /* The clock: explode over the first 0.6 of the pin (eased), then each slab draws its leaders in turn */
+  .slab-scene[data-pin-scene][data-pinned="true"] {
+    --e0: clamp(0, calc(var(--pin-progress, 0) / 0.6), 1);
+    --e: calc(var(--e0) * var(--e0) * (3 - 2 * var(--e0)));
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.28fr) minmax(0, 0.72fr);
+    align-items: center;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    padding-block: calc(var(--header-offset) + 1rem) 1.5rem;
+    block-size: 100%;
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-head {
+    margin: 0;
+  }
+
+  /* One row per slab, the foundation at the bottom: DOM order is foundation first, so the list reads bottom-up */
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-list {
+    --pitch: calc((100svh - var(--header-offset) - 2.5rem) / 3);
+    --tight: 1.6svh;
+    --zstep: 5svh;
+    --leader: clamp(1.25rem, 2.4vw, 2.5rem);
+    --plate-h: calc(var(--pitch) * 0.78);
+
+    display: flex;
+    position: relative;
+    flex-direction: column-reverse;
+    justify-content: center;
+    border: 0;
+    isolation: isolate;
+    font-size: clamp(0.6875rem, min(1.7svh, 0.95vw), 0.9375rem);
+  }
+
+  /* A faint hairline grid behind the slabs gives the glass something to see through */
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-list::before {
+    position: absolute;
+    z-index: -1;
+    mask-image: radial-gradient(70% 70% at 50% 50%, black 30%, transparent 78%);
+    inset: 0 -1rem;
+    background-image:
+      linear-gradient(to right, var(--line-1) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line-1) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    content: "";
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab {
+    /* Where this slab is, relative to its own row: 0 once exploded, toward the middle of the list when tight */
+    --lift: calc(
+      (1 - var(--e)) * (var(--n, 0) - (var(--count, 3) - 1) / 2) *
+        (var(--pitch) - var(--tight))
+    );
+
+    /* The leader and the specs follow, one slab after the other, after the explode */
+    --r: clamp(
+      0,
+      calc((var(--pin-progress, 0) - 0.6 - var(--n, 0) * 0.1) / 0.2),
+      1
+    );
+    --t: clamp(0, calc((var(--r) - 0.35) / 0.65), 1);
+
+    grid-template-columns: minmax(0, 1fr) minmax(0, 15rem) minmax(0, 1fr);
+    grid-template-areas: "a plate b";
+    column-gap: var(--leader);
+    align-items: center;
+    border: 0;
+    padding: 0;
+    block-size: var(--pitch);
+  }
+
+  /* The slab: a tilted glass plate; each higher slab sits nearer the camera (translateZ), so it is a little larger */
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-plate {
+    align-self: center;
+    transform: translateY(var(--lift)) perspective(900px)
+      translateZ(calc(var(--n, 0) * var(--zstep) * var(--e))) rotateX(50deg);
+    will-change: transform;
+    block-size: var(--plate-h);
+    min-block-size: 0;
+  }
+
+  /* The title travels with its slab and appears as the slabs part, flat to the reader */
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-label {
+    grid-area: plate;
+    align-self: center;
+    justify-self: center;
+    transform: translateY(var(--lift));
+    opacity: clamp(0, calc((var(--e0) - 0.5) / 0.4), 1);
+    z-index: 1;
+    padding-inline: 1.25rem;
+    pointer-events: none;
+    text-align: center;
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-title {
+    font-size: clamp(0.95rem, min(2.6svh, 1.45vw), 1.5rem);
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] :is(.slab-a, .slab-b) {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+    font-size: inherit;
+  }
+
+  /* Specs fade and slide in from the plate side once their leader has started */
+  .slab-scene[data-pin-scene][data-pinned="true"] :is(.slab-a, .slab-b) > * {
+    opacity: var(--t);
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-a > * {
+    transform: translate3d(calc((1 - var(--t)) * 0.9rem), 0, 0);
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-b > * {
+    transform: translate3d(calc((1 - var(--t)) * -0.9rem), 0, 0);
+  }
+
+  /* Hairline leaders in the gap between spec and plate, with a node on the plate end; they draw from the plate outward */
+  .slab-scene[data-pin-scene][data-pinned="true"] :is(.slab-a, .slab-b)::after {
+    position: absolute;
+    transform-origin: 100% 50%;
+    margin-block-start: -2.5px;
+    inset-block-start: 50%;
+    background:
+      linear-gradient(var(--line-4), var(--line-4)) 0 50% / 100% 1px no-repeat,
+      linear-gradient(var(--foreground), var(--foreground)) 100% 50% / 5px 5px
+        no-repeat;
+    inline-size: calc(var(--leader) - 0.35rem);
+    block-size: 5px;
+    pointer-events: none;
+    content: "";
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-a::after {
+    transform: scaleX(var(--r));
+    inset-inline-end: calc(0.35rem - var(--leader));
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-b::after {
+    transform: scaleX(var(--r));
+    transform-origin: 0 50%;
+    inset-inline-start: calc(0.35rem - var(--leader));
+    background:
+      linear-gradient(var(--line-4), var(--line-4)) 0 50% / 100% 1px no-repeat,
+      linear-gradient(var(--foreground), var(--foreground)) 0 50% / 5px 5px
+        no-repeat;
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-spec dt {
+    color: var(--text-secondary);
+  }
+
+  .slab-scene[data-pin-scene][data-pinned="true"] .slab-specs {
+    gap: 0.6em;
+  }
+}
+
+@media (forced-colors: active) {
+  .slab-scene[data-pin-scene][data-pinned="true"] :is(.slab-a, .slab-b)::after {
+    margin-block-start: 0;
+    border-block-start: 1px solid CanvasText;
+    background: none;
+    block-size: 0;
+  }
+
+  .triage-groups > span::before {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+}
