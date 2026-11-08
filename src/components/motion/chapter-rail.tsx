@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TraceRail, type TraceRailItem } from "./trace-rail";
 
-/** Short labels for the sections the home page has today; chapters name themselves with `data-chapter-label` from Phase 5 on. */
+/** Short labels for sections that do not name themselves; chapters name themselves with `data-chapter-label`. */
 const KNOWN_LABELS: Readonly<Record<string, string>> = {
   ingress: "Ingress",
   about: "About",
@@ -43,18 +43,23 @@ export function ChapterRail() {
   useEffect(() => {
     const found: TraceRailItem[] = [];
     const seen = new Set<string>();
-    document
-      .querySelectorAll<HTMLElement>("main [data-chapter], main > section[id]")
-      .forEach((element) => {
-        const id = element.id || element.dataset.chapter;
-        if (!id || seen.has(id)) return;
-        seen.add(id);
-        found.push({
-          id,
-          label:
-            element.dataset.chapterLabel ?? KNOWN_LABELS[id] ?? titleCase(id),
-        });
+    // Chapters mark themselves; a page that marks none (an inner page, an older composition) falls back to its sections
+    const marked = document.querySelectorAll<HTMLElement>(
+      "main [data-chapter]"
+    );
+    (marked.length > 0
+      ? marked
+      : document.querySelectorAll<HTMLElement>("main > section[id]")
+    ).forEach((element) => {
+      const id = element.id || element.dataset.chapter;
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      found.push({
+        id,
+        label:
+          element.dataset.chapterLabel ?? KNOWN_LABELS[id] ?? titleCase(id),
       });
+    });
     setItems(found.slice(0, MAX_CHAPTERS));
   }, [pathname]);
 

@@ -1,4 +1,3 @@
-import { gsap } from "gsap";
 import { scrubLag } from "../tokens";
 import type { Cleanup } from "./types";
 
@@ -82,34 +81,106 @@ const bindFocus = (container: HTMLElement): Cleanup => {
   };
 };
 
-const parseRange = (value: string | undefined): [string, string] => {
-  const [start, end] = (value ?? "").split(",").map((part) => part.trim());
-  return [start || "top 80%", end || "bottom 55%"];
+export type Anchor = Readonly<{ edge: number; screen: number }>;
+
+const EDGES: Readonly<Record<string, number>> = {
+  top: 0,
+  center: 0.5,
+  bottom: 1,
 };
 
+/** `"top 80%"`: the element's top edge (0), centre (0.5) or bottom edge (1) against a fraction of the screen. */
+const parseAnchor = (value: string | undefined, fallback: Anchor): Anchor => {
+  const match = /^(top|center|bottom)\s+(\d+(?:\.\d+)?)%$/.exec(
+    (value ?? "").trim()
+  );
+  return match
+    ? { edge: EDGES[match[1]!]!, screen: Number(match[2]) / 100 }
+    : fallback;
+};
+
+/** 0 when the start anchor is reached, 1 at the end anchor, linear in scroll in between. */
+export const progressFor = (
+  top: number,
+  height: number,
+  viewport: number,
+  start: Anchor,
+  end: Anchor
+): number => {
+  const passed = viewport * start.screen - (top + height * start.edge);
+  const length =
+    height * (end.edge - start.edge) + viewport * (start.screen - end.screen);
+  return length > 0 ? Math.min(1, Math.max(0, passed / length)) : 1;
+};
+
+export const parseRange = (value: string | undefined): [Anchor, Anchor] => {
+  const [start, end] = (value ?? "").split(",");
+  return [
+    parseAnchor(start, { edge: 0, screen: 0.8 }),
+    parseAnchor(end, { edge: 1, screen: 0.55 }),
+  ];
+};
+
+/**
+ * `--progress` from the element's own position, linear in scroll and eased toward the target with the
+ * scrub lag. It deliberately does not use ScrollTrigger: a trigger makes ScrollTrigger refresh the page
+ * (scroll to the top and back) whenever one is created or the page changes size, which moved a visitor who
+ * had already scrolled far on a page that has no pinned scene. Reading the element's box once per frame,
+ * only while it is near the screen, needs no refresh and cannot move the page.
+ */
 const bindProgress = (element: HTMLElement): Cleanup => {
   const [start, end] = parseRange(element.dataset.progressRange);
-  const state = { value: 0 };
+  let target = 0;
+  let current = 0;
+  let near = false;
+  let frame = 0;
+  let last = 0;
+
+  const read = () => {
+    const box = element.getBoundingClientRect();
+    target = progressFor(box.top, box.height, window.innerHeight, start, end);
+  };
   const write = () =>
-    element.style.setProperty("--progress", state.value.toFixed(4));
+    element.style.setProperty("--progress", current.toFixed(4));
+
+  const tick = (time: number) => {
+    frame = 0;
+    const dt = Math.min(0.1, (time - last) / 1000 || 0.016);
+    last = time;
+    if (near) read();
+    // Time constant of a third of the scrub lag: the value has caught up after about the lag
+    current += (target - current) * (1 - Math.exp(-dt / (scrubLag / 3)));
+    if (Math.abs(target - current) < 0.0005) current = target;
+    write();
+    if (near || current !== target) schedule();
+  };
+  const schedule = () => {
+    if (!frame) frame = window.requestAnimationFrame(tick);
+  };
+
+  // Only measure while the element is within a screen of the viewport; beyond it the value is 0 or 1
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        near = entry.isIntersecting;
+        if (!near) target = entry.boundingClientRect.top < 0 ? 1 : 0;
+      }
+      schedule();
+    },
+    { rootMargin: "100% 0px 100% 0px", threshold: 0 }
+  );
+  observer.observe(element);
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule);
+  read();
+  current = target;
   write();
 
-  const tween = gsap.to(state, {
-    value: 1,
-    ease: "none",
-    onUpdate: write,
-    scrollTrigger: {
-      trigger: element,
-      start,
-      end,
-      scrub: scrubLag,
-      invalidateOnRefresh: true,
-    },
-  });
-
   return () => {
-    tween.scrollTrigger?.kill();
-    tween.kill();
+    observer.disconnect();
+    window.removeEventListener("scroll", schedule);
+    window.removeEventListener("resize", schedule);
+    if (frame) window.cancelAnimationFrame(frame);
     element.style.removeProperty("--progress");
   };
 };

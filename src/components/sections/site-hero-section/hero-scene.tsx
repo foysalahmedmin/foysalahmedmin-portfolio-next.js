@@ -28,6 +28,8 @@ export function HeroScene({
     <HeroStoryProvider value={story}>
       <PinScene
         id="ingress"
+        data-chapter="ingress"
+        data-chapter-label="Ingress"
         data-hero=""
         beats={3}
         length={length}

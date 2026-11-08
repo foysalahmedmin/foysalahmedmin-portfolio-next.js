@@ -419,7 +419,7 @@ describe("mobile action bar", () => {
 });
 
 describe("chapter rail", () => {
-  it("lists the chapters the page actually has, in order, with friendly names", () => {
+  const stubObserver = () =>
     vi.stubGlobal(
       "IntersectionObserver",
       class {
@@ -428,33 +428,56 @@ describe("chapter rail", () => {
         unobserve = vi.fn();
       }
     );
-    document.body.innerHTML = `
-      <main>
-        <section id="ingress"></section>
-        <section id="pillar-showcase"></section>
-        <div data-chapter="custom-one" data-chapter-label="Custom"></div>
-        <section id="unknown-thing"></section>
-        <section></section>
-      </main>`;
+  const renderRail = () =>
     render(<ChapterRail />, {
       container: document.body.appendChild(document.createElement("div")),
     });
+
+  it("lists the chapters the page marks, in order, with friendly names, and skips unmarked sections", () => {
+    stubObserver();
+    document.body.innerHTML = `
+      <main>
+        <section id="ingress" data-chapter="ingress"></section>
+        <section id="pillar-showcase" data-chapter="pillar-showcase"></section>
+        <div data-chapter="custom-one" data-chapter-label="Custom"></div>
+        <section id="proof-metrics"></section>
+        <section></section>
+      </main>`;
+    renderRail();
     const links = screen.getAllByRole("link");
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
       "#ingress",
       "#pillar-showcase",
       "#custom-one",
-      "#unknown-thing",
     ]);
     expect(links.map((link) => link.textContent)).toEqual([
       "01 Ingress",
       "02 Practice",
       "03 Custom",
-      "04 Unknown Thing",
     ]);
     expect(
       screen.getByRole("navigation", { name: "Page chapters" })
     ).toBeInTheDocument();
+  });
+
+  it("falls back to the sections that have an id when the page marks no chapter", () => {
+    stubObserver();
+    document.body.innerHTML = `
+      <main>
+        <section id="ingress"></section>
+        <section id="unknown-thing"></section>
+        <section></section>
+      </main>`;
+    renderRail();
+    const links = screen.getAllByRole("link");
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "#ingress",
+      "#unknown-thing",
+    ]);
+    expect(links.map((link) => link.textContent)).toEqual([
+      "01 Ingress",
+      "02 Unknown Thing",
+    ]);
   });
 
   it("renders nothing for a page with fewer than two chapters", () => {
