@@ -3,7 +3,6 @@ import { formatVideoDuration } from "@/lib/content/video-contract";
 import { resolveVideoPlayback } from "@/lib/content/video-playback";
 import { cn } from "@/lib/utils";
 import type { TVideoListItem } from "@/types/video.type";
-import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 
 const formatDate = (value?: string): string | null => {
@@ -30,9 +29,10 @@ type TVideoCardProps = Readonly<{
 }>;
 
 /**
- * One card for both shapes. A landscape film and a reel never share a frame:
- * the player owns its box (16:9 or 9:16) and the text sits below it, so a
- * grid of either shape keeps aligned edges.
+ * One poster card for both shapes. A landscape film and a reel never share a frame: the player owns its box
+ * (16:9 or 9:16) and the text sits below it, so a grid of either shape keeps aligned edges. The poster and
+ * the embedded player are greyscale (`ed-poster__player`) and carry a Mono duration chip; the title is the
+ * link. Styles: `ed-*` in pages-editorial.css.
  */
 export const VideoCard = ({ video, priority, className }: TVideoCardProps) => {
   const playback = resolveVideoPlayback(video);
@@ -45,54 +45,41 @@ export const VideoCard = ({ video, priority, className }: TVideoCardProps) => {
   return (
     <article
       data-video-shape={video.aspect_ratio}
-      className={cn(
-        "group border-border bg-card flex h-full flex-col overflow-hidden border shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-[var(--motion-standard)] hover:border-primary/40 hover:shadow-[var(--shadow-md)]",
-        isReel
-          ? "rounded-[var(--radius-lg-token)]"
-          : "rounded-[var(--radius-xl-token)]",
-        className
-      )}
+      className={cn("ed-vcard", className)}
     >
-      <VideoPlayerCore
-        src={playback.src}
-        title={video.name}
-        thumbnailSrc={playback.poster}
-        thumbnailSizes={isReel ? REEL_SIZES : LANDSCAPE_SIZES}
-        priority={priority}
-        orientation={video.aspect_ratio}
-      />
-      <div className={cn("flex flex-1 flex-col", isReel ? "p-4" : "p-5")}>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold tracking-wide uppercase">
-          {video.category?.name ? (
-            <span className="text-primary">{video.category.name}</span>
-          ) : null}
-          {duration ? (
-            <span className="text-muted-foreground">{duration}</span>
-          ) : null}
-        </div>
-        <h3
-          className={cn(
-            "group-hover:text-primary mt-2 leading-snug font-bold transition-colors",
-            isReel ? "line-clamp-3 text-base" : "text-xl"
-          )}
-        >
-          <Link
-            href={href}
-            className="focus-visible:ring-ring rounded-sm outline-none focus-visible:ring-2"
-          >
+      <div className="ed-poster">
+        <VideoPlayerCore
+          src={playback.src}
+          title={video.name}
+          thumbnailSrc={playback.poster}
+          thumbnailSizes={isReel ? REEL_SIZES : LANDSCAPE_SIZES}
+          priority={priority}
+          orientation={video.aspect_ratio}
+          className="ed-poster__player"
+        />
+        {duration ? (
+          <span className="ed-duration t-eyebrow t-mono">
+            <span className="sr-only">Duration </span>
+            {duration}
+          </span>
+        ) : null}
+      </div>
+      <div className="ed-vcard__body">
+        {video.category?.name || published ? (
+          <p className="ed-vcard__meta t-eyebrow">
+            {video.category?.name ? <span>{video.category.name}</span> : null}
+            {published ? (
+              <time dateTime={video.published_at}>{published}</time>
+            ) : null}
+          </p>
+        ) : null}
+        <h3 className="ed-vcard__title">
+          <Link href={href} className="ed-vcard__link link-draw">
             {video.name}
           </Link>
         </h3>
         {!isReel && video.description ? (
-          <p className="text-muted-foreground mt-2 line-clamp-2 text-sm leading-relaxed">
-            {video.description}
-          </p>
-        ) : null}
-        {published ? (
-          <p className="text-muted-foreground mt-auto flex items-center gap-2 pt-4 text-xs">
-            <CalendarDays className="size-3.5" aria-hidden="true" />
-            <time dateTime={video.published_at}>{published}</time>
-          </p>
+          <p className="ed-vcard__desc">{video.description}</p>
         ) : null}
       </div>
     </article>

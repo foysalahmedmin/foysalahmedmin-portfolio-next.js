@@ -1,20 +1,16 @@
 import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
-import ShareButton from "@/components/content/share-button";
 import { RichContentRenderer } from "@/components/content/rich-content-renderer";
+import ShareButton from "@/components/content/share-button";
+import { ReadingProgress } from "@/components/motion/reading-progress";
+import type { PageHeaderProps } from "@/components/templates/page-header";
 import OptimizedMedia from "@/components/ui/optimized-media";
+import { Tag } from "@/components/ui/tag";
+import { prepareEditorialDocument } from "@/lib/content/editorial-document";
 import { getPillarLabel } from "@/lib/content/pillars";
 import { resolveMediaAlt } from "@/lib/media/presentation";
 import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TArticleListItem, TPublicArticle } from "@/types/article.type";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  CalendarDays,
-  Clock3,
-  User,
-} from "lucide-react";
-import Link from "next/link";
+import { ArticleRow } from "../article-row";
 
 const dateLabel = (value?: string): string | null => {
   if (!value) return null;
@@ -26,6 +22,40 @@ const dateLabel = (value?: string): string | null => {
   }).format(date);
 };
 
+/** The shared PageHeader for an article: system path, Display title, excerpt as the lede, Mono meta. */
+export const buildArticleHeader = (
+  article: TPublicArticle
+): PageHeaderProps => {
+  const published = dateLabel(article.published_at);
+  return {
+    title: article.name,
+    lede: article.excerpt || article.description,
+    path: [
+      { index: 1, name: "Home", href: "/", icon: "house" },
+      { index: 2, name: "Articles", href: "/articles" },
+      { index: 3, name: article.slug ?? article.name },
+    ],
+    meta:
+      published || article.reading_time_minutes ? (
+        <>
+          {published ? (
+            <time dateTime={new Date(article.published_at!).toISOString()}>
+              {published}
+            </time>
+          ) : null}
+          {article.reading_time_minutes ? (
+            <span>{article.reading_time_minutes} min read</span>
+          ) : null}
+        </>
+      ) : undefined,
+  };
+};
+
+/**
+ * The article body (A4 Detail): a reading column with the cover and the long-form text, a sticky aside with
+ * the spec sheet, topics, the table of contents and sharing, then "Continue reading" as the same hairline
+ * rows as the index. The page header, JSON-LD and the CtaBand come from the page and its template.
+ */
 const ArticleDetailsSection = ({
   article,
   related,
@@ -35,8 +65,7 @@ const ArticleDetailsSection = ({
   related: readonly TArticleListItem[];
   fallbacks?: TPublicSiteFallbacksDto;
 }) => {
-  const published = dateLabel(article.published_at);
-  const pillar = article.primary_pillar
+  const role = article.primary_pillar
     ? getPillarLabel(article.primary_pillar)
     : null;
   const tags = [
@@ -50,178 +79,120 @@ const ArticleDetailsSection = ({
       })
     : undefined;
   const cover = article.thumbnail?.url ? article.thumbnail : managedFallback;
+  // shortcut: the renderer prepares the same document again for its own body; pass headings in once it takes a prop
+  const { headings } = prepareEditorialDocument({
+    document: article.rich_content,
+    legacy_html: article.content,
+  });
+  const facts = [
+    { label: "Author", value: article.author?.name },
+    { label: "Role", value: role },
+    { label: "Category", value: article.category?.name },
+  ].filter((fact) => Boolean(fact.value));
 
   return (
-    <div>
-      <header className="bg-surface-subtle border-border relative overflow-hidden border-b py-20 lg:py-28">
-        <div className="bg-primary/10 pointer-events-none absolute -top-40 left-1/2 size-[38rem] -translate-x-1/2 rounded-full blur-[150px]" />
-        <div className="relative container mx-auto px-6">
-          <Link
-            href="/articles"
-            className="text-muted-foreground hover:text-primary focus-visible:ring-primary inline-flex min-h-11 items-center gap-2 rounded-lg pr-3 text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            All articles
-          </Link>
-          <div className="mx-auto mt-10 max-w-5xl text-center">
-            <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-bold">
-              {pillar && (
-                <span className="bg-primary/10 text-primary rounded-full px-3 py-1.5">
-                  {pillar}
-                </span>
-              )}
-              {article.category?.name && (
-                <span className="border-border bg-card rounded-full border px-3 py-1.5">
-                  {article.category.name}
-                </span>
-              )}
-            </div>
-            <h1 className="mt-6 text-4xl leading-[1.03] font-black tracking-tight text-balance sm:text-6xl lg:text-7xl">
-              {article.name}
-            </h1>
-            {(article.excerpt || article.description) && (
-              <p className="text-muted-foreground mx-auto mt-7 max-w-3xl text-xl leading-9">
-                {article.excerpt || article.description}
-              </p>
-            )}
-            <dl className="text-muted-foreground mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm">
-              {article.author?.name && (
-                <div className="flex items-center gap-2">
-                  <User className="size-4" aria-hidden="true" />
-                  <dt className="sr-only">Author</dt>
-                  <dd className="font-semibold">{article.author.name}</dd>
-                </div>
-              )}
-              {published && (
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="size-4" aria-hidden="true" />
-                  <dt className="sr-only">Published</dt>
-                  <dd>
-                    <time
-                      dateTime={new Date(article.published_at!).toISOString()}
-                    >
-                      {published}
-                    </time>
-                  </dd>
-                </div>
-              )}
-              {article.reading_time_minutes && (
-                <div className="flex items-center gap-2">
-                  <Clock3 className="size-4" aria-hidden="true" />
-                  <dt className="sr-only">Reading time</dt>
-                  <dd>{article.reading_time_minutes} min read</dd>
-                </div>
-              )}
-            </dl>
+    <>
+      <ReadingProgress />
+      <div className="ed-detail container">
+        <article className="ed-main">
+          <div className="ed-cover">
+            <OptimizedMedia
+              src={cover?.url}
+              alt={resolveMediaAlt(cover, article.name)}
+              fallback="article"
+              pillar={article.primary_pillar}
+              focalPoint={cover?.focal_point}
+              dominantColor={cover?.dominant_color}
+              blurDataUrl={cover?.blur_data_url}
+              sizes="(max-width: 1024px) 100vw, 46rem"
+              priority
+              className="object-cover"
+            />
           </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto -mt-8 px-6 lg:-mt-12">
-        <div className="border-border bg-muted relative aspect-[16/9] overflow-hidden rounded-xl border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
-          <OptimizedMedia
-            src={cover?.url}
-            alt={resolveMediaAlt(cover, article.name)}
-            fallback="article"
-            pillar={article.primary_pillar}
-            focalPoint={cover?.focal_point}
-            dominantColor={cover?.dominant_color}
-            blurDataUrl={cover?.blur_data_url}
-            sizes="100vw"
-            priority
-            className="object-cover"
-          />
-        </div>
-      </div>
-
-      <article className="container mx-auto px-6 py-20 lg:py-28">
-        <div className="mx-auto max-w-6xl">
           <RichContentRenderer
+            className="ed-body"
             document={article.rich_content}
             legacyHtml={article.content}
             fallback="article"
             pillar={article.primary_pillar}
           />
+        </article>
 
-          {tags.length > 0 && (
-            <div className="border-border mt-14 border-t pt-8">
-              <h2 className="text-sm font-black tracking-[0.14em] uppercase">
+        <aside className="ed-aside" aria-label="About this article">
+          {facts.length > 0 ? (
+            <dl className="ed-spec">
+              {facts.map((fact) => (
+                <div key={fact.label}>
+                  <dt className="t-eyebrow">{fact.label}</dt>
+                  <dd>{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+
+          {tags.length > 0 ? (
+            <section aria-labelledby="article-topics-title">
+              <h2
+                id="article-topics-title"
+                className="ed-aside__title t-eyebrow"
+              >
                 Topics
               </h2>
-              <ul className="mt-4 flex flex-wrap gap-2" role="list">
+              <ul className="ed-tags" role="list">
                 {tags.map((tag) => (
-                  <li
-                    key={tag}
-                    className="bg-muted rounded-full px-3 py-1.5 text-xs font-bold"
-                  >
-                    {tag}
+                  <li key={tag}>
+                    <Tag>{tag}</Tag>
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            </section>
+          ) : null}
 
-          <div className="border-border bg-card mt-14 flex flex-col items-start justify-between gap-6 rounded-xl border p-6 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-lg font-black">
-                Share the canonical article
+          {headings.length >= 2 ? (
+            <nav className="ed-toc" aria-labelledby="article-toc-title">
+              <h2 id="article-toc-title" className="ed-aside__title t-eyebrow">
+                On this page
               </h2>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Use the native share sheet or copy the current link.
-              </p>
-            </div>
-            <ShareButton title={article.name} />
-          </div>
-        </div>
-      </article>
+              <ol role="list">
+                {headings.map((heading) => (
+                  <li
+                    key={heading.id}
+                    data-level={heading.level > 2 ? "sub" : undefined}
+                  >
+                    <a href={`#${heading.id}`}>{heading.label}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          ) : null}
 
-      {related.length > 0 && (
+          <section aria-labelledby="article-share-title" className="ed-share">
+            <h2 id="article-share-title" className="ed-aside__title t-eyebrow">
+              Share
+            </h2>
+            <ShareButton title={article.name} />
+          </section>
+        </aside>
+      </div>
+
+      {related.length > 0 ? (
         <section
-          className="border-border bg-surface-subtle border-t py-20"
+          className="ed-related"
           aria-labelledby="related-articles-title"
         >
-          <div className="container mx-auto px-6">
-            <div className="flex items-center gap-3">
-              <BookOpen className="text-primary size-6" aria-hidden="true" />
-              <h2
-                id="related-articles-title"
-                className="text-3xl font-black tracking-tight"
-              >
-                Continue reading
-              </h2>
-            </div>
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="container">
+            <h2 id="related-articles-title" className="ed-related__title">
+              Continue reading
+            </h2>
+            <ol className="ed-rows" role="list">
               {related.map((item) => (
-                <Link
-                  key={item._id}
-                  href={`/articles/${item.slug ?? item._id}`}
-                  className="border-border bg-card hover:border-primary group rounded-xl border p-6"
-                >
-                  <p className="text-primary text-xs font-black uppercase">
-                    {item.primary_pillar
-                      ? getPillarLabel(item.primary_pillar)
-                      : "Article"}
-                  </p>
-                  <h3 className="mt-3 text-xl font-black">{item.name}</h3>
-                  {(item.excerpt || item.description) && (
-                    <p className="text-muted-foreground mt-3 line-clamp-3 text-sm leading-6">
-                      {item.excerpt || item.description}
-                    </p>
-                  )}
-                  <span className="text-primary mt-5 inline-flex items-center gap-2 text-sm font-bold">
-                    Read article
-                    <ArrowRight
-                      className="size-4 transition-transform group-hover:translate-x-1"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </Link>
+                <ArticleRow key={item._id} article={item} />
               ))}
-            </div>
+            </ol>
           </div>
         </section>
-      )}
-    </div>
+      ) : null}
+    </>
   );
 };
 

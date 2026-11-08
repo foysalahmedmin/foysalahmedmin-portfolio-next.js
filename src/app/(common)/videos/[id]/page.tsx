@@ -1,6 +1,8 @@
 import { DetailLayout } from "@/components/templates";
 import * as VideoService from "@/app/api/videos/video.service";
-import VideoDetailsSection from "@/components/(common)/videos-page/video-details-section";
+import VideoDetailsSection, {
+  buildVideoHeader,
+} from "@/components/(common)/videos-page/video-details-section";
 import { JsonLdScript } from "@/components/content/json-ld-script";
 import AppError from "@/builder/app-error";
 import { toYouTubeThumbnailUrl } from "@/lib/content/video-contract";
@@ -125,7 +127,7 @@ export default async function VideoDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <DetailLayout route="video" site={site}>
+      <DetailLayout route="video" site={site} header={buildVideoHeader(video)}>
         <VideoDetailsSection video={video} related={related} />
       </DetailLayout>
     </>

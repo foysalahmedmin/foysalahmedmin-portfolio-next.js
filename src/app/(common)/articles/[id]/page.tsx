@@ -1,6 +1,8 @@
 import { DetailLayout } from "@/components/templates";
 import * as ArticleService from "@/app/api/articles/article.service";
-import ArticleDetailsSection from "@/components/(common)/articles-page/article-details-section";
+import ArticleDetailsSection, {
+  buildArticleHeader,
+} from "@/components/(common)/articles-page/article-details-section";
 import { JsonLdScript } from "@/components/content/json-ld-script";
 import AppError from "@/builder/app-error";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
@@ -121,7 +123,11 @@ export default async function ArticleDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <DetailLayout route="article" site={site}>
+      <DetailLayout
+        route="article"
+        site={site}
+        header={buildArticleHeader(article)}
+      >
         <ArticleDetailsSection
           article={article}
           related={related}
