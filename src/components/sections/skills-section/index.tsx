@@ -10,19 +10,11 @@ import {
 import { getPillarLabel } from "@/lib/content/pillars";
 import { getBalancedGridClass } from "@/lib/layout/balanced-grid";
 import { cn } from "@/lib/utils";
+import SkillsRegistry, { proficiencyLabel } from "./registry";
 
 export type TPublicSkillGroupWithSkills = TPublicSkillGroupDto & {
   skills: readonly TPublicSkillDto[];
 };
-
-const proficiencyLabel = (value: TPublicSkillDto["proficiency_level"]) =>
-  value === "foundational"
-    ? "Foundation"
-    : value === "working"
-      ? "Working"
-      : value === "advanced"
-        ? "Advanced"
-        : "Expert";
 
 export default function SkillsSection({
   pillars,
@@ -35,6 +27,11 @@ export default function SkillsSection({
   heading?: string;
   layout?: string;
 }) {
+  if (layout === "registry")
+    return (
+      <SkillsRegistry pillars={pillars} groups={groups} heading={heading} />
+    );
+
   const matrix = layout === "matrix";
   const fallbackGroups = pillars
     .filter((pillar) => pillar.enabled)

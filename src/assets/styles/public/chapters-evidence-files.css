@@ -3,3 +3,620 @@
  * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"],
  * an unbound `--progress` is finished, reduced motion and no-JS show everything.
  */
+
+/* ======================================================================
+   Ch.0b Evidence strip (metrics-strip, layout "evidence")
+   One hairline-bordered row of three or four cells. The hairlines are the grid gap over a line-coloured
+   row, so any wrap keeps its rules. The note is a native popover: no JavaScript.
+   ====================================================================== */
+.evidence-strip {
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.evidence-row {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--line-3);
+  background: var(--line-2);
+  padding: 0;
+  list-style: none;
+}
+
+.evidence-cell {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: var(--background);
+  padding: clamp(1rem, 2vw, 1.5rem);
+  min-inline-size: 0;
+}
+
+.evidence-value {
+  margin: 0;
+  font-weight: 500;
+  font-size: var(--step-3);
+  line-height: 1;
+  font-family: var(--ff-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.evidence-label {
+  margin: 0;
+  max-inline-size: 34ch;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.evidence-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+  margin-block-start: auto;
+  padding-block-start: 0.4rem;
+  font-size: var(--step--1);
+}
+
+.evidence-note-button {
+  cursor: pointer;
+  border: 0;
+  background-color: transparent;
+  padding: 0.25rem 0;
+  color: var(--text-secondary);
+  font: inherit;
+}
+
+.evidence-note-button:hover,
+.evidence-note-button:focus-visible {
+  color: var(--foreground);
+}
+
+.evidence-note {
+  margin: 0;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  padding: 1rem 1.1rem;
+  max-inline-size: min(22rem, calc(100vw - 2rem));
+  color: var(--foreground);
+}
+
+.evidence-note > * {
+  margin: 0;
+}
+
+.evidence-note > * + * {
+  margin-block-start: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .evidence-row[data-cells="4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .evidence-row[data-cells="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .evidence-row[data-cells="4"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* The note sits under its button where anchor positioning exists; elsewhere the popover keeps the
+   browser default (centred in the viewport). */
+@supports (position-anchor: --evidence) {
+  .evidence-note-button {
+    anchor-name: var(--evidence-anchor);
+  }
+
+  .evidence-note {
+    position-anchor: var(--evidence-anchor);
+    position-area: block-end span-inline-end;
+    position-try-fallbacks:
+      flip-inline,
+      flip-block,
+      flip-block flip-inline;
+    margin: 0.5rem 0 0;
+    inset: auto;
+  }
+}
+
+@supports selector(:popover-open) {
+  .evidence-note {
+    opacity: 0;
+    transition:
+      opacity var(--dur-fast) var(--ease-signal),
+      overlay var(--dur-fast) allow-discrete,
+      display var(--dur-fast) allow-discrete;
+  }
+
+  .evidence-note:popover-open {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .evidence-note:popover-open {
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evidence-note {
+    transition: none;
+  }
+}
+
+/* ======================================================================
+   Ch.4 Case files (case-study-collection, layout "files")
+   A dense list, not cards. The whole row is the link (a stretched ::after on the title link). The
+   greyscale preview is CSS only and only an enhancement: hover with a fine pointer, or keyboard focus.
+   ====================================================================== */
+.case-files {
+  margin: 0;
+  border-block-start: 1px solid var(--line-3);
+  padding: 0;
+  list-style: none;
+}
+
+.case-file {
+  display: grid;
+  position: relative;
+  gap: 0.9rem 2.5rem;
+  transition: background-color var(--dur-fast) var(--ease-signal);
+  border-block-end: 1px solid var(--line-2);
+  padding: 1.5rem clamp(0.5rem, 1.5vw, 1rem);
+}
+
+.case-file__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  min-inline-size: 0;
+}
+
+.case-file__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/* Stretch the title link over the whole row; the row is the positioned ancestor */
+.case-file__link::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.case-file__facts {
+  display: grid;
+  gap: 0.9rem 2rem;
+  margin: 0;
+  min-inline-size: 0;
+}
+
+.case-file__fact dt {
+  margin-block-end: 0.25rem;
+}
+
+.case-file__fact dd {
+  margin: 0;
+  max-inline-size: 62ch;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.case-file__peek {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .case-file:hover {
+    background: var(--surface-subtle);
+  }
+}
+
+.case-file:has(.case-file__link:focus-visible) {
+  background: var(--surface-subtle);
+}
+
+@media (min-width: 1024px) {
+  .case-file {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
+    align-items: start;
+  }
+
+  .case-file__facts {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+
+  .case-file__fact[data-fact="problem"] {
+    grid-column: 1;
+  }
+
+  .case-file__fact[data-fact="role"] {
+    grid-column: 2;
+  }
+
+  .case-file__fact[data-fact="outcome"] {
+    grid-column: 3;
+  }
+}
+
+@media (min-width: 1100px) {
+  .case-file {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr) 11rem;
+  }
+
+  .case-file__peek {
+    display: block;
+    position: relative;
+    align-self: stretch;
+    pointer-events: none;
+  }
+
+  .case-file__open {
+    display: inline-flex;
+    position: absolute;
+    align-items: center;
+    gap: 0.5rem;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    color: var(--text-secondary);
+  }
+
+  .case-file__peek-frame {
+    display: none;
+    position: absolute;
+    translate: 0 -50%;
+    z-index: 3;
+    transition:
+      opacity var(--dur-fast) var(--ease-signal),
+      display var(--dur-fast) allow-discrete;
+    inset-block-start: 50%;
+    inset-inline-end: 0;
+    border-radius: var(--r-panel);
+    padding: 0.25rem;
+    inline-size: 100%;
+  }
+
+  .case-file__peek-media {
+    position: relative;
+    transition: clip-path var(--dur-base) var(--ease-snap);
+    border-radius: var(--r-control);
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+
+  .case-file__peek-media img {
+    filter: grayscale(1) contrast(1.05);
+  }
+
+  @starting-style {
+    .case-file__peek-frame {
+      opacity: 0;
+    }
+
+    .case-file__peek-media {
+      clip-path: inset(0 0 100% 0);
+    }
+  }
+}
+
+@media (min-width: 1100px) and (hover: hover) and (pointer: fine) {
+  .case-file:hover .case-file__peek-frame {
+    display: block;
+  }
+
+  .case-file:hover .case-file__open {
+    visibility: hidden;
+  }
+}
+
+@media (min-width: 1100px) {
+  .case-file:has(.case-file__link:focus-visible) .case-file__peek-frame {
+    display: block;
+  }
+
+  .case-file:has(.case-file__link:focus-visible) .case-file__open {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-file,
+  .case-file__peek-frame,
+  .case-file__peek-media {
+    transition: none;
+  }
+}
+
+/* ======================================================================
+   Ch.4b Deliverables (deliverable-samples)
+   A document viewer from radio inputs, no JavaScript. Each .doc-item holds radio, tab label and page, so
+   the checked radio selects its own page with sibling selectors. Phone: an accordion (one page open,
+   the radio group is the exclusive set). Desktop: tabs on the left, a printed page on the right, the
+   pages stacked in one grid cell so the viewer never changes height. Reduced motion: every page, stacked.
+   ====================================================================== */
+.doc-viewer {
+  --doc-page-size: clamp(24rem, 62svh, 34rem);
+
+  margin-block-start: clamp(2rem, 4vw, 3.5rem);
+  border-block-start: 1px solid var(--line-3);
+}
+
+/* Visually hidden but focusable, and in the flow so focus scrolls to the tab beside it */
+.doc-radio {
+  display: block;
+  opacity: 0;
+  margin: 0 0 -1px;
+  inline-size: 1px;
+  block-size: 1px;
+  pointer-events: none;
+}
+
+.doc-tab {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: 0.3rem;
+  cursor: pointer;
+  border-inline-start: 2px solid transparent;
+  border-block-end: 1px solid var(--line-2);
+  padding: 1rem 2.75rem 1rem 1rem;
+}
+
+.doc-tab__kind {
+  color: var(--text-secondary);
+}
+
+.doc-tab__title {
+  font-size: var(--step--1);
+  line-height: 1.35;
+}
+
+/* The state glyph is a plus that becomes a minus, never a colour */
+.doc-tab::after {
+  position: absolute;
+  inset-block-start: 1.25rem;
+  inset-inline-end: 1rem;
+  background:
+    linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  content: "";
+}
+
+.doc-radio:checked + .doc-tab {
+  border-inline-start-color: var(--foreground);
+  background: var(--surface-subtle);
+}
+
+.doc-radio:checked + .doc-tab .doc-tab__title {
+  font-weight: 600;
+}
+
+.doc-radio:checked + .doc-tab::after {
+  background: linear-gradient(currentColor, currentColor) center / 100% 1.5px
+    no-repeat;
+}
+
+.doc-radio:focus-visible + .doc-tab {
+  outline: 2px solid var(--focus-ink);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 4px var(--focus-paper);
+}
+
+.doc-page {
+  display: none;
+  flex-direction: column;
+  box-shadow:
+    inset 0 0 0 0.35rem var(--background),
+    inset 0 0 0 calc(0.35rem + 1px) var(--line-2),
+    var(--elev-2);
+  border: 1px solid var(--line-3);
+  min-inline-size: 0;
+  max-block-size: 34rem;
+}
+
+.doc-radio:checked ~ .doc-page {
+  display: flex;
+}
+
+.doc-page__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  border-block-end: 1px solid var(--line-2);
+  padding: 1rem 1.25rem 0.9rem;
+}
+
+.doc-page__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--step-0);
+  line-height: 1.25;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+}
+
+.doc-page__body {
+  flex: 1;
+  margin: 0;
+  padding: 1.1rem 1.25rem;
+  min-block-size: 0;
+  overflow: auto;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  font-family: var(--ff-mono, ui-monospace, monospace);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Code-shaped samples keep their columns and scroll sideways */
+.doc-page[data-kind="diagram"] .doc-page__body,
+.doc-page[data-kind="report"] .doc-page__body,
+.doc-page[data-kind="dry_run"] .doc-page__body {
+  white-space: pre;
+  overflow-wrap: normal;
+}
+
+.doc-page__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  border-block-start: 1px solid var(--line-2);
+  padding: 0.8rem 1.25rem 0.9rem;
+  font-size: var(--step--1);
+}
+
+.doc-page__mark {
+  margin-inline-start: auto;
+}
+
+@media (min-width: 768px) {
+  .doc-viewer {
+    display: grid;
+    grid-template-rows: repeat(var(--samples), min-content) 1fr;
+    grid-template-columns: minmax(14rem, 19rem) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .doc-item {
+    display: contents;
+  }
+
+  .doc-radio,
+  .doc-tab {
+    grid-row: var(--i);
+    grid-column: 1;
+  }
+
+  .doc-tab::after {
+    display: none;
+  }
+
+  .doc-page {
+    display: flex;
+    grid-row: 1 / -1;
+    grid-column: 2;
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity 150ms var(--ease-signal),
+      visibility 0s linear 150ms;
+    block-size: var(--doc-page-size);
+    max-block-size: none;
+  }
+
+  .doc-radio:checked ~ .doc-page {
+    visibility: visible;
+    opacity: 1;
+    transition:
+      opacity 150ms var(--ease-signal),
+      visibility 0s;
+  }
+}
+
+html[data-motion="off"] .doc-viewer .doc-page {
+  transition: none;
+}
+
+/* Reduced motion: no tabs, every sample stacked in reading order under its own header bar */
+@media (prefers-reduced-motion: reduce) {
+  .doc-viewer {
+    display: block;
+    border-block-start: 0;
+  }
+
+  .doc-item {
+    display: block;
+    margin-block-end: 2rem;
+  }
+
+  .doc-radio,
+  .doc-tab {
+    display: none;
+  }
+
+  .doc-viewer .doc-item > .doc-page {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    transition: none;
+    block-size: auto;
+    max-block-size: 30rem;
+  }
+}
+
+/* ======================================================================
+   Ch.6 Capability registry (skill-group-collection, layout "registry")
+   A compact mono grid: every cell has a right and a bottom hairline, the grid has the top and left.
+   ====================================================================== */
+.registry {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  margin-block-start: clamp(2rem, 4vw, 3.5rem);
+  border-inline-start: 1px solid var(--line-3);
+  border-block-start: 1px solid var(--line-3);
+}
+
+.registry-group {
+  border-inline-end: 1px solid var(--line-3);
+  border-block-end: 1px solid var(--line-3);
+  padding: 1.25rem clamp(1rem, 2vw, 1.5rem) 1.5rem;
+  min-inline-size: 0;
+}
+
+.registry-group__title {
+  margin: 0.5rem 0 0.9rem;
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.015em;
+}
+
+.registry-entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.registry-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  border-block-start: 1px solid var(--line-1);
+  padding-block: 0.45rem;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  font-family: var(--ff-mono, ui-monospace, monospace);
+}
+
+.registry-entry__detail {
+  flex: none;
+  color: var(--text-secondary);
+  font-size: var(--step--2);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
