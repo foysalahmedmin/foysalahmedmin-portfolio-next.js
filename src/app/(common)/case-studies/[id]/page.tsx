@@ -1,6 +1,7 @@
 import { StoryLayout } from "@/components/templates";
 import * as CaseStudyService from "@/app/api/case-studies/case-study.service";
 import CaseStudyDetailsSection from "@/components/(common)/case-studies-page/case-study-details-section";
+import { getCaseStudyHeader } from "@/components/(common)/case-studies-page/case-study-details-section/header";
 import { JsonLdScript } from "@/components/content/json-ld-script";
 import AppError from "@/builder/app-error";
 import { toSerializableCaseStudyListItem } from "@/lib/discovery/case-study-discovery";
@@ -78,13 +79,27 @@ export default async function CaseStudyDetailsPage({ params }: Props) {
       sort: "newest",
     }).catch(() => ({ data: [] })),
   ]);
-  const related = relatedResult.data
-    .flatMap((record) => {
+  const toItems = (records: readonly unknown[]) =>
+    records.flatMap((record) => {
       const item = toSerializableCaseStudyListItem(record);
-      return item ? [item] : [];
-    })
-    .filter((item) => item._id !== caseStudy._id)
-    .slice(0, 3);
+      return item && item._id !== caseStudy._id ? [item] : [];
+    });
+  // Same-pillar list, newest first: the related band is its first three
+  const siblings = toItems(relatedResult.data);
+  const related = siblings.slice(0, 3);
+  // Next case file: the one after this in the newest-first list, wrapping to the first. When this is the
+  // only case file in its pillar, one more read (every pillar) finds a neighbour.
+  const position = relatedResult.data.findIndex(
+    (record) => String((record as { _id?: unknown })?._id) === caseStudy._id
+  );
+  let next =
+    toItems(relatedResult.data.slice(position + 1))[0] ?? siblings[0] ?? null;
+  if (!next) {
+    const everything = await CaseStudyService.getPublicCaseStudyDiscovery({
+      sort: "newest",
+    }).catch(() => ({ data: [] }));
+    next = toItems(everything.data)[0] ?? null;
+  }
   const managedFallback = resolvePublicContentFallback({
     kind: "project",
     pillar: caseStudy.primary_pillar,
@@ -122,10 +137,15 @@ export default async function CaseStudyDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <StoryLayout route="case-study" site={site}>
+      <StoryLayout
+        route="case-study"
+        site={site}
+        header={getCaseStudyHeader(caseStudy)}
+      >
         <CaseStudyDetailsSection
           caseStudy={caseStudy}
           related={related}
+          next={next}
           fallbacks={site.fallbacks}
         />
       </StoryLayout>

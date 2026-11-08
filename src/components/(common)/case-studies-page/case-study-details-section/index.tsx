@@ -1,54 +1,30 @@
 import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
-import { CaseStudyCard } from "@/components/content/case-study-card";
+import { CaseStudyDiagram } from "@/components/content/case-study-diagram";
 import { ProjectGallery } from "@/components/content/project-gallery";
 import { RichContentRenderer } from "@/components/content/rich-content-renderer";
-import ParallaxLayer from "@/components/motion/parallax-layer";
+import Reveal from "@/components/motion/reveal";
 import OptimizedMedia from "@/components/ui/optimized-media";
-import { CASE_STUDY_ENGAGEMENT_LABELS } from "@/lib/content/case-study-contract";
+import { StatusMark } from "@/components/ui/status-mark";
+import { Tag } from "@/components/ui/tag";
+import {
+  parseCaseStudyArchitecture,
+  type CaseStudyArchitecture,
+} from "@/lib/content/case-study-contract";
+import {
+  DIAGRAM_KIND_LABELS,
+  highlightIdsForFocus,
+  outputHighlightIds,
+} from "@/lib/content/case-study-diagram-layout";
 import { getPillarLabel } from "@/lib/content/pillars";
-import { isAllowedPublicProjectUrl } from "@/lib/content/portfolio-contract";
 import { resolveMediaAlt } from "@/lib/media/presentation";
 import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type {
   TCaseStudyListItem,
   TPublicCaseStudy,
 } from "@/types/case-study.type";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  CheckCircle2,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
-
-const DetailSection = ({
-  id,
-  eyebrow,
-  title,
-  children,
-}: {
-  id: string;
-  eyebrow: string;
-  title: string;
-  children: ReactNode;
-}) => (
-  <section
-    id={id}
-    className="border-border border-t pt-10"
-    aria-labelledby={`${id}-title`}
-  >
-    <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
-      {eyebrow}
-    </p>
-    <h2 id={`${id}-title`} className="mt-3 text-3xl font-black tracking-tight">
-      {title}
-    </h2>
-    <div className="text-muted-foreground mt-5 text-base leading-8">
-      {children}
-    </div>
-  </section>
-);
+import type { CSSProperties, ReactNode } from "react";
 
 const monthFormatter = new Intl.DateTimeFormat("en", {
   month: "short",
@@ -62,38 +38,117 @@ const formatMonth = (value?: string): string | null => {
   return Number.isNaN(date.valueOf()) ? null : monthFormatter.format(date);
 };
 
-const FactRow = ({ label, value }: { label: string; value?: string | null }) =>
-  value ? (
-    <div>
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="mt-1 font-bold">{value}</dd>
-    </div>
-  ) : null;
+/** `data-highlights` for a row; an empty list leaves the attribute off so the diagram rests. */
+const highlights = (ids: readonly string[]) =>
+  ids.length ? { "data-highlights": ids.join(",") } : {};
 
-const Paragraphs = ({ text }: { text: string }) => (
-  <div className="space-y-4 whitespace-pre-line">{text}</div>
+const Chapter = ({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: string;
+  children: ReactNode;
+}) => (
+  <section id={id} className="story-chapter" aria-labelledby={`${id}-title`}>
+    <h2 id={`${id}-title`} className="story-chapter__title t-eyebrow">
+      {title}
+    </h2>
+    {children}
+  </section>
 );
+
+const BlockHead = ({
+  id,
+  eyebrow,
+  title,
+}: {
+  id: string;
+  eyebrow: string;
+  title: string;
+}) => (
+  <header className="story-block__head">
+    <p className="t-eyebrow text-fg-secondary">{eyebrow}</p>
+    <h2 id={id} className="t-h4">
+      {title}
+    </h2>
+  </header>
+);
+
+const Chips = ({ items }: { items: readonly string[] }) => (
+  <ul className="story-chips" role="list">
+    {items.map((item) => (
+      <li key={item}>
+        <Tag>{item}</Tag>
+      </li>
+    ))}
+  </ul>
+);
+
+/**
+ * The decisions that shape the diagram: each step names the components it concerns, and the engine lights
+ * them (and the connections that enter or leave them) as the step reaches the middle of the screen.
+ */
+const Walkthrough = ({
+  architecture,
+}: {
+  architecture: CaseStudyArchitecture;
+}) => {
+  if (!architecture.steps.length) return null;
+  const nodes = new Map(architecture.nodes.map((node) => [node.key, node]));
+  return (
+    <ol
+      className="story-steps"
+      role="list"
+      aria-label="Walkthrough of the diagram"
+    >
+      {architecture.steps.map((step, index) => (
+        <li
+          key={`${step.title}-${index}`}
+          className="story-step"
+          data-focus-row=""
+          {...highlights(highlightIdsForFocus(architecture, step.focus))}
+        >
+          <h3 className="story-step__title">{step.title}</h3>
+          <ul className="story-step__nodes" role="list">
+            {step.focus.map((key) => {
+              const node = nodes.get(key);
+              return node ? (
+                <li key={key}>
+                  <span className="t-eyebrow text-fg-secondary">
+                    {DIAGRAM_KIND_LABELS[node.kind]}
+                  </span>
+                  <strong>{node.label}</strong>
+                  {node.note ? <span>{node.note}</span> : null}
+                </li>
+              ) : null;
+            })}
+          </ul>
+        </li>
+      ))}
+    </ol>
+  );
+};
 
 const CaseStudyDetailsSection = ({
   caseStudy,
   related,
+  next,
   fallbacks,
 }: {
   caseStudy: TPublicCaseStudy;
   related: readonly TCaseStudyListItem[];
+  /** The case file that follows this one, when the page found one. */
+  next?: TCaseStudyListItem | null;
   fallbacks?: TPublicSiteFallbacksDto;
 }) => {
-  const pillar = caseStudy.primary_pillar
-    ? getPillarLabel(caseStudy.primary_pillar)
+  // Fail closed: a diagram that does not satisfy the contract is not drawn
+  const parsed = caseStudy.architecture
+    ? parseCaseStudyArchitecture(caseStudy.architecture)
     : null;
-  const links = [
-    caseStudy.live_url && isAllowedPublicProjectUrl(caseStudy.live_url)
-      ? { label: "Open live product", href: caseStudy.live_url }
-      : null,
-    caseStudy.source_url && isAllowedPublicProjectUrl(caseStudy.source_url)
-      ? { label: "View public source", href: caseStudy.source_url }
-      : null,
-  ].filter((link): link is { label: string; href: string } => Boolean(link));
+  const architecture = parsed?.ok ? parsed.value : null;
+
   const managedFallback = fallbacks
     ? resolvePublicContentFallback({
         kind: "project",
@@ -104,333 +159,364 @@ const CaseStudyDetailsSection = ({
   const cover = caseStudy.thumbnail?.url
     ? caseStudy.thumbnail
     : managedFallback;
+
   const started = formatMonth(caseStudy.started_at);
   const ended = formatMonth(caseStudy.ended_at);
   const timeframe =
     caseStudy.duration_label ||
     (started && ended ? `${started} – ${ended}` : (started ?? ended ?? null));
+  const factRows: Array<[string, string | null | undefined]> = [
+    ["Client", caseStudy.client_name],
+    ["Industry", caseStudy.client_industry],
+    ["Location", caseStudy.client_location],
+    ["My role", caseStudy.role],
+    [
+      "Team size",
+      caseStudy.team_size
+        ? `${caseStudy.team_size} ${caseStudy.team_size === 1 ? "person" : "people"}`
+        : null,
+    ],
+    ["Timeframe", timeframe],
+  ];
+  const facts = factRows.filter((fact): fact is [string, string] =>
+    Boolean(fact[1])
+  );
+
+  const constraints = (caseStudy.constraints ?? []).filter((item) =>
+    item.trim()
+  );
+  const decisions = caseStudy.key_decisions ?? [];
+  const outcomes = (caseStudy.outcomes ?? []).filter(
+    (outcome) => outcome.verification_state !== "unverified"
+  );
+  const services = caseStudy.services ?? [];
+  const tools = caseStudy.tech_stack ?? [];
+
+  const hasProblem = Boolean(
+    caseStudy.challenge || caseStudy.overview || facts.length
+  );
+  const hasArchitecture = Boolean(
+    architecture ||
+      caseStudy.approach ||
+      caseStudy.solution ||
+      decisions.length ||
+      tools.length
+  );
+  const hasResult = Boolean(
+    caseStudy.results_summary || outcomes.length || services.length
+  );
+  const chapterCount = [
+    hasProblem,
+    constraints.length > 0,
+    hasArchitecture,
+    hasResult,
+  ].filter(Boolean).length;
+
   const hasBody = Boolean(caseStudy.content?.trim() || caseStudy.rich_content);
-  // Number only the sections that are actually shown, in reading order.
-  let section = 0;
-  const nextEyebrow = (label: string) =>
-    `${String((section += 1)).padStart(2, "0")} · ${label}`;
-  const outcomes = caseStudy.outcomes ?? [];
+  const learnings = caseStudy.learnings ?? [];
+  const gallery = caseStudy.images ?? [];
+  const more = related.filter((item) => item._id !== next?._id);
 
   return (
-    <div className="bg-background">
-      <header className="relative overflow-hidden pt-20 pb-16 lg:pt-28 lg:pb-24">
-        <div className="bg-primary/10 pointer-events-none absolute top-0 left-1/2 h-[30rem] w-[70rem] -translate-x-1/2 rounded-full blur-[140px]" />
-        <div className="relative container mx-auto px-6">
-          <Link
-            href="/case-studies"
-            className="text-muted-foreground hover:text-primary focus-visible:ring-primary inline-flex min-h-11 items-center gap-2 rounded-lg pr-3 text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            All case studies
-          </Link>
-          <div className="mt-10 max-w-5xl">
-            <div className="flex flex-wrap gap-2">
-              {pillar ? (
-                <span className="bg-primary/10 text-primary rounded-full px-3 py-1.5 text-xs font-black">
-                  {pillar}
-                </span>
+    <>
+      {chapterCount > 0 ? (
+        <section
+          className="story"
+          aria-label="Case file walkthrough"
+          data-highlight-scope=""
+        >
+          <div className="container">
+            <div
+              className="story-grid"
+              data-scroll-focus=""
+              data-diagram={architecture ? "true" : "false"}
+              style={{ "--story-rows": chapterCount } as CSSProperties}
+            >
+              {hasProblem ? (
+                <Chapter id="problem" title="Problem">
+                  <div className="story-row" data-focus-row="">
+                    {caseStudy.challenge ? (
+                      <p className="story-statement story-prose">
+                        {caseStudy.challenge}
+                      </p>
+                    ) : null}
+                    {caseStudy.overview ? (
+                      <p className="story-prose text-fg-secondary">
+                        {caseStudy.overview}
+                      </p>
+                    ) : null}
+                    {facts.length ? (
+                      <dl className="story-facts">
+                        {facts.map(([label, value]) => (
+                          <div key={label}>
+                            <dt className="t-eyebrow text-fg-secondary">
+                              {label}
+                            </dt>
+                            <dd>{value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : null}
+                  </div>
+                </Chapter>
               ) : null}
-              {caseStudy.engagement_type ? (
-                <span className="border-border bg-card rounded-full border px-3 py-1.5 text-xs font-bold">
-                  {CASE_STUDY_ENGAGEMENT_LABELS[caseStudy.engagement_type]}
-                </span>
+
+              {constraints.length ? (
+                <Chapter id="constraints" title="Constraints">
+                  <div className="story-row" data-focus-row="">
+                    <ul className="story-list" role="list">
+                      {constraints.map((item, index) => (
+                        <li key={`${item}-${index}`}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </Chapter>
               ) : null}
-              {caseStudy.category?.name ? (
-                <span className="border-border bg-card rounded-full border px-3 py-1.5 text-xs font-bold">
-                  {caseStudy.category.name}
-                </span>
+
+              {/* One figure for both layouts: sticky beside the chapters on desktop, inline before Architecture below 1024 px */}
+              {architecture ? (
+                <CaseStudyDiagram
+                  architecture={architecture}
+                  className="story-figure"
+                />
+              ) : null}
+
+              {hasArchitecture ? (
+                <Chapter id="architecture" title="Architecture">
+                  <div className="story-row" data-focus-row="">
+                    {caseStudy.approach ? (
+                      <p className="story-prose">{caseStudy.approach}</p>
+                    ) : architecture ? (
+                      <p className="story-prose">{architecture.alt}</p>
+                    ) : null}
+                    {decisions.length ? (
+                      <>
+                        <h3 className="story-subtitle t-eyebrow text-fg-secondary">
+                          Key decisions
+                        </h3>
+                        <ul className="story-list" role="list">
+                          {decisions.map((decision, index) => (
+                            <li key={`${decision}-${index}`}>{decision}</li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : null}
+                    {caseStudy.solution ? (
+                      <>
+                        <h3 className="story-subtitle t-eyebrow text-fg-secondary">
+                          What I built
+                        </h3>
+                        <p className="story-prose">{caseStudy.solution}</p>
+                      </>
+                    ) : null}
+                  </div>
+                  {architecture ? (
+                    <Walkthrough architecture={architecture} />
+                  ) : null}
+                  {tools.length ? (
+                    <div className="story-aside">
+                      <h3 className="story-subtitle t-eyebrow text-fg-secondary">
+                        Tools used
+                      </h3>
+                      <Chips items={tools} />
+                    </div>
+                  ) : null}
+                </Chapter>
+              ) : null}
+
+              {hasResult ? (
+                <Chapter id="result" title="Result">
+                  <div
+                    className="story-row"
+                    data-focus-row=""
+                    {...highlights(
+                      architecture ? outputHighlightIds(architecture) : []
+                    )}
+                  >
+                    {caseStudy.results_summary ? (
+                      <p className="story-statement story-prose">
+                        {caseStudy.results_summary}
+                      </p>
+                    ) : null}
+                    {outcomes.length ? (
+                      <ul className="story-outcomes" role="list">
+                        {outcomes.map((outcome) => (
+                          <li key={`${outcome.label}-${outcome.value}`}>
+                            <p className="story-outcome__value t-mono">
+                              {outcome.value}
+                            </p>
+                            <div className="story-outcome__body">
+                              <p className="story-outcome__label">
+                                {outcome.label}
+                              </p>
+                              {outcome.description ? (
+                                <p className="text-fg-secondary">
+                                  {outcome.description}
+                                </p>
+                              ) : null}
+                              <StatusMark
+                                state={
+                                  outcome.verification_state === "verified"
+                                    ? "verified"
+                                    : "derived"
+                                }
+                                className="t-eyebrow"
+                              >
+                                {outcome.verification_state === "verified"
+                                  ? "Verified"
+                                  : "Derived from approved data"}
+                              </StatusMark>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {services.length ? (
+                      <>
+                        <h3 className="story-subtitle t-eyebrow text-fg-secondary">
+                          What I delivered
+                        </h3>
+                        <Chips items={services} />
+                      </>
+                    ) : null}
+                  </div>
+                </Chapter>
               ) : null}
             </div>
-            <h1 className="mt-6 text-5xl leading-[0.95] font-black tracking-tight text-balance sm:text-6xl lg:text-7xl">
-              {caseStudy.name}
-            </h1>
-            {caseStudy.description ? (
-              <p className="text-muted-foreground mt-7 max-w-3xl text-xl leading-9">
-                {caseStudy.description}
-              </p>
-            ) : null}
-            {links.length > 0 ? (
-              <div className="mt-8 flex flex-wrap gap-3">
-                {links.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-border bg-card hover:border-primary focus-visible:ring-primary inline-flex min-h-12 items-center gap-2 rounded-xl border px-5 text-sm font-black focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    {link.label}
-                    <ArrowUpRight className="size-4" aria-hidden="true" />
-                  </a>
-                ))}
-              </div>
-            ) : null}
           </div>
-        </div>
-      </header>
+        </section>
+      ) : null}
 
-      <div className="container mx-auto px-6">
-        <div className="border-border bg-surface-subtle relative aspect-[16/9] overflow-hidden rounded-xl border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
-          <ParallaxLayer className="absolute -inset-[3%]" depth="subtle">
-            <OptimizedMedia
-              src={cover?.url}
-              alt={resolveMediaAlt(cover, caseStudy.name)}
-              fallback="project"
-              pillar={caseStudy.primary_pillar}
-              focalPoint={cover?.focal_point}
-              dominantColor={cover?.dominant_color}
-              blurDataUrl={cover?.blur_data_url}
-              sizes="100vw"
-              priority
-              className="object-cover"
-            />
-          </ParallaxLayer>
-        </div>
-      </div>
+      {cover || hasBody || learnings.length || gallery.length ? (
+        <div className="story-record container">
+          {cover ? (
+            <figure className="story-cover">
+              <OptimizedMedia
+                src={cover.url}
+                alt={resolveMediaAlt(cover, caseStudy.name)}
+                fallback="project"
+                pillar={caseStudy.primary_pillar}
+                focalPoint={cover.focal_point}
+                dominantColor={cover.dominant_color}
+                blurDataUrl={cover.blur_data_url}
+                sizes="(min-width: 1024px) 60rem, 100vw"
+                className="object-cover"
+              />
+            </figure>
+          ) : null}
 
-      <article className="container mx-auto grid gap-16 px-6 py-20 lg:grid-cols-[minmax(0,1fr)_20rem] lg:py-28">
-        <div className="min-w-0 space-y-14">
-          {caseStudy.overview ? (
-            <section aria-labelledby="overview-title">
-              <h2 id="overview-title" className="sr-only">
-                Overview
-              </h2>
-              <div className="text-foreground text-xl leading-9">
-                <Paragraphs text={caseStudy.overview} />
+          {hasBody ? (
+            <section className="story-block" aria-labelledby="detail-title">
+              <BlockHead
+                id="detail-title"
+                eyebrow="/in-depth"
+                title="The full story"
+              />
+              <div className="story-block__body">
+                <RichContentRenderer
+                  document={caseStudy.rich_content}
+                  legacyHtml={caseStudy.content ?? ""}
+                  fallback="project"
+                  pillar={caseStudy.primary_pillar}
+                />
               </div>
             </section>
           ) : null}
 
-          {caseStudy.challenge ? (
-            <DetailSection
-              id="challenge"
-              eyebrow={nextEyebrow("The challenge")}
-              title="The problem"
-            >
-              <Paragraphs text={caseStudy.challenge} />
-            </DetailSection>
-          ) : null}
-
-          {caseStudy.approach || caseStudy.key_decisions?.length ? (
-            <DetailSection
-              id="approach"
-              eyebrow={nextEyebrow("Approach")}
-              title="How I approached it"
-            >
-              {caseStudy.approach ? (
-                <Paragraphs text={caseStudy.approach} />
-              ) : null}
-              {caseStudy.key_decisions?.length ? (
-                <ol className="mt-6 space-y-3">
-                  {caseStudy.key_decisions.map((decision, index) => (
-                    <li key={decision} className="flex gap-3">
-                      <span className="text-primary font-black tabular-nums">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span>{decision}</span>
-                    </li>
-                  ))}
-                </ol>
-              ) : null}
-            </DetailSection>
-          ) : null}
-
-          {caseStudy.solution ? (
-            <DetailSection
-              id="solution"
-              eyebrow={nextEyebrow("Solution")}
-              title="What I built"
-            >
-              <Paragraphs text={caseStudy.solution} />
-            </DetailSection>
-          ) : null}
-
-          {caseStudy.results_summary || outcomes.length > 0 ? (
-            <DetailSection
-              id="results"
-              eyebrow={nextEyebrow("Impact")}
-              title="What changed for the business"
-            >
-              {caseStudy.results_summary ? (
-                <Paragraphs text={caseStudy.results_summary} />
-              ) : null}
-              {outcomes.length > 0 ? (
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  {outcomes.map((outcome) => (
-                    <div
-                      key={`${outcome.label}-${outcome.value}`}
-                      className="border-border bg-card rounded-xl border p-5"
-                    >
-                      <CheckCircle2
-                        className="text-success size-5"
-                        aria-hidden="true"
-                      />
-                      <p className="text-foreground mt-3 text-lg font-black">
-                        {outcome.value}
-                      </p>
-                      <p className="mt-1 text-sm">{outcome.label}</p>
-                      {outcome.description ? (
-                        <p className="mt-2 text-sm leading-6">
-                          {outcome.description}
-                        </p>
-                      ) : null}
-                      <p className="mt-3 text-[0.65rem] font-black tracking-wide uppercase">
-                        {outcome.verification_state === "verified"
-                          ? "Evidence verified"
-                          : "Derived from approved data"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </DetailSection>
-          ) : null}
-
-          {hasBody ? (
-            <DetailSection
-              id="detail"
-              eyebrow={nextEyebrow("In depth")}
-              title="The full story"
-            >
-              <RichContentRenderer
-                document={caseStudy.rich_content}
-                legacyHtml={caseStudy.content ?? ""}
-                fallback="project"
-                pillar={caseStudy.primary_pillar}
+          {learnings.length ? (
+            <section className="story-block" aria-labelledby="learnings-title">
+              <BlockHead
+                id="learnings-title"
+                eyebrow="/reflection"
+                title="What I would carry forward"
               />
-            </DetailSection>
+              <div className="story-block__body">
+                <ul className="story-list" role="list">
+                  {learnings.map((learning, index) => (
+                    <li key={`${learning}-${index}`}>{learning}</li>
+                  ))}
+                </ul>
+              </div>
+            </section>
           ) : null}
 
-          {caseStudy.learnings?.length ? (
-            <DetailSection
-              id="learnings"
-              eyebrow={nextEyebrow("Reflection")}
-              title="What I would carry forward"
-            >
-              <ul className="space-y-3">
-                {caseStudy.learnings.map((learning) => (
-                  <li key={learning} className="flex gap-3">
-                    <ArrowRight
-                      className="text-primary mt-1 size-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                    {learning}
-                  </li>
-                ))}
-              </ul>
-            </DetailSection>
-          ) : null}
-
-          {caseStudy.images?.length ? (
-            <DetailSection
-              id="gallery"
-              eyebrow={nextEyebrow("Visual proof")}
-              title="Gallery"
-            >
-              <ProjectGallery
-                images={caseStudy.images}
-                projectName={caseStudy.name}
-                pillar={caseStudy.primary_pillar}
+          {gallery.length ? (
+            <section className="story-block" aria-labelledby="gallery-title">
+              <BlockHead
+                id="gallery-title"
+                eyebrow="/visual-proof"
+                title="Gallery"
               />
-            </DetailSection>
+              <div className="story-block__body">
+                <ProjectGallery
+                  images={gallery}
+                  projectName={caseStudy.name}
+                  pillar={caseStudy.primary_pillar}
+                />
+              </div>
+            </section>
           ) : null}
         </div>
+      ) : null}
 
-        <aside className="h-fit space-y-6 lg:sticky lg:top-28">
-          <div className="border-border bg-card rounded-xl border p-6">
-            <h2 className="font-black">Case study facts</h2>
-            <dl className="mt-5 space-y-4 text-sm">
-              <FactRow label="Client" value={caseStudy.client_name} />
-              <FactRow label="Industry" value={caseStudy.client_industry} />
-              <FactRow label="Location" value={caseStudy.client_location} />
-              <FactRow label="Focus area" value={pillar} />
-              <FactRow label="My role" value={caseStudy.role} />
-              <FactRow
-                label="Team size"
-                value={
-                  caseStudy.team_size
-                    ? `${caseStudy.team_size} ${caseStudy.team_size === 1 ? "person" : "people"}`
-                    : null
-                }
-              />
-              <FactRow label="Timeframe" value={timeframe} />
-              {caseStudy.tech_stack?.length ? (
-                <div>
-                  <dt className="text-muted-foreground">Tools used</dt>
-                  <dd className="mt-2 flex flex-wrap gap-1.5">
-                    {caseStudy.tech_stack.map((tool) => (
-                      <span
-                        key={tool}
-                        className="bg-muted rounded-md px-2 py-1 text-xs font-semibold"
-                      >
-                        {tool}
-                      </span>
-                    ))}
-                  </dd>
-                </div>
-              ) : null}
-              {caseStudy.services?.length ? (
-                <div>
-                  <dt className="text-muted-foreground">What I delivered</dt>
-                  <dd className="mt-2 flex flex-wrap gap-1.5">
-                    {caseStudy.services.map((service) => (
-                      <span
-                        key={service}
-                        className="bg-primary/10 text-primary rounded-md px-2 py-1 text-xs font-semibold"
-                      >
-                        {service}
-                      </span>
-                    ))}
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-          </div>
-          <div className="bg-primary text-primary-foreground rounded-xl p-6">
-            <h2 className="text-xl font-black">Facing a similar problem?</h2>
-            <p className="mt-3 text-sm leading-6 opacity-85">
-              Tell me what you are trying to achieve and what is getting in the
-              way. I will reply with how I would approach it.
-            </p>
-            <Link
-              href="/contact"
-              className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-black"
-            >
-              Start a conversation
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
-        </aside>
-      </article>
-
-      {related.length > 0 ? (
-        <section
-          className="border-border bg-surface-subtle border-t py-20"
-          aria-labelledby="related-case-studies-title"
-        >
-          <div className="container mx-auto px-6">
-            <h2
-              id="related-case-studies-title"
-              className="text-3xl font-black tracking-tight"
-            >
-              More problems solved
+      {next ? (
+        <section className="story-next" aria-labelledby="story-next-title">
+          <Reveal className="container">
+            <h2 id="story-next-title" className="t-eyebrow text-fg-secondary">
+              Next case file
             </h2>
-            <ul className="mt-8 grid gap-8 md:grid-cols-3">
-              {related.map((item) => (
-                <li key={item._id} className="min-w-0">
-                  <CaseStudyCard caseStudy={item} fallbacks={fallbacks} />
-                </li>
-              ))}
-            </ul>
-          </div>
+            <Link
+              href={`/case-studies/${next.slug ?? next._id}`}
+              className="story-next__link"
+            >
+              <span className="story-next__title t-h3 link-draw">
+                {next.name}
+              </span>
+              <ArrowRight className="story-next__arrow" aria-hidden="true" />
+            </Link>
+            {next.description ? (
+              <p className="t-lead t-measure">{next.description}</p>
+            ) : null}
+          </Reveal>
         </section>
       ) : null}
-    </div>
+
+      {more.length > 0 ? (
+        <section
+          className="story-related container"
+          aria-labelledby="related-case-studies-title"
+        >
+          <h2
+            id="related-case-studies-title"
+            className="t-eyebrow text-fg-secondary"
+          >
+            More problems solved
+          </h2>
+          <ul role="list">
+            {more.map((item) => (
+              <li key={item._id}>
+                <Link
+                  href={`/case-studies/${item.slug ?? item._id}`}
+                  className="story-related__link"
+                >
+                  <span className="story-related__title link-draw">
+                    {item.name}
+                  </span>
+                  {item.primary_pillar ? (
+                    <span className="t-eyebrow text-fg-secondary">
+                      {getPillarLabel(item.primary_pillar)}
+                    </span>
+                  ) : null}
+                </Link>
+                {item.description ? (
+                  <p className="text-fg-secondary">{item.description}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </>
   );
 };
 

@@ -2,4 +2,728 @@
  * Public inner pages: case-story (Phase 6). Owned by one slice; add rules here, not in sections.css.
  * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"], reduced motion
  * and no-JS show everything, no hover-only information.
+ *
+ * The case file (A3 Story): one sticky architecture diagram beside four chapters (Problem, Constraints,
+ * Architecture, Result). The engine lights the nodes and edges the chapter at mid-screen concerns (M17,
+ * `data-highlights` on a row, `data-highlight-id` on the diagram parts). Everything below is complete
+ * without the engine: nothing is dimmed, every chapter and every node is fully readable.
  */
+
+/* ======================================================================
+   Layout: the story grid
+   Mobile and no diagram: one column. From 1024 px with a diagram: the figure is a sticky first column
+   spanning every chapter row, the chapters stack in the second. The figure stays one element: below
+   1024 px it sits in the flow just before the Architecture chapter.
+   ====================================================================== */
+.story {
+  padding-block: var(--space-section-compact);
+}
+
+.story-grid {
+  --story-inset: clamp(1.25rem, 3vw, 2rem);
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.story-grid[data-diagram="false"] {
+  max-inline-size: 52rem;
+}
+
+@media (min-width: 1024px) {
+  .story-grid[data-diagram="true"] {
+    grid-template-rows: repeat(var(--story-rows, 1), auto);
+    grid-template-columns: minmax(0, 8fr) minmax(0, 5fr);
+    column-gap: clamp(2rem, 5vw, 5rem);
+    align-content: start;
+  }
+
+  .story-grid[data-diagram="true"] > .story-figure {
+    position: sticky;
+    grid-row: 1 / -1;
+    grid-column: 1;
+    align-self: start;
+    inset-block-start: calc(var(--header-offset) + 1.5rem);
+  }
+
+  .story-grid[data-diagram="true"] > .story-chapter {
+    grid-column: 2;
+  }
+}
+
+/* ======================================================================
+   Chapters: a wire down the column, a square on it at each chapter title
+   The square is hollow everywhere; with the engine the chapter at mid-screen fills it.
+   ====================================================================== */
+.story-chapter {
+  position: relative;
+  padding-inline-start: var(--story-inset);
+  padding-block: clamp(2rem, 8svh, 4.5rem);
+  scroll-margin-block-start: calc(var(--header-offset) + 1rem);
+}
+
+.story-chapter::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-inline-start: 1px solid var(--line-2);
+  content: "";
+}
+
+.story-chapter__title {
+  position: relative;
+  margin: 0 0 1.25rem;
+  color: var(--text-secondary);
+}
+
+.story-chapter__title::before {
+  position: absolute;
+  inset-block-start: 0.2em;
+  inset-inline-start: calc(-1 * var(--story-inset) - 0.3rem);
+  border: 1.5px solid currentcolor;
+  background: var(--background);
+  inline-size: 0.6rem;
+  block-size: 0.6rem;
+  content: "";
+}
+
+html[data-motion-engine="ready"]
+  .story-chapter:has([data-focus-row][data-active="true"])::before {
+  border-inline-start-color: var(--line-4);
+}
+
+html[data-motion-engine="ready"]
+  .story-chapter:has([data-focus-row][data-active="true"])
+  .story-chapter__title {
+  color: var(--foreground);
+}
+
+html[data-motion-engine="ready"]
+  .story-chapter:has([data-focus-row][data-active="true"])
+  .story-chapter__title::before {
+  background: var(--foreground);
+}
+
+.story-row > * + * {
+  margin-block-start: 1.5rem;
+}
+
+.story-prose {
+  margin: 0;
+  max-inline-size: 58ch;
+  font-size: var(--step-0);
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.story-statement {
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.story-subtitle {
+  margin: 2rem 0 0.25rem;
+}
+
+.story-aside {
+  margin-block-start: 2rem;
+}
+
+.story-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  margin: 2rem 0 0;
+  border-block-start: 1px solid var(--line-3);
+}
+
+.story-facts > div {
+  margin: 0;
+  border-block-end: 1px solid var(--line-2);
+  padding: 0.85rem 1rem 0.85rem 0;
+  min-inline-size: 0;
+}
+
+.story-facts dd {
+  margin: 0.3rem 0 0;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.story-list {
+  margin: 0;
+  border-block-start: 1px solid var(--line-3);
+  padding: 0;
+  list-style: none;
+}
+
+.story-subtitle + .story-list {
+  margin-block-start: 0.75rem;
+}
+
+.story-list > li {
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 0.9rem;
+  max-inline-size: 60ch;
+  font-size: var(--step-0);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.story-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- Architecture walkthrough: one row per step, each lights its components ---------- */
+.story-steps {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-step {
+  border-block-start: 1px solid var(--line-2);
+  padding-block: clamp(1.25rem, 5svh, 2.25rem);
+}
+
+.story-step__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.story-step__nodes {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-step__nodes > li {
+  display: grid;
+  gap: 0.15rem;
+  font-size: var(--step--1);
+  line-height: 1.45;
+}
+
+.story-step__nodes strong {
+  font-weight: 600;
+  font-size: var(--step-0);
+}
+
+.story-step__nodes span:not(.t-eyebrow) {
+  max-inline-size: 52ch;
+  color: var(--text-secondary);
+}
+
+html[data-motion-engine="ready"] .story-step {
+  transition: border-color var(--dur-base) var(--ease-signal);
+}
+
+html[data-motion-engine="ready"] .story-step[data-active="true"] {
+  border-block-start-color: var(--foreground);
+}
+
+/* ---------- Result: outcomes as hairline rows ---------- */
+.story-outcomes {
+  margin: 2rem 0 0;
+  border-block-start: 1px solid var(--line-3);
+  padding: 0;
+  list-style: none;
+}
+
+.story-outcomes > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6rem 1.5rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 1.1rem;
+}
+
+@media (min-width: 40rem) {
+  .story-outcomes > li {
+    grid-template-columns: minmax(6rem, 10rem) minmax(0, 1fr);
+  }
+}
+
+.story-outcome__value {
+  margin: 0;
+  font-weight: 500;
+  font-size: var(--step-1);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.story-outcome__body {
+  min-inline-size: 0;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.story-outcome__body > * {
+  margin: 0;
+}
+
+.story-outcome__body > * + * {
+  margin-block-start: 0.45rem;
+}
+
+.story-outcome__label {
+  color: var(--foreground);
+  font-size: var(--step-0);
+}
+
+/* ======================================================================
+   The diagram: a hairline frame, the SVG, and the same content as text
+   ====================================================================== */
+.story-figure {
+  margin: 0;
+}
+
+@media (max-width: 1023.98px) {
+  .story-figure {
+    margin-block: 1rem;
+  }
+}
+
+.story-diagram {
+  margin: 0;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  min-inline-size: 0;
+}
+
+/* A wide diagram scrolls inside its frame (never the page); the frame is focusable so a keyboard can scroll it */
+.story-diagram__scroll {
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+@media (min-width: 1024px) {
+  .story-diagram__scroll {
+    max-block-size: calc(100svh - var(--header-offset) - 6rem);
+  }
+
+  .story-diagram:has(details[open]) .story-diagram__scroll {
+    max-block-size: 40svh;
+  }
+}
+
+.story-svg {
+  display: block;
+  inline-size: 100%;
+  /* Never smaller than 75 % of the drawn size, so the smallest text stays near 7.5 px */
+  min-inline-size: calc(var(--diagram-width) * 0.75px);
+  block-size: auto;
+  color: var(--foreground);
+}
+
+.story-layer__name {
+  fill: var(--text-secondary);
+  font-weight: 500;
+  font-size: 10px;
+  font-family: var(--ff-mono, ui-monospace, monospace);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.story-layer__rule {
+  fill: none;
+  stroke: var(--line-3);
+  stroke-width: 1;
+}
+
+/* Nodes: the box keeps an opaque fill so a line passing behind it never crosses its text */
+.story-node__box {
+  fill: var(--background);
+  stroke: var(--foreground);
+  stroke-width: 1.25;
+}
+
+.story-node[data-kind="external"] .story-node__box {
+  stroke-dasharray: 5 4;
+}
+
+.story-node__inner {
+  fill: none;
+  stroke: var(--foreground);
+  stroke-width: 1;
+}
+
+.story-node__glyph {
+  fill: none;
+  stroke: var(--foreground);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.story-node__kind {
+  fill: var(--text-secondary);
+  font-weight: 500;
+  font-size: 10px;
+  font-family: var(--ff-mono, ui-monospace, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.story-node__label {
+  fill: var(--foreground);
+  font-weight: 500;
+  font-size: 13px;
+  font-family: var(--ff-mono, ui-monospace, monospace);
+}
+
+/* Edges: a line, an arrowhead at the target and, hidden until lit, the light that travels the line */
+.story-edge__line {
+  fill: none;
+  stroke: var(--foreground);
+  stroke-opacity: 0.6;
+  stroke-width: 1.25;
+}
+
+.story-edge__arrow {
+  fill: var(--foreground);
+  fill-opacity: 0.6;
+}
+
+.story-edge__pulse {
+  fill: none;
+  stroke: var(--foreground);
+  stroke-width: 2.5;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+}
+
+.story-edge__label {
+  fill: var(--text-secondary);
+  stroke: var(--background);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  font-weight: 500;
+  font-size: 11px;
+  font-family: var(--ff-mono, ui-monospace, monospace);
+}
+
+/* ---------- With the engine: the chapter at mid-screen lights its parts, the others step back ---------- */
+/* Only strokes and fills dim; every label keeps full contrast. A node box keeps its fill, so lines stay behind it. */
+html[data-motion-engine="ready"] .story-node__box,
+html[data-motion-engine="ready"] .story-node__inner,
+html[data-motion-engine="ready"] .story-node__glyph {
+  transition:
+    stroke-opacity var(--dur-base) var(--ease-signal),
+    stroke-width var(--dur-base) var(--ease-signal),
+    fill var(--dur-base) var(--ease-signal);
+}
+
+html[data-motion-engine="ready"] .story-edge__line,
+html[data-motion-engine="ready"] .story-edge__arrow {
+  transition:
+    stroke-opacity var(--dur-base) var(--ease-signal),
+    fill-opacity var(--dur-base) var(--ease-signal),
+    stroke-width var(--dur-base) var(--ease-signal);
+}
+
+html[data-motion-engine="ready"] .story-edge__pulse {
+  transition: stroke-dashoffset var(--dur-slow) var(--ease-signal);
+}
+
+html[data-motion-engine="ready"]
+  .story-diagram:has([data-lit])
+  .story-node:not([data-lit])
+  :is(.story-node__box, .story-node__inner, .story-node__glyph) {
+  stroke-opacity: 0.28;
+}
+
+html[data-motion-engine="ready"]
+  .story-diagram:has([data-lit])
+  .story-edge:not([data-lit])
+  .story-edge__line {
+  stroke-opacity: 0.2;
+}
+
+html[data-motion-engine="ready"]
+  .story-diagram:has([data-lit])
+  .story-edge:not([data-lit])
+  .story-edge__arrow {
+  fill-opacity: 0.2;
+}
+
+/* Lit: heavier outline and a raised fill for nodes; full-strength lines with the light drawn along them */
+html[data-motion-engine="ready"] .story-node[data-lit] .story-node__box {
+  fill: var(--surface-raised);
+  stroke-width: 2.25;
+}
+
+html[data-motion-engine="ready"] .story-edge[data-lit] .story-edge__line {
+  stroke-opacity: 1;
+  stroke-width: 1.75;
+}
+
+html[data-motion-engine="ready"] .story-edge[data-lit] .story-edge__arrow {
+  fill-opacity: 1;
+}
+
+html[data-motion-engine="ready"] .story-edge[data-lit] .story-edge__pulse {
+  stroke-dashoffset: 0;
+}
+
+/* ---------- Diagram as text ---------- */
+.story-diagram__text {
+  border-block-start: 1px solid var(--line-2);
+  padding-inline: 1rem;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.story-diagram__text summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  min-block-size: 2.75rem;
+  font-weight: 500;
+  font-size: var(--step--2);
+  font-family: var(--ff-mono, ui-monospace, monospace);
+  letter-spacing: 0.08em;
+  list-style: none;
+  text-transform: uppercase;
+}
+
+.story-diagram__text summary::-webkit-details-marker {
+  display: none;
+}
+
+.story-diagram__glyph {
+  position: relative;
+  flex: none;
+  transition: transform var(--dur-fast) var(--ease-signal);
+  inline-size: 0.7rem;
+  block-size: 0.7rem;
+}
+
+.story-diagram__glyph::before,
+.story-diagram__glyph::after {
+  position: absolute;
+  background: currentcolor;
+  content: "";
+}
+
+.story-diagram__glyph::before {
+  translate: 0 -50%;
+  inset: 50% 0 auto;
+  block-size: 1.5px;
+}
+
+.story-diagram__glyph::after {
+  translate: -50% 0;
+  inset: 0 auto 0 50%;
+  inline-size: 1.5px;
+}
+
+.story-diagram__text[open] .story-diagram__glyph {
+  transform: rotate(45deg);
+}
+
+.story-diagram__text > p {
+  margin: 0 0 0.75rem;
+  max-inline-size: 60ch;
+}
+
+.story-diagram__text-label {
+  margin: 0.75rem 0 0.25rem;
+  color: var(--text-secondary);
+}
+
+.story-diagram__text ul {
+  margin: 0 0 0.75rem;
+  border-block-start: 1px solid var(--line-2);
+  padding: 0;
+  max-block-size: 24svh;
+  overflow: auto;
+  list-style: none;
+}
+
+.story-diagram__text li {
+  border-block-end: 1px solid var(--line-1);
+  padding-block: 0.5rem;
+}
+
+.story-diagram__meta {
+  color: var(--text-secondary);
+}
+
+/* ======================================================================
+   After the walkthrough: cover, the long story, learnings, gallery
+   ====================================================================== */
+.story-record {
+  display: grid;
+  gap: var(--space-section-compact);
+  border-block-start: 1px solid var(--line-2);
+  padding-block: var(--space-section-compact);
+}
+
+.story-cover {
+  position: relative;
+  margin: 0;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  aspect-ratio: 16 / 9;
+  max-inline-size: 64rem;
+  overflow: clip;
+}
+
+.story-block {
+  display: grid;
+  gap: 1.25rem 3rem;
+  border-block-start: 1px solid var(--line-2);
+  padding-block-start: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .story-block {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  }
+}
+
+.story-block__head > h2 {
+  margin: 0.5rem 0 0;
+}
+
+.story-block__body {
+  min-inline-size: 0;
+  max-inline-size: var(--container-prose);
+}
+
+/* ======================================================================
+   Footer of the story: the next case file, then more of them
+   ====================================================================== */
+.story-next {
+  border-block-start: 1px solid var(--line-2);
+  padding-block: var(--space-section-compact);
+}
+
+.story-next__link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-block: 1rem;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.story-next__title {
+  overflow-wrap: anywhere;
+}
+
+.story-next__arrow {
+  flex: none;
+  align-self: center;
+  transition: transform var(--dur-fast) var(--ease-signal);
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+}
+
+.story-next__link:is(:hover, :focus-visible) .link-draw {
+  background-size: 100% 1px;
+}
+
+.story-next__link:is(:hover, :focus-visible) .story-next__arrow {
+  transform: translateX(0.35rem);
+}
+
+.story-related {
+  padding-block: var(--space-section-compact);
+}
+
+.story-related > ul {
+  margin: 1.25rem 0 0;
+  border-block-start: 1px solid var(--line-3);
+  padding: 0;
+  list-style: none;
+}
+
+.story-related li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.4rem 2rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .story-related li {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+}
+
+.story-related li > p {
+  margin: 0;
+  max-inline-size: 60ch;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.story-related__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.story-related__title {
+  align-self: flex-start;
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.015em;
+}
+
+.story-related__link:is(:hover, :focus-visible) .link-draw {
+  background-size: 100% 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion-engine="ready"] .story-edge__pulse,
+  html[data-motion-engine="ready"] .story-node__box,
+  html[data-motion-engine="ready"] .story-edge__line,
+  .story-diagram__glyph,
+  .story-next__arrow {
+    transition: none;
+  }
+}
+
+/* Print: the paper theme without the sticky column, the whole diagram at rest */
+@media print {
+  .story-grid[data-diagram="true"] {
+    display: block;
+  }
+
+  .story-grid > .story-figure {
+    position: static;
+  }
+
+  .story-diagram__scroll {
+    max-block-size: none;
+  }
+}
