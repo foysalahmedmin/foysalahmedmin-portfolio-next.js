@@ -1,4 +1,6 @@
 import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
+import Reveal from "@/components/motion/reveal";
+import { SectionHead } from "@/components/sections/signal/section-head";
 import OptimizedMedia from "@/components/ui/optimized-media";
 import {
   Description,
@@ -9,6 +11,7 @@ import {
 import { getPillarLabel } from "@/lib/content/pillars";
 import { resolveMediaAlt } from "@/lib/media/presentation";
 import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
+import { TextLink } from "@/components/ui/text-link";
 import type { TArticleListItem } from "@/types/article.type";
 import { ArrowRight, Calendar, Clock, User } from "lucide-react";
 import Link from "next/link";
@@ -100,11 +103,107 @@ function ArticleCard({
   );
 }
 
+const EmptyArticles = ({ unavailable }: { unavailable: boolean }) => (
+  <div className="border-border bg-surface-subtle rounded-[var(--radius-lg-token)] border p-8 text-center">
+    <h3 className="font-bold">
+      {unavailable
+        ? "Articles are temporarily unavailable"
+        : "No approved public article is available yet"}
+    </h3>
+    <p className="text-muted-foreground mx-auto mt-2 max-w-xl text-sm">
+      {unavailable
+        ? "The public article reader could not be reached. The articles page can be retried directly."
+        : "Draft and incomplete writing remains private until its publication checks pass."}
+    </p>
+  </div>
+);
+
+/** Home "Field notes" (docs plan 4.1, Ch.7b): three hairline rows, the excerpt is the takeaway. */
+function FieldNotes({
+  articles,
+  unavailable,
+  heading,
+}: {
+  articles: readonly TArticleListItem[];
+  unavailable: boolean;
+  heading?: string;
+}) {
+  const notes = articles.slice(0, 3);
+  return (
+    <section
+      id="articles"
+      aria-labelledby="articles-heading"
+      className="py-[var(--space-section)]"
+    >
+      <div className="container">
+        <SectionHead
+          eyebrow="Lab"
+          title={heading || "Field notes"}
+          titleId="articles-heading"
+          lead="Lessons from building and running real systems."
+        />
+        {notes.length ? (
+          <>
+            <ul className="field-notes" role="list">
+              {notes.map((article, index) => {
+                const topic =
+                  article.category?.name ??
+                  (article.primary_pillar
+                    ? getPillarLabel(article.primary_pillar)
+                    : null);
+                const takeaway = article.excerpt || article.description;
+                return (
+                  <Reveal
+                    key={article._id}
+                    as="li"
+                    index={index}
+                    count={notes.length}
+                    className="field-note"
+                  >
+                    <h3 className="field-note__title">
+                      <Link
+                        href={`/articles/${article.slug ?? article._id}`}
+                        className="link-draw"
+                      >
+                        {article.name}
+                      </Link>
+                    </h3>
+                    {takeaway ? (
+                      <p className="field-note__takeaway">{takeaway}</p>
+                    ) : null}
+                    {article.reading_time_minutes || topic ? (
+                      <p className="field-note__meta t-eyebrow">
+                        {article.reading_time_minutes ? (
+                          <span>{article.reading_time_minutes} min read</span>
+                        ) : null}
+                        {topic ? <span>{topic}</span> : null}
+                      </p>
+                    ) : null}
+                  </Reveal>
+                );
+              })}
+            </ul>
+            <p className="field-notes__more">
+              <TextLink href="/projects" variant="quiet">
+                Open the lab
+                <ArrowRight className="size-4 self-center" aria-hidden="true" />
+              </TextLink>
+            </p>
+          </>
+        ) : (
+          <EmptyArticles unavailable={unavailable} />
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function ArticlesSection({
   articles,
   unavailable = false,
   heading,
   fallbacks,
+  layout,
 }: {
   articles: readonly TArticleListItem[];
   unavailable?: boolean;
@@ -112,6 +211,15 @@ export default function ArticlesSection({
   fallbacks?: TPublicSiteFallbacksDto;
   layout?: string;
 }) {
+  if (layout === "notes") {
+    return (
+      <FieldNotes
+        articles={articles}
+        unavailable={unavailable}
+        heading={heading}
+      />
+    );
+  }
   return (
     <section id="articles" className="py-[var(--space-section)]">
       <div className="container">
@@ -143,18 +251,7 @@ export default function ArticlesSection({
             ))}
           </div>
         ) : (
-          <div className="border-border bg-surface-subtle rounded-[var(--radius-lg-token)] border p-8 text-center">
-            <h3 className="font-bold">
-              {unavailable
-                ? "Articles are temporarily unavailable"
-                : "No approved public article is available yet"}
-            </h3>
-            <p className="text-muted-foreground mx-auto mt-2 max-w-xl text-sm">
-              {unavailable
-                ? "The public article reader could not be reached. The articles page can be retried directly."
-                : "Draft and incomplete writing remains private until its publication checks pass."}
-            </p>
-          </div>
+          <EmptyArticles unavailable={unavailable} />
         )}
       </div>
     </section>

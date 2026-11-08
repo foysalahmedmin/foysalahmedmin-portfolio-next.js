@@ -220,41 +220,60 @@ export const FAQSection = ({
   unavailable?: boolean;
   heading?: string;
   layout?: string;
-}) => (
-  <section className="py-[var(--space-section)]" aria-labelledby="faq-title">
-    <div className="container">
-      <div className="mx-auto grid max-w-3xl gap-10">
-        <SectionHead
-          align="center"
-          eyebrow="Useful before a conversation"
-          title={heading || "Questions before we start"}
-          titleId="faq-title"
-          lead="Clear expectations make the first call sharper: scope, delivery, security, communication and proof, answered before a project starts."
-        />
+}) => {
+  // A category label only helps when the list mixes categories (the Contact page filters to one)
+  const showCategory = new Set(faqs.map((faq) => faq.category)).size > 1;
+  return (
+    <section
+      id="faq"
+      className="py-[var(--space-section)]"
+      aria-labelledby="faq-title"
+    >
+      <div className="container">
+        <div className="mx-auto grid max-w-3xl gap-10">
+          <SectionHead
+            align="center"
+            eyebrow="Useful before a conversation"
+            title={heading || "Questions before we start"}
+            titleId="faq-title"
+            lead="Clear expectations make the first call sharper: scope, delivery, security, communication and proof, answered before a project starts."
+          />
 
-        {faqs.length ? (
-          <Accordion>
-            {faqs.map((faq, index) => (
-              <AccordionItem
-                key={faq.slug}
-                name="faq"
-                title={faq.question}
-                open={index === 0}
-              >
-                <TrustedRichText
-                  html={faq.answer}
-                  className="editorial text-fg-secondary max-w-none whitespace-pre-line"
-                />
-              </AccordionItem>
-            ))}
-          </Accordion>
-        ) : (
-          <EmptyEvidence title="FAQs" unavailable={unavailable} />
-        )}
+          {faqs.length ? (
+            <Accordion>
+              {faqs.map((faq, index) => (
+                <AccordionItem
+                  key={faq.slug}
+                  name="faq"
+                  title={
+                    showCategory ? (
+                      <span className="faq-question">
+                        <span className="t-eyebrow text-fg-secondary">
+                          {faq.category}
+                        </span>
+                        <span>{faq.question}</span>
+                      </span>
+                    ) : (
+                      faq.question
+                    )
+                  }
+                  open={index === 0}
+                >
+                  <TrustedRichText
+                    html={faq.answer}
+                    className="editorial text-fg-secondary max-w-none whitespace-pre-line"
+                  />
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+            <EmptyEvidence title="FAQs" unavailable={unavailable} />
+          )}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export const TestimonialsSection = ({
   testimonials,

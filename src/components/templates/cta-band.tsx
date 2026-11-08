@@ -1,21 +1,25 @@
-import type { TPublicSiteDto } from "@/app/api/site/site.type";
+import type { TPublicSiteDto, TSiteNextStep } from "@/app/api/site/site.type";
 import { PublicSiteLink } from "@/components/content/public-site-link";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { getPrimaryPublicCta } from "@/lib/site/public-shell";
 import { cn } from "@/lib/utils";
+import type { CSSProperties } from "react";
 
 /**
  * The one call-to-action band (docs plan 3.13). It takes the opposite tone of the page body, so every
  * page ends with the same inversion before the footer returns to the page tone. One centred column:
  * a short heading, one line of support, the action and the email. Copy varies through site data; the
- * layout never does. Renders nothing when the site has no primary action.
+ * layout never does. Renders nothing when the site has no primary action. The home page also passes
+ * `nextSteps`: what happens after you write, a real sequence carried by a wire rather than numerals.
  */
 export function CtaBand({
   site,
   className,
+  nextSteps,
 }: {
   site: TPublicSiteDto;
   className?: string;
+  nextSteps?: readonly TSiteNextStep[];
 }) {
   const cta = getPrimaryPublicCta(site);
   if (!cta) return null;
@@ -39,6 +43,32 @@ export function CtaBand({
         aria-hidden="true"
       />
       <div className="container flex flex-col items-center gap-8 py-[var(--space-section)] text-center">
+        {nextSteps?.length ? (
+          <div className="cta-steps">
+            <p id="cta-steps-label" className="t-eyebrow text-fg-secondary">
+              What happens after you write
+            </p>
+            <ol
+              className="cta-steps__list"
+              role="list"
+              aria-labelledby="cta-steps-label"
+              data-scroll-progress=""
+              data-progress-range="top 90%,bottom 60%"
+            >
+              {nextSteps.map((step, index) => (
+                <li
+                  key={step.key}
+                  style={{ "--t": index / nextSteps.length } as CSSProperties}
+                >
+                  <span className="cta-steps__title t-eyebrow">
+                    {step.title}
+                  </span>
+                  <span className="cta-steps__summary">{step.summary}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
         <p className="t-eyebrow text-fg-secondary">Let&apos;s talk</p>
         <h2 id="cta-band-title" className="cta-title">
           {heading}

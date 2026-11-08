@@ -2,4 +2,570 @@
  * Home chapters: trust-close (Phase 5). Owned by one slice; add rules here, not in sections.css.
  * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"],
  * an unbound `--progress` is finished, reduced motion and no-JS show everything.
+ *
+ * Chapters: commitments (.trust-*), how I think (.principle*), fit check (.fit-*), starting-point
+ * finder (.finder-*), field notes (.field-note*), FAQ question label (.faq-question) and the next steps
+ * in the closing band (.cta-steps*).
  */
+
+/* ---------- Ch.7 Commitments: plain lines with a glyph, hairline rows ---------- */
+.trust-lines,
+.principles,
+.field-notes {
+  margin: clamp(2rem, 4vw, 3.5rem) 0 0;
+  border-block-start: 1px solid var(--line-2);
+  padding: 0;
+  list-style: none;
+}
+
+.trust-line {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr);
+  column-gap: 1rem;
+  row-gap: 0.35rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 1.25rem;
+}
+
+/* A square with a tick: the commitment is kept. Shape only, the text carries the meaning. */
+.trust-glyph {
+  position: relative;
+  grid-row: 1;
+  grid-column: 1;
+  margin-block-start: 0.35em;
+  border: 1.5px solid currentColor;
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+}
+
+.trust-glyph::after {
+  position: absolute;
+  transform: rotate(40deg);
+  inset-block-start: -0.02rem;
+  inset-inline-start: 0.3rem;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  inline-size: 0.26rem;
+  block-size: 0.5rem;
+  content: "";
+}
+
+.trust-title {
+  grid-row: 1;
+  grid-column: 2;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.01em;
+}
+
+.trust-summary {
+  grid-row: 2;
+  grid-column: 2;
+  max-inline-size: 62ch;
+  color: var(--text-secondary);
+}
+
+@media (min-width: 48rem) {
+  .trust-line {
+    grid-template-columns: 1.1rem minmax(0, 26rem) minmax(0, 1fr);
+    column-gap: clamp(1.25rem, 3vw, 3rem);
+    padding-block: 1.5rem;
+  }
+
+  .trust-summary {
+    grid-row: 1;
+    grid-column: 3;
+  }
+}
+
+/* ---------- Ch.7a How I think: large Display statements, hairlines between ---------- */
+.principle {
+  display: grid;
+  gap: 0.5rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: clamp(0.75rem, 1.5vw, 1.1rem);
+}
+
+.principle__statement {
+  max-inline-size: 20em;
+  font-weight: 750;
+  font-stretch: 118%;
+  font-size: var(--step-2);
+  line-height: 1.05;
+  font-family: var(--ff-display-118, var(--ff-display, inherit));
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.principle__note {
+  max-inline-size: 60ch;
+  color: var(--text-secondary);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+/* ---------- Ch.5c Fit check: two columns split by a hairline ---------- */
+.fit-columns {
+  display: grid;
+  margin-block-start: clamp(1.5rem, 3vw, 2.5rem);
+  border-block: 1px solid var(--line-2);
+}
+
+.fit-columns[data-single="true"] {
+  max-inline-size: 46rem;
+}
+
+.fit-column {
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.fit-column + .fit-column {
+  border-block-start: 1px solid var(--line-2);
+}
+
+.fit-column__title {
+  margin: 0 0 1.25rem;
+  color: var(--text-secondary);
+}
+
+.fit-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fit-list > li {
+  display: grid;
+  gap: 0.25rem;
+  border-block-start: 1px solid var(--line-1);
+  padding-block: 1rem;
+}
+
+.fit-list > li:first-child {
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+
+.fit-list__label {
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.01em;
+}
+
+.fit-list__line {
+  max-inline-size: 52ch;
+  color: var(--text-secondary);
+}
+
+/* A plain line with no label reads at body size */
+.fit-list > li > .fit-list__line:only-child {
+  color: var(--foreground);
+  font-size: var(--step-0);
+}
+
+@media (min-width: 48rem) {
+  .fit-columns:not([data-single="true"]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fit-columns:not([data-single="true"]) > .fit-column + .fit-column {
+    border-inline-start: 1px solid var(--line-2);
+    border-block-start: 0;
+    padding-inline-start: clamp(1.5rem, 4vw, 4rem);
+  }
+
+  .fit-columns:not([data-single="true"]) > .fit-column:first-child {
+    padding-inline-end: clamp(1.5rem, 4vw, 4rem);
+  }
+}
+
+/* ---------- Ch.5d Starting-point finder: an inline form in a glass panel ---------- */
+.finder-stage {
+  margin-block-start: clamp(2rem, 4vw, 3.5rem);
+  border: 1px solid var(--line-2);
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+
+.finder-panel {
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+/* Holds the form's place while its chunk loads, so the page below does not move */
+.finder-pending {
+  min-block-size: 18rem;
+}
+
+.finder-form {
+  display: grid;
+  gap: 2rem;
+}
+
+.finder-steps {
+  display: grid;
+  align-content: start;
+  gap: 1.75rem;
+}
+
+.finder-step {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.finder-question {
+  margin-block-end: 0.75rem;
+  padding: 0;
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.01em;
+}
+
+.finder-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.finder-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  transition:
+    border-color var(--dur-fast) var(--ease-signal),
+    background-color var(--dur-fast) var(--ease-signal),
+    color var(--dur-fast) var(--ease-signal);
+  cursor: pointer;
+  border: 1px solid var(--line-3);
+  padding: 0.5rem 0.9rem;
+  min-block-size: 2.75rem;
+  font-size: var(--step-0);
+  line-height: 1.25;
+}
+
+.finder-option:hover {
+  border-color: var(--line-4);
+}
+
+/* Chosen: an inverted chip plus the filled dot, so it reads without colour */
+.finder-option:has(input:checked) {
+  border-color: var(--foreground);
+  background-color: var(--foreground);
+  color: var(--background);
+  font-weight: 600;
+}
+
+.finder-option input {
+  position: relative;
+  flex: none;
+  appearance: none;
+  cursor: pointer;
+  margin: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  inline-size: 1rem;
+  block-size: 1rem;
+  color: inherit;
+}
+
+.finder-option input::after {
+  position: absolute;
+  transform: scale(0);
+  transition: transform var(--dur-fast) var(--ease-signal);
+  inset: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.finder-option input:checked::after {
+  transform: scale(1);
+}
+
+.finder-result {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  border: 1px solid var(--line-2);
+  padding: 1.25rem;
+  min-block-size: 12rem;
+}
+
+.finder-result[data-state="match"] {
+  border-color: var(--line-4);
+}
+
+.finder-result a {
+  justify-self: start;
+  margin-block-start: 0.5rem;
+}
+
+.finder-result__hint {
+  color: var(--text-secondary);
+}
+
+.finder-result__model {
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: var(--step-2);
+  line-height: 1.05;
+  font-family: var(--ff-display-112, var(--ff-display, inherit));
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.finder-result__reason {
+  max-inline-size: 52ch;
+  color: var(--text-secondary);
+}
+
+.finder-skip,
+.finder-noscript {
+  margin-block-start: 1.25rem;
+  color: var(--text-secondary);
+}
+
+@keyframes finder-settle {
+  from {
+    transform: translateY(0.5rem);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+html[data-motion="full"] .finder-result[data-state="match"] > *,
+html[data-motion="full"] .finder-result[data-state="open"] > * {
+  animation: finder-settle var(--dur-base) var(--ease-signal) both;
+}
+
+@media (min-width: 64rem) {
+  .finder-form {
+    grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 1fr);
+    gap: clamp(2rem, 4vw, 4rem);
+  }
+
+  .finder-pending {
+    min-block-size: 24rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .finder-option,
+  .finder-option input::after {
+    transition: none;
+  }
+}
+
+/* ---------- Ch.7b Field notes: three hairline rows ---------- */
+.field-note {
+  display: grid;
+  position: relative;
+  gap: 0.6rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.field-note__title {
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: var(--step-2);
+  line-height: 1.08;
+  font-family: var(--ff-display-112, var(--ff-display, inherit));
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+/* The whole row opens the note; keyboard focus stays on the title link */
+.field-note__title a {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.field-note__title a::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.field-note__takeaway {
+  max-inline-size: 56ch;
+  color: var(--text-secondary);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.field-note__meta {
+  display: flex;
+  flex-wrap: wrap;
+  color: var(--text-secondary);
+}
+
+.field-note__meta > span + span::before {
+  display: inline-block;
+  vertical-align: -0.1em;
+  margin-inline: 1rem;
+  background: var(--line-3);
+  inline-size: 1px;
+  block-size: 0.95em;
+  content: "";
+}
+
+.field-notes__more {
+  margin-block-start: 1.5rem;
+}
+
+@media (hover: hover) {
+  .field-note:hover {
+    background-color: color-mix(in oklab, var(--foreground) 4%, transparent);
+  }
+}
+
+@media (min-width: 64rem) {
+  .field-note {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    column-gap: clamp(2rem, 5vw, 5rem);
+    align-items: start;
+  }
+
+  .field-note__title {
+    grid-row: 1 / span 2;
+  }
+
+  .field-note__takeaway,
+  .field-note__meta {
+    grid-column: 2;
+  }
+}
+
+/* ---------- Ch.8 FAQ: the mono category label above the question ---------- */
+.faq-question {
+  display: grid;
+  gap: 0.3rem;
+}
+
+/* ---------- Ch.9 Next steps in the closing band ---------- */
+.cta-steps {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+  inline-size: 100%;
+  max-inline-size: 64rem;
+}
+
+.cta-steps__list {
+  --wire-inset: calc(0.3em + 0.375rem);
+
+  display: grid;
+  position: relative;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  inline-size: 100%;
+  list-style: none;
+  text-align: start;
+}
+
+/* The wire runs through the nodes and fades out toward the statement below, which is where it leads */
+.cta-steps__list::before {
+  position: absolute;
+  mask-image: linear-gradient(to bottom, var(--foreground) 70%, transparent);
+  inset-block: var(--wire-inset) -1.5rem;
+  inset-inline-start: calc(0.375rem - 0.5px);
+  background: var(--line-4);
+  inline-size: 1px;
+  content: "";
+}
+
+.cta-steps__list > li {
+  display: grid;
+  position: relative;
+  gap: 0.35rem;
+  padding-inline-start: 2rem;
+}
+
+/* The node sits on the wire; the lit centre appears as the wire reaches it */
+.cta-steps__list > li::before {
+  position: absolute;
+  inset-block-start: 0.3em;
+  inset-inline-start: 0;
+  border: 1.5px solid currentColor;
+  background: var(--background);
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  content: "";
+}
+
+.cta-steps__list > li::after {
+  position: absolute;
+  inset-block-start: calc(0.3em + 0.1875rem);
+  inset-inline-start: 0.1875rem;
+  background: currentColor;
+  inline-size: 0.375rem;
+  block-size: 0.375rem;
+  content: "";
+}
+
+.cta-steps__summary {
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+/* Unbound, --progress is 1: every node is lit and the wire is whole. Only the engine animates it. */
+html[data-motion-engine="ready"] .cta-steps__list::before {
+  transform: scaleY(var(--progress, 1));
+  transform-origin: top;
+}
+
+html[data-motion-engine="ready"] .cta-steps__list > li::after {
+  opacity: clamp(0, calc((var(--progress, 1) - var(--t, 0)) * 6), 1);
+}
+
+@media (min-width: 48rem) {
+  .cta-steps__list {
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: clamp(1.5rem, 3vw, 3rem);
+  }
+
+  .cta-steps__list::before {
+    mask-image: linear-gradient(to right, var(--foreground) 70%, transparent);
+    inset-block: calc(0.3em + 0.375rem - 0.5px) auto;
+    inset-inline: 0.375rem 0;
+    inline-size: auto;
+    block-size: 1px;
+  }
+
+  .cta-steps__list > li {
+    padding-inline-start: 0;
+    padding-block-start: 1.75rem;
+  }
+
+  html[data-motion-engine="ready"] .cta-steps__list::before {
+    transform: scaleX(var(--progress, 1));
+    transform-origin: left;
+  }
+}
+
+@media (forced-colors: active) {
+  .cta-steps__list::before,
+  .field-note__meta > span + span::before {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+}
