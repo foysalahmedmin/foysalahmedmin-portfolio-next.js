@@ -4,6 +4,811 @@
  * and no-JS show everything, no hover-only information.
  */
 
+/* ======================================================================
+   Lab registry: /projects (A2). A real table; a stacked list below 720 px (CSS only).
+   ====================================================================== */
+/* The PageHeader above already ends with compact padding, so the body starts closer */
+.lab-page {
+  padding-block: clamp(2rem, 4vw, 3rem) var(--space-section);
+}
+
+/* ---------- Filters: a plain GET form ---------- */
+.lab-filters {
+  display: grid;
+  gap: 1.25rem;
+  margin-block-end: 1.5rem;
+}
+
+.lab-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.lab-field {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  min-inline-size: 0;
+}
+
+.lab-field--search {
+  grid-column: 1 / -1;
+}
+
+.lab-field :is(input, select) {
+  border: 1px solid var(--line-4);
+  border-radius: var(--r-control);
+  background: transparent;
+  padding-inline: 0.75rem;
+  inline-size: 100%;
+  min-block-size: var(--control-h, 2.75rem);
+  color: var(--foreground);
+  font: inherit;
+  /* 16 px keeps iOS from zooming the page on focus */
+  font-size: 1rem;
+}
+
+.lab-field input::placeholder {
+  color: var(--text-faint);
+}
+
+.lab-filters__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .lab-filters__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lab-field--search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lab-filters__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .lab-field--search {
+    grid-column: span 2;
+  }
+}
+
+/* ---------- Active filter chips ---------- */
+.lab-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition:
+    border-color var(--dur-fast) var(--ease-signal),
+    background-color var(--dur-fast) var(--ease-signal);
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-control);
+  padding: 0.3rem 0.65rem;
+  min-block-size: 2.25rem;
+  color: var(--foreground);
+  font-size: var(--step--1);
+  text-decoration: none;
+}
+
+.lab-chip:hover {
+  border-color: var(--line-4);
+  background: var(--surface-subtle);
+}
+
+/* ---------- Results ---------- */
+.lab-results {
+  margin-block-start: 1rem;
+  scroll-margin-block-start: var(--header-offset, 5.5rem);
+}
+
+.lab-count {
+  margin: 0 0 1rem;
+}
+
+.lab-empty {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  border-block: 1px solid var(--line-2);
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.lab-empty > * {
+  margin: 0;
+}
+
+/* ---------- Registry table ---------- */
+.lab-table {
+  border-collapse: collapse;
+  inline-size: 100%;
+  table-layout: fixed;
+}
+
+.lab-table thead th {
+  border-block-end: 1px solid var(--line-3);
+  padding: 0 1rem 0.75rem 0;
+  color: var(--text-secondary);
+  text-align: start;
+}
+
+.lab-table thead th:first-child {
+  inline-size: 38%;
+}
+
+.lab-table thead th:nth-child(2) {
+  inline-size: 20%;
+}
+
+.lab-table thead th:nth-child(3) {
+  inline-size: 24%;
+}
+
+.lab-table tbody :is(th, td) {
+  vertical-align: top;
+  transition: background-color var(--dur-fast) var(--ease-signal);
+  border-block-end: 1px solid var(--line-2);
+  padding: 1.25rem 1rem 1.25rem 0;
+  font-weight: 400;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.lab-table :is(thead, tbody) :is(th, td):first-child {
+  padding-inline-start: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+.lab-row__link {
+  display: inline-block;
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: var(--step-0);
+  line-height: 1.2;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.015em;
+  text-decoration: none;
+  text-wrap: balance;
+}
+
+.lab-row__flag {
+  vertical-align: middle;
+  margin-inline-start: 0.75rem;
+}
+
+.lab-row__desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 0.5rem 0 0;
+  max-inline-size: 52ch;
+  overflow: hidden;
+  color: var(--text-secondary);
+}
+
+.lab-row__sub {
+  display: block;
+  margin-block-start: 0.25rem;
+  color: var(--text-secondary);
+  font-size: var(--step--2);
+}
+
+.lab-row__stack {
+  color: var(--text-secondary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lab-row:hover > * {
+    background: var(--surface-subtle);
+  }
+}
+
+.lab-row:has(.lab-row__link:focus-visible) > * {
+  background: var(--surface-subtle);
+}
+
+/* Row preview: reserved gutter right of the table, 1100 px and up. Greyscale comes from state.css. */
+.lab-row__type {
+  position: relative;
+}
+
+.lab-peek {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .lab-registry {
+    padding-inline-end: 13.5rem;
+  }
+
+  .lab-peek {
+    display: block;
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(100% + 1.5rem);
+    inline-size: 12rem;
+    pointer-events: none;
+  }
+
+  .lab-peek__open {
+    display: inline-flex;
+    position: absolute;
+    align-items: center;
+    gap: 0.5rem;
+    inset-block-start: 1.25rem;
+    inset-inline-start: 0;
+    color: var(--text-secondary);
+  }
+
+  .lab-peek__frame {
+    display: none;
+    position: absolute;
+    translate: 0 -50%;
+    z-index: 3;
+    transition:
+      opacity var(--dur-fast) var(--ease-signal),
+      display var(--dur-fast) allow-discrete;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    border-radius: var(--r-panel);
+    padding: 0.25rem;
+    inline-size: 100%;
+  }
+
+  .lab-peek__media {
+    display: block;
+    position: relative;
+    transition: clip-path var(--dur-base) var(--ease-snap);
+    border-radius: var(--r-control);
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+
+  @starting-style {
+    .lab-peek__frame {
+      opacity: 0;
+    }
+
+    .lab-peek__media {
+      clip-path: inset(0 0 100% 0);
+    }
+  }
+
+  .lab-row:has(.lab-row__link:focus-visible) .lab-peek__frame {
+    display: block;
+  }
+
+  .lab-row:has(.lab-row__link:focus-visible) .lab-peek__open {
+    visibility: hidden;
+  }
+}
+
+@media (min-width: 1100px) and (hover: hover) and (pointer: fine) {
+  .lab-row:hover .lab-peek__frame {
+    display: block;
+  }
+
+  .lab-row:hover .lab-peek__open {
+    visibility: hidden;
+  }
+}
+
+/* Small screens: each row is a stacked list, labelled from data-label. The table markup stays. */
+@media (max-width: 719px) {
+  .lab-table,
+  .lab-table tbody,
+  .lab-table tr,
+  .lab-table tbody :is(th, td) {
+    display: block;
+  }
+
+  .lab-table thead {
+    position: absolute;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+  }
+
+  .lab-table tbody tr {
+    border-block-end: 1px solid var(--line-2);
+    padding-block: 1.25rem;
+  }
+
+  .lab-table tbody :is(th, td),
+  .lab-table tbody :is(th, td):first-child {
+    border: 0;
+    padding: 0;
+  }
+
+  .lab-table tbody td {
+    margin-block-start: 0.75rem;
+  }
+
+  .lab-table tbody td::before {
+    display: block;
+    margin-block-end: 0.15rem;
+    content: attr(data-label);
+    /* Generated text is read aloud by some screen readers; the empty alt keeps the visible label silent */
+    content: attr(data-label) / "";
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-stretch: 75%;
+    font-size: var(--step--2);
+    font-family: var(--ff-mono, ui-monospace, monospace);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+/* ======================================================================
+   Project detail: /projects/[id] (A4). 46 rem reading column, sticky facts.
+   ====================================================================== */
+.lab-detail-page {
+  padding-block: clamp(2rem, 4vw, 3rem) var(--space-section);
+}
+
+.lab-detail {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
+}
+
+.lab-detail__main {
+  display: grid;
+  align-content: start;
+  gap: clamp(2.5rem, 5vw, 3.5rem);
+  min-inline-size: 0;
+}
+
+.lab-detail__aside {
+  display: grid;
+  align-content: start;
+  gap: 2rem;
+  min-inline-size: 0;
+}
+
+@media (min-width: 1024px) {
+  .lab-detail {
+    grid-template-columns: minmax(0, var(--container-prose, 46rem)) minmax(
+        15rem,
+        20rem
+      );
+    justify-content: space-between;
+    align-items: start;
+  }
+
+  .lab-detail__aside {
+    position: sticky;
+    inset-block-start: calc(var(--header-offset, 5.5rem) + 1rem);
+  }
+}
+
+.lab-cover {
+  margin: 0;
+}
+
+.lab-cover__frame {
+  position: relative;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  background: var(--surface-subtle);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+/* The reading column is already narrow: no table of contents beside the body */
+.lab-detail__main > .lab-body {
+  display: block;
+}
+
+.lab-detail__main > .lab-body > nav {
+  display: none;
+}
+
+.lab-section {
+  border-block-start: 1px solid var(--line-2);
+  padding-block-start: 2rem;
+}
+
+.lab-section__title {
+  margin: 0 0 1.25rem;
+}
+
+.lab-prose {
+  margin: 0;
+  max-inline-size: 65ch;
+  color: var(--text-secondary);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.lab-subhead {
+  margin: 1.75rem 0 0.75rem;
+}
+
+.lab-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  max-inline-size: 65ch;
+  list-style: none;
+}
+
+.lab-list li {
+  position: relative;
+  padding-inline-start: 1.25rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.lab-list li::before {
+  position: absolute;
+  inset-block-start: 0.8em;
+  inset-inline-start: 0;
+  background: var(--line-4);
+  inline-size: 0.5rem;
+  block-size: 1px;
+  content: "";
+}
+
+/* Decisions are an ordered list: order is carried by the wire, not by numerals */
+.lab-wire {
+  display: grid;
+  position: relative;
+  gap: 1rem;
+  margin: 0;
+  padding: 0 0 0 1.75rem;
+  max-inline-size: 65ch;
+  list-style: none;
+}
+
+.lab-wire::before {
+  position: absolute;
+  inset-block: 0.7em;
+  inset-inline-start: 0.3125rem;
+  background: var(--line-3);
+  inline-size: 1px;
+  content: "";
+}
+
+.lab-wire li {
+  position: relative;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.lab-wire li::before {
+  position: absolute;
+  inset-block-start: 0.45em;
+  inset-inline-start: -1.75rem;
+  border: 1px solid var(--line-4);
+  background: var(--background);
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  content: "";
+}
+
+.lab-outcomes {
+  margin: 0;
+  border-block-start: 1px solid var(--line-3);
+}
+
+.lab-outcome {
+  display: grid;
+  gap: 0.4rem 1.5rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 1rem;
+}
+
+.lab-outcome dt {
+  color: var(--text-secondary);
+}
+
+.lab-outcome dd {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.lab-outcome__value {
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.1;
+}
+
+@media (min-width: 640px) {
+  .lab-outcome {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+  }
+
+  .lab-outcome dd {
+    justify-items: end;
+    text-align: end;
+  }
+}
+
+.lab-holds {
+  display: grid;
+  gap: 1.5rem;
+  margin: 0;
+}
+
+.lab-holds > div {
+  border-inline-start: 1px solid var(--line-3);
+  padding-inline-start: 1rem;
+}
+
+.lab-holds dt {
+  margin-block-end: 0.35rem;
+  font-weight: 600;
+}
+
+.lab-holds dd {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+@media (min-width: 640px) {
+  .lab-holds {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Facts aside */
+.lab-facts {
+  border-block-start: 1px solid var(--line-3);
+  padding-block-start: 1rem;
+}
+
+.lab-facts__title {
+  margin: 0 0 0.5rem;
+}
+
+.lab-facts dl {
+  margin: 0;
+}
+
+.lab-fact {
+  display: grid;
+  gap: 0.3rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 0.85rem;
+}
+
+.lab-fact dd {
+  margin: 0;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.lab-fact__sub {
+  display: block;
+  color: var(--text-secondary);
+}
+
+.lab-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-stack li {
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-sm);
+  padding: 0.15rem 0.5rem;
+  font-size: var(--step--2);
+}
+
+.lab-resources {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-resources a {
+  align-items: center;
+  min-block-size: var(--hit-area, 2.75rem);
+  font-size: var(--step--1);
+}
+
+/* Related projects */
+.lab-related {
+  margin-block: clamp(3rem, 6vw, 5rem) 0;
+  border-block-start: 1px solid var(--line-3);
+  padding-block-start: 2rem;
+}
+
+.lab-related__list {
+  display: grid;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-related__item {
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 1.25rem;
+}
+
+.lab-related__item > p {
+  margin: 0;
+}
+
+.lab-related__title {
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+  font-size: var(--step-0);
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.015em;
+}
+
+.lab-related__desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 0.5rem 0 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .lab-related__list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 2rem;
+  }
+}
+
+/* ---------- Gallery: a hairline player frame; the lightbox is the player ---------- */
+.lab-gallery {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .lab-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lab-gallery[data-lead="true"] > li:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.lab-gallery__item {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.lab-gallery__open {
+  display: block;
+  position: relative;
+  cursor: zoom-in;
+  border: 0;
+  background: none;
+  padding: 0;
+  inline-size: 100%;
+  color: inherit;
+  text-align: start;
+}
+
+.lab-gallery__frame {
+  display: block;
+  position: relative;
+  transition: border-color var(--dur-fast) var(--ease-signal);
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  background: var(--surface-subtle);
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.lab-gallery__frame::before,
+.lab-gallery__frame::after {
+  z-index: 1;
+}
+
+.lab-gallery__open:hover .lab-gallery__frame,
+.lab-gallery__open:focus-visible .lab-gallery__frame {
+  border-color: var(--line-4);
+}
+
+.lab-gallery__cue {
+  display: inline-flex;
+  position: absolute;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0;
+  z-index: 2;
+  transition: opacity var(--dur-fast) var(--ease-signal);
+  inset-block-end: 0.75rem;
+  inset-inline-end: 0.75rem;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+  padding: 0.3rem 0.55rem;
+  color: var(--foreground);
+}
+
+.lab-gallery__open:hover .lab-gallery__cue,
+.lab-gallery__open:focus-visible .lab-gallery__cue {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .lab-gallery__cue {
+    opacity: 1;
+  }
+}
+
+.lab-gallery__caption {
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.lab-lightbox {
+  position: relative;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  background: var(--background);
+  inline-size: 100%;
+  max-inline-size: 72rem;
+  max-block-size: calc(100dvh - 1.5rem);
+  overflow: hidden;
+  color: var(--foreground);
+}
+
+.lab-lightbox__stage {
+  position: relative;
+  border-radius: var(--r-control);
+  background: var(--surface-subtle);
+  aspect-ratio: 16 / 10;
+  max-block-size: 75dvh;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-chip,
+  .lab-table tbody :is(th, td),
+  .lab-peek__frame,
+  .lab-peek__media,
+  .lab-gallery__frame,
+  .lab-gallery__cue {
+    transition: none;
+  }
+}
+
 /* ---------- Lab switcher (M28): shared by projects, articles and videos ---------- */
 .lab-switcher {
   position: relative;

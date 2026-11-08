@@ -1,24 +1,16 @@
 import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
-import { RichContentRenderer } from "@/components/content/rich-content-renderer";
 import { ProjectGallery } from "@/components/content/project-gallery";
-import ParallaxLayer from "@/components/motion/parallax-layer";
+import { RichContentRenderer } from "@/components/content/rich-content-renderer";
 import OptimizedMedia from "@/components/ui/optimized-media";
+import { StatusMark } from "@/components/ui/status-mark";
+import { TextLink } from "@/components/ui/text-link";
 import { getPillarLabel } from "@/lib/content/pillars";
 import { isAllowedPublicProjectUrl } from "@/lib/content/portfolio-contract";
 import { resolveMediaAlt } from "@/lib/media/presentation";
 import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TProject, TProjectListItem } from "@/types/project.type";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  CheckCircle2,
-  ExternalLink,
-  Layers3,
-  ShieldCheck,
-} from "lucide-react";
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { projectYear, titleCase } from "../format";
 
 export type TPublicProjectResource = Readonly<{
   _id?: string;
@@ -29,34 +21,58 @@ export type TPublicProjectResource = Readonly<{
   sequence?: number;
 }>;
 
-const DetailSection = ({
+/** The live and source links that are safe to show publicly. The page puts them in the header actions. */
+export const getPublicProjectLinks = (
+  project: Pick<TProject, "live_url" | "source_url">
+) =>
+  [
+    project.live_url && isAllowedPublicProjectUrl(project.live_url)
+      ? { label: "Open live product", href: project.live_url }
+      : null,
+    project.source_url && isAllowedPublicProjectUrl(project.source_url)
+      ? { label: "View public source", href: project.source_url }
+      : null,
+  ].filter((link): link is { label: string; href: string } => Boolean(link));
+
+const Paragraphs = ({ text }: { text: string }) => (
+  <p className="lab-prose">{text}</p>
+);
+
+/** A case-file section: one H2 in the four-word vocabulary (Problem, Approach, Result), body below it. */
+const Section = ({
   id,
-  eyebrow,
   title,
   children,
 }: {
   id: string;
-  eyebrow: string;
   title: string;
   children: ReactNode;
 }) => (
-  <section
-    id={id}
-    className="border-border border-t pt-10"
-    aria-labelledby={`${id}-title`}
-  >
-    <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
-      {eyebrow}
-    </p>
-    <h2 id={`${id}-title`} className="mt-3 text-3xl font-black tracking-tight">
+  <section id={id} aria-labelledby={`${id}-title`} className="lab-section">
+    <h2 id={`${id}-title`} className="lab-section__title t-h4">
       {title}
     </h2>
-    <div className="text-muted-foreground mt-5 text-base leading-8">
-      {children}
-    </div>
+    {children}
   </section>
 );
 
+const SubHead = ({ children }: { children: ReactNode }) => (
+  <h3 className="lab-subhead t-eyebrow text-fg-secondary">{children}</h3>
+);
+
+const Fact = ({ label, children }: { label: string; children: ReactNode }) => (
+  <div className="lab-fact">
+    <dt className="t-eyebrow text-fg-secondary">{label}</dt>
+    <dd>{children}</dd>
+  </div>
+);
+
+/**
+ * `/projects/[id]` body (docs plan 4.2, archetype A4): a 46 rem reading column and a sticky facts aside.
+ * The template gives the page header (title, lede, path, live and source actions) and the CtaBand, so this
+ * renders neither. The sections use the case-file vocabulary where the data allows: Problem, Approach,
+ * Result, and the Stack in the facts.
+ */
 const ProjectDetailsSection = ({
   project,
   resources,
@@ -71,14 +87,6 @@ const ProjectDetailsSection = ({
   const pillar = project.primary_pillar
     ? getPillarLabel(project.primary_pillar)
     : null;
-  const publicLinks = [
-    project.live_url && isAllowedPublicProjectUrl(project.live_url)
-      ? { label: "Open live product", href: project.live_url }
-      : null,
-    project.source_url && isAllowedPublicProjectUrl(project.source_url)
-      ? { label: "View public source", href: project.source_url }
-      : null,
-  ].filter((link): link is { label: string; href: string } => Boolean(link));
   const safeResources = resources.filter((resource) =>
     isAllowedPublicProjectUrl(resource.url)
   );
@@ -90,372 +98,262 @@ const ProjectDetailsSection = ({
       })
     : undefined;
   const cover = project.thumbnail?.url ? project.thumbnail : managedFallback;
+  const started = projectYear(project.started_at);
+  const ended = projectYear(project.ended_at);
+  const period =
+    started && ended && ended !== started
+      ? `${started}–${ended}`
+      : (started ?? ended);
+  const hasBody = Boolean(project.content?.trim() || project.rich_content);
+  const constraints = project.constraints ?? [];
+  const decisions = project.decisions ?? [];
+  const outcomes = project.outcomes ?? [];
+  const learnings = project.learnings ?? [];
+  const stack = project.tags ?? [];
+  const hasProblem = Boolean(project.problem) || constraints.length > 0;
+  const hasApproach =
+    Boolean(project.architecture || project.implementation) ||
+    decisions.length > 0;
+  const hasResult =
+    outcomes.length > 0 ||
+    Boolean(project.security || project.performance_reliability) ||
+    learnings.length > 0;
 
   return (
-    <div className="bg-background">
-      <header className="relative overflow-hidden pt-20 pb-16 lg:pt-28 lg:pb-24">
-        <div className="bg-primary/10 pointer-events-none absolute top-0 left-1/2 h-[30rem] w-[70rem] -translate-x-1/2 rounded-full blur-[140px]" />
-        <div className="relative container mx-auto px-6">
-          <Link
-            href="/projects"
-            className="text-muted-foreground hover:text-primary focus-visible:ring-primary inline-flex min-h-11 items-center gap-2 rounded-lg pr-3 text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            All projects
-          </Link>
-          <div className="mt-10 max-w-5xl">
-            <div className="flex flex-wrap gap-2">
-              {pillar && (
-                <span className="bg-primary/10 text-primary rounded-full px-3 py-1.5 text-xs font-black">
-                  {pillar}
-                </span>
-              )}
-              {project.project_type && (
-                <span className="border-border bg-card rounded-full border px-3 py-1.5 text-xs font-bold">
-                  {project.project_type.replaceAll("_", " ")}
-                </span>
-              )}
-              {project.delivery_status && (
-                <span className="border-border bg-card rounded-full border px-3 py-1.5 text-xs font-bold">
-                  {project.delivery_status}
-                </span>
-              )}
+    <div className="lab-detail-page container">
+      <div className="lab-detail">
+        <article className="lab-detail__main">
+          <figure className="lab-cover">
+            <div className="lab-cover__frame">
+              <OptimizedMedia
+                src={cover?.url}
+                alt={resolveMediaAlt(cover, project.name)}
+                fallback="project"
+                pillar={project.primary_pillar}
+                focalPoint={cover?.focal_point}
+                dominantColor={cover?.dominant_color}
+                blurDataUrl={cover?.blur_data_url}
+                sizes="(max-width: 1023px) 100vw, 46rem"
+                priority
+                className="object-cover"
+              />
             </div>
-            <h1 className="mt-6 text-5xl leading-[0.95] font-black tracking-tight text-balance sm:text-6xl lg:text-8xl">
-              {project.name}
-            </h1>
-            {project.description && (
-              <p className="text-muted-foreground mt-7 max-w-3xl text-xl leading-9">
-                {project.description}
-              </p>
-            )}
-            {publicLinks.length > 0 && (
-              <div className="mt-8 flex flex-wrap gap-3">
-                {publicLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-border bg-card hover:border-primary focus-visible:ring-primary inline-flex min-h-12 items-center gap-2 rounded-xl border px-5 text-sm font-black focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    {link.label}
-                    <ArrowUpRight className="size-4" aria-hidden="true" />
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+          </figure>
 
-      <div className="container mx-auto px-6">
-        <div className="border-border bg-surface-subtle relative aspect-[16/9] overflow-hidden rounded-xl border shadow-[var(--shadow-lg)] lg:aspect-[21/9]">
-          <ParallaxLayer className="absolute -inset-[3%]" depth="subtle">
-            <OptimizedMedia
-              src={cover?.url}
-              alt={resolveMediaAlt(cover, project.name)}
+          {hasBody ? (
+            <RichContentRenderer
+              className="lab-body"
+              document={project.rich_content}
+              legacyHtml={project.content}
               fallback="project"
               pillar={project.primary_pillar}
-              focalPoint={cover?.focal_point}
-              dominantColor={cover?.dominant_color}
-              blurDataUrl={cover?.blur_data_url}
-              sizes="100vw"
-              priority
-              className="object-cover"
             />
-          </ParallaxLayer>
-        </div>
-      </div>
+          ) : null}
 
-      <article className="container mx-auto grid gap-16 px-6 py-20 lg:grid-cols-[minmax(0,1fr)_20rem] lg:py-28">
-        <div className="min-w-0 space-y-14">
-          <RichContentRenderer
-            document={project.rich_content}
-            legacyHtml={project.content}
-            fallback="project"
-            pillar={project.primary_pillar}
-          />
+          {hasProblem ? (
+            <Section id="problem" title="Problem">
+              {project.problem ? <Paragraphs text={project.problem} /> : null}
+              {constraints.length ? (
+                <>
+                  <SubHead>Constraints</SubHead>
+                  <ul className="lab-list">
+                    {constraints.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </Section>
+          ) : null}
 
-          {project.problem && (
-            <DetailSection
-              id="problem"
-              eyebrow="01 · The challenge"
-              title="The problem"
-            >
-              <p>{project.problem}</p>
-            </DetailSection>
-          )}
-          {(project.role || project.constraints?.length) && (
-            <DetailSection
-              id="role-constraints"
-              eyebrow="02 · Context"
-              title="What made it hard"
-            >
-              {project.role && <p>{project.role}</p>}
-              {project.constraints && project.constraints.length > 0 && (
-                <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {project.constraints.map((item) => (
-                    <li
-                      key={item}
-                      className="border-border bg-card rounded-xl border p-4 text-sm leading-6"
+          {hasApproach ? (
+            <Section id="approach" title="Approach">
+              {project.architecture ? (
+                <Paragraphs text={project.architecture} />
+              ) : null}
+              {decisions.length ? (
+                <>
+                  <SubHead>Decisions</SubHead>
+                  <ol className="lab-wire">
+                    {decisions.map((decision) => (
+                      <li key={decision}>{decision}</li>
+                    ))}
+                  </ol>
+                </>
+              ) : null}
+              {project.implementation ? (
+                <>
+                  <SubHead>What I built</SubHead>
+                  <Paragraphs text={project.implementation} />
+                </>
+              ) : null}
+            </Section>
+          ) : null}
+
+          {hasResult ? (
+            <Section id="result" title="Result">
+              {outcomes.length ? (
+                <dl className="lab-outcomes">
+                  {outcomes.map((outcome) => (
+                    <div
+                      key={`${outcome.label}-${outcome.value}`}
+                      className="lab-outcome"
                     >
-                      {item}
-                    </li>
+                      <dt>{outcome.label}</dt>
+                      <dd>
+                        <strong className="lab-outcome__value t-mono">
+                          {outcome.value}
+                        </strong>
+                        <StatusMark
+                          state={
+                            outcome.verification_state === "verified"
+                              ? "verified"
+                              : "derived"
+                          }
+                          className="t-eyebrow"
+                        >
+                          {outcome.verification_state === "verified"
+                            ? "Evidence verified"
+                            : "Derived from approved data"}
+                        </StatusMark>
+                      </dd>
+                    </div>
                   ))}
-                </ul>
-              )}
-            </DetailSection>
-          )}
-          {(project.architecture || project.decisions?.length) && (
-            <DetailSection
-              id="architecture"
-              eyebrow="03 · Approach"
-              title="How I approached it"
-            >
-              {project.architecture && <p>{project.architecture}</p>}
-              {project.decisions && project.decisions.length > 0 && (
-                <ol className="mt-6 space-y-3">
-                  {project.decisions.map((decision, index) => (
-                    <li key={decision} className="flex gap-3">
-                      <span className="text-primary font-black tabular-nums">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span>{decision}</span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </DetailSection>
-          )}
-          {project.implementation && (
-            <DetailSection
-              id="implementation"
-              eyebrow="04 · Solution"
-              title="What I built"
-            >
-              <p>{project.implementation}</p>
-            </DetailSection>
-          )}
-          {project.outcomes && project.outcomes.length > 0 && (
-            <DetailSection
-              id="outcomes"
-              eyebrow="05 · Impact"
-              title="What changed for the business"
-            >
-              <div className="grid gap-4 sm:grid-cols-2">
-                {project.outcomes.map((outcome) => (
-                  <div
-                    key={`${outcome.label}-${outcome.value}`}
-                    className="border-border bg-card rounded-xl border p-5"
-                  >
-                    <CheckCircle2
-                      className="text-success size-5"
-                      aria-hidden="true"
-                    />
-                    <p className="text-foreground mt-3 text-lg font-black">
-                      {outcome.value}
-                    </p>
-                    <p className="mt-1 text-sm">{outcome.label}</p>
-                    <p className="mt-3 text-[0.65rem] font-black tracking-wide uppercase">
-                      {outcome.verification_state === "verified"
-                        ? "Evidence verified"
-                        : "Derived from approved data"}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </DetailSection>
-          )}
-          {(project.security || project.performance_reliability) && (
-            <DetailSection
-              id="quality"
-              eyebrow="06 · Dependability"
-              title="Why it holds up"
-            >
-              <div className="grid gap-4 md:grid-cols-2">
-                {project.security && (
-                  <div className="border-border bg-card rounded-xl border p-5">
-                    <ShieldCheck
-                      className="text-primary size-5"
-                      aria-hidden="true"
-                    />
-                    <h3 className="text-foreground mt-3 font-bold">
-                      Security boundary
-                    </h3>
-                    <p className="mt-2 text-sm leading-7">{project.security}</p>
-                  </div>
-                )}
-                {project.performance_reliability && (
-                  <div className="border-border bg-card rounded-xl border p-5">
-                    <Layers3
-                      className="text-primary size-5"
-                      aria-hidden="true"
-                    />
-                    <h3 className="text-foreground mt-3 font-bold">
-                      Performance and reliability
-                    </h3>
-                    <p className="mt-2 text-sm leading-7">
-                      {project.performance_reliability}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </DetailSection>
-          )}
-          {project.learnings && project.learnings.length > 0 && (
-            <DetailSection
-              id="learnings"
-              eyebrow="07 · Reflection"
-              title="What I would carry forward"
-            >
-              <ul className="space-y-3">
-                {project.learnings.map((learning) => (
-                  <li key={learning} className="flex gap-3">
-                    <ArrowRight
-                      className="text-primary mt-1 size-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                    {learning}
-                  </li>
-                ))}
-              </ul>
-            </DetailSection>
-          )}
+                </dl>
+              ) : null}
+              {project.security || project.performance_reliability ? (
+                <>
+                  <SubHead>Why it holds up</SubHead>
+                  <dl className="lab-holds">
+                    {project.security ? (
+                      <div>
+                        <dt>Security boundary</dt>
+                        <dd>{project.security}</dd>
+                      </div>
+                    ) : null}
+                    {project.performance_reliability ? (
+                      <div>
+                        <dt>Performance and reliability</dt>
+                        <dd>{project.performance_reliability}</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </>
+              ) : null}
+              {learnings.length ? (
+                <>
+                  <SubHead>Carried forward</SubHead>
+                  <ul className="lab-list">
+                    {learnings.map((learning) => (
+                      <li key={learning}>{learning}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </Section>
+          ) : null}
 
-          {project.images && project.images.length > 0 && (
-            <DetailSection
-              id="gallery"
-              eyebrow="08 · Visual proof"
-              title="Project gallery"
-            >
+          {project.images && project.images.length > 0 ? (
+            <Section id="gallery" title="Gallery">
               <ProjectGallery
                 images={project.images}
                 projectName={project.name}
                 pillar={project.primary_pillar}
               />
-            </DetailSection>
-          )}
-        </div>
+            </Section>
+          ) : null}
+        </article>
 
-        <aside className="h-fit space-y-6 lg:sticky lg:top-28">
-          <div className="border-border bg-card rounded-xl border p-6">
-            <h2 className="font-black">Project facts</h2>
-            <dl className="mt-5 space-y-4 text-sm">
-              {pillar && (
-                <div>
-                  <dt className="text-muted-foreground">Focus area</dt>
-                  <dd className="mt-1 font-bold">{pillar}</dd>
-                </div>
-              )}
-              {project.role && (
-                <div>
-                  <dt className="text-muted-foreground">Role</dt>
-                  <dd className="mt-1 line-clamp-4 font-bold">
-                    {project.role}
-                  </dd>
-                </div>
-              )}
-              {project.tags && project.tags.length > 0 && (
-                <div>
-                  <dt className="text-muted-foreground">Tools used</dt>
-                  <dd className="mt-2 flex flex-wrap gap-1.5">
-                    {project.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="bg-muted rounded-md px-2 py-1 text-xs font-semibold"
-                      >
+        <aside className="lab-detail__aside">
+          <div className="lab-facts">
+            <h2 className="lab-facts__title t-eyebrow text-fg-secondary">
+              Project facts
+            </h2>
+            <dl>
+              {pillar || project.role ? (
+                <Fact label="Role">
+                  {pillar ? <span>{pillar}</span> : null}
+                  {project.role ? (
+                    <span className="lab-fact__sub">{project.role}</span>
+                  ) : null}
+                </Fact>
+              ) : null}
+              {project.project_type ? (
+                <Fact label="Type">{titleCase(project.project_type)}</Fact>
+              ) : null}
+              {project.delivery_status ? (
+                <Fact label="Status">{titleCase(project.delivery_status)}</Fact>
+              ) : null}
+              {period ? (
+                <Fact label="Year">
+                  <span className="t-mono">{period}</span>
+                </Fact>
+              ) : null}
+              {stack.length ? (
+                <Fact label="Stack">
+                  <ul className="lab-stack">
+                    {stack.map((tag) => (
+                      <li key={tag} className="t-mono">
                         {tag}
-                      </span>
+                      </li>
                     ))}
-                  </dd>
-                </div>
-              )}
+                  </ul>
+                </Fact>
+              ) : null}
             </dl>
           </div>
-          {safeResources.length > 0 && (
-            <div className="border-border bg-card rounded-xl border p-6">
-              <h2 className="font-black">Public resources</h2>
-              <ul className="mt-4 space-y-2">
+
+          {safeResources.length > 0 ? (
+            <div className="lab-facts">
+              <h2 className="lab-facts__title t-eyebrow text-fg-secondary">
+                Public resources
+              </h2>
+              <ul className="lab-resources">
                 {safeResources.map((resource) => (
                   <li key={resource._id ?? resource.url}>
-                    <a
-                      href={resource.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-primary focus-visible:ring-primary flex min-h-11 items-center justify-between gap-3 rounded-lg text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-                    >
+                    <TextLink href={resource.url} variant="quiet" external>
                       {resource.title}
-                      <ExternalLink
-                        className="size-4 shrink-0"
-                        aria-hidden="true"
-                      />
-                    </a>
+                    </TextLink>
                   </li>
                 ))}
               </ul>
             </div>
-          )}
-          <div className="bg-primary text-primary-foreground rounded-xl p-6">
-            <h2 className="text-xl font-black">Facing a similar problem?</h2>
-            <p className="mt-3 text-sm leading-6 opacity-85">
-              Tell me what you are trying to achieve and what is getting in the
-              way. I will reply with how I would approach it.
-            </p>
-            <Link
-              href="/contact"
-              className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-black"
-            >
-              Start a conversation
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
+          ) : null}
         </aside>
-      </article>
+      </div>
 
-      {related.length > 0 && (
+      {related.length > 0 ? (
         <section
-          className="border-border bg-surface-subtle border-t py-20"
           aria-labelledby="related-projects-title"
+          className="lab-related"
         >
-          <div className="container mx-auto px-6">
-            <h2
-              id="related-projects-title"
-              className="text-3xl font-black tracking-tight"
-            >
-              Similar problems solved
-            </h2>
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {related.map((item) => (
-                <Link
-                  key={item._id}
-                  href={`/projects/${item.slug ?? item._id}`}
-                  className="border-border bg-card hover:border-primary group rounded-xl border p-6"
-                >
-                  <p className="text-primary text-xs font-black uppercase">
-                    {item.primary_pillar
-                      ? getPillarLabel(item.primary_pillar)
-                      : "Project"}
-                  </p>
-                  <h3 className="mt-3 text-xl font-black">{item.name}</h3>
-                  {item.description && (
-                    <p className="text-muted-foreground mt-3 line-clamp-2 text-sm leading-6">
-                      {item.description}
-                    </p>
-                  )}
-                  <span className="text-primary mt-5 inline-flex items-center gap-2 text-sm font-bold">
-                    View case study
-                    <ArrowRight
-                      className="size-4 transition-transform group-hover:translate-x-1"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
+          <h2 id="related-projects-title" className="t-h4">
+            Similar problems solved
+          </h2>
+          <ul className="lab-related__list">
+            {related.map((item) => (
+              <li key={item._id} className="lab-related__item">
+                <p className="t-eyebrow text-fg-secondary">
+                  {item.primary_pillar
+                    ? getPillarLabel(item.primary_pillar)
+                    : "Project"}
+                </p>
+                <h3 className="lab-related__title">
+                  <TextLink
+                    href={`/projects/${item.slug ?? item._id}`}
+                    variant="quiet"
+                  >
+                    {item.name}
+                  </TextLink>
+                </h3>
+                {item.description ? (
+                  <p className="lab-related__desc">{item.description}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
         </section>
-      )}
+      ) : null}
     </div>
   );
 };

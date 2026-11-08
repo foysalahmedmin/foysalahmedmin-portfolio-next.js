@@ -1,4 +1,5 @@
 import ProjectsContentSection from "@/components/(common)/projects-page/projects-content-section";
+import { canonicalProjectsPath } from "@/components/(common)/projects-page/projects-content-section/query";
 import { PublicRoutePage } from "@/components/pages/public-route-page";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
 import { getPublicPagePayloadOrFallback } from "@/lib/pages/public-page-fallback";
@@ -40,6 +41,12 @@ export default async function ProjectsPage({
     search_params: rawSearchParams,
   });
   if (discovery?.redirect_to) redirect(discovery.redirect_to);
+  // The filter form is a plain GET form and sends every field (`?pillar=all`); keep the URL clean.
+  const cleanPath =
+    discovery?.route_key === "projects"
+      ? canonicalProjectsPath(rawSearchParams, discovery.props.initialQuery)
+      : null;
+  if (cleanPath) redirect(cleanPath);
 
   return (
     <PublicRoutePage

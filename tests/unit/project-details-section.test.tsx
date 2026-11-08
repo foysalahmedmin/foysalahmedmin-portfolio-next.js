@@ -1,18 +1,12 @@
 // @vitest-environment jsdom
 
 import ProjectDetailsSection, {
+  getPublicProjectLinks,
   type TPublicProjectResource,
 } from "@/components/(common)/projects-page/project-details-section";
 import type { TProject } from "@/types/project.type";
-import { cleanup, render, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("@/components/motion/parallax-layer", () => ({
-  default: ({ children, depth }: { children?: ReactNode; depth?: string }) => (
-    <div data-parallax-layer={depth}>{children}</div>
-  ),
-}));
 
 vi.mock("@/components/ui/optimized-media", () => ({
   default: ({ alt }: { alt?: string }) => <img alt={alt || ""} />,
@@ -72,30 +66,26 @@ describe("ProjectDetailsSection", () => {
         url: "https://design.local/file",
       },
     ];
+    const unsafe = project({
+      live_url: "http://localhost:3000/preview",
+      source_url: "javascript:alert(1)",
+    });
 
     render(
       <ProjectDetailsSection
-        project={project({
-          live_url: "http://localhost:3000/preview",
-          source_url: "javascript:alert(1)",
-        })}
+        project={unsafe}
         resources={resources}
         related={[]}
       />
     );
 
-    expect(
-      screen.queryByRole("link", { name: /open live product/i })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: /view public source/i })
-    ).not.toBeInTheDocument();
+    expect(getPublicProjectLinks(unsafe)).toEqual([]);
     expect(screen.queryByText("Public resources")).not.toBeInTheDocument();
     expect(screen.queryByText("Internal runbook")).not.toBeInTheDocument();
     expect(screen.queryByText("Local design file")).not.toBeInTheDocument();
   });
 
-  it("tells the case study from the client's side, ending on business impact", () => {
+  it("tells the project in the case-file vocabulary, without its own header or CTA", () => {
     const { container } = render(
       <ProjectDetailsSection
         project={project({
@@ -112,27 +102,96 @@ describe("ProjectDetailsSection", () => {
     const titles = Array.from(
       container.querySelectorAll("article section h2")
     ).map((heading) => heading.textContent);
-    expect(titles).toEqual([
-      "The problem",
-      "What made it hard",
-      "How I approached it",
-      "What I built",
-      "What changed for the business",
-      "Why it holds up",
-      "What I would carry forward",
-    ]);
+    expect(titles).toEqual(["Problem", "Approach", "Result"]);
+    // The A4 template owns the header (the only h1) and the CtaBand
+    expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
     expect(
-      screen.getByRole("heading", { name: "Facing a similar problem?" })
+      screen.queryByRole("heading", { name: "Facing a similar problem?" })
+    ).toBeNull();
+
+    // Every field the old page showed is still there
+    expect(
+      screen.getByText("Orders were re-typed by hand and often went wrong.")
     ).toBeInTheDocument();
+    expect(screen.getByText("A two-person team")).toBeInTheDocument();
+    expect(
+      screen.getByText("A public-safe architecture summary.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Automate the slowest hand-off first")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Built with typed contracts.")).toBeInTheDocument();
+    expect(screen.getByText("Verified")).toBeInTheDocument();
+    expect(screen.getByText("Evidence verified")).toBeInTheDocument();
+    expect(screen.getByText("No private link exposure.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Predictable fallback states.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Small releases kept the team confident")
+    ).toBeInTheDocument();
+    // Decisions are an ordered list: the wire carries the order, no numerals are printed
+    expect(container.querySelector("ol.lab-wire")).toHaveTextContent(
+      "Automate the slowest hand-off first"
+    );
   });
 
-  it("renders only validated HTTPS public project links", () => {
-    const { container } = render(
+  it("puts role, type, status, year and stack in the facts aside", () => {
+    render(
       <ProjectDetailsSection
         project={project({
-          live_url: "https://example.com/product",
-          source_url: "https://github.com/example/repo",
+          started_at: "2023-03-01T00:00:00.000Z",
+          ended_at: "2024-06-01T00:00:00.000Z",
+          tags: ["Next.js", "MongoDB"],
         })}
+        resources={[]}
+        related={[]}
+      />
+    );
+    const facts = screen.getByRole("complementary");
+    const term = (label: string) =>
+      within(facts).getByText(label, { selector: "dt" }).nextElementSibling;
+    expect(term("Role")).toHaveTextContent("Software Developer");
+    expect(term("Role")).toHaveTextContent("Full-stack engineer");
+    expect(term("Type")).toHaveTextContent("Internal");
+    expect(term("Status")).toHaveTextContent("Completed");
+    expect(term("Year")).toHaveTextContent("2023–2024");
+    expect(term("Stack")).toHaveTextContent("Next.js");
+    expect(term("Stack")).toHaveTextContent("MongoDB");
+  });
+
+  it("lists related projects as links", () => {
+    render(
+      <ProjectDetailsSection
+        project={project()}
+        resources={[]}
+        related={[
+          {
+            _id: "p2",
+            slug: "queue-platform",
+            name: "Queue platform",
+            description: "Reliable delivery.",
+            status: "completed",
+            is_featured: false,
+            is_premium: false,
+            primary_pillar: "software_developer",
+          },
+        ]}
+      />
+    );
+    expect(
+      screen.getByRole("link", { name: "Queue platform" })
+    ).toHaveAttribute("href", "/projects/queue-platform");
+  });
+
+  it("renders only validated HTTPS public project links and resources", () => {
+    const safe = project({
+      live_url: "https://example.com/product",
+      source_url: "https://github.com/example/repo",
+    });
+    render(
+      <ProjectDetailsSection
+        project={safe}
         resources={[
           {
             _id: "resource-1",
@@ -151,18 +210,13 @@ describe("ProjectDetailsSection", () => {
       />
     );
 
-    expect(
-      screen.getByRole("link", { name: /open live product/i })
-    ).toHaveAttribute("href", "https://example.com/product");
-    expect(
-      screen.getByRole("link", { name: /view public source/i })
-    ).toHaveAttribute("href", "https://github.com/example/repo");
+    expect(getPublicProjectLinks(safe)).toEqual([
+      { label: "Open live product", href: "https://example.com/product" },
+      { label: "View public source", href: "https://github.com/example/repo" },
+    ]);
     expect(
       screen.getByRole("link", { name: /public architecture note/i })
     ).toHaveAttribute("href", "https://docs.example.com/architecture");
     expect(screen.queryByText("Private source mirror")).not.toBeInTheDocument();
-    expect(
-      container.querySelector("[data-parallax-layer='subtle']")
-    ).toBeInTheDocument();
   });
 });

@@ -3,6 +3,7 @@ import * as ProjectResourceService from "@/app/api/project-resources/project-res
 import * as ProjectService from "@/app/api/projects/project.service";
 import { JsonLdScript } from "@/components/content/json-ld-script";
 import ProjectDetailsSection, {
+  getPublicProjectLinks,
   type TPublicProjectResource,
 } from "@/components/(common)/projects-page/project-details-section";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
@@ -14,7 +15,9 @@ import {
 import { readPublishedSite } from "@/lib/site/published-site";
 import { resolvePublicContentFallback } from "@/lib/site/public-content-fallback";
 import type { TProject, TProjectListItem } from "@/types/project.type";
+import { buttonVariants } from "@/components/ui/button-variants";
 import AppError from "@/builder/app-error";
+import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
@@ -101,6 +104,7 @@ export default async function ProjectDetailsPage({ params }: Props) {
   });
   const coverUrl = project.thumbnail?.url || managedFallback?.url;
 
+  const publicLinks = getPublicProjectLinks(project);
   const pathname = `/projects/${project.slug ?? id}`;
   const structuredData = [
     buildWebPageJsonLd(site, {
@@ -130,7 +134,35 @@ export default async function ProjectDetailsPage({ params }: Props) {
   return (
     <>
       <JsonLdScript data={structuredData} />
-      <DetailLayout route="project" site={site}>
+      <DetailLayout
+        route="project"
+        site={site}
+        header={{
+          title: project.name,
+          lede: project.description,
+          path: [
+            { index: 1, name: "Home", href: "/", icon: "house" },
+            { index: 2, name: "Projects", href: "/projects" },
+            { index: 3, name: project.name },
+          ],
+          actions: publicLinks.length
+            ? publicLinks.map((link, index) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={buttonVariants({
+                    variant: index === 0 ? "default" : "outline",
+                  })}
+                >
+                  {link.label}
+                  <ArrowUpRight className="size-4" aria-hidden="true" />
+                </a>
+              ))
+            : undefined,
+        }}
+      >
         <ProjectDetailsSection
           project={project}
           resources={resources}
