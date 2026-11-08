@@ -57,25 +57,29 @@ describe("seed version 8: Site draft", () => {
     expect(draft.contact).not.toHaveProperty("working_hours");
   });
 
-  it("keeps every unconfirmed commercial record off; the fit check and the principles are on (owner, 2026-11-08)", () => {
+  it("has the engagement models, the finder, the fit check and the principles on (owner, 2026-11-08), with no price or duration", () => {
+    expect(draft.engagement_models).toHaveLength(3);
     for (const model of draft.engagement_models) {
-      expect(model).toMatchObject({
-        enabled: false,
-        verification: "unverified",
-      });
+      expect(model).toMatchObject({ enabled: true, verification: "verified" });
+      expect(model.how_it_runs).toEqual(expect.any(String));
+      expect(model.you_get.length).toBeGreaterThan(0);
+      // C-14 and C-15 are still unconfirmed: nothing is quoted
       expect(model).not.toHaveProperty("price_label");
       expect(model).not.toHaveProperty("duration_label");
-      expect(model).not.toHaveProperty("how_it_runs");
     }
-    const partnership = draft.engagement_models.find(
-      (model: { key: string }) => model.key === "ongoing-partnership"
-    );
-    expect(partnership.you_get).toEqual([]);
     expect(draft.fit.enabled).toBe(true);
-    expect(draft.finder.enabled).toBe(false);
+    expect(draft.finder.enabled).toBe(true);
     expect(draft.principles).toHaveLength(5);
     expect(
       draft.principles.every((item: { enabled: boolean }) => item.enabled)
+    ).toBe(true);
+  });
+
+  it("keeps the deliverable samples off until each one is approved (C-31)", () => {
+    expect(
+      draft.deliverable_samples.every(
+        (sample: { enabled: boolean }) => !sample.enabled
+      )
     ).toBe(true);
   });
 
@@ -281,7 +285,7 @@ describe("seed version 8: Page compositions", () => {
     expect(home.length).toBeLessThanOrEqual(20);
     expect(
       home.filter((section) => !section.visible).map((section) => section.key)
-    ).toEqual(["pillars", "finder"]);
+    ).toEqual(["pillars"]);
     const layouts = Object.fromEntries(
       home.map((section) => [section.key, section.layout])
     );

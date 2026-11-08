@@ -755,9 +755,8 @@ const automatic = (
 
 const system = { mode: "system" as const };
 
-// The home chapters in the order of the plan (section 4.1). The fit check and "How I think" were switched on
-// by the owner on 2026-11-08; the finder stays hidden until the engagement models it points at are confirmed
-// (C-13), and a section with no public data hides itself.
+// The home chapters in the order of the plan (section 4.1). The engagement models, the fit check, the finder
+// and "How I think" were switched on by the owner on 2026-11-08; a section with no public data hides itself.
 const pageDrafts = {
   home: {
     seo: { noindex: true },
@@ -856,7 +855,7 @@ const pageDrafts = {
       {
         key: "finder",
         kind: "starting-point",
-        visible: false,
+        visible: true,
         heading: "Not sure where to start?",
         layout: "default",
         source: system,

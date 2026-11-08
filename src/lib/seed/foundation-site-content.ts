@@ -217,9 +217,9 @@ const NEXT_STEPS = [
   },
 ] as const;
 
-// Which models are offered, their scope, duration and price are all unconfirmed
-// (C-13 to C-15): off and unverified, with no price, no duration, and no
-// "how it runs" or "you get" where the plan leaves that to the owner.
+// The owner approved the model names, who each is for, what you get and how it runs on 2026-11-08 (C-13).
+// Duration and price are still unconfirmed (C-14, C-15): there is no price and no duration, so the table says
+// "Scoped per project".
 const ENGAGEMENT_MODELS = [
   {
     key: "architecture-review",
@@ -231,8 +231,10 @@ const ENGAGEMENT_MODELS = [
       "Risks",
       "Delivery roadmap",
     ],
-    verification: "unverified",
-    enabled: false,
+    how_it_runs:
+      "A short review of your code, data and constraints, then a written report you can act on.",
+    verification: "verified",
+    enabled: true,
   },
   {
     key: "build-product-or-automation",
@@ -243,17 +245,25 @@ const ENGAGEMENT_MODELS = [
       "Automated tests",
       "Handover documentation",
     ],
-    verification: "unverified",
-    enabled: false,
+    how_it_runs:
+      "Reviewable releases in small steps, with a short demo at the end of each one.",
+    verification: "verified",
+    enabled: true,
   },
   {
     key: "ongoing-partnership",
     name: "Ongoing partnership",
     best_when:
       "You need a senior engineer as the system grows, or an architecture partner for your agency.",
-    you_get: [],
-    verification: "unverified",
-    enabled: false,
+    you_get: [
+      "A senior engineer for the system",
+      "Regular architecture and cost reviews",
+      "Documentation that stays current",
+    ],
+    how_it_runs:
+      "A regular rhythm of reviews and hands-on work as the system grows.",
+    verification: "verified",
+    enabled: true,
   },
 ] as const;
 
@@ -292,10 +302,9 @@ const FIT = {
   ],
 } as const;
 
-// Draft rules pending C-13: every outcome points at an engagement model that is
-// itself switched off, so the finder stays off with it.
+// Switched on by the owner on 2026-11-08, together with the engagement models its outcomes point at.
 const FINDER = {
-  enabled: false,
+  enabled: true,
   steps: [
     {
       key: "situation",
@@ -475,7 +484,7 @@ const commitmentSchema = z
   })
   .strict();
 
-/** Draft fields added in seed v8. The literals are the truth rules: a model, the finder or a sample cannot be enabled by accident (the fit check and the principles were switched on by the owner on 2026-11-08). */
+/** Draft fields added in seed v8. The literals are the truth rules: a deliverable sample cannot be enabled by accident (the engagement models, the finder, the fit check and the principles were switched on by the owner on 2026-11-08). */
 export const siteContentShape = {
   engagement_models: z
     .array(
@@ -485,8 +494,9 @@ export const siteContentShape = {
           name: plain(2, 80),
           best_when: plain(2, 300),
           you_get: z.array(plain(2, 200)).max(6),
-          verification: z.literal("unverified"),
-          enabled: z.literal(false),
+          how_it_runs: plain(2, 300),
+          verification: z.enum(["derived", "verified"]),
+          enabled: z.boolean(),
         })
         .strict()
     )
@@ -581,7 +591,7 @@ export const siteContentShape = {
   principles: z.array(commitmentSchema).max(6),
   finder: z
     .object({
-      enabled: z.literal(false),
+      enabled: z.boolean(),
       steps: z
         .array(
           z

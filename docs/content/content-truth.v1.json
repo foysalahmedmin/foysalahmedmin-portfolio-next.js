@@ -1722,7 +1722,7 @@
       "id": "site.engagement-model.architecture-review",
       "category": "engagement",
       "claim": "The \"Architecture review\" engagement model is offered.",
-      "current_public_value": "Draft: best when and what you get only; disabled",
+      "current_public_value": "Name, who it is for, what you get and how it runs; switched on by the owner on 2026-11-08. No price and no duration.",
       "status": "needs-owner-verification",
       "production_publish": "block",
       "sources": [
@@ -1731,14 +1731,14 @@
           "symbol_or_context": "ENGAGEMENT_MODELS architecture-review"
         }
       ],
-      "reason": "Which engagement models are offered, and their scope, duration and price, are unconfirmed (C-13, C-14, C-15). The seed keeps the record off and unverified, with no price, no duration and no how-it-runs text.",
-      "required_action": "Owner confirms the model (C-13), its scope and duration (C-15) and any price policy (C-14); only then is the record enabled with verification verified. A price is shown only when verified."
+      "reason": "The owner approved this wording on 2026-11-08 (C-13). Duration and price are still unconfirmed (C-14, C-15): the table says \"Scoped per project\".",
+      "required_action": "Owner records the confirmation reference outside Git before the production publish; duration and price stay empty until C-14 and C-15."
     },
     {
       "id": "site.engagement-model.build-product-or-automation",
       "category": "engagement",
       "claim": "The \"Build a product or automation\" engagement model is offered.",
-      "current_public_value": "Draft: best when and what you get only; disabled",
+      "current_public_value": "Name, who it is for, what you get and how it runs; switched on by the owner on 2026-11-08. No price and no duration.",
       "status": "needs-owner-verification",
       "production_publish": "block",
       "sources": [
@@ -1747,14 +1747,14 @@
           "symbol_or_context": "ENGAGEMENT_MODELS build-product-or-automation"
         }
       ],
-      "reason": "Which engagement models are offered, and their scope, duration and price, are unconfirmed (C-13, C-14, C-15). The seed keeps the record off and unverified, with no price, no duration and no how-it-runs text.",
-      "required_action": "Owner confirms the model (C-13), its scope and duration (C-15) and any price policy (C-14); only then is the record enabled with verification verified. A price is shown only when verified."
+      "reason": "The owner approved this wording on 2026-11-08 (C-13). Duration and price are still unconfirmed (C-14, C-15): the table says \"Scoped per project\".",
+      "required_action": "Owner records the confirmation reference outside Git before the production publish; duration and price stay empty until C-14 and C-15."
     },
     {
       "id": "site.engagement-model.ongoing-partnership",
       "category": "engagement",
       "claim": "The \"Ongoing partnership\" engagement model is offered.",
-      "current_public_value": "Draft: best when only; what you get and how it runs are empty; disabled",
+      "current_public_value": "Name, who it is for, what you get and how it runs; switched on by the owner on 2026-11-08. No price and no duration.",
       "status": "needs-owner-verification",
       "production_publish": "block",
       "sources": [
@@ -1763,8 +1763,8 @@
           "symbol_or_context": "ENGAGEMENT_MODELS ongoing-partnership"
         }
       ],
-      "reason": "Which engagement models are offered, and their scope, duration and price, are unconfirmed (C-13, C-14, C-15). The seed keeps the record off and unverified, with no price, no duration and no how-it-runs text.",
-      "required_action": "Owner confirms the model (C-13), its scope and duration (C-15) and any price policy (C-14); only then is the record enabled with verification verified. A price is shown only when verified."
+      "reason": "The owner approved this wording on 2026-11-08 (C-13). Duration and price are still unconfirmed (C-14, C-15): the table says \"Scoped per project\".",
+      "required_action": "Owner records the confirmation reference outside Git before the production publish; duration and price stay empty until C-14 and C-15."
     },
     {
       "id": "site.deliverable-sample.decision-record",
@@ -1966,7 +1966,7 @@
       "id": "site.finder",
       "category": "engagement",
       "claim": "The starting-point finder: three questions and three draft rules that suggest an engagement model.",
-      "current_public_value": "Draft questions and rules; disabled",
+      "current_public_value": "Three questions and three rules; switched on by the owner on 2026-11-08",
       "status": "needs-owner-verification",
       "production_publish": "block",
       "sources": [
@@ -1975,8 +1975,8 @@
           "symbol_or_context": "FINDER"
         }
       ],
-      "reason": "The rules point at engagement models that are themselves unconfirmed (C-13), so the finder stays off. It runs in the browser and stores nothing.",
-      "required_action": "Owner confirms the engagement models (C-13) and the rules, then enables the finder after the first confirmed enquiries."
+      "reason": "The rules point at the three engagement models, which the owner approved on 2026-11-08. It runs in the browser and stores nothing.",
+      "required_action": "Owner records the confirmation reference outside Git before the production publish."
     },
     {
       "id": "site.working-hours",
