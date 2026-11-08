@@ -93,15 +93,16 @@ function Body({ archetype }: { archetype: PublicArchetypeId }) {
         </div>
       );
     case "A6":
+      // The aside (what happens next) is on the left and the form on the right, as in the loaded page
       return (
-        <div className="container grid gap-10 py-[var(--space-section)] lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div className="container grid gap-10 py-[var(--space-section)] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <Skeleton className="h-64 w-full" />
           <div className="flex flex-col gap-5">
             {[0, 1, 2, 3].map((index) => (
               <Skeleton key={index} className="h-12 w-full" />
             ))}
             <Skeleton className="h-32 w-full" />
           </div>
-          <Skeleton className="h-64 w-full" />
         </div>
       );
     default:
@@ -117,6 +118,7 @@ function Body({ archetype }: { archetype: PublicArchetypeId }) {
 /**
  * Archetype-shaped loading state (docs plan 3.12): the skeleton has the final layout's header and body
  * dimensions, so the page does not shift when content arrives. Used by each route's loading.tsx.
+ * A 2 px hairline bar runs across the top (it is out of flow, so it adds no height).
  */
 export function ArchetypeSkeleton({
   archetype,
@@ -129,7 +131,11 @@ export function ArchetypeSkeleton({
       data-public-route="loading"
       aria-busy="true"
       aria-label="Loading page"
+      className="relative"
     >
+      <div className="nr-loadbar" data-loading-bar="" aria-hidden="true">
+        <span />
+      </div>
       {archetype === "A1" ? null : <HeaderSkeleton />}
       <Body archetype={archetype} />
       <span className="sr-only" role="status">

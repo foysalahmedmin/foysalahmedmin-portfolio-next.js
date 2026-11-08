@@ -3,3 +3,519 @@
  * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"], reduced motion
  * and no-JS show everything, no hover-only information.
  */
+
+/* ======================================================================
+   About: introduction (nr-about, nr-portrait, nr-promise, nr-links)
+   A Mono-treated portrait (the public surface greyscales every image) revealed by the media wipe and
+   drifting inside its frame; without one, the copy stands alone in a calm column.
+   ====================================================================== */
+.nr-about {
+  padding-block: var(--space-section);
+}
+
+.nr-about-grid {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4.5rem);
+}
+
+.nr-about-copy {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  min-inline-size: 0;
+}
+
+.nr-about-grid[data-portrait="false"] .nr-about-copy {
+  max-inline-size: 52rem;
+}
+
+.nr-portrait {
+  margin: 0;
+  max-inline-size: 22rem;
+}
+
+.nr-portrait-frame {
+  position: relative;
+  border: 1px solid var(--line-3);
+  background: var(--line-1);
+  aspect-ratio: 4 / 5;
+  overflow: clip;
+}
+
+/* Taller than its frame by the parallax travel (up to 32 px each way), so the edges never show */
+.nr-portrait-layer {
+  position: absolute;
+  inset-block: -8%;
+  inset-inline: 0;
+}
+
+.nr-portrait-caption {
+  margin-block-start: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.nr-bio {
+  margin: 0;
+  max-inline-size: 60ch;
+  color: var(--text-secondary);
+  font-size: var(--step-0);
+  line-height: 1.65;
+}
+
+.nr-promise {
+  border-inline-start: 1px solid var(--line-4);
+  padding-inline-start: 1.25rem;
+}
+
+.nr-promise > p {
+  margin: 0;
+}
+
+.nr-promise > p + p {
+  margin-block-start: 0.5rem;
+  max-inline-size: 40ch;
+  font-weight: 500;
+  font-size: var(--step-1);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.nr-links {
+  margin: 0;
+  border-block-start: 1px solid var(--line-3);
+  padding: 0;
+  list-style: none;
+}
+
+.nr-link {
+  display: grid;
+  grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 1rem;
+  min-block-size: 3rem;
+}
+
+.nr-link-label {
+  font-weight: 500;
+  font-size: var(--step-0);
+}
+
+.nr-link-arrow {
+  align-self: center;
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nr-link-arrow {
+    transition: translate var(--dur-fast) var(--ease-signal);
+  }
+
+  .nr-link:is(:hover, :focus-visible) .nr-link-arrow {
+    translate: 0.25rem 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nr-about-grid[data-portrait="true"] {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    align-items: start;
+  }
+
+  .nr-portrait {
+    max-inline-size: none;
+  }
+}
+
+/* ======================================================================
+   About: timeline (nr-wire) and credentials (nr-registry)
+   The wire is drawn by `--progress` on the `[data-scroll-progress]` container (unbound it is 1, so
+   the wire is whole and every entry is lit). Entries brighten as the wire reaches them, under the
+   engine only; nothing is dimmed without it.
+   ====================================================================== */
+.nr-timeline,
+.nr-credentials {
+  padding-block: var(--space-section);
+}
+
+.nr-wire {
+  --wire-pad: 2.75rem;
+  --wire-x: 1.125rem;
+  --node: 0.6875rem;
+  --row-pad: clamp(1.25rem, 2.5vw, 2rem);
+
+  position: relative;
+  margin-block-start: clamp(2.5rem, 5vw, 4rem);
+  padding-inline-start: var(--wire-pad);
+}
+
+/* The rail clips the pulse head; the track is a hairline, the fill grows down it */
+.nr-rail {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--wire-x) - 0.625rem);
+  inline-size: 1.25rem;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.nr-rail::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(50% - 0.5px);
+  background: var(--line-3);
+  inline-size: 1px;
+  content: "";
+}
+
+.nr-fill {
+  position: absolute;
+  transform: scaleY(var(--progress));
+  transform-origin: 50% 0;
+  inset-block: 0;
+  inset-inline-start: calc(50% - 1px);
+  background: color-mix(in oklab, var(--foreground) 55%, transparent);
+  inline-size: 2px;
+}
+
+/* The pulse head rides the tip of the fill: a taper that brightens to a point */
+.nr-pulse {
+  position: absolute;
+  translate: 0 calc((var(--progress) - 1) * 100%);
+  inset-block: 0;
+  inset-inline: 0;
+}
+
+.nr-pulse::before,
+.nr-pulse::after {
+  position: absolute;
+  translate: -50% 0;
+  inset-block-end: 0;
+  inset-inline-start: 50%;
+  content: "";
+}
+
+.nr-pulse::before {
+  background: linear-gradient(to bottom, transparent, var(--foreground));
+  inline-size: 3px;
+  block-size: 4.5rem;
+}
+
+.nr-pulse::after {
+  background: var(--foreground);
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+}
+
+.nr-entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nr-entry {
+  --lit: 1;
+
+  display: grid;
+  position: relative;
+  gap: 0.75rem 3rem;
+  border-block-start: 1px solid var(--line-3);
+  padding-block: var(--row-pad);
+}
+
+.nr-entry:last-child {
+  border-block-end: 1px solid var(--line-3);
+}
+
+/* The entry's node on the wire: hollow until the wire reaches it, then solid */
+.nr-entry::before {
+  position: absolute;
+  inset-block-start: calc(var(--row-pad) + 0.5rem);
+  inset-inline-start: calc(var(--wire-x) - var(--wire-pad) - var(--node) / 2);
+  border: 1px solid var(--foreground);
+  background: color-mix(
+    in oklab,
+    var(--foreground) calc(var(--lit) * 100%),
+    var(--background)
+  );
+  inline-size: var(--node);
+  block-size: var(--node);
+  content: "";
+}
+
+.nr-when {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  color: color-mix(
+    in oklab,
+    var(--foreground) calc(var(--lit) * 100%),
+    var(--text-secondary)
+  );
+  font-size: var(--step--1);
+  line-height: 1.4;
+}
+
+.nr-type {
+  color: var(--text-secondary);
+}
+
+.nr-body > * {
+  margin: 0;
+}
+
+.nr-body > * + * {
+  margin-block-start: 0.6rem;
+}
+
+.nr-title {
+  color: color-mix(
+    in oklab,
+    var(--foreground) calc(var(--lit) * 100%),
+    var(--text-secondary)
+  );
+  font-size: var(--step-1);
+}
+
+.nr-org {
+  font-weight: 500;
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.nr-summary,
+.nr-points {
+  max-inline-size: 60ch;
+  color: var(--text-secondary);
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+
+.nr-points {
+  padding: 0;
+  list-style: none;
+}
+
+.nr-points li {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+}
+
+.nr-points li::before {
+  align-self: baseline;
+  translate: 0 -0.35em;
+  background: var(--line-4);
+  inline-size: 0.5rem;
+  block-size: 1px;
+  content: "";
+}
+
+.nr-tech {
+  color: var(--text-secondary);
+}
+
+/* The engine draws the wire: entries dim until it reaches them. Nothing is dimmed without it. */
+html[data-motion-engine="ready"] .nr-entry {
+  --lit: clamp(0, calc((var(--progress) - var(--at, 0)) * 14 + 1), 1);
+}
+
+@media (min-width: 768px) {
+  .nr-entry {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+  }
+}
+
+/* Credentials: a compact registry of hairline rows */
+.nr-registry {
+  margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+  border-block-start: 1px solid var(--line-3);
+  padding: 0;
+  list-style: none;
+}
+
+.nr-cred {
+  display: grid;
+  gap: 0.35rem 2rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block: 1.25rem;
+}
+
+.nr-cred > * {
+  margin: 0;
+  min-inline-size: 0;
+}
+
+.nr-cred-title {
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.nr-cred-meta {
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+}
+
+.nr-cred-link {
+  font-size: var(--step--1);
+}
+
+.nr-cred-summary {
+  max-inline-size: 60ch;
+  color: var(--text-secondary);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+@media (min-width: 768px) {
+  .nr-cred {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr);
+    align-items: baseline;
+  }
+
+  .nr-cred-link {
+    justify-self: end;
+  }
+
+  .nr-cred-summary {
+    grid-column: 1 / span 2;
+  }
+}
+
+/* ======================================================================
+   System pages (A8): 404, error and the loading bar
+   ====================================================================== */
+.nr-system {
+  display: grid;
+  position: relative;
+  align-items: end;
+  isolation: isolate;
+  padding-block: var(--space-section);
+  min-block-size: 70dvh;
+  overflow: clip;
+}
+
+/* The static maquette still: decorative, behind the copy, with a scrim that keeps the text readable */
+.nr-still {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nr-still picture {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+/* The posters are scenes on a transparent ground: the page colour is the stage, so no filter */
+.nr-still img {
+  display: block;
+  opacity: 0.7;
+  filter: none !important;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.nr-still::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, var(--background), transparent 55%),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--background) 85%, transparent),
+      transparent 70%
+    );
+  content: "";
+}
+
+html.dark .nr-still-light,
+html.light .nr-still-dark {
+  display: none;
+}
+
+.nr-system-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.nr-system-body > * {
+  margin: 0;
+}
+
+.nr-system-body > :is(h1, p) {
+  max-inline-size: 36rem;
+}
+
+/* Mono "no route" path line, set like a terminal row between two hairlines */
+.nr-path {
+  border-block: 1px solid var(--line-3);
+  padding-block: 0.65rem;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  overflow-wrap: anywhere;
+}
+
+.nr-system-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+}
+
+.nr-hint {
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+}
+
+.nr-kbd {
+  border: 1px solid var(--line-3);
+  padding: 0.1rem 0.4rem;
+  color: var(--foreground);
+  font-size: var(--step--2);
+  font-family: var(--ff-mono, ui-monospace, monospace);
+}
+
+/* Loading: a 2 px hairline across the top of the skeleton. Transform only; static when motion is reduced. */
+.nr-loadbar {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  background: var(--line-2);
+  block-size: 2px;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.nr-loadbar > span {
+  position: absolute;
+  transform: scaleX(0.4);
+  transform-origin: 0 50%;
+  inset: 0;
+  background: var(--foreground);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="reduced"], [data-motion="off"]) .nr-loadbar > span {
+    animation: nr-loadbar 1.4s var(--ease-snap) infinite;
+  }
+}
+
+@keyframes nr-loadbar {
+  from {
+    transform: translateX(-100%) scaleX(0.4);
+  }
+
+  to {
+    transform: translateX(100%) scaleX(0.4);
+  }
+}

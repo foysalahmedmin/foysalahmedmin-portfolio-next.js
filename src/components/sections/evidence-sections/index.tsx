@@ -3,6 +3,7 @@ import type { TPublicFAQDto } from "@/app/api/faqs/faq.type";
 import type { TPublicTestimonialDto } from "@/app/api/testimonials/testimonial.type";
 import type { TPublicTimelineEntryDto } from "@/app/api/timeline/timeline-entry.type";
 import TrustedRichText from "@/components/content/trusted-rich-text";
+import Reveal from "@/components/motion/reveal";
 import { SectionHead } from "@/components/sections/signal/section-head";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import OptimizedMedia from "@/components/ui/optimized-media";
@@ -12,16 +13,11 @@ import {
   Subtitle,
   Title,
 } from "@/components/ui/section-title";
+import { TextLink } from "@/components/ui/text-link";
 import { isAllowedPublicProjectUrl } from "@/lib/content/portfolio-contract";
 import { cn } from "@/lib/utils";
-import {
-  Award,
-  CalendarRange,
-  CheckCircle2,
-  HelpCircle,
-  Quote,
-  ShieldCheck,
-} from "lucide-react";
+import type { CSSProperties } from "react";
+import { HelpCircle, Quote, ShieldCheck } from "lucide-react";
 
 const formatMonth = (value: string): string => {
   const date = new Date(value);
@@ -55,6 +51,25 @@ const EmptyEvidence = ({
   </div>
 );
 
+const formatRange = (entry: TPublicTimelineEntryDto) => (
+  <>
+    <time dateTime={entry.started_at}>{formatMonth(entry.started_at)}</time>
+    {" – "}
+    {entry.is_current ? (
+      "Present"
+    ) : entry.ended_at ? (
+      <time dateTime={entry.ended_at}>{formatMonth(entry.ended_at)}</time>
+    ) : (
+      "Date not published"
+    )}
+  </>
+);
+
+/**
+ * The chronology as a wire (M19): a vertical line drawn by the scroll engine (`--progress` on
+ * `[data-scroll-progress]`), with hairline entries that light as the wire reaches them. A server
+ * component; without the engine `--progress` is 1, so the wire is whole and every entry is lit.
+ */
 export const TimelineSection = ({
   entries,
   unavailable,
@@ -65,67 +80,74 @@ export const TimelineSection = ({
   heading?: string;
 }) => (
   <section
-    className="py-[var(--space-section)]"
+    id="timeline"
+    className="nr-timeline"
     aria-labelledby="timeline-title"
   >
     <div className="container">
-      <SectionTitle>
-        <Subtitle>Verified chronology</Subtitle>
-        <Title id="timeline-title">
-          {heading || "Experience and education"}
-        </Title>
-        <Description>
-          Only reviewed timeline entries are public; private verification
-          references never leave the admin boundary.
-        </Description>
-      </SectionTitle>
+      <Reveal>
+        <SectionHead
+          eyebrow="Verified chronology"
+          title={heading || "Experience and education"}
+          titleId="timeline-title"
+          lead="Only reviewed entries are public. The proof behind each one stays private."
+        />
+      </Reveal>
       {entries.length ? (
-        <ol className="relative mx-auto max-w-5xl space-y-6 before:absolute before:top-3 before:bottom-3 before:left-[1.18rem] before:w-px before:bg-[var(--border)] md:before:left-1/2">
-          {entries.map((entry, index) => (
-            <li
-              key={entry.slug}
-              className={`relative grid gap-5 md:grid-cols-2 ${
-                index % 2 ? "md:[&>article]:col-start-2" : ""
-              }`}
-            >
-              <span className="bg-primary ring-background absolute top-7 left-3 z-10 size-4 rounded-full ring-4 md:left-1/2 md:-translate-x-1/2" />
-              <article className="border-border bg-card ml-12 rounded-xl border p-6 shadow-sm md:ml-0 md:odd:mr-10 md:even:ml-10">
-                <div className="text-primary flex items-center gap-2 text-xs font-black tracking-wide uppercase">
-                  <CalendarRange className="size-4" aria-hidden />
-                  {formatMonth(entry.started_at)} –{" "}
-                  {entry.is_current
-                    ? "Present"
-                    : entry.ended_at
-                      ? formatMonth(entry.ended_at)
-                      : "Date not published"}
-                </div>
-                <h3 className="mt-4 text-xl font-black">{entry.position}</h3>
-                <p className="text-muted-foreground mt-1 font-semibold">
-                  {entry.organization}
-                  {entry.location ? ` · ${entry.location}` : ""}
+        <div
+          className="nr-wire"
+          data-scroll-progress=""
+          data-progress-range="top 60%,bottom 60%"
+        >
+          <span className="nr-rail" aria-hidden="true">
+            <span className="nr-fill" />
+            <span className="nr-pulse" />
+          </span>
+          <ol
+            role="list"
+            className="nr-entries"
+            aria-label="Experience and education"
+          >
+            {entries.map((entry, index) => (
+              <li
+                key={entry.slug}
+                className="nr-entry"
+                style={
+                  {
+                    "--at": (index / entries.length).toFixed(4),
+                  } as CSSProperties
+                }
+              >
+                <p className="nr-when t-mono">
+                  <span>{formatRange(entry)}</span>
+                  <span className="nr-type t-eyebrow">{entry.type}</span>
                 </p>
-                {entry.highlights.length > 0 && (
-                  <ul className="text-muted-foreground mt-5 space-y-2 text-sm leading-6">
-                    {entry.highlights.map((highlight) => (
-                      <li key={highlight} className="flex gap-2">
-                        <CheckCircle2
-                          className="text-primary mt-1 size-4 shrink-0"
-                          aria-hidden
-                        />
-                        {highlight}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {entry.technologies.length > 0 && (
-                  <p className="text-muted-foreground mt-5 text-xs">
-                    {entry.technologies.slice(0, 8).join(" · ")}
+                <div className="nr-body">
+                  <h3 className="nr-title t-h4">{entry.position}</h3>
+                  <p className="nr-org">
+                    {entry.organization}
+                    {entry.location ? ` · ${entry.location}` : ""}
                   </p>
-                )}
-              </article>
-            </li>
-          ))}
-        </ol>
+                  {entry.summary ? (
+                    <p className="nr-summary">{entry.summary}</p>
+                  ) : null}
+                  {entry.highlights.length > 0 && (
+                    <ul className="nr-points" role="list">
+                      {entry.highlights.map((highlight) => (
+                        <li key={highlight}>{highlight}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {entry.technologies.length > 0 && (
+                    <p className="nr-tech t-eyebrow">
+                      {entry.technologies.slice(0, 8).join(" · ")}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
       ) : (
         <EmptyEvidence title="Timeline records" unavailable={unavailable} />
       )}
@@ -133,6 +155,7 @@ export const TimelineSection = ({
   </section>
 );
 
+/** Verified credentials as a compact registry: one hairline row each, the issuer link only where it is safe. */
 export const CredentialsSection = ({
   credentials,
   unavailable,
@@ -143,66 +166,44 @@ export const CredentialsSection = ({
   heading?: string;
 }) => (
   <section
-    className="bg-surface-subtle py-[var(--space-section)]"
+    id="credentials"
+    className="nr-credentials"
     aria-labelledby="credentials-title"
   >
     <div className="container">
-      <SectionTitle>
-        <Subtitle>Reviewed credentials</Subtitle>
-        <Title id="credentials-title">
-          {heading || "Credentials and continued learning"}
-        </Title>
-        <Description>
-          Issuer and date metadata is shown only for verified public records.
-        </Description>
-      </SectionTitle>
+      <Reveal>
+        <SectionHead
+          eyebrow="Reviewed credentials"
+          title={heading || "Credentials and continued learning"}
+          titleId="credentials-title"
+          lead="Issuer and date are shown only for verified public records."
+        />
+      </Reveal>
       {credentials.length ? (
-        <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {credentials.map((credential) => {
-            const content = (
-              <>
-                <div className="flex items-start justify-between gap-4">
-                  <span className="bg-primary/10 text-primary grid size-11 place-items-center rounded-xl">
-                    <Award className="size-5" aria-hidden />
-                  </span>
-                  <span className="bg-success/10 text-success rounded-full px-2.5 py-1 text-[0.65rem] font-black uppercase">
-                    Verified
-                  </span>
-                </div>
-                <h3 className="mt-5 text-xl font-black">{credential.title}</h3>
-                <p className="text-muted-foreground mt-2 text-sm">
-                  {credential.issuer} · {formatMonth(credential.issued_at)}
-                </p>
-                {credential.summary && (
-                  <p className="text-muted-foreground mt-4 text-sm leading-6">
-                    {credential.summary}
-                  </p>
-                )}
-              </>
-            );
-            return (
-              <li key={credential.slug}>
-                {credential.credential_url &&
-                isAllowedPublicProjectUrl(credential.credential_url) ? (
-                  <a
-                    href={credential.credential_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-border bg-card hover:border-primary focus-visible:ring-primary block h-full rounded-xl border p-6 focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    {content}
-                    <span className="text-primary mt-5 inline-block text-sm font-bold">
-                      Verify with issuer ↗
-                    </span>
-                  </a>
-                ) : (
-                  <article className="border-border bg-card h-full rounded-xl border p-6">
-                    {content}
-                  </article>
-                )}
-              </li>
-            );
-          })}
+        <ul role="list" className="nr-registry">
+          {credentials.map((credential) => (
+            <li key={credential.slug} className="nr-cred">
+              <h3 className="nr-cred-title">{credential.title}</h3>
+              <p className="nr-cred-meta t-mono">
+                {credential.issuer} · {formatMonth(credential.issued_at)}
+              </p>
+              {credential.credential_url &&
+              isAllowedPublicProjectUrl(credential.credential_url) ? (
+                <TextLink
+                  href={credential.credential_url}
+                  variant="quiet"
+                  external
+                  className="nr-cred-link"
+                >
+                  Verify with issuer
+                  <span className="sr-only">: {credential.title}</span>
+                </TextLink>
+              ) : null}
+              {credential.summary ? (
+                <p className="nr-cred-summary">{credential.summary}</p>
+              ) : null}
+            </li>
+          ))}
         </ul>
       ) : (
         <EmptyEvidence title="Credentials" unavailable={unavailable} />
