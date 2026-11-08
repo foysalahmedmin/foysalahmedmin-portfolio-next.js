@@ -110,3 +110,58 @@ describe("chapter progress", () => {
     expect(progressFor(10, 100, 1000, flat[0], flat[1])).toBe(1);
   });
 });
+
+describe("chapter highlights", () => {
+  const scene = () => {
+    const scope = document.createElement("section");
+    scope.dataset.highlightScope = "";
+    const diagram = document.createElement("svg");
+    const nodes = ["db", "api", "queue"].map((id) => {
+      const node = document.createElement("g");
+      node.dataset.highlightId = id;
+      diagram.append(node);
+      return node;
+    });
+    const container = document.createElement("ol");
+    const rows = ["db,api", "queue", undefined].map((ids) => {
+      const row = document.createElement("li");
+      if (ids) row.dataset.highlights = ids;
+      container.append(row);
+      return row;
+    });
+    scope.append(diagram, container);
+    return { container, rows, nodes };
+  };
+
+  it("lights the elements the active row names and only those", () => {
+    const { container, rows, nodes } = scene();
+    const focus = createFocusController(container, rows);
+    focus.activate(0);
+    expect(nodes.map((node) => node.dataset.lit)).toEqual([
+      "true",
+      "true",
+      undefined,
+    ]);
+    focus.activate(1);
+    expect(nodes.map((node) => node.dataset.lit)).toEqual([
+      undefined,
+      undefined,
+      "true",
+    ]);
+    focus.activate(2);
+    expect(nodes.every((node) => !node.hasAttribute("data-lit"))).toBe(true);
+  });
+
+  it("puts everything back when cleared, and does nothing without a scope", () => {
+    const { container, rows, nodes } = scene();
+    const focus = createFocusController(container, rows);
+    focus.activate(0);
+    focus.clear();
+    expect(nodes.every((node) => !node.hasAttribute("data-lit"))).toBe(true);
+
+    const bare = list(["a"]);
+    expect(() =>
+      createFocusController(bare.container, bare.rows).activate(0)
+    ).not.toThrow();
+  });
+});

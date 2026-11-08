@@ -14,6 +14,8 @@ const PROGRESS_SELECTOR = "[data-scroll-progress]";
  *  - `data-scroll-focus` on a list, `data-focus-row` on each row (optionally `data-group`): the row that
  *    crosses the middle of the screen gets `data-active="true"`; the list gets `data-focus-index` and
  *    `data-focus-group`. The first row is active from the start and the last stays active at the end.
+ *    `data-highlights` on a row lights the matching `data-highlight-id` elements in its
+ *    `data-highlight-scope` (`data-lit`).
  *  - `data-scroll-progress` on any element: `--progress` (0 to 1, linear in scroll, smoothed by the scrub
  *    lag) while the element crosses the screen. `data-progress-range="top 80%,bottom 55%"` overrides the
  *    trigger positions.
@@ -26,12 +28,29 @@ export type FocusController = Readonly<{
   clear(): void;
 }>;
 
-/** Writes the active row onto the DOM; kept apart from the observer so it can be tested without a browser. */
+/**
+ * Writes the active row onto the DOM; kept apart from the observer so it can be tested without a browser.
+ * A row may also name elements to light (`data-highlights="a,b"`): inside the nearest
+ * `[data-highlight-scope]` the elements whose `data-highlight-id` is named get `data-lit="true"` and the
+ * rest lose it (the case-study diagram follows its chapters this way, M17).
+ */
 export const createFocusController = (
   container: HTMLElement,
   rows: readonly HTMLElement[]
 ): FocusController => {
   let current = -1;
+  const scope = container.closest<HTMLElement>("[data-highlight-scope]");
+  const light = (ids: readonly string[] | null) => {
+    scope
+      ?.querySelectorAll<HTMLElement>("[data-highlight-id]")
+      .forEach((element) => {
+        if (ids?.includes(element.dataset.highlightId ?? "")) {
+          element.dataset.lit = "true";
+        } else {
+          element.removeAttribute("data-lit");
+        }
+      });
+  };
   return {
     activate(index) {
       if (index === current || index < 0 || index >= rows.length) return;
@@ -44,12 +63,15 @@ export const createFocusController = (
       const group = rows[index]?.dataset.group;
       if (group) container.dataset.focusGroup = group;
       else container.removeAttribute("data-focus-group");
+      const highlights = rows[index]?.dataset.highlights;
+      light(highlights ? highlights.split(",").map((id) => id.trim()) : null);
     },
     clear() {
       current = -1;
       rows.forEach((row) => row.removeAttribute("data-active"));
       container.removeAttribute("data-focus-index");
       container.removeAttribute("data-focus-group");
+      light(null);
     },
   };
 };

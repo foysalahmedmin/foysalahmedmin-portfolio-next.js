@@ -257,6 +257,12 @@
   @import "../assets/styles/public/chapters-pipeline-process.css";
   @import "../assets/styles/public/chapters-evidence-files.css";
   @import "../assets/styles/public/chapters-trust-close.css";
+  @import "../assets/styles/public/pages-case-index.css";
+  @import "../assets/styles/public/pages-case-story.css";
+  @import "../assets/styles/public/pages-lab.css";
+  @import "../assets/styles/public/pages-editorial.css";
+  @import "../assets/styles/public/pages-conversation.css";
+  @import "../assets/styles/public/pages-narrative.css";
 
   .text-glow {
     text-shadow: 0 0 15px color-mix(in srgb, var(--primary) 50%, transparent);

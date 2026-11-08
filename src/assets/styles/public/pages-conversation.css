@@ -1,0 +1,5 @@
+/*
+ * Public inner pages: conversation (Phase 6). Owned by one slice; add rules here, not in sections.css.
+ * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"], reduced motion
+ * and no-JS show everything, no hover-only information.
+ */

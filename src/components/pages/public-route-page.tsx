@@ -29,15 +29,15 @@ const ROUTE_HEADER_FALLBACKS = {
     label: "About",
   },
   projects: {
-    title: "Problems solved",
+    title: "The lab",
     description:
-      "Case studies that start with the business problem, then walk through the approach, the solution, and what changed as a result.",
+      "Working projects and experiments: the problem each one solves, my role and the stack behind it.",
     label: "Projects",
   },
   "case-studies": {
-    title: "Problems solved, in depth",
+    title: "Case files",
     description:
-      "Full stories that start with the business problem, then walk through the approach, the solution, and the result.",
+      "Every file follows the same four steps: the problem, the constraints, the architecture and the result.",
     label: "Case studies",
   },
   articles: {
@@ -47,9 +47,9 @@ const ROUTE_HEADER_FALLBACKS = {
     label: "Articles",
   },
   videos: {
-    title: "Watch how problems get solved",
+    title: "Recommended watching",
     description:
-      "Walkthroughs and short reels that show the thinking and the tools behind the work.",
+      "Walkthroughs and short reels worth your time, picked for the thinking and the tools behind real work.",
     label: "Videos",
   },
   contact: {

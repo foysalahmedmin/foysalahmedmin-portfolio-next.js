@@ -1,0 +1,45 @@
+/*
+ * Public inner pages: lab (Phase 6). Owned by one slice; add rules here, not in sections.css.
+ * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"], reduced motion
+ * and no-JS show everything, no hover-only information.
+ */
+
+/* ---------- Lab switcher (M28): shared by projects, articles and videos ---------- */
+.lab-switcher {
+  position: relative;
+  margin-block: 0 2rem;
+  border-block-end: 1px solid var(--line-2);
+  inline-size: fit-content;
+  max-inline-size: 100%;
+}
+
+.lab-switcher ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-switcher a {
+  display: block;
+  padding: 0.75rem 1.5rem 0.75rem 0;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.lab-switcher a[aria-current="page"] {
+  color: var(--foreground);
+}
+
+/* The indicator is one hairline as wide as the first item, moved by the current index */
+.lab-switcher::after {
+  position: absolute;
+  transform: translateX(calc(var(--i, 0) * 100%));
+  transition: transform var(--dur-base) var(--ease-signal);
+  inset-block-end: -1px;
+  inset-inline-start: 0;
+  background: var(--foreground);
+  inline-size: calc(100% / 3);
+  block-size: 2px;
+  content: "";
+}
