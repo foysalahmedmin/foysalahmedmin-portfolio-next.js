@@ -22,7 +22,7 @@ const MAX_ROWS = 6;
  * keyboard focus on the title link); everything it could say is already in the row, so nothing is
  * hover-only. The thumbnail stays out of the accessibility tree.
  */
-function CaseFileRow({
+export function CaseFileRow({
   caseStudy,
   fallbacks,
   index,

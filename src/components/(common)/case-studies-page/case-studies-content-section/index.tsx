@@ -1,12 +1,11 @@
 import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
-import {
-  DiscoveryFilters,
-  type TDiscoveryFilterField,
-} from "@/components/content/discovery-filters";
-import { CaseStudyCard } from "@/components/content/case-study-card";
-import { EmptyState } from "@/components/ui/async-state";
+import { CaseFileRow } from "@/components/(common)/home-page/case-studies-section/files";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { LinkPagination } from "@/components/ui/link-pagination";
-import { PILLAR_RELATIONSHIP_OPTIONS } from "@/lib/content/pillars";
+import {
+  PILLAR_RELATIONSHIP_OPTIONS,
+  getPillarLabel,
+} from "@/lib/content/pillars";
 import {
   CASE_STUDY_DISCOVERY_SORTS,
   DEFAULT_CASE_STUDY_DISCOVERY_QUERY,
@@ -16,8 +15,9 @@ import {
 } from "@/lib/discovery/case-study-discovery";
 import type { TCaseStudyCategory } from "@/types/case-study-category.type";
 import type { TCaseStudyListItem } from "@/types/case-study.type";
-import { BookOpenCheck } from "lucide-react";
-import { Suspense } from "react";
+import { X } from "lucide-react";
+import Link from "next/link";
+import { Topology } from "./topology";
 
 export type CaseStudiesContentSectionProps = Readonly<{
   items: readonly TCaseStudyListItem[];
@@ -29,6 +29,9 @@ export type CaseStudiesContentSectionProps = Readonly<{
   initialError?: boolean;
 }>;
 
+const BASE_PATH = "/case-studies";
+const defaults = DEFAULT_CASE_STUDY_DISCOVERY_QUERY;
+
 const SORT_LABELS: Record<(typeof CASE_STUDY_DISCOVERY_SORTS)[number], string> =
   {
     newest: "Newest first",
@@ -37,6 +40,16 @@ const SORT_LABELS: Record<(typeof CASE_STUDY_DISCOVERY_SORTS)[number], string> =
     name: "Title A–Z",
   };
 
+const hrefFor = (query: CaseStudyDiscoveryQuery) =>
+  `${BASE_PATH}${mergeCaseStudyDiscoveryQueryString("", query)}`;
+
+type TFilterKey = "search" | "pillar" | "category" | "technology";
+
+/**
+ * The case files index (docs plan 4.2): the Ch.4 case-file rows as a full list, with URL-backed
+ * discovery. It is a server component with no client JavaScript: the filters are a plain GET form
+ * (the server renders the results from `searchParams`), active filters and pagination are links.
+ */
 const CaseStudiesContentSection = ({
   items,
   meta,
@@ -47,157 +60,267 @@ const CaseStudiesContentSection = ({
   initialError = false,
 }: CaseStudiesContentSectionProps) => {
   const filtersActive = hasCaseStudyDiscoveryFilters(query);
+  const dirty = filtersActive || query.sort !== defaults.sort;
   const totalPages = Math.max(1, Math.ceil(meta.total / meta.limit));
-  const hasSelectedCategory = categories.some(
+  const page = Math.min(query.page, totalPages);
+  const selectedCategory = categories.find(
     (category) => category.slug === query.category
   );
   const technologies =
-    query.technology !== "all" && !facets.technologies.includes(query.technology)
+    query.technology !== "all" &&
+    !facets.technologies.includes(query.technology)
       ? [query.technology, ...facets.technologies]
       : facets.technologies;
-  const defaults = DEFAULT_CASE_STUDY_DISCOVERY_QUERY;
 
-  const fields: TDiscoveryFilterField[] = [
-    {
-      type: "search",
-      key: "search",
-      label: "Search",
-      value: query.search,
-      placeholder: "Search by problem, industry or tool",
-    },
-    {
-      type: "select",
-      key: "pillar",
-      label: "Role",
-      value: query.pillar,
-      defaultValue: defaults.pillar,
-      options: [
-        { value: "all", label: "All roles" },
-        ...PILLAR_RELATIONSHIP_OPTIONS.map(({ key, label }) => ({
-          value: key,
-          label,
-        })),
-      ],
-    },
-    {
-      type: "select",
-      key: "category",
-      label: "Category",
-      value: query.category,
-      defaultValue: defaults.category,
-      options: [
-        { value: "all", label: "All categories" },
-        ...(query.category !== "all" && !hasSelectedCategory
-          ? [
-              {
-                value: query.category,
-                label: `Unavailable category: ${query.category}`,
-              },
-            ]
-          : []),
-        ...categories.map((category) => ({
-          value: category.slug,
-          label: category.name,
-        })),
-      ],
-    },
-    {
-      type: "select",
-      key: "technology",
-      label: "Tool",
-      value: query.technology,
-      defaultValue: defaults.technology,
-      options: [
-        { value: "all", label: "All tools" },
-        ...technologies.map((technology) => ({
-          value: technology,
-          label: technology,
-        })),
-      ],
-    },
-    {
-      type: "select",
-      key: "sort",
-      label: "Sort",
-      value: query.sort,
-      defaultValue: defaults.sort,
-      options: CASE_STUDY_DISCOVERY_SORTS.map((sort) => ({
-        value: sort,
-        label: SORT_LABELS[sort],
-      })),
-    },
+  // One link per active filter that drops just that param (and the page counter, which no longer applies).
+  const chips: { key: TFilterKey; label: string; value: string }[] = [
+    ...(query.search.trim()
+      ? [
+          {
+            key: "search" as const,
+            label: "Search",
+            value: `“${query.search}”`,
+          },
+        ]
+      : []),
+    ...(query.pillar !== "all"
+      ? [
+          {
+            key: "pillar" as const,
+            label: "Role",
+            value: getPillarLabel(query.pillar),
+          },
+        ]
+      : []),
+    ...(query.category !== "all"
+      ? [
+          {
+            key: "category" as const,
+            label: "Category",
+            value: selectedCategory?.name ?? query.category,
+          },
+        ]
+      : []),
+    ...(query.technology !== "all"
+      ? [{ key: "technology" as const, label: "Tool", value: query.technology }]
+      : []),
   ];
 
   return (
-    <section
-      aria-labelledby="case-study-results-heading"
-      className="py-16 lg:py-24"
-    >
+    <section aria-labelledby="cfx-heading" className="cfx">
       <div className="container">
-        <div className="border-border bg-surface-subtle rounded-[var(--radius-xl-token)] border p-5 lg:p-7">
-          <p className="type-label text-primary">Case study explorer</p>
-          <h2
-            id="case-study-results-heading"
-            className="mt-2 mb-5 text-2xl font-bold"
+        <h2 id="cfx-heading" className="sr-only">
+          Case files
+        </h2>
+
+        <div className="cfx-top">
+          <form
+            className="cfx-filters"
+            method="get"
+            action={BASE_PATH}
+            role="search"
+            aria-label="Filter and sort case files"
           >
-            Find a problem like yours
-          </h2>
-          <Suspense fallback={null}>
-            <DiscoveryFilters
-              legend="Filter and sort case studies"
-              fields={fields}
-              resetKeys={["page"]}
-              clearHref="/case-studies"
-              className="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
-            />
-          </Suspense>
+            <div className="cfx-field cfx-field--search">
+              <label htmlFor="cfx-search" className="cfx-label t-eyebrow">
+                Search
+              </label>
+              <input
+                id="cfx-search"
+                name="search"
+                type="search"
+                autoComplete="off"
+                maxLength={100}
+                defaultValue={query.search}
+                placeholder="Search by problem, industry or tool"
+                className="cfx-control"
+              />
+            </div>
+
+            <div className="cfx-field">
+              <label htmlFor="cfx-pillar" className="cfx-label t-eyebrow">
+                Role
+              </label>
+              <select
+                id="cfx-pillar"
+                name="pillar"
+                defaultValue={query.pillar}
+                className="cfx-control"
+              >
+                <option value="all">All roles</option>
+                {PILLAR_RELATIONSHIP_OPTIONS.map(({ key, label }) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="cfx-field">
+              <label htmlFor="cfx-category" className="cfx-label t-eyebrow">
+                Category
+              </label>
+              <select
+                id="cfx-category"
+                name="category"
+                defaultValue={query.category}
+                className="cfx-control"
+              >
+                <option value="all">All categories</option>
+                {query.category !== "all" && !selectedCategory ? (
+                  <option value={query.category}>
+                    Unavailable category: {query.category}
+                  </option>
+                ) : null}
+                {categories.map((category) => (
+                  <option key={category.slug} value={category.slug}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="cfx-field">
+              <label htmlFor="cfx-technology" className="cfx-label t-eyebrow">
+                Tool
+              </label>
+              <select
+                id="cfx-technology"
+                name="technology"
+                defaultValue={query.technology}
+                className="cfx-control"
+              >
+                <option value="all">All tools</option>
+                {technologies.map((technology) => (
+                  <option key={technology} value={technology}>
+                    {technology}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="cfx-field">
+              <label htmlFor="cfx-sort" className="cfx-label t-eyebrow">
+                Sort
+              </label>
+              <select
+                id="cfx-sort"
+                name="sort"
+                defaultValue={query.sort}
+                className="cfx-control"
+              >
+                {CASE_STUDY_DISCOVERY_SORTS.map((sort) => (
+                  <option key={sort} value={sort}>
+                    {SORT_LABELS[sort]}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="cfx-actions">
+              <button
+                type="submit"
+                className={buttonVariants({ variant: "default" })}
+              >
+                Apply
+              </button>
+              {dirty ? (
+                <Link href={BASE_PATH} className="cfx-clear link-draw">
+                  Clear filters
+                </Link>
+              ) : null}
+            </div>
+          </form>
+
+          <Topology />
         </div>
 
-        <p className="text-muted-foreground mt-8 text-sm" aria-live="polite">
-          {meta.total} {meta.total === 1 ? "case study" : "case studies"}
-          {filtersActive ? " match the current filters" : " available"}.
-        </p>
+        {chips.length ? (
+          <ul className="cfx-chips" aria-label="Active filters">
+            {chips.map((chip) => (
+              <li key={chip.key}>
+                <Link
+                  className="cfx-chip"
+                  href={hrefFor({
+                    ...query,
+                    [chip.key]: defaults[chip.key],
+                    page: 1,
+                  })}
+                  aria-label={`Remove filter ${chip.label}: ${chip.value}`}
+                >
+                  <span className="t-eyebrow cfx-chip__key">{chip.label}</span>
+                  <span>{chip.value}</span>
+                  <X className="size-3.5" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
-        <div id="case-study-results" className="mt-8">
-          {initialError ? (
-            <EmptyState
-              title="Case studies could not be loaded"
-              description="The published library is temporarily unavailable. Please try again in a moment."
-            />
-          ) : items.length === 0 ? (
-            <EmptyState
-              icon={<BookOpenCheck className="size-5" aria-hidden="true" />}
-              title={
-                filtersActive
-                  ? "No matching case studies"
-                  : "No published case studies yet"
-              }
-              description={
-                filtersActive
-                  ? "Try a broader role, category, tool or search phrase."
-                  : "Published case studies will appear here when they are ready."
-              }
-            />
-          ) : (
-            <ul className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-              {items.map((caseStudy) => (
-                <li key={caseStudy._id} className="min-w-0">
-                  <CaseStudyCard caseStudy={caseStudy} fallbacks={fallbacks} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {initialError ? null : (
+          <p className="cfx-count t-mono">
+            <span>
+              <strong>{meta.total}</strong> case{" "}
+              {meta.total === 1 ? "file" : "files"}
+              {filtersActive ? " match" : ""}
+            </span>
+            {totalPages > 1 ? (
+              <span className="cfx-count__page">
+                Page {page} of {totalPages}
+              </span>
+            ) : null}
+          </p>
+        )}
+
+        {initialError ? (
+          <div className="cfx-empty">
+            <h3 className="cfx-empty__title">
+              Case studies could not be loaded
+            </h3>
+            <p className="cfx-empty__body">
+              The published library is temporarily unavailable. Please try again
+              in a moment.
+            </p>
+            <Link href={hrefFor(query)} className="cfx-clear link-draw">
+              Try again
+            </Link>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="cfx-empty">
+            <h3 className="cfx-empty__title">
+              {filtersActive
+                ? "No matching case studies"
+                : "No published case studies yet"}
+            </h3>
+            <p className="cfx-empty__body">
+              {filtersActive
+                ? "Try a broader role, category, tool or search phrase."
+                : "Published case studies will appear here when they are ready."}
+            </p>
+            {dirty ? (
+              <Link href={BASE_PATH} className="cfx-clear link-draw">
+                Clear filters
+              </Link>
+            ) : null}
+          </div>
+        ) : (
+          <ul className="case-files" aria-label="Case files">
+            {items.map((caseStudy, index) => (
+              <CaseFileRow
+                key={caseStudy._id}
+                caseStudy={caseStudy}
+                fallbacks={fallbacks}
+                index={index}
+                count={items.length}
+              />
+            ))}
+          </ul>
+        )}
 
         <LinkPagination
-          page={Math.min(query.page, totalPages)}
+          page={page}
           totalPages={totalPages}
-          hrefFor={(page) =>
-            `/case-studies${mergeCaseStudyDiscoveryQueryString("", {
-              ...query,
-              page,
-            })}`
-          }
+          hrefFor={(target) => hrefFor({ ...query, page: target })}
           ariaLabel="Case study result pages"
           className="mt-12"
         />

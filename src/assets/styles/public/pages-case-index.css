@@ -2,4 +2,193 @@
  * Public inner pages: case-index (Phase 6). Owned by one slice; add rules here, not in sections.css.
  * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"], reduced motion
  * and no-JS show everything, no hover-only information.
+ *
+ * /case-studies (A2 Index). The rows are the home Ch.4 `.case-file` rows (chapters-evidence-files.css), so the
+ * hover and focus preview is shared. Everything here is the filter bar, the chips, the count and the states.
  */
+
+.cfx {
+  padding-block: clamp(2rem, 4vw, 3.5rem) var(--space-section-compact);
+}
+
+.cfx-top {
+  display: grid;
+  gap: 2rem 3rem;
+  margin-block-end: 1.5rem;
+}
+
+/* ---------- Filter form (GET, no script) ---------- */
+.cfx-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 1rem 1.25rem;
+  margin: 0;
+  min-inline-size: 0;
+}
+
+.cfx-field {
+  min-inline-size: 0;
+}
+
+.cfx-field--search {
+  grid-column: 1 / -1;
+}
+
+.cfx-label {
+  display: block;
+  margin-block-end: 0.4rem;
+  color: var(--text-secondary);
+}
+
+.cfx-control {
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-control);
+  background: var(--background);
+  padding-inline: 0.75rem;
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--step--1);
+}
+
+.cfx-control::placeholder {
+  color: var(--text-secondary);
+}
+
+.cfx-control:hover {
+  border-color: var(--line-4);
+}
+
+.cfx-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+
+.cfx-clear {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+}
+
+.cfx-clear:hover,
+.cfx-clear:focus-visible {
+  color: var(--foreground);
+}
+
+/* ---------- Topology fragment: a static piece of the maquette, wide screens only ---------- */
+.cfx-topology {
+  display: none;
+  pointer-events: none;
+  color: var(--line-4);
+}
+
+@media (min-width: 1024px) {
+  .cfx-top {
+    grid-template-columns: minmax(0, 1fr) 13rem;
+    align-items: start;
+  }
+
+  .cfx-topology {
+    display: block;
+    justify-self: end;
+    inline-size: 100%;
+    block-size: auto;
+  }
+}
+
+/* ---------- Active filters: each chip is a link that drops one param ---------- */
+.cfx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.cfx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition:
+    border-color var(--dur-fast) var(--ease-signal),
+    background-color var(--dur-fast) var(--ease-signal);
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-control);
+  padding: 0.35rem 0.6rem;
+  min-block-size: 2rem;
+  font-size: var(--step--1);
+}
+
+.cfx-chip__key {
+  color: var(--text-secondary);
+}
+
+.cfx-chip:hover,
+.cfx-chip:focus-visible {
+  border-color: var(--line-4);
+  background: var(--surface-subtle);
+}
+
+@media (pointer: coarse) {
+  .cfx-chip {
+    min-block-size: 2.75rem;
+  }
+}
+
+/* ---------- Results count (Mono) ---------- */
+.cfx-count {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+  margin: 0;
+  padding-block: 0.9rem;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+}
+
+.cfx-count strong {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* ---------- Empty and unavailable states: calm, hairline, no card ---------- */
+.cfx-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  border-block: 1px solid var(--line-2);
+  padding-block: clamp(2rem, 5vw, 3.5rem);
+}
+
+.cfx-empty__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.015em;
+}
+
+.cfx-empty__body {
+  margin: 0;
+  max-inline-size: 52ch;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfx-chip {
+    transition: none;
+  }
+}

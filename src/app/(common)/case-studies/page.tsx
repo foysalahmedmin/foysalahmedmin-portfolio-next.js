@@ -1,5 +1,7 @@
 import CaseStudiesContentSection from "@/components/(common)/case-studies-page/case-studies-content-section";
 import { PublicRoutePage } from "@/components/pages/public-route-page";
+import { mergeCaseStudyDiscoveryQueryString } from "@/lib/discovery/case-study-discovery";
+import { querySourceToQueryString } from "@/lib/discovery/public-discovery";
 import { buildPageMetadata } from "@/lib/metadata/site-metadata";
 import { getPublicPagePayloadOrFallback } from "@/lib/pages/public-page-fallback";
 import {
@@ -40,6 +42,16 @@ export default async function CaseStudiesPage({
     search_params: rawSearchParams,
   });
   if (discovery?.redirect_to) redirect(discovery.redirect_to);
+  if (discovery?.route_key === "case-studies") {
+    // The filter form is a GET form and submits every field; fold defaults and empty values back out so
+    // the shared URL matches what the chip and pagination links produce.
+    const current = querySourceToQueryString(rawSearchParams);
+    const canonical = mergeCaseStudyDiscoveryQueryString(
+      current,
+      discovery.props.query
+    );
+    if (canonical !== current) redirect(`/case-studies${canonical}`);
+  }
 
   return (
     <PublicRoutePage
