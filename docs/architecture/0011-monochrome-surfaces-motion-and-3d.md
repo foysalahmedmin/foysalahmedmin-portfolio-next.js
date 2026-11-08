@@ -106,6 +106,12 @@ Full evidence: [`docs/baseline/phase-6-findings.md`](../baseline/phase-6-finding
 
 Every public page is composed from its archetype template with the shared page header. The case-study walkthrough draws its architecture as code-native SVG from the structured data and the engine's focus binder lights the nodes of the chapter in view (a `data-highlight-scope`), so no inner page needs a pinned scene. The discovery filters of the four index pages are server-rendered GET forms: about 2,000 lines of client discovery code were deleted, which brought every list page and the home to 177.4 KB of initial JavaScript (the two list pages that were gated at 188 to 191 KB included). Not repeated in this phase: Lighthouse, the smoothness harness and the visual snapshots.
 
+## Phase 7 outcome (2026-11-08)
+
+Full evidence: [`docs/baseline/phase-7-findings.md`](../baseline/phase-7-findings.md).
+
+The admin renders on the console surface: the same ramp, fonts, focus ring and status marks as the public site, with the workbench density and no motion library. The shell, the dashboard (decision order: needs attention, publish state, pipeline), the workspace patterns and the auth pages are built; the audit log and the article editor adopt the patterns and Phase 8 sweeps the rest. Status is carried by shape and label (`StatusBadge` keeps its tone API). The shell's first load is 164 KB gzip against the plan's 150 KB: the root layout and its providers are the floor (the sign-in page is 160 KB), which is recorded for Phase 9. Authenticated browser coverage now exists (`tests/e2e/console.spec.ts`).
+
 ## Verification
 
 - Bundle boundary test and build-output scan (admin and `components/ui` free of the engine libraries).

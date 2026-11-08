@@ -9,6 +9,13 @@
 | **Decision** | Needs ADR 0011 (amends ADR 0002 dependencies and ADR 0009 budgets). Drafted in Appendix C, not yet accepted.                                             |
 | **Handoff**  | On approval, each phase in section 7 gets its own task-level implementation plan (writing-plans format) before any code.                                 |
 
+### Revision 1.10: what Phase 7 changed in the plan (2026-11-08)
+
+- **The Enquiries panel (D-08) is cut**: the observability endpoint stores no enquiry events.
+- **"Workspaces already keep filters in the URL" was wrong.** Only the inbox and the media library read filters from the URL after this phase; the content workspaces keep them in state, so their Needs-attention links open the bare workspace until Phase 8.
+- **The shell's first load is 164 KB, not 150 KB**; the sign-in page without a shell is 160 KB, so the floor is the root layout and its providers, not the shell. Revisit in Phase 9.
+- **The session banner and palette record search are not built.** Dashboard counts now exclude soft-deleted records and cover case studies and videos.
+
 ### Revision 1.9: what Phase 6 changed in the plan (2026-11-08)
 
 - **Filters are server-rendered GET forms.** The discovery sections of the four index pages no longer use client code; every form sends all its fields and the page redirects to the canonical URL. This also removed the initial-JS gate on `/projects` and `/articles`.
@@ -1442,6 +1449,7 @@ Dependencies: P0 → P1 → P2 → (P3 ∥ P4 ∥ P7) → P5 → P6; P7 → P8; 
 ### Phase 7: Console shell, dashboard and shared patterns (M–L, parallel with Phases 3 and 4)
 
 - **Work:** flip the admin layout to `data-surface="console"`; new `AdminShell` (rail, top bar, publish-state chip, environment chip); console command palette; **dashboard redesign (4.3)**; `StatusMark` goes live behind the `StatusBadge` tone API; console styling of `DataTable`, `FormControl`, `Tabs`, `Modal`, `Drawer`, `Toast`; pattern components (`ConsoleList`, `ConsoleToolbar`, `ConsoleEditor`, `EditorActionBar`, `SectionIndex`, `ConsoleInbox`); auth pages (C6); authenticated Playwright fixtures; bundle boundary test; decision on the Enquiries panel (D-08).
+- **Result (2026-11-08):** built; evidence and the gaps are in [`docs/baseline/phase-7-findings.md`](../baseline/phase-7-findings.md). Not met: filtered deep links for the content workspaces and the 150 KB shell budget.
 - **Acceptance:** shell, dashboard, one list and one editor pass axe, visual (both themes) and keyboard tests; authority, route-boundary and data-boundary tests unchanged and green; no animation library in any admin chunk; shell ≤ 150 KB gz; every "Needs attention" deep link opens the right filtered workspace; sidebar collapse passes the harness or ships instant; no `backdrop-filter` outside overlays; console usability check on status marks (R19).
 - **Tests:** console component specs, authenticated e2e, axe, visual, bundle boundary, consistency probe on console routes.
 
