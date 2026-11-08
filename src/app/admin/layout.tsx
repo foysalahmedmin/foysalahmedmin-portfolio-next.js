@@ -1,3 +1,4 @@
+import { SurfaceMarker } from "@/components/surface/surface-marker";
 import { buildNoIndexMetadata } from "@/lib/metadata/noindex";
 import type { ReactNode } from "react";
 
@@ -12,6 +13,12 @@ export const metadata = buildNoIndexMetadata({
   },
 });
 
-const AdminRootLayout = ({ children }: { children: ReactNode }) => children;
+// The console is its own surface (docs plan 3.11); the marker keeps it right across client navigations
+const AdminRootLayout = ({ children }: { children: ReactNode }) => (
+  <>
+    <SurfaceMarker surface="console" />
+    {children}
+  </>
+);
 
 export default AdminRootLayout;

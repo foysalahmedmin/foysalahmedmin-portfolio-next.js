@@ -263,6 +263,10 @@
   @import "../assets/styles/public/pages-editorial.css";
   @import "../assets/styles/public/pages-conversation.css";
   @import "../assets/styles/public/pages-narrative.css";
+  @import "../assets/styles/public/console-shell.css";
+  @import "../assets/styles/public/console-dashboard.css";
+  @import "../assets/styles/public/console-patterns.css";
+  @import "../assets/styles/public/console-auth.css";
 
   .text-glow {
     text-shadow: 0 0 15px color-mix(in srgb, var(--primary) 50%, transparent);

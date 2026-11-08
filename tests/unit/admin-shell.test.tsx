@@ -86,7 +86,9 @@ describe("AdminShell", () => {
       screen.getAllByRole("link", { name: "Pages" }).length
     ).toBeGreaterThan(0);
     expect(screen.getByText("Preview")).toBeVisible();
-    expect(screen.getByText("Published r3")).toBeVisible();
+    expect(
+      screen.getByText("Published r3, draft r4: review and publish")
+    ).toBeVisible();
     expect(screen.getByRole("main")).toHaveTextContent("Dashboard content");
     expect(
       screen.queryByRole("link", { name: "Contact inbox" })

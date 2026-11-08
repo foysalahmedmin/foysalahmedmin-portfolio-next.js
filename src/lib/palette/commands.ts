@@ -3,14 +3,17 @@ export type PaletteAction =
   | "theme:dark"
   | "theme:light"
   | "theme:system"
+  | "theme:toggle"
   | "motion:system"
   | "motion:full"
   | "motion:reduce"
   | "motion:off"
   | "scene:auto"
-  | "scene:still";
+  | "scene:still"
+  /** The console only: the palette does not run it, it hands it to its host (`onAction`). */
+  | "session:signout";
 
-export type PaletteGroup = "Navigate" | "Preferences";
+export type PaletteGroup = "Navigate" | "Create" | "Actions" | "Preferences";
 
 export type PaletteCommand = Readonly<{
   id: string;
@@ -26,6 +29,8 @@ export type PaletteCommand = Readonly<{
 
 export const PALETTE_GROUPS: readonly PaletteGroup[] = [
   "Navigate",
+  "Create",
+  "Actions",
   "Preferences",
 ];
 

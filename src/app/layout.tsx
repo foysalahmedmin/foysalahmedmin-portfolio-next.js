@@ -37,10 +37,10 @@ export default function RootLayout({
                     var s = raw ? JSON.parse(raw) : null;
                     var root = document.documentElement;
 
-                    // ---- Surface: the public site is monochrome, the admin keeps its legacy tokens until Phase 7 ----
+                    // ---- Surface: the public site and the admin console are both monochrome ----
                     var path = window.location.pathname;
                     var admin = path === '/admin' || path.indexOf('/admin/') === 0;
-                    if (!admin) root.setAttribute('data-surface', 'public');
+                    root.setAttribute('data-surface', admin ? 'console' : 'public');
 
                     // ---- Theme (first visit: dark on the public site, system in the admin) ----
                     var theme = s && s.theme ? s.theme : (admin ? 'system' : 'dark');

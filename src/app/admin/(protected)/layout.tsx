@@ -15,14 +15,18 @@ const ProtectedAdminLayout = async ({ children }: { children: ReactNode }) => {
       environment={
         process.env.VERCEL_ENV || process.env.NODE_ENV || "development"
       }
-      siteState={{
-        configured: Boolean(site),
-        published: Boolean(site?.published),
-        ...(site ? { draftRevision: site.revision } : {}),
-        ...(site?.published
-          ? { publishedRevision: site.published.revision }
-          : {}),
-      }}
+      siteState={
+        site
+          ? {
+              configured: true,
+              published: Boolean(site.published),
+              draftRevision: site.revision,
+              ...(site.published
+                ? { publishedRevision: site.published.revision }
+                : {}),
+            }
+          : undefined
+      }
     >
       {children}
     </AdminShell>

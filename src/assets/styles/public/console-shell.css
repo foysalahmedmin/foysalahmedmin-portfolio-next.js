@@ -1,0 +1,606 @@
+/*
+ * Admin console: shell (Phase 7). Owned by one slice; add rules here.
+ * Rules: tokens only (no colour literals), no backdrop-filter outside overlays, no animation library, state is
+ * shape, weight and label (never colour), every control reachable by keyboard with visible focus.
+ * Scope every rule to [data-surface="console"] so the public site is untouched.
+ *
+ * Prefix: cs-. The rail is 240 px (56 px collapsed, instant), the top bar 48 px, both solid with hairline edges.
+ */
+
+[data-surface="console"] .cs-shell {
+  display: flex;
+  background: var(--background);
+  min-height: 100dvh;
+  color: var(--foreground);
+}
+
+[data-surface="console"] .cs-skip {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  transform: translateY(-300%);
+  z-index: calc(var(--z-modal) + 1);
+  border: 1px solid var(--line-4);
+  border-radius: var(--r-control);
+  background: var(--background);
+  padding: 0.5rem 0.75rem;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+[data-surface="console"] .cs-skip:focus-visible {
+  transform: none;
+}
+
+/* ---------- Shared controls ---------- */
+[data-surface="console"] .cs-icon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-surface="console"] :is(.cs-iconbtn, .cs-btn, .cs-user__trigger) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: var(--r-control);
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+[data-surface="console"] .cs-iconbtn {
+  flex: none;
+  justify-content: center;
+  width: var(--control-h-sm);
+  height: var(--control-h-sm);
+}
+
+[data-surface="console"] :is(.cs-btn, .cs-user__trigger) {
+  padding-inline: 0.625rem;
+  height: var(--control-h-sm);
+}
+
+[data-surface="console"] .cs-btn {
+  border-color: var(--line-3);
+}
+
+[data-surface="console"]
+  :is(.cs-iconbtn, .cs-btn, .cs-user__trigger):hover:not(:disabled) {
+  background: var(--line-1);
+}
+
+@media (pointer: coarse) {
+  [data-surface="console"] :is(.cs-iconbtn, .cs-btn, .cs-user__trigger) {
+    min-width: var(--hit-area);
+    min-height: var(--hit-area);
+  }
+}
+
+[data-surface="console"] .cs-kbd {
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-sm);
+  padding: 0.125rem 0.3125rem;
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-family: var(--ff-mono);
+}
+
+/* ---------- Rail ---------- */
+[data-surface="console"] .cs-rail {
+  display: none;
+  position: sticky;
+  top: 0;
+  flex: none;
+  flex-direction: column;
+  border-right: 1px solid var(--line-2);
+  background: var(--background);
+  width: 15rem;
+  height: 100dvh;
+}
+
+@media (min-width: 1024px) {
+  [data-surface="console"] .cs-rail {
+    display: flex;
+  }
+}
+
+[data-surface="console"] .cs-rail[data-collapsed="true"] {
+  width: 3.5rem;
+}
+
+[data-surface="console"] .cs-rail__head {
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--line-2);
+  padding-inline: 0.75rem;
+  height: 3rem;
+}
+
+[data-surface="console"] .cs-rail[data-collapsed="true"] .cs-rail__head {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+[data-surface="console"] .cs-brand {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--foreground);
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-surface="console"] .cs-rail[data-collapsed="true"] .cs-brand {
+  display: none;
+}
+
+[data-surface="console"] .cs-nav {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+[data-surface="console"] .cs-nav__group + .cs-nav__group {
+  margin-top: 1.25rem;
+}
+
+[data-surface="console"] .cs-nav__heading {
+  margin: 0;
+  padding: 0 0.5rem 0.375rem;
+  color: var(--text-secondary);
+}
+
+[data-surface="console"] .cs-nav ul {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-surface="console"] .cs-nav__link {
+  display: flex;
+  position: relative;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: var(--r-control);
+  padding-inline: 0.5rem;
+  min-height: var(--hit-area);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+[data-surface="console"] .cs-nav__link:hover {
+  background: var(--line-1);
+  color: var(--foreground);
+}
+
+/* Active: an ink block, paper text, heavier weight and a 2 px bar. Shape and weight, never colour. */
+[data-surface="console"] .cs-nav__link[aria-current="page"] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 700;
+}
+
+[data-surface="console"] .cs-nav__link[aria-current="page"]::before {
+  position: absolute;
+  inset-block: 0.25rem;
+  left: 0;
+  background: var(--primary-foreground);
+  width: 2px;
+  content: "";
+}
+
+[data-surface="console"] .cs-nav__icon {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* Collapsed: icons only. Names stay in the accessibility tree (visually hidden), so the current location
+   is still announced; each link also carries a title for sighted pointer users. */
+[data-surface="console"]
+  .cs-rail[data-collapsed="true"]
+  :is(.cs-nav__text, .cs-nav__heading) {
+  position: absolute;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+[data-surface="console"] .cs-rail[data-collapsed="true"] .cs-nav__link {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+[data-surface="console"] .cs-rail[data-collapsed="true"] .cs-nav__group {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--line-1);
+  padding-top: 0.75rem;
+}
+
+[data-surface="console"]
+  .cs-rail[data-collapsed="true"]
+  .cs-nav__group:first-child {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* ---------- Column and top bar ---------- */
+[data-surface="console"] .cs-column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+[data-surface="console"] .cs-topbar {
+  display: flex;
+  position: sticky;
+  top: 0;
+  flex: none;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: var(--z-header);
+  border-bottom: 1px solid var(--line-2);
+  background: var(--background);
+  padding-inline: 1rem;
+  height: 3rem;
+}
+
+[data-surface="console"] .cs-menu-button {
+  margin-left: -0.375rem;
+}
+
+@media (min-width: 1024px) {
+  [data-surface="console"] .cs-menu-button {
+    display: none;
+  }
+}
+
+[data-surface="console"] .cs-topbar__end {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+/* The theme switcher renders after mount; reserve its box so the bar does not shift. */
+[data-surface="console"] .cs-slot {
+  display: inline-block;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+/* System path */
+[data-surface="console"] .cs-path {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-surface="console"] .cs-path ol {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-family: var(--ff-mono);
+  list-style: none;
+  white-space: nowrap;
+}
+
+[data-surface="console"] .cs-path li {
+  display: flex;
+  min-width: 0;
+}
+
+[data-surface="console"] .cs-path li:last-child {
+  overflow: hidden;
+  color: var(--foreground);
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+
+[data-surface="console"] .cs-path a {
+  color: inherit;
+  text-decoration: none;
+}
+
+[data-surface="console"] .cs-path a:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+[data-surface="console"] .cs-path__sep {
+  padding-inline: 0.25rem;
+  color: var(--text-faint);
+}
+
+/* Chips: Mono, hairline, shape plus the word. Production is the heaviest (solid border, bold). */
+[data-surface="console"] .cs-chip {
+  display: none;
+  align-items: center;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-sm);
+  padding: 0.25rem 0.5rem;
+  max-width: 24rem;
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  font-family: var(--ff-mono);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  [data-surface="console"] .cs-chip--env {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-surface="console"] .cs-chip--publish {
+    display: inline-flex;
+  }
+}
+
+[data-surface="console"] .cs-chip[data-env="production"] {
+  border: 2px solid var(--foreground);
+  font-weight: 700;
+}
+
+[data-surface="console"] .cs-chip[data-publish="ahead"] {
+  border-style: dashed;
+  border-color: var(--foreground);
+  font-weight: 600;
+}
+
+[data-surface="console"] a.cs-chip:hover {
+  background: var(--line-1);
+}
+
+[data-surface="console"] .cs-chip[data-publish="ahead"] .status-mark__label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Below 640 px the labels collapse to the icon; the names stay for assistive technology. */
+@media (max-width: 639px) {
+  [data-surface="console"] :is(.cs-btn__label, .cs-kbd) {
+    position: absolute;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  [data-surface="console"] .cs-btn {
+    padding-inline: 0.5rem;
+  }
+
+  [data-surface="console"] .cs-view-site {
+    display: none;
+  }
+}
+
+/* ---------- User menu ---------- */
+[data-surface="console"] .cs-user {
+  position: relative;
+}
+
+[data-surface="console"] .cs-user__trigger {
+  padding-inline: 0.25rem 0.375rem;
+}
+
+[data-surface="console"] .cs-avatar {
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  background: var(--primary);
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--primary-foreground);
+  font-weight: 700;
+  font-size: 0.6875rem;
+  font-family: var(--ff-mono);
+}
+
+[data-surface="console"] .cs-user__name {
+  display: none;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 1280px) {
+  [data-surface="console"] .cs-user__name {
+    display: inline;
+  }
+}
+
+[data-surface="console"] .cs-user__panel {
+  display: grid;
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  right: 0;
+  gap: 1px;
+  z-index: var(--z-overlay);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  background: var(--popover);
+  padding: 0.375rem;
+  min-width: 15rem;
+  color: var(--popover-foreground);
+}
+
+[data-surface="console"] .cs-user__panel[hidden] {
+  display: none;
+}
+
+[data-surface="console"] .cs-user__who {
+  display: grid;
+  gap: 0.125rem;
+  margin: 0;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--line-2);
+  padding: 0.375rem 0.5rem 0.5rem;
+}
+
+[data-surface="console"] .cs-user__who-name {
+  overflow: hidden;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+}
+
+[data-surface="console"] .cs-user__who-role {
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-family: var(--ff-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-surface="console"] .cs-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  border: 0;
+  border-radius: var(--r-control);
+  background: transparent;
+  padding-inline: 0.5rem;
+  width: 100%;
+  min-height: var(--hit-area);
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-align: left;
+  text-decoration: none;
+}
+
+[data-surface="console"] .cs-menu-item:hover:not(:disabled) {
+  background: var(--line-1);
+}
+
+[data-surface="console"] .cs-menu-item:disabled {
+  cursor: progress;
+  font-style: italic;
+}
+
+/* ---------- Main, alert ---------- */
+[data-surface="console"] .cs-main {
+  flex: 1;
+  margin-inline: auto;
+  padding: 1rem;
+  width: 100%;
+  max-width: var(--container-wide);
+}
+
+@media (min-width: 640px) {
+  [data-surface="console"] .cs-main {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-surface="console"] .cs-main {
+    padding: 2rem;
+  }
+}
+
+[data-surface="console"] .cs-main:focus {
+  outline: none;
+}
+
+[data-surface="console"] .cs-alert {
+  margin: 0;
+  border-bottom: 1px solid var(--line-3);
+  border-left: 3px dashed var(--foreground);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+[data-surface="console"] .cs-alert::before {
+  margin-right: 0.5rem;
+  content: "\25B2";
+}
+
+/* ---------- Mobile sheet (an overlay: the scrim is the only translucent layer) ---------- */
+[data-surface="console"] .cs-sheet {
+  position: fixed;
+  z-index: var(--z-modal);
+  inset: 0;
+}
+
+@media (min-width: 1024px) {
+  [data-surface="console"] .cs-sheet {
+    display: none;
+  }
+}
+
+[data-surface="console"] .cs-sheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+}
+
+[data-surface="console"] .cs-sheet__panel {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  border-right: 1px solid var(--line-3);
+  background: var(--background);
+  width: min(88vw, 20rem);
+  height: 100dvh;
+}
+
+[data-surface="console"] .cs-brand--title {
+  display: block;
+}
+
+[data-surface="console"] .cs-sheet__env {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* ---------- Forced colours: backgrounds are dropped, so the active block needs an outline ---------- */
+@media (forced-colors: active) {
+  [data-surface="console"] .cs-nav__link[aria-current="page"] {
+    outline: 2px solid CanvasText;
+    outline-offset: -2px;
+  }
+}

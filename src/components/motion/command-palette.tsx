@@ -11,7 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useMotion, type MotionPreference } from "@/providers/motion-provider";
 import { setScenePreference } from "@/state/scene-store";
-import { setTheme } from "@/state/setting-store";
+import { setTheme, toggleTheme } from "@/state/setting-store";
 import { ArrowRight, CornerDownLeft, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -29,6 +29,12 @@ type CommandPaletteProps = {
   commands: readonly PaletteCommand[];
   /** Increments each time the shell asks for the palette (shortcut or button); each request toggles it. */
   requests: number;
+  /** Replaces the display preferences appended to `commands` (the console offers the theme only). */
+  preferences?: readonly PaletteCommand[];
+  /** Runs the actions the palette cannot (for example the console's sign out). */
+  onAction?: (action: PaletteAction) => void;
+  /** The accessible name and placeholder of the search field. */
+  label?: string;
 };
 
 /**
@@ -40,6 +46,9 @@ type CommandPaletteProps = {
 export default function CommandPalette({
   commands,
   requests,
+  preferences = PREFERENCE_COMMANDS,
+  onAction,
+  label = "Search pages and settings",
 }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -69,8 +78,8 @@ export default function CommandPalette({
   useDialogFocus({ active: open, containerRef: dialogRef, onEscape: close });
 
   const results = useMemo(
-    () => filterCommands([...commands, ...PREFERENCE_COMMANDS], query),
-    [commands, query]
+    () => filterCommands([...commands, ...preferences], query),
+    [commands, preferences, query]
   );
   const groups = useMemo(() => groupCommands(results), [results]);
   // Options are numbered in display order (group by group), which is the keyboard order
@@ -101,13 +110,15 @@ export default function CommandPalette({
   const runAction = useCallback(
     (action: PaletteAction) => {
       const [kind, value] = action.split(":") as [string, string];
-      if (kind === "theme") setTheme(value as "dark" | "light" | "system");
-      else if (kind === "motion") setPreference(value as MotionPreference);
+      if (kind === "theme") {
+        if (value === "toggle") toggleTheme();
+        else setTheme(value as "dark" | "light" | "system");
+      } else if (kind === "motion") setPreference(value as MotionPreference);
       else if (kind === "scene") {
         setScenePreference(value as "auto" | "still");
-      }
+      } else onAction?.(action);
     },
-    [setPreference]
+    [onAction, setPreference]
   );
 
   const choose = useCallback(
@@ -177,8 +188,8 @@ export default function CommandPalette({
             aria-activedescendant={
               ordered.length > 0 ? optionId(activeIndex) : undefined
             }
-            aria-label="Search pages and settings"
-            placeholder="Search pages and settings"
+            aria-label={label}
+            placeholder={label}
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
