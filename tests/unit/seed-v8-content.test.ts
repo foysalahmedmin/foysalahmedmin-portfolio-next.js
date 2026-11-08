@@ -57,7 +57,7 @@ describe("seed version 8: Site draft", () => {
     expect(draft.contact).not.toHaveProperty("working_hours");
   });
 
-  it("keeps every unconfirmed commercial or voice record off", () => {
+  it("keeps every unconfirmed commercial record off; the fit check and the principles are on (owner, 2026-11-08)", () => {
     for (const model of draft.engagement_models) {
       expect(model).toMatchObject({
         enabled: false,
@@ -71,10 +71,11 @@ describe("seed version 8: Site draft", () => {
       (model: { key: string }) => model.key === "ongoing-partnership"
     );
     expect(partnership.you_get).toEqual([]);
-    expect(draft.fit.enabled).toBe(false);
+    expect(draft.fit.enabled).toBe(true);
     expect(draft.finder.enabled).toBe(false);
+    expect(draft.principles).toHaveLength(5);
     expect(
-      draft.principles.every((item: { enabled: boolean }) => !item.enabled)
+      draft.principles.every((item: { enabled: boolean }) => item.enabled)
     ).toBe(true);
   });
 
@@ -280,7 +281,7 @@ describe("seed version 8: Page compositions", () => {
     expect(home.length).toBeLessThanOrEqual(20);
     expect(
       home.filter((section) => !section.visible).map((section) => section.key)
-    ).toEqual(["pillars", "fit", "finder", "principles"]);
+    ).toEqual(["pillars", "finder"]);
     const layouts = Object.fromEntries(
       home.map((section) => [section.key, section.layout])
     );

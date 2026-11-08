@@ -116,33 +116,33 @@ const PRINCIPLES = [
     title: "Start with the problem, not the technology",
     summary:
       "Understand the business goal, the people affected, and the constraint that hurts most before choosing any technology.",
-    enabled: false,
+    enabled: true,
   },
   {
     key: "simplest-thing",
     title: "Choose the simplest thing that works",
     summary:
       "Compare realistic options, pick the simplest one that works, and write down why.",
-    enabled: false,
+    enabled: true,
   },
   {
     key: "show-trade-offs",
     title: "Show the trade-offs",
     summary: "Every trade-off is explained in plain language.",
-    enabled: false,
+    enabled: true,
   },
   {
     key: "ship-small",
     title: "Ship small",
     summary:
       "Ship working increments you can review early, instead of one big reveal at the end.",
-    enabled: false,
+    enabled: true,
   },
   {
     key: "leave-documented",
     title: "Leave it better documented than I found it",
     summary: "Hand over documentation your team can run with.",
-    enabled: false,
+    enabled: true,
   },
 ] as const;
 
@@ -257,9 +257,9 @@ const ENGAGEMENT_MODELS = [
   },
 ] as const;
 
-// The stances need approval (C-32), so the whole record stays off.
+// The owner approved the stances (C-32) on 2026-11-08 and switched the fit check on.
 const FIT = {
-  enabled: false,
+  enabled: true,
   segments: [
     {
       key: "founders",
@@ -475,7 +475,7 @@ const commitmentSchema = z
   })
   .strict();
 
-/** Draft fields added in seed v8. The literals are the truth rules: a model, the fit check, the finder, a principle or a sample cannot be enabled by accident. */
+/** Draft fields added in seed v8. The literals are the truth rules: a model, the finder or a sample cannot be enabled by accident (the fit check and the principles were switched on by the owner on 2026-11-08). */
 export const siteContentShape = {
   engagement_models: z
     .array(
@@ -563,7 +563,7 @@ export const siteContentShape = {
     .max(4),
   fit: z
     .object({
-      enabled: z.literal(false),
+      enabled: z.boolean(),
       segments: z
         .array(
           z
@@ -578,9 +578,7 @@ export const siteContentShape = {
       not_a_fit: z.array(plain(2, 200)).max(6),
     })
     .strict(),
-  principles: z
-    .array(commitmentSchema.extend({ enabled: z.literal(false) }))
-    .max(6),
+  principles: z.array(commitmentSchema).max(6),
   finder: z
     .object({
       enabled: z.literal(false),

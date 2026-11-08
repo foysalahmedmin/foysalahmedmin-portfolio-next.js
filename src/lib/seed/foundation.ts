@@ -755,9 +755,9 @@ const automatic = (
 
 const system = { mode: "system" as const };
 
-// The home chapters in the order of the plan (section 4.1). Tier 2 sections
-// (fit check, finder, "How I think") are composed but hidden: their copy needs
-// the owner's confirmation first, and a section with no public data hides itself.
+// The home chapters in the order of the plan (section 4.1). The fit check and "How I think" were switched on
+// by the owner on 2026-11-08; the finder stays hidden until the engagement models it points at are confirmed
+// (C-13), and a section with no public data hides itself.
 const pageDrafts = {
   home: {
     seo: { noindex: true },
@@ -848,7 +848,7 @@ const pageDrafts = {
       {
         key: "fit",
         kind: "fit-check",
-        visible: false,
+        visible: true,
         heading: "Who this is for",
         layout: "default",
         source: system,
@@ -898,7 +898,7 @@ const pageDrafts = {
       {
         key: "principles",
         kind: "commitments",
-        visible: false,
+        visible: true,
         heading: "How I think",
         layout: "principles",
         source: system,

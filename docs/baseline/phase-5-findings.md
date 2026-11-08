@@ -61,3 +61,7 @@ Engine: `src/lib/motion/engine/chapters.ts` binds `data-scroll-focus` and `data-
 - The finder's `finder_complete` event is not sent: the repo has no general event helper, and the plan says nothing is sent.
 - `/contact?topic=` and `start=` are linked but not read (Phase 6).
 - FAQPage JSON-LD is not emitted (Phase 6 or 9).
+
+## 6. After the review (2026-11-08)
+
+The owner told the assistant to switch the three tier-2 chapters on. The fit check and "How I think" are on in seed v8 and visible on the home (the seed schema's hard `false` literals were relaxed for those two only; the claims `site.fit-check` and `site.principles` record the instruction and still ask the owner for a confirmation reference outside Git before a production publish). **The finder stays off**: it needs the three engagement models, and those cannot be enabled without `how_it_runs` for each and a `you_get` for the ongoing partnership, which are the owner's facts (C-13 to C-15). The home with the fit check and the principles on is about 25 screens (limit 27 with tier 2).

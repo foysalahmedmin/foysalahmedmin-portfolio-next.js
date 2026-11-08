@@ -1902,7 +1902,7 @@
       "id": "site.principles",
       "category": "method",
       "claim": "Five working principles under the heading How I think.",
-      "current_public_value": "Five statements; all disabled",
+      "current_public_value": "Five statements; switched on by the owner on 2026-11-08",
       "status": "needs-owner-verification",
       "production_publish": "block",
       "sources": [
@@ -1911,8 +1911,8 @@
           "symbol_or_context": "PRINCIPLES"
         }
       ],
-      "reason": "The wording and the stances are the owner's voice and need approval (C-18). The elaboration lines reuse copy already seeded.",
-      "required_action": "Owner approves each line and its elaboration (C-18), then enables the principles; About reads the same data."
+      "reason": "The wording and the stances are the owner's voice (C-18). The owner told the assistant to switch \"How I think\" on on 2026-11-08 with the seeded wording. The elaboration lines reuse copy already seeded.",
+      "required_action": "Owner records the confirmation reference outside Git before the production publish; About reads the same data and stays hidden there until switched on in the Pages editor."
     },
     {
       "id": "site.workflow-example",
@@ -1950,7 +1950,7 @@
       "id": "site.fit-check",
       "category": "engagement",
       "claim": "Who the work is for (four segments) and who it is probably not for (three lines).",
-      "current_public_value": "Draft segments and lines; disabled",
+      "current_public_value": "Four segments and three not-a-fit lines; switched on by the owner on 2026-11-08",
       "status": "needs-owner-verification",
       "production_publish": "block",
       "sources": [
@@ -1959,8 +1959,8 @@
           "symbol_or_context": "FIT"
         }
       ],
-      "reason": "The segments and the not-a-fit lines are stances that need approval (C-32).",
-      "required_action": "Owner approves the segment wording and the not-a-fit lines (C-32), then enables the fit check."
+      "reason": "The segments and the not-a-fit lines are stances (C-32). The owner told the assistant to switch the fit check on on 2026-11-08 with the seeded wording.",
+      "required_action": "Owner records the confirmation reference outside Git before the production publish; the wording stays editable in the Site settings."
     },
     {
       "id": "site.finder",

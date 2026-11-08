@@ -1699,7 +1699,7 @@ Updated as work lands. The acceptance gate is plan section 7, Phase 5.
 
 - [x] Chapter bindings in the deferred engine (`data-scroll-focus`, `data-scroll-progress`); no new client code on the home route
 - [x] Evidence strip, Triage, Stack (pinned), Pipeline (pinned), Case files, Deliverables, Process wire, Engagement, Capability registry, Commitments, Field notes, FAQ, Next steps
-- [x] Tier 2 built and off: Fit check, Starting-point finder (offline, one lazy island), How I think
+- [x] Tier 2 built: Fit check and How I think switched on by the owner (2026-11-08); Starting-point finder (offline, one lazy island) stays off until the engagement models are confirmed
 - [x] Skip link and anchor for every pinned scene; three pins at most (asserted)
 - [x] Home length 22.8 screens (<= 24) and 27.0 with Tier 2 (<= 27); `pillars` set off on the home
 - [x] Initial JS 179.71 KB: the dead client `Rail` removed, card-row process layout retired
