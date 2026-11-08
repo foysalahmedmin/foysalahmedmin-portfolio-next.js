@@ -1,3 +1,4 @@
+import { AuthFrame } from "@/components/admin/auth-frame";
 import AdminSignInForm from "@/components/admin/admin-signin-form";
 import { getSafeAdminReturnPath } from "@/lib/auth/admin-access";
 import {
@@ -22,10 +23,12 @@ const AdminSignInPage = async ({ searchParams }: AdminSignInPageProps) => {
 
   const canRecoverSession = await hasRefreshSessionCookie();
   return (
-    <AdminSignInForm
-      returnTo={returnTo}
-      canRecoverSession={canRecoverSession}
-    />
+    <AuthFrame>
+      <AdminSignInForm
+        returnTo={returnTo}
+        canRecoverSession={canRecoverSession}
+      />
+    </AuthFrame>
   );
 };
 

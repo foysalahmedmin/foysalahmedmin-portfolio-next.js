@@ -1,0 +1,224 @@
+/*
+ * Admin console: auth (Phase 7). Owned by one slice; add rules here.
+ * Rules: tokens only (no colour literals), no backdrop-filter outside overlays, no animation library, state is
+ * shape, weight and label (never colour), every control reachable by keyboard with visible focus.
+ * Scope every rule to [data-surface="console"] so the public site is untouched.
+ */
+
+/* ---------- Page: the static maquette still behind one centred glass panel ---------- */
+[data-surface="console"] .ca-page {
+  display: grid;
+  position: relative;
+  place-items: center;
+  isolation: isolate;
+  padding: 1.5rem 1rem;
+  min-block-size: 100dvh;
+  overflow: clip;
+}
+
+[data-surface="console"] .ca-main {
+  min-inline-size: 0;
+}
+
+/* Decorative: below the panel, with a scrim that keeps the glass text on a dark ground, then grain */
+[data-surface="console"] .ca-still {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+[data-surface="console"] .ca-still picture {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+/* The posters are scenes on a transparent ground: the page colour is the stage, so no filter */
+[data-surface="console"] .ca-still img {
+  display: block;
+  opacity: 0.7;
+  filter: none !important;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+[data-surface="console"] .ca-still::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at center,
+      color-mix(in oklab, var(--background) 85%, transparent),
+      transparent 75%
+    ),
+    color-mix(in oklab, var(--background) 60%, transparent);
+  content: "";
+}
+
+[data-surface="console"] .ca-still::before {
+  position: absolute;
+  opacity: var(--grain-opacity, 0.05);
+  z-index: 2;
+  inset: 0;
+  background-image: url("/textures/grain.png");
+  background-size: 160px 160px;
+  content: "";
+}
+
+/* data-surface sits on <html> itself, next to the theme class */
+html.dark[data-surface="console"] .ca-still-light,
+html.light[data-surface="console"] .ca-still-dark {
+  display: none;
+}
+
+@media (prefers-contrast: more), (forced-colors: active) {
+  [data-surface="console"] .ca-still {
+    display: none;
+  }
+}
+
+/* ---------- Panel ---------- */
+[data-surface="console"] .ca-panel {
+  border-radius: var(--r-panel);
+  padding: clamp(1.25rem, 5vw, 2rem);
+  color: var(--foreground);
+}
+
+[data-surface="console"] .ca-head {
+  display: grid;
+  gap: 0.5rem;
+  margin-block-end: 1.25rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block-end: 1.25rem;
+}
+
+[data-surface="console"] .ca-head > * {
+  margin: 0;
+}
+
+[data-surface="console"] .ca-eyebrow {
+  color: var(--text-secondary);
+}
+
+[data-surface="console"] .ca-title {
+  font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
+}
+
+[data-surface="console"] .ca-lede {
+  color: var(--text-secondary);
+  font-size: var(--ui-text);
+  line-height: 1.5;
+}
+
+/* ---------- Form ---------- */
+/* Spacing is margin, not gap: the live status region stays mounted and must add no space while empty */
+[data-surface="console"] .ca-field,
+[data-surface="console"] .ca-box,
+[data-surface="console"] .ca-status > * {
+  margin-block-end: calc(var(--field-gap) * 1.25);
+}
+
+[data-surface="console"] .ca-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+[data-surface="console"] .ca-label-row label {
+  margin: 0;
+}
+
+[data-surface="console"] .ca-label-row,
+[data-surface="console"] .ca-field > label {
+  margin-block-end: 0.375rem;
+}
+
+[data-surface="console"] .ca-quiet {
+  padding-block: 0.25rem;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+}
+
+[data-surface="console"] .ca-notice {
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .ca-code {
+  font-family: var(--ff-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2em;
+}
+
+[data-surface="console"] .ca-box {
+  display: grid;
+  gap: 0.625rem;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-panel);
+  padding: 0.875rem 1rem;
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .ca-box > * {
+  margin: 0;
+}
+
+[data-surface="console"] .ca-key {
+  color: var(--text-secondary);
+}
+
+[data-surface="console"] .ca-secret {
+  display: block;
+  margin-block-start: 0.25rem;
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: var(--ff-mono);
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}
+
+[data-surface="console"] .ca-codes ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-surface="console"] .ca-codes code {
+  font-weight: 700;
+  font-size: 0.875rem;
+  font-family: var(--ff-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-surface="console"] .ca-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+[data-surface="console"] .ca-linkbtn {
+  display: block;
+  cursor: pointer;
+  margin: 1rem auto 0;
+  border: 0;
+  background-color: transparent;
+  padding: 0.375rem 0.25rem;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .ca-links {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 1.25rem;
+  border-block-start: 1px solid var(--line-2);
+  padding-block-start: 1rem;
+  font-size: var(--ui-text);
+}

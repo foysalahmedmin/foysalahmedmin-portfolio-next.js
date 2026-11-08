@@ -1,3 +1,4 @@
+import { AuthFrame } from "@/components/admin/auth-frame";
 import AdminRecoveryForm from "@/components/admin/admin-recovery-form";
 import type { Metadata } from "next";
 
@@ -6,5 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default function ForgotPasswordPage() {
-  return <AdminRecoveryForm mode="request" />;
+  return (
+    <AuthFrame>
+      <AdminRecoveryForm mode="request" />
+    </AuthFrame>
+  );
 }
