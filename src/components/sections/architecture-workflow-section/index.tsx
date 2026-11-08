@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import PipelineSection from "./pipeline";
 
 const GUARDRAILS = [
   {
@@ -117,11 +118,19 @@ const FlowDiagram = () => (
 export default function ArchitectureWorkflowSection({
   site,
   heading,
+  layout,
 }: {
   site: TPublicSiteDto;
   heading?: string;
   layout?: string;
 }) {
+  // The home chapter: the pinned pipeline. Every other layout keeps the About page's diagram.
+  if (layout === "pipeline") {
+    return (
+      <PipelineSection workflow={site.workflow_example} heading={heading} />
+    );
+  }
+
   const pillarsByKey = new Map<
     TPublicSiteDto["pillars"][number]["key"],
     TPublicSiteDto["pillars"][number]

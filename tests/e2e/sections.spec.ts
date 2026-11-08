@@ -4,7 +4,7 @@ import { settle } from "./support/settle";
 
 /**
  * The home sections on the sections lab (`/lab/sections`, served in development and with MOTION_LAB=1):
- * stacked role panels, the process rail with its arrows, and the FAQ accordion. Checks structure and
+ * stacked role panels and the FAQ accordion. Checks structure and
  * behaviour a screenshot would not: panels really stack, the arrows really scroll and stop at the ends,
  * there are no numbers in cards, and there is no overflow or serious axe finding in either theme.
  */
@@ -56,31 +56,6 @@ test("the role panels slide over each other", async ({ page }, testInfo) => {
       { message: "the first role panel is held near the top" }
     )
     .toBe(true);
-});
-
-test("the process row moves with the arrows and stops at its ends", async ({
-  page,
-}) => {
-  await open(page);
-  const track = page.getByRole("list", { name: "Working process steps" });
-  await track.scrollIntoViewIfNeeded();
-  const previous = page.getByRole("button", { name: "Previous" });
-  const next = page.getByRole("button", { name: "Next" });
-  await expect(previous).toBeDisabled();
-  await expect(next).toBeEnabled();
-
-  const before = await track.evaluate((element) => element.scrollLeft);
-  await next.click();
-  await expect
-    .poll(() => track.evaluate((element) => element.scrollLeft))
-    .toBeGreaterThan(before + 100);
-  await expect(previous).toBeEnabled();
-
-  for (let guard = 0; guard < 8 && (await next.isEnabled()); guard += 1) {
-    await next.click();
-    await page.waitForTimeout(450);
-  }
-  await expect(next).toBeDisabled();
 });
 
 test("cards carry no numbers and the FAQ opens one answer at a time", async ({

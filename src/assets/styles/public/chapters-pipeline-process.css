@@ -2,4 +2,718 @@
  * Home chapters: pipeline-process (Phase 5). Owned by one slice; add rules here, not in sections.css.
  * Rules: tokens only (no colour literals), dim or hide only under html[data-motion-engine="ready"],
  * an unbound `--progress` is finished, reduced motion and no-JS show everything.
+ *
+ * Three chapters live here:
+ *  - Ch.3 pipeline (.pipeline-*): a pinned scene. Everything below reads `--pin-position` (the story
+ *    clock) through custom properties that the markup declares on `.pipeline-diagram`; unpinned there is
+ *    no `--pin-position` and each expression resolves to "finished".
+ *  - Ch.5 process (.process-*): a vertical wire drawn by `--progress` on `[data-scroll-progress]`.
+ *  - Ch.5b engagement (.engagement-*): a spec-sheet table that stacks below 900 px.
  */
+
+/* ======================================================================
+   Ch.3 Pipeline
+   ====================================================================== */
+
+.pipeline {
+  --pipeline-panel: clamp(8.5rem, 23svh, 13rem);
+}
+
+.pipeline-stage {
+  display: grid;
+  align-content: start;
+  gap: clamp(1.5rem, 4svh, 3rem);
+  padding-block: var(--space-section);
+}
+
+.pipeline-head {
+  display: grid;
+  gap: 1.25rem 4rem;
+}
+
+.pipeline-note {
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  gap: 0.75rem;
+}
+
+/* The mandatory label may wrap on a narrow phone rather than overflow */
+.pipeline-note .t-eyebrow {
+  white-space: normal;
+}
+
+.pipeline-caption {
+  margin: 0;
+  max-inline-size: 42ch;
+  color: var(--text-secondary);
+  font-size: var(--step-0);
+  line-height: 1.45;
+}
+
+.pipeline-diagram {
+  position: relative;
+}
+
+.pipeline-svg {
+  display: none;
+}
+
+/* ---------- Phones and narrow windows: a vertical wire, a square node per step ---------- */
+.pipeline-steps {
+  display: grid;
+  position: relative;
+  gap: 1.75rem;
+  margin: 0;
+  padding: 0 0 0 2.5rem;
+  list-style: none;
+}
+
+.pipeline-steps::before {
+  position: absolute;
+  inset-block: 0.75rem 0.5rem;
+  inset-inline-start: 0.5625rem;
+  background: var(--line-4);
+  inline-size: 1px;
+  content: "";
+}
+
+.pipeline-step {
+  position: relative;
+}
+
+.pipeline-step::before {
+  position: absolute;
+  inset-block-start: 0.125rem;
+  inset-inline-start: -2.5rem;
+  background: var(--foreground);
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  content: "";
+}
+
+.pipeline-name {
+  margin: 0;
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: var(--step--1);
+}
+
+.pipeline-does {
+  margin: 0.5rem 0 0;
+  max-inline-size: 38ch;
+  font-size: var(--step-0);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.pipeline-fails {
+  margin: 0.75rem 0 0;
+  max-inline-size: 38ch;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.pipeline-fails-label {
+  display: block;
+  margin-block-end: 0.125rem;
+}
+
+/* ---------- The switch: HTML and CSS, no script. Off is its resting state. ---------- */
+.pipeline-off {
+  --travel: calc(3rem - 1.125rem - 0.5rem - 2px);
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-block-start: 2rem;
+  border-block-start: 1px solid var(--line-3);
+  padding-block-start: 1.25rem;
+  max-inline-size: 46rem;
+}
+
+.pipeline-off p {
+  margin: 0;
+  min-inline-size: 0;
+  font-size: var(--step-0);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.pipeline-off-label {
+  display: block;
+  color: var(--text-secondary);
+}
+
+.pipeline-switch {
+  position: relative;
+  flex: none;
+  border: 1px solid var(--foreground);
+  inline-size: 3rem;
+  block-size: 1.625rem;
+}
+
+/* The track fills while the switch is on and empties as it flips */
+.pipeline-switch::before {
+  position: absolute;
+  opacity: calc(1 - var(--off, 1));
+  inset: 0;
+  background: var(--foreground);
+  content: "";
+}
+
+.pipeline-knob {
+  position: absolute;
+  translate: calc((1 - var(--off, 1)) * var(--travel));
+  margin-block: auto;
+  inset-block: 0;
+  inset-inline-start: 0.25rem;
+  border: 1px solid var(--foreground);
+  background: var(--background);
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+
+/* ---------- Wide: the wire in SVG, the names under their chips, what each step does in the column ---------- */
+@media (min-width: 768px) {
+  .pipeline-head {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: end;
+  }
+
+  .pipeline .section-head h2 {
+    font-size: clamp(1.75rem, 1rem + 1.2vw + 1.8svh, 2.75rem);
+    line-height: 1.02;
+  }
+
+  .pipeline-svg {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  .pipeline-steps {
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 0;
+    margin-block-start: 0.5rem;
+    padding: 0;
+  }
+
+  .pipeline-steps::before,
+  .pipeline-step::before {
+    display: none;
+  }
+
+  /* Static, so the beats of a pinned scene anchor to the list, not to the item */
+  .pipeline-step {
+    position: static;
+    padding-inline-end: clamp(0.75rem, 2vw, 2rem);
+  }
+
+  .pipeline-does {
+    font-size: var(--step--1);
+  }
+}
+
+/* ---------- The wire ---------- */
+.pipeline-wire,
+.pipeline-trail,
+.pipeline-head-dash {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.pipeline-wire {
+  stroke: var(--line-3);
+  stroke-width: 1.5;
+}
+
+/* The path drawn so far. The path length is 1 (pathLength), the dash is a hair longer so the end never gaps. */
+.pipeline-trail {
+  opacity: 0.55;
+  stroke: var(--foreground);
+  stroke-width: 1.5;
+  stroke-dasharray: 1.01 3;
+  stroke-dashoffset: calc(1.01 - var(--pulse, 1));
+}
+
+/* The tapered head: three dashes ending at the pulse; the shortest is the thickest and the brightest */
+.pipeline-head-dash {
+  opacity: calc(var(--a) * (1 - var(--off, 1)));
+  stroke: var(--foreground);
+  stroke-width: var(--w);
+  stroke-dasharray: var(--len) 3;
+  stroke-dashoffset: calc(var(--len) - var(--pulse, 1));
+  stroke-linecap: round;
+}
+
+.pipeline-spark {
+  offset-distance: calc(var(--pulse, 1) * 100%);
+  offset-rotate: 0deg;
+  opacity: calc(1 - var(--off, 1));
+}
+
+.pipeline-spark-halo {
+  opacity: 0.18;
+  fill: var(--foreground);
+}
+
+.pipeline-spark-core {
+  fill: var(--foreground);
+  stroke: var(--background);
+  stroke-width: 2;
+}
+
+/* A chip lights as the pulse arrives (the wire runs under it) and stays lit. Finished, all are lit. */
+.pipeline-chip {
+  --lit: clamp(0, calc((var(--pulse, 1) - var(--at, 0)) * 24 + 1), 1);
+
+  /* The node the story is on: a ring around its chip, only while pinned (--pin-position is unset otherwise) */
+  --here: calc(
+    clamp(0, (var(--pin-position, -9) - var(--k, 0) + 0.15) * 20, 1) *
+      clamp(0, (var(--k, 0) + 0.85 - var(--pin-position, -9)) * 20, 1)
+  );
+}
+
+.pipeline-chip-ring {
+  opacity: var(--here, 0);
+  fill: none;
+  stroke: var(--foreground);
+  stroke-width: 1;
+}
+
+.pipeline-chip-box {
+  fill: var(--background);
+  stroke: var(--line-4);
+  stroke-width: 1.5;
+}
+
+.pipeline-chip-fill {
+  opacity: var(--lit);
+  fill: var(--foreground);
+}
+
+.pipeline-chip-glyph {
+  fill: none;
+  stroke: color-mix(
+    in oklab,
+    var(--background) calc(var(--lit) * 100%),
+    var(--text-secondary)
+  );
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Pinned (wide): the stage is one screen, the beats are the panel under the wire ---------- */
+@media (min-width: 768px) {
+  .pipeline[data-pinned="true"] .pipeline-stage {
+    align-content: center;
+    padding-block: calc(var(--header-offset) + 1rem) 1.5rem;
+    block-size: 100%;
+  }
+
+  /* A name lights as the pulse reaches it, like its chip */
+  .pipeline[data-pinned="true"] .pipeline-name {
+    --lit: clamp(0, calc((var(--pulse, 1) - var(--at, 0)) * 24 + 1), 1);
+
+    color: color-mix(
+      in oklab,
+      var(--foreground) calc(var(--lit) * 100%),
+      var(--text-secondary)
+    );
+  }
+
+  /* The list reserves the panel; the beats are absolutely placed in it, all the same size */
+  .pipeline[data-pinned="true"] .pipeline-steps {
+    padding-block-end: var(--pipeline-panel);
+  }
+
+  .pipeline[data-pin-scene][data-pinned="true"] .pipeline-beat {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 2rem;
+    align-content: start;
+    inset: auto 0 0;
+    border-block-start: 1px solid var(--line-3);
+    padding-block-start: clamp(0.75rem, 2.2svh, 1.5rem);
+    block-size: var(--pipeline-panel);
+  }
+
+  /* A stem from the panel up to the column of the step it describes */
+  .pipeline[data-pinned="true"] .pipeline-beat::before {
+    position: absolute;
+    inset-block-end: 100%;
+    inset-inline-start: calc(var(--beat) * 100% / var(--n));
+    background: var(--foreground);
+    inline-size: 1px;
+    block-size: 0.75rem;
+    content: "";
+  }
+
+  .pipeline[data-pinned="true"] .pipeline-does {
+    grid-column: 1;
+    margin: 0;
+    max-inline-size: none;
+    font-size: var(--step-0);
+  }
+
+  .pipeline[data-pinned="true"] .pipeline-fails {
+    grid-column: 2;
+    margin: 0;
+    max-inline-size: none;
+  }
+
+  /* The switch takes the third column of the panel and arrives with the last beat */
+  .pipeline[data-pinned="true"] .pipeline-off {
+    position: absolute;
+    align-items: flex-start;
+    opacity: var(--arrive, 1);
+    margin: 0;
+    inset: auto 0 0 auto;
+    border: 0;
+    padding-block-start: clamp(0.75rem, 2.2svh, 1.5rem);
+    inline-size: calc((100% - 4rem) / 3);
+    max-inline-size: none;
+    block-size: var(--pipeline-panel);
+  }
+
+  .pipeline[data-pinned="true"] .pipeline-off p {
+    opacity: var(--off, 1);
+  }
+}
+
+/* Below 768 px a pinned scene is a plain stacked list again: nothing clipped, every beat visible */
+@media (max-width: 767px) {
+  .pipeline[data-pin-scene][data-pinned="true"] {
+    block-size: auto;
+  }
+
+  .pipeline[data-pin-scene][data-pinned="true"] > [data-pin-stage] {
+    position: static;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  .pipeline[data-pin-scene][data-pinned="true"] [data-pin-beat] {
+    position: static;
+    opacity: 1;
+  }
+}
+
+/* ======================================================================
+   Ch.5 Process (the wire) and Ch.5b Engagement: one paper band, no seam
+   ====================================================================== */
+
+.process-band,
+.engagement-band {
+  padding-block: var(--space-section);
+}
+
+/* Same tone straight after the process band: its bottom padding is the gap */
+.process-band + .engagement-band {
+  padding-block-start: 0;
+}
+
+.process-wire {
+  --wire-pad: 2.75rem;
+  --wire-x: 1.125rem;
+  --node: 0.6875rem;
+  --row-pad: clamp(1.5rem, 3vw, 2.5rem);
+
+  position: relative;
+  margin-block-start: clamp(2.5rem, 5vw, 4rem);
+  padding-inline-start: var(--wire-pad);
+}
+
+/* The rail clips the fill: the fill is as tall as the wire and slides down into view with `--progress` */
+.process-rail {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--wire-x) - 0.625rem);
+  inline-size: 1.25rem;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.process-rail::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(50% - 0.5px);
+  background: var(--line-3);
+  inline-size: 1px;
+  content: "";
+}
+
+.process-fill {
+  position: absolute;
+  translate: 0 calc((var(--progress) - 1) * 100%);
+  inset-block: 0;
+  inset-inline-start: calc(50% - 1px);
+  background: color-mix(in oklab, var(--foreground) 55%, transparent);
+  inline-size: 2px;
+}
+
+/* The pulse head at the tip: a taper that brightens toward the point, and the point */
+.process-fill::before,
+.process-fill::after {
+  position: absolute;
+  translate: -50% 0;
+  inset-block-end: 0;
+  inset-inline-start: 50%;
+  content: "";
+}
+
+.process-fill::before {
+  background: linear-gradient(to bottom, transparent, var(--foreground));
+  inline-size: 3px;
+  block-size: 4.5rem;
+}
+
+.process-fill::after {
+  background: var(--foreground);
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+}
+
+.process-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.process-step {
+  --lit: 1;
+
+  display: grid;
+  position: relative;
+  gap: 0.75rem 3rem;
+  border-block-start: 1px solid var(--line-3);
+  padding-block: var(--row-pad);
+}
+
+.process-step:last-child {
+  border-block-end: 1px solid var(--line-3);
+}
+
+/* The step's node on the wire: hollow until the wire reaches it, then solid */
+.process-step::before {
+  position: absolute;
+  inset-block-start: calc(var(--row-pad) + 0.5rem);
+  inset-inline-start: calc(var(--wire-x) - var(--wire-pad) - var(--node) / 2);
+  border: 1px solid var(--foreground);
+  background: color-mix(
+    in oklab,
+    var(--foreground) calc(var(--lit) * 100%),
+    var(--background)
+  );
+  inline-size: var(--node);
+  block-size: var(--node);
+  content: "";
+}
+
+.process-title,
+.process-summary,
+.process-output {
+  margin: 0;
+  color: color-mix(
+    in oklab,
+    var(--foreground) calc(var(--lit) * 100%),
+    var(--text-secondary)
+  );
+}
+
+.process-summary {
+  max-inline-size: 48ch;
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+
+.process-output {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.process-output-label {
+  color: var(--text-secondary);
+}
+
+/* The engine draws the wire: steps dim until it reaches them. Nothing is dimmed without it. */
+html[data-motion-engine="ready"] .process-step {
+  --lit: clamp(0, calc((var(--progress) - var(--at, 0)) * 14 + 1), 1);
+}
+
+@media (min-width: 768px) {
+  .process-step {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+
+  .process-title {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+  }
+
+  .process-summary,
+  .process-output {
+    grid-column: 2;
+  }
+}
+
+/* ---------- Engagement: a spec sheet ---------- */
+.engagement-sheet {
+  margin-block-start: clamp(2.5rem, 5vw, 4rem);
+}
+
+.engagement-table {
+  border-collapse: collapse;
+  inline-size: 100%;
+  table-layout: fixed;
+}
+
+.engagement-table th,
+.engagement-table td {
+  vertical-align: top;
+  padding: 1.25rem 1.5rem 1.25rem 0;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.engagement-table thead th {
+  border-block-end: 1px solid var(--line-4);
+  padding-block: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: var(--step--2);
+  line-height: 1.4;
+}
+
+.engagement-table thead th:nth-child(1) {
+  inline-size: 20%;
+}
+
+.engagement-table thead th:nth-child(2),
+.engagement-table thead th:nth-child(3) {
+  inline-size: 22%;
+}
+
+.engagement-table thead th:nth-child(4),
+.engagement-table thead th:nth-child(5) {
+  inline-size: 18%;
+}
+
+.engagement-table tbody tr {
+  border-block-end: 1px solid var(--line-2);
+}
+
+.engagement-table .engagement-name {
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.engagement-gets {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.engagement-gets li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+}
+
+.engagement-gets li::before {
+  flex: none;
+  translate: 0 -0.05em;
+  background: var(--foreground);
+  inline-size: 0.375rem;
+  block-size: 0.375rem;
+  content: "";
+}
+
+.engagement-start {
+  display: block;
+}
+
+.engagement-start[data-scoped] {
+  color: var(--text-secondary);
+}
+
+/* Below 900 px each row is a stacked list of labelled values (the markup is the same table) */
+@media (max-width: 899px) {
+  .engagement-table,
+  .engagement-table tbody,
+  .engagement-table tr,
+  .engagement-table th,
+  .engagement-table td {
+    display: block;
+  }
+
+  /* The column headings stay for assistive technology; the labels below replace them on screen */
+  .engagement-table thead {
+    position: absolute;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .engagement-table tbody tr {
+    border-block-start: 1px solid var(--line-3);
+    border-block-end: 0;
+    padding-block: 1.5rem;
+  }
+
+  .engagement-table tbody tr:last-child {
+    border-block-end: 1px solid var(--line-3);
+  }
+
+  .engagement-table th,
+  .engagement-table td {
+    padding: 0;
+  }
+
+  .engagement-table .engagement-name {
+    margin-block-end: 0.75rem;
+  }
+
+  .engagement-table td {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 8rem) minmax(0, 1fr);
+    gap: 0.25rem 1rem;
+    border-block-start: 1px solid var(--line-1);
+    padding-block: 0.625rem;
+  }
+
+  .engagement-table td::before {
+    content: attr(data-label);
+
+    /* The label is decoration where the browser supports alt text for generated content; the column headings carry the meaning */
+    content: attr(data-label) / "";
+    color: var(--text-secondary);
+    font-size: var(--step--2);
+    font-family: var(--ff-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .engagement-table td:empty {
+    display: none;
+  }
+}
