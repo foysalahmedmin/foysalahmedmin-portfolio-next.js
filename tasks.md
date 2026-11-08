@@ -1646,7 +1646,7 @@ Source of truth: [`docs/plans/2026-10-08-monochrome-systems-ui-overhaul.md`](./d
 | SG3   | Verification  | Built, measured and pushed 2026-10-26 ([findings](./docs/baseline/phase-3-findings.md)): story clock, shell, 3D maquette with packets of light, poster pipeline, hero scroll story, rebuilt home sections, owner review round; every plan 6.2 budget met on the constrained profile (Home TBT 118 ms, LCP 1,244 ms, CLS 0.012), 3D chunk 138 KB gzip, initial JS 179.96 KB (46 bytes under), harness green on all routes. Awaiting owner review                                                                                                   |
 | SG4   | Verification  | Built and verified locally 2026-11-04 ([findings](./docs/baseline/phase-4-findings.md)): Site, Page, Service and case study data model, six page kinds and nine layouts, admin editors, seed v8 (46 records, second dry run all unchanged), truth manifest 1.1.0 with a content gate; 1,441 tests pass, 132 browser specs pass; initial JS 179.97 KB (28 bytes under). Content stays off where a fact is the owner's: C-13 to C-18, C-31 to C-33. Awaiting owner review                                                                           |
 | SG5   | Verification  | Built and verified locally 2026-11-08 ([findings](./docs/baseline/phase-5-findings.md)): sixteen home chapters (Tier 1 and built-but-hidden Tier 2), chapter bindings in the deferred engine, pinned Stack and Pipeline with skip links, first hero role complete at scroll 0; home 22.8 screens (27.0 with Tier 2), initial JS 179.71 KB (302 bytes under), 1,565 tests pass, chapter and public browser specs pass. Lighthouse and the smoothness harness not re-run. Awaiting owner review                                                     |
-| SG6   | Pending       | Public inner pages on archetype templates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| SG6   | Verification  | Built locally 2026-11-08 ([findings](./docs/baseline/phase-6-findings.md)): every public page on its archetype template with the shared header; case-study scrollytelling with a code-native diagram, lab registry, editorial articles and videos, About narrative, Contact with topic chips, legal and system pages; filters are server GET forms (no client discovery code); initial JS 177.4 KB on every list page, 1,681 tests pass. No engagement-type filter, no M30, no Lighthouse run. Awaiting owner review                              |
 | SG7   | Pending       | Console shell, dashboard, shared patterns, authenticated e2e                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | SG8   | Pending       | Console workspaces sweep (about 370 legacy class hits across 35 files)                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | SG9   | Pending       | Hardening and motion tuning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -1708,7 +1708,22 @@ Updated as work lands. The acceptance gate is plan section 7, Phase 5.
 - [x] Docs: `phase-5-findings.md`, plan revision 1.8, ADR 0011 Phase 5 outcome, motion registry
 - [ ] Lighthouse, smoothness harness and visual snapshots on the new home (not run in Phase 5)
 - [ ] Owner: review the home on a real GPU; decide whether `pillars` comes back; C-13 to C-18 and C-31 to C-33 before Tier 2 is switched on
-- [ ] Owner review, then SG6 (public inner pages)
+- [x] Owner review of Phase 5 folded into Phase 6 (the owner asked for Phase 6 next)
+
+### SG6 checklist (public inner pages)
+
+Updated as work lands. The acceptance gate is plan section 7, Phase 6.
+
+- [x] Case files index and the case-study walkthrough with the diagram renderer, text equivalent and chapter sync (M17)
+- [x] Lab: projects registry and `LabSwitcher`; editorial articles with reading progress; videos as greyscale posters
+- [x] About narrative (portrait, timeline wire), Contact with `?topic=` chips and "What happens next", legal documents, 404, error and loading
+- [x] Server-rendered GET filters; the client discovery sections and `DiscoveryFilters` deleted; `/projects` and `/articles` under the JS budget
+- [x] Route header copy fixed (The lab, Case files, Recommended watching); A3 and A4 page headers in the contract
+- [x] Docs: `phase-6-findings.md`, plan revision 1.9, ADR 0011 Phase 6 outcome, motion registry
+- [ ] Engagement-type filter on `/case-studies` (discovery field and query)
+- [ ] M30 shared-element morph; Lighthouse, smoothness harness and visual snapshots on the inner pages
+- [ ] Owner: review the inner pages on a real device; decide the root `error.tsx` digest
+- [ ] Owner review, then SG7 (console shell)
 
 ## Deferred ideas — only after the core release
 

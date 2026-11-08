@@ -314,7 +314,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "All nodes visible, no highlight",
     phase: 6,
-    built: false,
+    built: true,
+    implementation: "src/components/content/case-study-diagram.tsx",
+    demoRoute: "/case-studies",
   },
   {
     id: "M18",
@@ -436,7 +438,10 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Static image",
     phase: 6,
-    built: false,
+    built: true,
+    implementation:
+      "src/components/(common)/about-page/about-details-section/index.tsx",
+    demoRoute: "/about",
   },
   {
     id: "M26",
@@ -497,7 +502,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, N, N),
     reduced: "None",
     phase: 5,
-    built: false,
+    built: true,
+    implementation: "src/components/content/lab-switcher.tsx",
+    demoRoute: "/projects",
   },
   {
     id: "M30",
@@ -542,7 +549,10 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, R),
     reduced: "Instant",
     phase: 6,
-    built: false,
+    built: true,
+    implementation:
+      "src/components/(common)/contact-page/contact-content-section/contact-form.tsx",
+    demoRoute: "/contact",
   },
   {
     id: "M33",
@@ -571,7 +581,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, R),
     reduced: "Static or hidden",
     phase: 6,
-    built: false,
+    built: true,
+    implementation: "src/components/motion/reading-progress.tsx",
+    demoRoute: "/privacy",
   },
   {
     id: "M35",

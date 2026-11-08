@@ -1,5 +1,5 @@
 {
-  "$comment": "The contract the consistency probe (tests/e2e/consistency.spec.ts) and tests/unit/archetypes.test.ts read. Change it in the same PR as any template change (docs plan 3.15). `pageHeader`: false, \"index\" (H1 at --step-5), \"detail\" (H1 at --step-4) or \"deferred\" (the page still renders its own hero; moved onto PageHeader in Phase 6). `ctaBand`: whether the shared CtaBand is expected. `shell: false`: the page renders outside the public layout (unmatched URLs), so no header, footer or grain is expected; a `notFound()` raised inside a public route renders (common)/not-found.tsx inside the shell.",
+  "$comment": "The contract the consistency probe (tests/e2e/consistency.spec.ts) and tests/unit/archetypes.test.ts read. Change it in the same PR as any template change (docs plan 3.15). `pageHeader`: false, \"index\" (H1 at --step-5), \"detail\" (H1 at --step-4). `ctaBand`: whether the shared CtaBand is expected. `shell: false`: the page renders outside the public layout (unmatched URLs), so no header, footer or grain is expected; a `notFound()` raised inside a public route renders (common)/not-found.tsx inside the shell.",
   "version": 1,
   "public": {
     "surface": "public",
@@ -35,7 +35,7 @@
       "A3": {
         "name": "Story",
         "template": "StoryLayout",
-        "pageHeader": "deferred",
+        "pageHeader": "detail",
         "ctaBand": true,
         "discover": {
           "api": "/api/case-studies?limit=1",
@@ -45,7 +45,7 @@
       "A4": {
         "name": "Detail",
         "template": "DetailLayout",
-        "pageHeader": "deferred",
+        "pageHeader": "detail",
         "ctaBand": true,
         "discover": [
           { "api": "/api/projects?limit=1", "linkPrefix": "/projects/" },

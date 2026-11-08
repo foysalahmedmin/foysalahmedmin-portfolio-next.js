@@ -8,14 +8,14 @@ Every route belongs to exactly one archetype and every archetype has one templat
 | --------------- | -------------------- | ---------------------------------------------------- | ----------- | -------------------- |
 | A1 Chapter      | `ChapterPage`        | `/`                                                  | none (hero) | from the composition |
 | A2 Index        | `IndexLayout`        | `/projects`, `/case-studies`, `/articles`, `/videos` | index       | yes                  |
-| A3 Story        | `StoryLayout`        | `/case-studies/[id]`                                 | deferred    | yes                  |
-| A4 Detail       | `DetailLayout`       | `/projects/[id]`, `/articles/[id]`, `/videos/[id]`   | deferred    | yes                  |
+| A3 Story        | `StoryLayout`        | `/case-studies/[id]`                                 | detail      | yes                  |
+| A4 Detail       | `DetailLayout`       | `/projects/[id]`, `/articles/[id]`, `/videos/[id]`   | detail      | yes                  |
 | A5 Narrative    | `NarrativePage`      | `/about`                                             | index       | yes                  |
 | A6 Conversation | `ConversationLayout` | `/contact`                                           | index       | no                   |
 | A7 Document     | `DocumentLayout`     | `/privacy`, `/terms`                                 | detail      | no                   |
 | A8 System       | `SystemPage`         | not found, route errors (and the loading shell)      | none        | no                   |
 
-"Deferred" means the detail sections still render their own hero; Phase 6 moves them onto `PageHeader`. The `contact-cta` Page section renders the same `CtaBand`; a page whose composition already contains it does not get a second one.
+Every inner page renders the shared `PageHeader` (Phase 6). The `contact-cta` Page section renders the same `CtaBand`; a page whose composition already contains it does not get a second one.
 
 `SystemPage` is used twice for not found: `(common)/not-found.tsx` renders it inside the public layout (header, footer) for `notFound()` raised by a public route, and `app/not-found.tsx` renders it standalone, with its own surface and font scope, for addresses that match no route.
 

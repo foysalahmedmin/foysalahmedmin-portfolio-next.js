@@ -100,6 +100,12 @@ Full evidence: [`docs/baseline/phase-5-findings.md`](../baseline/phase-5-finding
 
 The home chapters are built from the Page composition and the Site data. Scroll-linked behaviour that is not a pinned scene is bound by the engine from data attributes (`data-scroll-focus`, `data-scroll-progress`), so it lives in the deferred motion chunk and the home route's initial JavaScript did not grow; the two pinned scenes (Stack, Pipeline) reuse `PinScene` and are driven from CSS. Chapter progress deliberately does not use ScrollTrigger: a trigger makes ScrollTrigger refresh the page, which left a visitor who had scrolled far partway down. The initial-JS cap is met again with 302 bytes of headroom, by retiring the client card-row `Rail` that no composition used. Every pinned scene has a skip link, and the home has three pins at most. Not repeated in this phase: Lighthouse, the smoothness harness and the visual snapshots.
 
+## Phase 6 outcome (2026-11-08)
+
+Full evidence: [`docs/baseline/phase-6-findings.md`](../baseline/phase-6-findings.md).
+
+Every public page is composed from its archetype template with the shared page header. The case-study walkthrough draws its architecture as code-native SVG from the structured data and the engine's focus binder lights the nodes of the chapter in view (a `data-highlight-scope`), so no inner page needs a pinned scene. The discovery filters of the four index pages are server-rendered GET forms: about 2,000 lines of client discovery code were deleted, which brought every list page and the home to 177.4 KB of initial JavaScript (the two list pages that were gated at 188 to 191 KB included). Not repeated in this phase: Lighthouse, the smoothness harness and the visual snapshots.
+
 ## Verification
 
 - Bundle boundary test and build-output scan (admin and `components/ui` free of the engine libraries).

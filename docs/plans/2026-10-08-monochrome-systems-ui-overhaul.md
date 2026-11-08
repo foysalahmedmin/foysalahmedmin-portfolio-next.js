@@ -9,6 +9,14 @@
 | **Decision** | Needs ADR 0011 (amends ADR 0002 dependencies and ADR 0009 budgets). Drafted in Appendix C, not yet accepted.                                             |
 | **Handoff**  | On approval, each phase in section 7 gets its own task-level implementation plan (writing-plans format) before any code.                                 |
 
+### Revision 1.9: what Phase 6 changed in the plan (2026-11-08)
+
+- **Filters are server-rendered GET forms.** The discovery sections of the four index pages no longer use client code; every form sends all its fields and the page redirects to the canonical URL. This also removed the initial-JS gate on `/projects` and `/articles`.
+- **The engagement-type filter on the case files is not built**: the discovery query has no such field. The type is a chip on every row.
+- **Route titles corrected:** `/projects` is "The lab", `/case-studies` is "Case files", `/videos` is "Recommended watching".
+- **The case-study diagram is lit by the focus binder** (a highlight scope in the engine chunk), not a pinned scene; no inner page pins.
+- **M30 and the Contact working-hours bar are not built.**
+
 ### Revision 1.8: what Phase 5 changed in the plan (2026-11-08)
 
 - **The first hero role is complete at the top of the page.** The plain line and the three capabilities of System Architect are visible before any scroll (owner request); the other two roles still arrive with the scroll. Ch.0 above describes the capabilities of every role appearing one by one: the first one no longer does.
@@ -1427,6 +1435,7 @@ Dependencies: P0 → P1 → P2 → (P3 ∥ P4 ∥ P7) → P5 → P6; P7 → P8; 
 ### Phase 6: Public inner pages (L)
 
 - **Work:** every public page on its archetype template: case-file index and walkthrough with the diagram renderer, Lab (projects), articles, videos, details, About, Contact flow, legal, 404, error and loading; `LabSwitcher`; one signature interaction per page; shared-element transition (M30).
+- **Result (2026-11-08):** built; evidence and the gaps are in [`docs/baseline/phase-6-findings.md`](../baseline/phase-6-findings.md). Not done: the engagement-type filter, M30, and the Lighthouse, harness and visual runs.
 - **Acceptance:** **consistency probe green on every public route**; each page uses a template (no private header or CTA band); axe and visual baselines in both themes; contact flow works with and without `?topic=`; diagrams readable without colour and with a text equivalent; harness green on a case file, an index and an article.
 - **Tests:** route e2e, visual, axe, consistency, contact abuse paths (existing) still green.
 

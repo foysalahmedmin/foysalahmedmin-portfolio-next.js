@@ -173,7 +173,7 @@ Generated from `src/lib/motion/registry.ts`. Do not edit by hand.
 | M14 | Magnetic CTA         | Pointer near                           | respond  | fast, spring                    | run / — / —     | None                                 | Built   |
 | M15 | Sheen                | Pointer over glass                     | respond  | micro                           | run / — / —     | Static edge highlight                | Phase 5 |
 | M16 | Reticle cursor       | Pointer (fine)                         | respond  | lag 120 ms                      | run / — / —     | Native cursor only                   | Built   |
-| M17 | Chapter sync         | Scroll (case file)                     | assemble | scrub.lag                       | run / run / —   | All nodes visible, no highlight      | Phase 6 |
+| M17 | Chapter sync         | Scroll (case file)                     | assemble | scrub.lag                       | run / run / —   | All nodes visible, no highlight      | Built   |
 | M18 | Route shutter        | Navigation                             | assemble | 420 ms, snap                    | run / run / —   | Instant or crossfade 150 ms          | Built   |
 | M19 | Wire draw            | Scroll (process, timeline)             | assemble | scrub.lag                       | run / run / —   | Complete wire                        | Built   |
 | M20 | Palette open         | Command-K or button                    | respond  | fast, signal                    | run / run / run | Instant                              | Built   |
@@ -181,16 +181,16 @@ Generated from `src/lib/motion/registry.ts`. Do not edit by hand.
 | M22 | Footer wordmark      | Scroll into footer                     | resolve  | scrub.lag                       | run / run / —   | Static wordmark                      | Built   |
 | M23 | Velocity coupling    | Scroll velocity                        | transmit | damped, skew 3 degrees at most  | run / — / —     | None                                 | Built   |
 | M24 | Boundary wipe        | Scroll (tone change)                   | assemble | scrub.lag, 30vh                 | run / run / —   | Instant tone change                  | Phase 5 |
-| M25 | Frame parallax       | Scroll (media frames)                  | assemble | scrub.lag, 8% travel            | run / run / —   | Static image                         | Phase 6 |
+| M25 | Frame parallax       | Scroll (media frames)                  | assemble | scrub.lag, 8% travel            | run / run / —   | Static image                         | Built   |
 | M26 | Underline draw       | Hover, focus                           | respond  | fast, signal                    | run / run / run | Instant underline                    | Built   |
 | M27 | Label roll           | Hover, press, loading                  | respond  | micro, press 50 ms              | run / — / —     | Colour-free state swap, no roll      | Built   |
 | M28 | Nav indicator        | Route or hover change                  | respond  | base, settle                    | run / run / run | Instant                              | Built   |
-| M29 | Glass tilt           | Pointer over featured glass            | respond  | spring, 3 degrees at most       | run / — / —     | None                                 | Phase 5 |
+| M29 | Glass tilt           | Pointer over featured glass            | respond  | spring, 3 degrees at most       | run / — / —     | None                                 | Built   |
 | M30 | Shared-element morph | Navigation                             | assemble | 420 ms, snap                    | run / run / —   | Instant or crossfade                 | Phase 6 |
 | M31 | Path draw            | Scroll, in-view                        | transmit | scrub.lag or slow               | run / run / —   | Complete path                        | Built   |
-| M32 | Field focus          | Focus, valid, invalid                  | respond  | fast                            | run / run / run | Instant                              | Phase 6 |
+| M32 | Field focus          | Focus, valid, invalid                  | respond  | fast                            | run / run / run | Instant                              | Built   |
 | M33 | Skeleton breathe     | Loading                                | resolve  | 1.4 s loop                      | run / run / run | Static skeleton                      | Built   |
-| M34 | Reading progress     | Scroll (articles, case files)          | transmit | linear                          | run / run / run | Static or hidden                     | Phase 6 |
+| M34 | Reading progress     | Scroll (articles, case files)          | transmit | linear                          | run / run / run | Static or hidden                     | Built   |
 | M35 | Header hide and show | Scroll direction and speed             | respond  | base, snap                      | run / run / run | Header always visible                | Built   |
 | M36 | Role story           | Scroll scrub (hero pin, about 300vh)   | resolve  | scrub.lag, hold 0.7, change 0.3 | run / run / run | Roles stacked as a plain list        | Built   |
 | M37 | Scene reaction       | Scroll (hero pin)                      | assemble | camera glide, eased             | run / run / —   | Poster still                         | Built   |
