@@ -363,16 +363,17 @@ html.light .hero-poster--dark {
   );
 }
 
-/* Capabilities appear one by one while the role holds */
+/* Capabilities appear one by one while the role holds. The first role is complete at the top of the page
+   (owner decision, 2026-11-08): its capabilities are there before any scroll, like its title and plain line. */
 [data-hero][data-pinned="true"] .hero-caps li {
-  transform: translateY(
-    calc(
-      (1 - clamp(0, (var(--tau) - (0.12 + var(--c, 0) * 0.14)) / 0.2, 1)) * 14px
-    )
+  --in: calc(
+    clamp(0, (var(--tau) - (0.12 + var(--c, 0) * 0.14)) / 0.2, 1) *
+      (1 - var(--first, 0)) + var(--first, 0)
   );
+
+  transform: translateY(calc((1 - var(--in)) * 14px));
   opacity: calc(
-    clamp(0, (var(--tau) - (0.12 + var(--c, 0) * 0.14)) / 0.2, 1) -
-      clamp(0, (var(--tau) - 0.7) / 0.2, 1) * (1 - var(--last, 0))
+    var(--in) - clamp(0, (var(--tau) - 0.7) / 0.2, 1) * (1 - var(--last, 0))
   );
 }
 

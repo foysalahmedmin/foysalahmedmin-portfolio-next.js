@@ -19,6 +19,7 @@ import AboutSection from "@/components/(common)/home-page/about-section";
 import ArticlesSection from "@/components/(common)/home-page/articles-section";
 import CaseStudiesSection from "@/components/(common)/home-page/case-studies-section";
 import SiteHeroSection from "@/components/sections/site-hero-section";
+import { PinSkipLink, PinSkipTarget } from "@/components/motion/pin-skip-link";
 import { isScene3dEnabled } from "@/lib/motion/scene";
 import ProjectsSection from "@/components/(common)/home-page/projects-section";
 import VideosSection from "@/components/(common)/home-page/videos-section";
@@ -65,6 +66,12 @@ export type TPublicPageSectionOverride = (
 export type TPublicPageSectionOverrides = Readonly<
   Partial<Record<TPageSectionKind, TPublicPageSectionOverride>>
 >;
+
+/** The scenes that pin on the home page: each gets a skip link before it and an anchor after it. */
+const isPinnedScene = (section: TResolvedPageSection) =>
+  section.kind === "site-hero" ||
+  (section.kind === "service-collection" && section.layout === "stack") ||
+  (section.kind === "architecture-workflow" && section.layout === "pipeline");
 
 const asItems = <T,>(items: readonly Readonly<Record<string, unknown>>[]) =>
   items as unknown as readonly T[];
@@ -390,7 +397,16 @@ export const PublicPageSections = ({ payload, sectionOverrides }: Props) => (
             content = null;
         }
 
-      return content ? <Fragment key={section.key}>{content}</Fragment> : null;
+      if (!content) return null;
+      return isPinnedScene(section) ? (
+        <Fragment key={section.key}>
+          <PinSkipLink target={`after-${section.key}`} />
+          {content}
+          <PinSkipTarget id={`after-${section.key}`} />
+        </Fragment>
+      ) : (
+        <Fragment key={section.key}>{content}</Fragment>
+      );
     })}
   </>
 );

@@ -194,8 +194,12 @@ describe("PublicPageSections", () => {
 
     const { container } = render(<PublicPageSections payload={payload} />);
     expect(container.textContent).toBe(
-      "projects:First case studyheroarchitecturearticles:First insightfaqsprocesscontact"
+      "projects:First case studySkip past this scroll scenehero" +
+        "architecturearticles:First insightfaqsprocesscontact"
     );
+    // The pinned hero can be skipped: a link before it, an anchor right after it
+    expect(container.querySelector('a[href="#after-hero"]')).not.toBeNull();
+    expect(container.querySelector("#after-hero")).not.toBeNull();
     expect(container.querySelector("[data-project-fallback]")).toHaveAttribute(
       "data-project-fallback",
       "https://cdn.example.com/project-backend.webp"

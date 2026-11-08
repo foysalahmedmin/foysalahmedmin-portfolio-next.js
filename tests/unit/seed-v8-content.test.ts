@@ -280,7 +280,7 @@ describe("seed version 8: Page compositions", () => {
     expect(home.length).toBeLessThanOrEqual(20);
     expect(
       home.filter((section) => !section.visible).map((section) => section.key)
-    ).toEqual(["fit", "finder", "principles"]);
+    ).toEqual(["pillars", "fit", "finder", "principles"]);
     const layouts = Object.fromEntries(
       home.map((section) => [section.key, section.layout])
     );

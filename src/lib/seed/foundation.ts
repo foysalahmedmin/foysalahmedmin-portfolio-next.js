@@ -779,7 +779,9 @@ const pageDrafts = {
       {
         key: "pillars",
         kind: "pillar-showcase",
-        visible: true,
+        // Off on the home since Phase 5: the hero and the Stack already present the same three roles, and
+        // the plan's length budget (24 screens) has no room for a third. Switch it on in the Pages editor.
+        visible: false,
         heading: "Three ways I help you move forward",
         layout: "sticky",
         source: system,

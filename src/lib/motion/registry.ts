@@ -215,7 +215,7 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     id: "M11",
     surface: "public",
     name: "Stack explode",
-    trigger: "Pinned scrub (about 250vh)",
+    trigger: "Pinned scrub (about 170vh)",
     meaning: "assemble",
     timing: "scrub.lag",
     durations: [],
@@ -223,7 +223,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Static panels, all specs shown",
     phase: 5,
-    built: false,
+    built: true,
+    implementation: "src/components/sections/services-section/stack.tsx",
+    demoRoute: "/",
   },
   {
     id: "M12",
@@ -237,7 +239,10 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Static diagram, failure line shown",
     phase: 5,
-    built: false,
+    built: true,
+    implementation:
+      "src/components/sections/architecture-workflow-section/pipeline.tsx",
+    demoRoute: "/",
   },
   {
     id: "M13",
@@ -338,7 +343,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Complete wire",
     phase: 5,
-    built: false,
+    built: true,
+    implementation: "src/components/sections/process-steps-section/wire.tsx",
+    demoRoute: "/",
   },
   {
     id: "M20",
@@ -518,7 +525,10 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: "Complete path",
     phase: 5,
-    built: false,
+    built: true,
+    implementation:
+      "src/components/sections/architecture-workflow-section/pipeline.tsx",
+    demoRoute: "/",
   },
   {
     id: "M32",
@@ -623,7 +633,9 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, R),
     reduced: "All pains fully visible",
     phase: 5,
-    built: false,
+    built: true,
+    implementation: "src/lib/motion/engine/chapters.ts",
+    demoRoute: "/",
   },
   {
     id: "M39",
@@ -637,7 +649,10 @@ export const PUBLIC_EFFECTS: readonly MotionEffect[] = [
     tiers: tiers(R, R, N),
     reduced: 'Static "Off" state with the sentence',
     phase: 5,
-    built: false,
+    built: true,
+    implementation:
+      "src/components/sections/architecture-workflow-section/pipeline.tsx",
+    demoRoute: "/",
   },
 ];
 
