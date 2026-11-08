@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 /**
  * State without colour (docs plan 3.6 and 4.3): a geometric glyph plus a visible text label.
@@ -33,16 +33,21 @@ const glyphByState: Record<StatusMarkState, string> = {
   unverified: "draft",
 };
 
-export type StatusMarkProps = {
+export type StatusMarkProps = Omit<ComponentProps<"span">, "children"> & {
   state: StatusMarkState;
   /** The visible label. Required: the glyph is decoration, the text carries the state. */
   children: ReactNode;
-  className?: string;
 };
 
-export function StatusMark({ state, children, className }: StatusMarkProps) {
+export function StatusMark({
+  state,
+  children,
+  className,
+  ...props
+}: StatusMarkProps) {
   return (
     <span
+      {...props}
       className={cn("status-mark", className)}
       data-state={state}
       data-glyph={glyphByState[state]}

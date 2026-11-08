@@ -1,21 +1,36 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import {
+  EditorActionBar,
+  EditorHeader,
+  EditorSection,
+  SectionIndex,
+  ValidationSummary,
+  type ValidationIssue,
+} from "@/components/console";
+import { ConsoleEditor } from "@/components/templates/console-templates";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { FileGalleryUploader } from "@/components/ui/file-gallery-uploader";
 import { FileUploader } from "@/components/ui/file-uploader";
+import { FormControl, formControlVariants } from "@/components/ui/form-control";
+import type { StatusMarkState } from "@/components/ui/status-mark";
+import { cn } from "@/lib/utils";
 import { getArticleCategories } from "@/services/category.service";
 import type { TArticleCategory } from "@/types/article-category.type";
 import type { TArticle, TArticleInput } from "@/types/article.type";
 import type { TFilePopulated } from "@/types/file.type";
 import { PILLAR_CONTRACT } from "@/lib/content/pillars";
-import { Save } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { ArrowLeft, Save } from "lucide-react";
+import Link from "next/link";
+import React, { useEffect, useRef, useState } from "react";
 
 interface ArticleFormProps {
   initialData?: Partial<TArticle>;
   onSubmit: (data: TArticleInput) => void;
   onCancel: () => void;
   loading?: boolean;
+  /** A failure from the last save, shown in the validation summary. */
+  error?: string | null;
 }
 
 type TArticleFormState = Omit<Partial<TArticle>, "category"> & {
@@ -36,31 +51,99 @@ const toIsoDateTime = (value?: string): string | undefined => {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 };
 
+const toFormState = (initialData?: Partial<TArticle>): TArticleFormState => ({
+  ...initialData,
+  category: initialData?.category?._id ?? "",
+  name: initialData?.name ?? "",
+  slug: initialData?.slug ?? "",
+  description: initialData?.description ?? "",
+  excerpt: initialData?.excerpt ?? "",
+  content: initialData?.content ?? "",
+  status: initialData?.status ?? "draft",
+  is_featured: initialData?.is_featured ?? false,
+  is_premium: initialData?.is_premium ?? false,
+  tags: initialData?.tags ?? [],
+  topics: initialData?.topics ?? [],
+  primary_pillar: initialData?.primary_pillar,
+  secondary_pillars: initialData?.secondary_pillars ?? [],
+  reading_time_source: initialData?.reading_time_source ?? "derived",
+  published_at: toLocalDateTime(initialData?.published_at),
+  expired_at: toLocalDateTime(initialData?.expired_at),
+});
+
+const splitList = (value: string) =>
+  value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+type TFieldKey = keyof TArticleFormState;
+
+/** The sections of the editor: the index links, and the fields whose edits mark each one. */
+const SECTIONS: readonly {
+  id: string;
+  label: string;
+  fields: readonly TFieldKey[];
+}[] = [
+  {
+    id: "article-basics",
+    label: "Basics",
+    fields: ["name", "slug", "excerpt", "description"],
+  },
+  { id: "article-content", label: "Content", fields: ["content"] },
+  {
+    id: "article-classification",
+    label: "Classification",
+    fields: [
+      "category",
+      "primary_pillar",
+      "secondary_pillars",
+      "topics",
+      "tags",
+    ],
+  },
+  { id: "article-media", label: "Media", fields: ["thumbnail", "images"] },
+  {
+    id: "article-publishing",
+    label: "Publishing",
+    fields: [
+      "status",
+      "published_at",
+      "expired_at",
+      "reading_time_source",
+      "reading_time_minutes",
+      "is_featured",
+    ],
+  },
+];
+
+const STATUS_MARKS: Record<
+  TArticle["status"],
+  { state: StatusMarkState; label: string }
+> = {
+  draft: { state: "draft", label: "Draft" },
+  pending: { state: "pending", label: "Pending" },
+  published: { state: "published", label: "Published" },
+  archived: { state: "archived", label: "Archived" },
+};
+
+/** A comparable form of a field: files by id, and "nothing" always the same empty string. */
+const comparable = (state: TArticleFormState, key: TFieldKey) => {
+  if (key === "thumbnail") return state.thumbnail?._id ?? "";
+  if (key === "images") return state.images?.map((image) => image._id) ?? [];
+  return state[key] ?? "";
+};
+
 const ArticleForm: React.FC<ArticleFormProps> = ({
   initialData,
   onSubmit,
   onCancel,
   loading,
+  error,
 }) => {
-  const [formData, setFormData] = useState<TArticleFormState>(() => ({
-    ...initialData,
-    category: initialData?.category?._id ?? "",
-    name: initialData?.name ?? "",
-    slug: initialData?.slug ?? "",
-    description: initialData?.description ?? "",
-    excerpt: initialData?.excerpt ?? "",
-    content: initialData?.content ?? "",
-    status: initialData?.status ?? "draft",
-    is_featured: initialData?.is_featured ?? false,
-    is_premium: initialData?.is_premium ?? false,
-    tags: initialData?.tags ?? [],
-    topics: initialData?.topics ?? [],
-    primary_pillar: initialData?.primary_pillar,
-    secondary_pillars: initialData?.secondary_pillars ?? [],
-    reading_time_source: initialData?.reading_time_source ?? "derived",
-    published_at: toLocalDateTime(initialData?.published_at),
-    expired_at: toLocalDateTime(initialData?.expired_at),
-  }));
+  const [initialState] = useState(() => toFormState(initialData));
+  const [formData, setFormData] = useState<TArticleFormState>(initialState);
+  const formRef = useRef<HTMLFormElement>(null);
   const [categories, setCategories] = useState<TArticleCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoryError, setCategoryError] = useState<string | null>(null);
@@ -149,320 +232,437 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
     onSubmit(payload);
   };
 
+  const changedKeys = SECTIONS.flatMap(({ fields }) => fields).filter(
+    (key) =>
+      JSON.stringify(comparable(formData, key)) !==
+      JSON.stringify(comparable(initialState, key))
+  );
+
+  const issues: ValidationIssue[] = [
+    ...(categoryError
+      ? [
+          {
+            href: "#article-category",
+            field: "Category",
+            message: categoryError,
+          },
+        ]
+      : []),
+    ...(error ? [{ message: error }] : []),
+  ];
+
+  // Cmd/Ctrl+S saves exactly like the Save button, including native validation
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        if (!loading) formRef.current?.requestSubmit();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [loading]);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Title
-          </label>
-          <input
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Status
-          </label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
-          >
-            <option value="draft">Draft</option>
-            <option value="pending">Pending</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
-        </div>
-        <div className="space-y-2">
-          <label
-            htmlFor="article-category"
-            className="text-muted-foreground text-sm font-bold tracking-widest uppercase"
-          >
-            Category
-          </label>
-          <select
-            id="article-category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            disabled={loading || categoriesLoading}
-            aria-describedby={
-              categoryError ? "article-category-error" : undefined
+    <form ref={formRef} onSubmit={handleSubmit}>
+      <ConsoleEditor
+        header={
+          <EditorHeader
+            title={
+              initialData
+                ? initialData.name || "Untitled article"
+                : "New article"
             }
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <option value="">
-              {categoriesLoading
-                ? "Loading categories…"
-                : categories.length
-                  ? "Select a category"
-                  : "No active categories available"}
-            </option>
-            {categories.map((category) => (
-              <option key={category._id} value={category._id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          {categoryError && (
-            <p id="article-category-error" className="text-destructive text-sm">
-              {categoryError}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Canonical slug
-          <input
-            name="slug"
-            value={formData.slug ?? ""}
-            onChange={handleChange}
-            placeholder="Generated from the article title"
-            className="border-border bg-background mt-2 w-full rounded-xl border p-3"
-          />
-        </label>
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Excerpt
-          <textarea
-            name="excerpt"
-            value={formData.excerpt ?? ""}
-            onChange={handleChange}
-            maxLength={500}
-            className="border-border bg-background mt-2 min-h-24 w-full rounded-xl border p-3"
-          />
-        </label>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Publish at (optional)
-          <input
-            type="datetime-local"
-            name="published_at"
-            value={formData.published_at ?? ""}
-            onChange={handleChange}
-            className="border-border bg-background mt-2 w-full rounded-xl border p-3"
-          />
-        </label>
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Expire at (optional)
-          <input
-            type="datetime-local"
-            name="expired_at"
-            value={formData.expired_at ?? ""}
-            onChange={handleChange}
-            className="border-border bg-background mt-2 w-full rounded-xl border p-3"
-          />
-        </label>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Primary pillar
-          <select
-            name="primary_pillar"
-            value={formData.primary_pillar ?? ""}
-            onChange={handleChange}
-            className="border-border bg-background mt-2 w-full rounded-xl border p-3"
-          >
-            <option value="">Not assigned</option>
-            {PILLAR_CONTRACT.map((pillar) => (
-              <option key={pillar.key} value={pillar.key}>
-                {pillar.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Secondary pillars
-          <select
-            multiple
-            value={formData.secondary_pillars ?? []}
-            onChange={(event) =>
-              setFormData((prev) => ({
-                ...prev,
-                secondary_pillars: Array.from(
-                  event.currentTarget.selectedOptions,
-                  (option) => option.value
-                ) as NonNullable<TArticle["secondary_pillars"]>,
-              }))
+            back={
+              <Link
+                href="/admin/articles"
+                aria-label="Back to articles"
+                className={buttonVariants({
+                  variant: "outline",
+                  shape: "icon",
+                })}
+              >
+                <ArrowLeft aria-hidden="true" className="size-4" />
+              </Link>
             }
-            className="border-border bg-background mt-2 min-h-28 w-full rounded-xl border p-3"
-          >
-            {PILLAR_CONTRACT.map((pillar) => (
-              <option key={pillar.key} value={pillar.key}>
-                {pillar.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="grid grid-cols-[1fr_7rem] gap-3">
-          <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-            Reading time
-            <select
-              name="reading_time_source"
-              value={formData.reading_time_source ?? "derived"}
+            status={
+              initialData
+                ? STATUS_MARKS[initialData.status ?? "draft"]
+                : undefined
+            }
+            savedAt={initialData?.updated_at}
+          />
+        }
+        validation={<ValidationSummary issues={issues} />}
+        sectionIndex={
+          <SectionIndex
+            sections={SECTIONS.map(({ id, label, fields }) => ({
+              id,
+              label,
+              dirty: fields.some((field) => changedKeys.includes(field)),
+              error: id === "article-classification" && Boolean(categoryError),
+            }))}
+          />
+        }
+        actionBar={
+          <EditorActionBar
+            unsavedCount={changedKeys.length}
+            discard={
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            }
+            saveDraft={
+              <Button type="submit" className="gap-2" isLoading={loading}>
+                <Save aria-hidden="true" className="size-4" />
+                {initialData ? "Update Article" : "Create Article"}
+              </Button>
+            }
+          />
+        }
+      >
+        <EditorSection id="article-basics" title="Basics">
+          <div className="cp-fields">
+            <div className="cp-field">
+              <label htmlFor="article-name" className="cp-label">
+                Title
+              </label>
+              <FormControl
+                id="article-name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="cp-field">
+              <label htmlFor="article-slug" className="cp-label">
+                Canonical slug
+              </label>
+              <FormControl
+                id="article-slug"
+                name="slug"
+                value={formData.slug ?? ""}
+                onChange={handleChange}
+                placeholder="Generated from the article title"
+              />
+            </div>
+          </div>
+          <div className="cp-field">
+            <label htmlFor="article-excerpt" className="cp-label">
+              Excerpt
+            </label>
+            <FormControl
+              as="textarea"
+              id="article-excerpt"
+              name="excerpt"
+              value={formData.excerpt ?? ""}
               onChange={handleChange}
-              className="border-border bg-background mt-2 w-full rounded-xl border p-3"
+              maxLength={500}
+              className="min-h-24 py-2"
+            />
+          </div>
+          <div className="cp-field">
+            <label htmlFor="article-description" className="cp-label">
+              Description
+            </label>
+            <FormControl
+              as="textarea"
+              id="article-description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="min-h-24 py-2"
+            />
+          </div>
+        </EditorSection>
+
+        <EditorSection id="article-content" title="Content">
+          <div className="cp-field">
+            <label htmlFor="article-content-body" className="cp-label">
+              Content
+            </label>
+            <FormControl
+              as="textarea"
+              id="article-content-body"
+              name="content"
+              value={formData.content}
+              onChange={handleChange}
+              required
+              className="min-h-96 py-2"
+            />
+          </div>
+        </EditorSection>
+
+        <EditorSection id="article-classification" title="Classification">
+          <div className="cp-fields">
+            <div className="cp-field">
+              <label htmlFor="article-category" className="cp-label">
+                Category
+              </label>
+              <FormControl
+                as="select"
+                id="article-category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+                disabled={loading || categoriesLoading}
+                aria-describedby={
+                  categoryError ? "article-category-error" : undefined
+                }
+                aria-invalid={categoryError ? true : undefined}
+              >
+                <option value="">
+                  {categoriesLoading
+                    ? "Loading categories…"
+                    : categories.length
+                      ? "Select a category"
+                      : "No active categories available"}
+                </option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
+                ))}
+              </FormControl>
+              {categoryError && (
+                <p
+                  id="article-category-error"
+                  className="text-destructive text-sm"
+                >
+                  {categoryError}
+                </p>
+              )}
+            </div>
+            <div className="cp-field">
+              <label htmlFor="article-primary-pillar" className="cp-label">
+                Primary pillar
+              </label>
+              <FormControl
+                as="select"
+                id="article-primary-pillar"
+                name="primary_pillar"
+                value={formData.primary_pillar ?? ""}
+                onChange={handleChange}
+              >
+                <option value="">Not assigned</option>
+                {PILLAR_CONTRACT.map((pillar) => (
+                  <option key={pillar.key} value={pillar.key}>
+                    {pillar.label}
+                  </option>
+                ))}
+              </FormControl>
+            </div>
+            <div className="cp-field">
+              <label htmlFor="article-secondary-pillars" className="cp-label">
+                Secondary pillars
+              </label>
+              <select
+                multiple
+                id="article-secondary-pillars"
+                value={formData.secondary_pillars ?? []}
+                onChange={(event) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    secondary_pillars: Array.from(
+                      event.currentTarget.selectedOptions,
+                      (option) => option.value
+                    ) as NonNullable<TArticle["secondary_pillars"]>,
+                  }))
+                }
+                className={cn(
+                  formControlVariants({ size: "none" }),
+                  "min-h-28 px-3 py-2 text-sm"
+                )}
+              >
+                {PILLAR_CONTRACT.map((pillar) => (
+                  <option key={pillar.key} value={pillar.key}>
+                    {pillar.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="cp-fields">
+            <div className="cp-field">
+              <label htmlFor="article-topics" className="cp-label">
+                Topics (comma separated)
+              </label>
+              <FormControl
+                id="article-topics"
+                value={formData.topics?.join(", ") ?? ""}
+                onChange={(event) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    topics: splitList(event.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div className="cp-field">
+              <label htmlFor="article-tags" className="cp-label">
+                Tags (comma separated)
+              </label>
+              <FormControl
+                id="article-tags"
+                value={formData.tags?.join(", ") ?? ""}
+                onChange={(event) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    tags: splitList(event.target.value),
+                  }))
+                }
+              />
+            </div>
+          </div>
+        </EditorSection>
+
+        <EditorSection id="article-media" title="Media">
+          <div className="cp-fields">
+            <div
+              className="cp-field"
+              role="group"
+              aria-labelledby="article-thumbnail-label"
             >
-              <option value="derived">Derived</option>
-              <option value="manual">Manual</option>
-            </select>
-          </label>
-          <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-            Minutes
+              <span id="article-thumbnail-label" className="cp-label">
+                Thumbnail
+              </span>
+              <FileUploader
+                purpose="article"
+                value={formData.thumbnail}
+                onChange={(file: TFilePopulated | null) =>
+                  setFormData((prev) => ({ ...prev, thumbnail: file }))
+                }
+                disabled={loading}
+              />
+            </div>
+            <div
+              className="cp-field"
+              role="group"
+              aria-labelledby="article-images-label"
+            >
+              <span id="article-images-label" className="cp-label">
+                Images
+              </span>
+              <FileGalleryUploader
+                purpose="article"
+                value={formData.images ?? []}
+                onChange={(files: TFilePopulated[]) =>
+                  setFormData((prev) => ({ ...prev, images: files }))
+                }
+                disabled={loading}
+              />
+            </div>
+          </div>
+        </EditorSection>
+
+        <EditorSection id="article-publishing" title="Publishing">
+          <div className="cp-fields">
+            <div className="cp-field">
+              <label htmlFor="article-status" className="cp-label">
+                Status
+              </label>
+              <FormControl
+                as="select"
+                id="article-status"
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+              >
+                <option value="draft">Draft</option>
+                <option value="pending">Pending</option>
+                <option value="published">Published</option>
+                <option value="archived">Archived</option>
+              </FormControl>
+            </div>
+            <div className="cp-field">
+              <label htmlFor="article-published-at" className="cp-label">
+                Publish at (optional)
+              </label>
+              <FormControl
+                id="article-published-at"
+                type="datetime-local"
+                name="published_at"
+                value={formData.published_at ?? ""}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="cp-field">
+              <label htmlFor="article-expired-at" className="cp-label">
+                Expire at (optional)
+              </label>
+              <FormControl
+                id="article-expired-at"
+                type="datetime-local"
+                name="expired_at"
+                value={formData.expired_at ?? ""}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          <div className="cp-fields">
+            <div className="cp-field">
+              <label htmlFor="article-reading-source" className="cp-label">
+                Reading time
+              </label>
+              <FormControl
+                as="select"
+                id="article-reading-source"
+                name="reading_time_source"
+                value={formData.reading_time_source ?? "derived"}
+                onChange={handleChange}
+              >
+                <option value="derived">Derived</option>
+                <option value="manual">Manual</option>
+              </FormControl>
+            </div>
+            <div className="cp-field">
+              <label htmlFor="article-reading-minutes" className="cp-label">
+                Minutes
+              </label>
+              <FormControl
+                id="article-reading-minutes"
+                type="number"
+                min={1}
+                max={600}
+                disabled={formData.reading_time_source !== "manual"}
+                value={formData.reading_time_minutes ?? ""}
+                onChange={(event) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    reading_time_minutes: event.target.value
+                      ? Number(event.target.value)
+                      : undefined,
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
             <input
-              type="number"
-              min={1}
-              max={600}
-              disabled={formData.reading_time_source !== "manual"}
-              value={formData.reading_time_minutes ?? ""}
-              onChange={(event) =>
+              type="checkbox"
+              id="is_featured"
+              checked={formData.is_featured}
+              onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
-                  reading_time_minutes: event.target.value
-                    ? Number(event.target.value)
-                    : undefined,
+                  is_featured: e.target.checked,
                 }))
               }
-              className="border-border bg-background mt-2 w-full rounded-xl border p-3"
+              className="border-border text-primary focus:ring-primary size-5 rounded"
             />
-          </label>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Topics (comma separated)
-          <input
-            value={formData.topics?.join(", ") ?? ""}
-            onChange={(event) =>
-              setFormData((prev) => ({
-                ...prev,
-                topics: event.target.value
-                  .split(",")
-                  .map((topic) => topic.trim())
-                  .filter(Boolean),
-              }))
-            }
-            className="border-border bg-background mt-2 w-full rounded-xl border p-3"
-          />
-        </label>
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Tags (comma separated)
-          <input
-            value={formData.tags?.join(", ") ?? ""}
-            onChange={(event) =>
-              setFormData((prev) => ({
-                ...prev,
-                tags: event.target.value
-                  .split(",")
-                  .map((tag) => tag.trim())
-                  .filter(Boolean),
-              }))
-            }
-            className="border-border bg-background mt-2 w-full rounded-xl border p-3"
-          />
-        </label>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-          Description
-        </label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          className="border-border bg-background focus:border-primary min-h-[100px] w-full rounded-xl border p-3 focus:outline-none"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-          Content
-        </label>
-        <textarea
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          required
-          className="border-border bg-background focus:border-primary min-h-[400px] w-full rounded-xl border p-3 focus:outline-none"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Thumbnail
-          </label>
-          <FileUploader
-            purpose="article"
-            value={formData.thumbnail}
-            onChange={(file: TFilePopulated | null) =>
-              setFormData((prev) => ({ ...prev, thumbnail: file }))
-            }
-            disabled={loading}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Images
-          </label>
-          <FileGalleryUploader
-            purpose="article"
-            value={formData.images ?? []}
-            onChange={(files: TFilePopulated[]) =>
-              setFormData((prev) => ({ ...prev, images: files }))
-            }
-            disabled={loading}
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          id="is_featured"
-          checked={formData.is_featured}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, is_featured: e.target.checked }))
-          }
-          className="border-border text-primary focus:ring-primary size-5 rounded"
-        />
-        <label
-          htmlFor="is_featured"
-          className="text-muted-foreground text-sm font-bold tracking-widest uppercase"
-        >
-          Featured Article
-        </label>
-      </div>
-
-      <div className="flex justify-end gap-4 pt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" className="gap-2" isLoading={loading}>
-          <Save className="size-4" />
-          {initialData ? "Update Article" : "Create Article"}
-        </Button>
-      </div>
+            <label htmlFor="is_featured" className="cp-label">
+              Featured Article
+            </label>
+          </div>
+        </EditorSection>
+      </ConsoleEditor>
     </form>
   );
 };

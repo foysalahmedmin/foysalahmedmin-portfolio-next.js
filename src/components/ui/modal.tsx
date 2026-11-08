@@ -198,6 +198,7 @@ const ModalContent: React.FC<ModalContentProps> = ({
     <div
       ref={ref}
       role="dialog"
+      data-slot="modal-content"
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}

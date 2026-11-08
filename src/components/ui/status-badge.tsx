@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { StatusMark, type StatusMarkState } from "./status-mark";
 
 export type TStatusBadgeTone =
   | "neutral"
@@ -9,13 +10,18 @@ export type TStatusBadgeTone =
   | "info"
   | "destructive";
 
-const toneClassNames: Record<TStatusBadgeTone, string> = {
-  neutral: "bg-muted text-muted-foreground",
-  primary: "bg-primary/10 text-primary",
-  success: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  warning: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  info: "bg-sky-500/10 text-sky-700 dark:text-sky-400",
-  destructive: "bg-destructive/10 text-destructive",
+/*
+ * State is a shape plus a visible label, never a colour (docs plan 4.3): neutral = outlined square,
+ * primary = filled square, info = half-filled square, success = square with a check, warning = outlined
+ * diamond with a heavier label, destructive = filled triangle with an inverted label (console-patterns.css).
+ */
+const markByTone: Record<TStatusBadgeTone, StatusMarkState> = {
+  neutral: "draft",
+  primary: "published",
+  info: "pending",
+  success: "success",
+  warning: "warning",
+  destructive: "error",
 };
 
 export type StatusBadgeProps = {
@@ -29,13 +35,12 @@ export const StatusBadge = ({
   tone = "neutral",
   className,
 }: StatusBadgeProps) => (
-  <span
-    className={cn(
-      "inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wider whitespace-nowrap uppercase",
-      toneClassNames[tone],
-      className
-    )}
+  // data-badge-tone, not data-tone: [data-tone] is the ink/paper band attribute and would paint a background
+  <StatusMark
+    state={markByTone[tone]}
+    data-badge-tone={tone}
+    className={cn("status-badge", className)}
   >
     {children}
-  </span>
+  </StatusMark>
 );

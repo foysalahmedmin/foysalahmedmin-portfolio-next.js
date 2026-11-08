@@ -12,16 +12,21 @@ import {
   type TAuditSource,
   type TAuditTargetType,
 } from "@/app/api/audit-events/audit-event.type";
+import { ConsoleToolbar } from "@/components/console";
+import { ConsoleList } from "@/components/templates/console-templates";
+import { Button } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
   type TDataTableFilter,
   type TDataTableState,
   type TDataTableStatus,
 } from "@/components/ui/data-table";
+import { FormControl } from "@/components/ui/form-control";
 import {
   StatusBadge,
   type TStatusBadgeTone,
 } from "@/components/ui/status-badge";
+import { StatusMark } from "@/components/ui/status-mark";
 import { useRepeatableAdminQueryState } from "@/hooks/ui/use-repeatable-admin-query-state";
 import {
   getAdminAuditEvents,
@@ -135,6 +140,7 @@ const columns: readonly TColumn<AdminAuditEvent>[] = [
     name: "Occurred",
     accessor: (event) => event.created_at,
     cell: ({ row }) => formatDateTime(row.created_at),
+    cellClassName: "t-mono",
     defaultVisible: true,
   },
   {
@@ -302,64 +308,45 @@ const AuditLogWorkspace = () => {
     patchState({ page: 1 });
   };
 
-  return (
-    <div className="space-y-6">
-      <header className="border-border bg-card rounded-2xl border p-5 shadow-[var(--shadow-sm)] sm:p-7">
-        <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
-          Governance
-        </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
-          Audit log
-        </h1>
-        <p className="text-muted-foreground mt-2 max-w-3xl text-sm leading-6">
-          Review bounded, privacy-safe administrative events. Session tokens,
-          contact contents, secrets, and raw correlation identifiers are never
-          returned by this view.
-        </p>
-      </header>
+  const filtersActive = Object.values(state.filters).some(Boolean);
 
-      <section
-        aria-labelledby="audit-range-title"
-        className="border-border bg-card rounded-2xl border p-5 shadow-[var(--shadow-sm)]"
-      >
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-          <div>
-            <h2 id="audit-range-title" className="text-lg font-black">
-              Bounded date window
-            </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Select up to 90 days. Newest events appear first.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm font-semibold">
-              From
-              <input
-                type="date"
-                value={from}
-                max={to}
-                onChange={(event) => updateRange("from", event.target.value)}
-                className="border-input bg-background focus-visible:ring-ring mt-1 block min-h-11 rounded-xl border px-3 focus-visible:ring-2 focus-visible:outline-none"
-              />
-            </label>
-            <label className="text-sm font-semibold">
-              To
-              <input
-                type="date"
-                value={to}
-                min={from}
-                onChange={(event) => updateRange("to", event.target.value)}
-                className="border-input bg-background focus-visible:ring-ring mt-1 block min-h-11 rounded-xl border px-3 focus-visible:ring-2 focus-visible:outline-none"
-              />
-            </label>
-          </div>
-        </div>
-        {rangeError ? (
-          <p className="text-destructive mt-3 text-sm" role="alert">
-            {rangeError}
+  return (
+    <ConsoleList
+      className="cp-rows-2"
+      eyebrow="Governance"
+      title="Audit log"
+      description="Review bounded, privacy-safe administrative events. Session tokens, contact contents, secrets, and raw correlation identifiers are never returned by this view."
+      toolbar={
+        <ConsoleToolbar label="Bounded date window">
+          <label className="cp-field">
+            <span className="cp-label">From</span>
+            <FormControl
+              type="date"
+              value={from}
+              max={to}
+              onChange={(event) => updateRange("from", event.target.value)}
+            />
+          </label>
+          <label className="cp-field">
+            <span className="cp-label">To</span>
+            <FormControl
+              type="date"
+              value={to}
+              min={from}
+              onChange={(event) => updateRange("to", event.target.value)}
+            />
+          </label>
+          <p className="cp-hint">
+            Select up to 90 days. Newest events appear first.
           </p>
-        ) : null}
-      </section>
+        </ConsoleToolbar>
+      }
+    >
+      {rangeError ? (
+        <p className="cp-validation" role="alert">
+          <StatusMark state="error">Date window</StatusMark> {rangeError}
+        </p>
+      ) : null}
 
       <DataTable
         title="Administrative events"
@@ -385,10 +372,29 @@ const AuditLogWorkspace = () => {
           isViewColumnVisibility: true,
           pageSizeOptions: [10, 20, 50],
         }}
-        emptyTitle="No audit events in this window"
-        emptyDescription="Adjust the date window or filters to review another bounded event set."
+        emptyTitle={
+          filtersActive
+            ? "No audit events match these filters"
+            : "No audit events in this window"
+        }
+        emptyDescription={
+          filtersActive ? (
+            <>
+              Clear the filters or widen the date window.{" "}
+              <Button
+                type="button"
+                variant="link"
+                onClick={() => patchState({ filters: {} }, true)}
+              >
+                Clear filters
+              </Button>
+            </>
+          ) : (
+            "Adjust the date window or filters to review another bounded event set."
+          )
+        }
       />
-    </div>
+    </ConsoleList>
   );
 };
 

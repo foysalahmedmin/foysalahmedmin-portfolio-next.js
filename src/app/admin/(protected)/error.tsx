@@ -10,7 +10,7 @@ export default function AdminRouteError({
   reset: () => void;
 }) {
   return (
-    <main className="p-6 lg:p-10">
+    <div className="p-6 lg:p-10">
       <ErrorState
         title="The workspace could not be loaded"
         description={
@@ -20,6 +20,6 @@ export default function AdminRouteError({
         }
         onRetry={reset}
       />
-    </main>
+    </div>
   );
 }

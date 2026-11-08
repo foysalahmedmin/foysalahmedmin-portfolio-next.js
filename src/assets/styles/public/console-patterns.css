@@ -1,0 +1,781 @@
+/*
+ * Admin console: patterns (Phase 7). Owned by one slice; add rules here.
+ * Rules: tokens only (no colour literals), no backdrop-filter outside overlays, no animation library, state is
+ * shape, weight and label (never colour), every control reachable by keyboard with visible focus.
+ * Scope every rule to [data-surface="console"] so the public site is untouched.
+ *
+ * Contents: 1 density, 2 status marks, 3 table and DataTable, 4 form controls, 5 buttons and tabs,
+ * 6 overlays (the only place glass is allowed), 7 list pattern (cp-header, cp-toolbar, cp-state, cp-skeleton),
+ * 8 editor pattern (cp-editor, cp-index, cp-section, cp-validation, cp-actionbar), 9 inbox pattern.
+ */
+
+/* ---------- 1. Density: compact by default, [data-density="comfortable"] relaxes it ---------- */
+[data-surface="console"] {
+  --cp-row-h: 2.75rem;
+  --cp-pad: 0.75rem;
+  --cp-gap: 1.5rem;
+  --cp-rail: 13rem;
+}
+
+[data-surface="console"] [data-density="comfortable"],
+[data-surface="console"][data-density="comfortable"] {
+  --cp-row-h: 3.5rem;
+  --cp-pad: 1rem;
+  --cp-gap: 2rem;
+}
+
+/* Workspaces whose cells hold two lines (a value and its detail) reserve the taller row for rows and skeleton alike */
+[data-surface="console"] .cp-rows-2 {
+  --cp-row-h: 3.75rem;
+}
+
+/* ---------- 2. Status marks: the shape carries the state in greyscale, print and for colour-blind users ---------- */
+[data-surface="console"] .status-mark {
+  font-size: var(--step--1);
+}
+
+[data-surface="console"] .status-mark__label {
+  white-space: nowrap;
+}
+
+/* Warning: outlined diamond and a heavier label */
+[data-surface="console"]
+  .status-mark[data-state="warning"]
+  .status-mark__label {
+  font-weight: 700;
+}
+
+/* Error: filled triangle and an inverted label (foreground fill, background text) */
+[data-surface="console"] .status-mark[data-state="error"] .status-mark__label {
+  background: var(--foreground);
+  padding-inline: 0.375em;
+  color: var(--background);
+  font-weight: 700;
+}
+
+@media (forced-colors: active) {
+  [data-surface="console"]
+    .status-mark[data-state="error"]
+    .status-mark__label {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* Browsers drop backgrounds when printing: keep the label readable and framed instead */
+@media print {
+  [data-surface="console"]
+    .status-mark[data-state="error"]
+    .status-mark__label {
+    outline: 1px solid currentColor;
+    background: none;
+    color: inherit;
+  }
+}
+
+/* ---------- 3. Table and DataTable ---------- */
+[data-surface="console"] [data-slot="table"] {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--ui-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sticky header on its own solid surface */
+[data-surface="console"] [data-slot="table-head"] {
+  position: sticky;
+  z-index: 2;
+  inset-block-start: 0;
+  border-block-end: 1px solid var(--line-3);
+  background: var(--surface-subtle);
+  padding: 0 var(--cp-pad);
+  height: var(--control-h-sm);
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+
+[data-surface="console"] [data-slot="table-header"] [data-slot="table-row"] {
+  background: transparent;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+[data-surface="console"] [data-slot="table-row"] {
+  transition: none;
+  border: 0;
+  background: transparent;
+}
+
+[data-surface="console"] [data-slot="table-cell"] {
+  vertical-align: middle;
+  border-block-end: 1px solid var(--line-2);
+  padding: 0.5rem var(--cp-pad);
+  height: var(--cp-row-h);
+}
+
+/* The empty and error rows span every column: they are not data rows */
+[data-surface="console"] [data-slot="table-cell"][colspan] {
+  padding-block: 3rem;
+  height: auto;
+  text-align: start;
+}
+
+[data-surface="console"] [data-slot="table-cell"][colspan] > div {
+  align-items: flex-start;
+}
+
+/* Hover and selection are a fill plus a left bar, never a colour */
+@media (hover: hover) {
+  [data-surface="console"]
+    [data-slot="table-body"]
+    [data-slot="table-row"]:hover
+    > [data-slot="table-cell"] {
+    background: var(--line-1);
+  }
+
+  [data-surface="console"]
+    [data-slot="table-body"]
+    [data-slot="table-row"]:hover
+    > [data-slot="table-cell"]:first-child {
+    box-shadow: inset 2px 0 0 var(--line-4);
+  }
+}
+
+[data-surface="console"]
+  [data-slot="table-row"][data-state="selected"]
+  > [data-slot="table-cell"] {
+  background: var(--line-2);
+}
+
+[data-surface="console"]
+  [data-slot="table-row"][data-state="selected"]
+  > [data-slot="table-cell"]:first-child {
+  box-shadow: inset 3px 0 0 var(--foreground);
+}
+
+/* Number columns opt in with cellClassName/headClassName "cp-num": Mono, tabular, end aligned */
+[data-surface="console"] .cp-num {
+  font-family: var(--ff-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* DataTable is a flat region between two hairlines, not a card */
+[data-surface="console"] [data-slot="data-table"] {
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  border-block: 1px solid var(--line-2);
+  background: transparent;
+}
+
+[data-surface="console"] [data-slot="data-table-toolbar"] {
+  gap: 0.75rem;
+  border-block-end: 1px solid var(--line-2);
+  padding: var(--cp-pad) 0;
+}
+
+[data-surface="console"] [data-slot="data-table-toolbar"] h2 {
+  font-weight: 600;
+  font-size: var(--step-0);
+  letter-spacing: 0;
+}
+
+/* The scroll region owns the vertical axis so the header can stick inside it */
+[data-surface="console"]
+  [data-slot="data-table"]
+  [data-slot="table-container"] {
+  max-block-size: max(24rem, calc(100dvh - var(--header-offset) - 8rem));
+  overflow: auto;
+}
+
+[data-surface="console"]
+  [data-slot="data-table-toolbar"]
+  :is(input:not([type="checkbox"], [type="radio"]), select) {
+  block-size: var(--hit-area);
+  font-size: var(--ui-text);
+}
+
+/* Skeleton rows keep the real row height; the bars are quiet, square-cornered lines */
+[data-surface="console"]
+  [data-slot="table-row"][aria-hidden="true"]
+  > [data-slot="table-cell"]
+  > div {
+  border-radius: var(--r-sm);
+  background: var(--line-2);
+  block-size: 0.75rem;
+}
+
+/* ---------- 4. Form controls: 2 px radius, hairline at control contrast ---------- */
+[data-surface="console"]
+  :is(
+    input:not(
+      [type="checkbox"],
+      [type="radio"],
+      [type="range"],
+      [type="file"],
+      [type="color"]
+    ),
+    select,
+    textarea
+  ) {
+  border-color: var(--input);
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"]
+  :is(
+    input:not(
+      [type="checkbox"],
+      [type="radio"],
+      [type="range"],
+      [type="file"],
+      [type="color"]
+    ),
+    select
+  ) {
+  border-radius: var(--r-control);
+}
+
+[data-surface="console"] textarea {
+  border-radius: var(--r-panel);
+}
+
+[data-surface="console"]
+  :is([data-as="input"], [data-as="select"]):not([multiple]) {
+  padding-inline: 0.75rem;
+  padding-block: 0;
+  block-size: var(--hit-area);
+  min-block-size: var(--hit-area);
+}
+
+[data-surface="console"] [data-as="textarea"] {
+  padding-inline: 0.75rem;
+  block-size: auto;
+  min-block-size: 6rem;
+}
+
+/* A field: label over control over hint, on the density rhythm */
+[data-surface="console"] .cp-field {
+  display: grid;
+  align-content: start;
+  gap: 0.375rem;
+  min-inline-size: 0;
+}
+
+[data-surface="console"] .cp-label {
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+}
+
+[data-surface="console"] .cp-hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+[data-surface="console"] .cp-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--field-gap) 1.25rem;
+}
+
+/* ---------- 5. Buttons and tabs ---------- */
+[data-surface="console"] .button {
+  border-radius: var(--r-control);
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .button:not([class*="underline"]) {
+  block-size: var(--hit-area);
+  min-block-size: var(--hit-area);
+}
+
+[data-surface="console"] [role="tablist"] {
+  justify-content: flex-start;
+  gap: 0;
+  border-block-end: 1px solid var(--line-2);
+}
+
+[data-surface="console"] [role="tab"] {
+  transition: none;
+  border-radius: 0;
+  padding-inline: 0.875rem;
+  min-block-size: var(--hit-area);
+  font-weight: 500;
+  font-size: var(--ui-text);
+}
+
+/* The active tab: ink text, heavier weight and a 2 px bar */
+[data-surface="console"] [role="tab"][aria-selected="true"] {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+[data-surface="console"] [role="tab"]::before {
+  transition: none;
+}
+
+/* ---------- 6. Overlays: dialog, drawer and toast may use glass (3.11) ---------- */
+[data-surface="console"]
+  :is([data-slot="modal-content"], [data-slot="drawer-content"]) {
+  backdrop-filter: blur(var(--glass-blur-3)) brightness(var(--glass-brightness))
+    saturate(var(--glass-saturate));
+  box-shadow: var(--glass-edge), var(--elev-4);
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-slab);
+  background: var(--glass-3-bg);
+}
+
+[data-surface="console"] [data-slot="drawer-content"] {
+  border-radius: 0;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  [data-surface="console"]
+    :is([data-slot="modal-content"], [data-slot="drawer-content"]) {
+    background: var(--glass-fallback);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  [data-surface="console"]
+    :is([data-slot="modal-content"], [data-slot="drawer-content"]) {
+    backdrop-filter: none;
+    background: var(--glass-fallback);
+  }
+}
+
+@media (forced-colors: active) {
+  [data-surface="console"]
+    :is([data-slot="modal-content"], [data-slot="drawer-content"]) {
+    backdrop-filter: none;
+    background: Canvas;
+  }
+}
+
+[data-surface="console"] [data-tone-kind] {
+  border-radius: var(--r-panel);
+  padding: 0.75rem 1rem;
+}
+
+/* ---------- 7. List pattern (C2) ---------- */
+[data-surface="console"] .cp-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem 1.5rem;
+  border-block-end: 1px solid var(--line-2);
+  padding-block-end: var(--cp-pad);
+}
+
+[data-surface="console"] .cp-header__text {
+  display: grid;
+  gap: 0.25rem;
+  min-inline-size: 0;
+}
+
+[data-surface="console"] .cp-header__lead {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-inline-size: 0;
+}
+
+[data-surface="console"] .cp-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* The page title is the only Display text in the console */
+[data-surface="console"] .cp-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--step-1);
+  line-height: 1.15;
+  font-family: var(--ff-display-100, var(--ff-display, inherit));
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-surface="console"] .cp-lede {
+  margin: 0;
+  max-inline-size: 64ch;
+  color: var(--text-secondary);
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 1.25rem;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+}
+
+/* Sticky, solid, no blur */
+[data-surface="console"] .cp-toolbar {
+  display: flex;
+  position: sticky;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  z-index: var(--z-sticky, 20);
+  inset-block-start: var(--header-offset);
+  border-block-end: 1px solid var(--line-2);
+  background: var(--background);
+  padding-block: 0.5rem;
+}
+
+[data-surface="console"] .cp-toolbar__search {
+  flex: 1 1 16rem;
+  min-inline-size: 12rem;
+  max-inline-size: 28rem;
+}
+
+[data-surface="console"] .cp-toolbar__chips,
+[data-surface="console"] .cp-toolbar__end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+[data-surface="console"] .cp-toolbar__end {
+  margin-inline-start: auto;
+}
+
+[data-surface="console"] .cp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-control);
+  background: transparent;
+  padding-inline: 0.625rem;
+  min-block-size: var(--control-h-sm);
+  color: var(--foreground);
+  font-size: var(--step--1);
+}
+
+[data-surface="console"] .cp-chip:hover {
+  background: var(--line-1);
+}
+
+/* Selected: ink fill and heavier weight */
+[data-surface="console"] .cp-chip:is([aria-pressed="true"], [aria-current]) {
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+  font-weight: 700;
+}
+
+[data-surface="console"] .cp-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-block: 1px solid var(--line-2);
+  padding: 3rem var(--cp-pad);
+  max-inline-size: 40rem;
+}
+
+[data-surface="console"] .cp-state[data-kind="error"] {
+  border-inline-start: 2px dashed var(--foreground);
+}
+
+[data-surface="console"] .cp-state__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--step-0);
+}
+
+[data-surface="console"] .cp-state__text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cp-state__action {
+  margin-block-start: 0.5rem;
+}
+
+[data-surface="console"] .cp-skeleton__row {
+  display: grid;
+  grid-template-columns: repeat(var(--cp-cols, 4), minmax(0, 1fr));
+  align-items: center;
+  gap: var(--cp-pad);
+  border-block-end: 1px solid var(--line-2);
+  padding-inline: var(--cp-pad);
+  min-block-size: var(--cp-row-h);
+}
+
+[data-surface="console"] .cp-skeleton__cell {
+  display: block;
+  border-radius: var(--r-sm);
+  background: var(--line-2);
+  inline-size: 70%;
+  block-size: 0.75rem;
+}
+
+[data-surface="console"] .cp-skeleton__cell:nth-child(even) {
+  inline-size: 45%;
+}
+
+[data-surface="console"] .cp-skeleton__cell:first-child {
+  inline-size: 85%;
+}
+
+/* ---------- 8. Editor pattern (C3) ---------- */
+[data-surface="console"] .cp-editor {
+  gap: var(--cp-gap);
+}
+
+[data-surface="console"] .cp-editor__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cp-gap);
+  min-inline-size: 0;
+}
+
+[data-surface="console"] .cp-editor__sections {
+  min-inline-size: 0;
+}
+
+/* Below 1280 px the index is a sticky strip above the sections */
+[data-surface="console"] .cp-index {
+  position: sticky;
+  z-index: var(--z-sticky, 20);
+  inset-block-start: var(--header-offset);
+  border-block-end: 1px solid var(--line-2);
+  background: var(--background);
+  overflow-x: auto;
+}
+
+[data-surface="console"] .cp-index__list {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-surface="console"] .cp-index__link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  border-block-end: 2px solid transparent;
+  padding: 0.5rem 0.75rem;
+  color: var(--muted-foreground);
+  font-size: var(--ui-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+[data-surface="console"] .cp-index__link:hover {
+  background: var(--line-1);
+  color: var(--foreground);
+}
+
+/* Current section: ink text, heavier weight and a 2 px bar (shape and weight, not colour) */
+[data-surface="console"] .cp-index__link[aria-current="location"] {
+  border-block-end-color: var(--foreground);
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+[data-surface="console"] .cp-index .status-mark {
+  font-size: 0.75rem;
+}
+
+@media (min-width: 80rem) {
+  [data-surface="console"] .cp-editor__body[data-index] {
+    grid-template-columns: var(--cp-rail) minmax(0, 60rem);
+    align-items: start;
+  }
+
+  [data-surface="console"] .cp-index {
+    inset-block-start: calc(var(--header-offset) + 1rem);
+    border-block-end: 0;
+    overflow: visible;
+  }
+
+  [data-surface="console"] .cp-index__list {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  [data-surface="console"] .cp-index__link {
+    border-inline-start: 2px solid transparent;
+    border-block-end: 0;
+    white-space: normal;
+  }
+
+  [data-surface="console"] .cp-index__link[aria-current="location"] {
+    border-inline-start-color: var(--foreground);
+    background: var(--line-1);
+  }
+}
+
+/* Sections are separated by hairlines, not cards */
+[data-surface="console"] .cp-section {
+  display: grid;
+  gap: var(--field-gap);
+  padding-block: var(--cp-gap);
+  scroll-margin-block-start: calc(var(--header-offset) + 4rem);
+}
+
+[data-surface="console"] .cp-section:first-child {
+  padding-block-start: 0;
+}
+
+[data-surface="console"] .cp-section + .cp-section {
+  border-block-start: 1px solid var(--line-2);
+}
+
+[data-surface="console"] .cp-section__head {
+  display: grid;
+  gap: 0.25rem;
+}
+
+[data-surface="console"] .cp-section__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--step-0);
+}
+
+[data-surface="console"] .cp-section__desc {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cp-section__body {
+  display: grid;
+  gap: var(--field-gap);
+  min-inline-size: 0;
+}
+
+/* Errors are a dashed frame and a labelled mark, never a red box */
+[data-surface="console"] .cp-validation {
+  border: 1px dashed var(--foreground);
+  border-radius: var(--r-panel);
+  padding: 0.75rem 1rem;
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cp-validation__title {
+  margin: 0 0 0.5rem;
+}
+
+[data-surface="console"] .cp-validation__list {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+
+[data-surface="console"] .cp-validation a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Sticky, solid, no blur */
+[data-surface="console"] .cp-actionbar {
+  display: flex;
+  position: sticky;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  z-index: var(--z-sticky, 20);
+  inset-block-end: 0;
+  border-block-start: 1px solid var(--line-3);
+  background: var(--background);
+  padding: 0.625rem 0;
+}
+
+[data-surface="console"] .cp-actionbar__state {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-surface="console"] .cp-actionbar[data-dirty="true"] .cp-actionbar__state {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+[data-surface="console"] .cp-actionbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
+/* ---------- 9. Inbox pattern (C4): the detail replaces the list below 1024 px ---------- */
+[data-surface="console"] .cp-inbox {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-panel);
+  min-block-size: 24rem;
+}
+
+[data-surface="console"] .cp-inbox__list,
+[data-surface="console"] .cp-inbox__detail {
+  min-inline-size: 0;
+}
+
+[data-surface="console"] .cp-inbox[data-view="list"] .cp-inbox__detail,
+[data-surface="console"] .cp-inbox[data-view="detail"] .cp-inbox__list {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  [data-surface="console"] .cp-inbox {
+    grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr);
+  }
+
+  [data-surface="console"] .cp-inbox[data-view] .cp-inbox__list,
+  [data-surface="console"] .cp-inbox[data-view] .cp-inbox__detail {
+    display: block;
+  }
+
+  [data-surface="console"] .cp-inbox__list {
+    border-inline-end: 1px solid var(--line-2);
+  }
+
+  [data-surface="console"] .cp-inbox__list,
+  [data-surface="console"] .cp-inbox__detail {
+    max-block-size: calc(100dvh - var(--header-offset) - 10rem);
+    overflow: auto;
+  }
+
+  [data-surface="console"] .cp-inbox__back {
+    display: none;
+  }
+}
+
+@media print {
+  [data-surface="console"] :is(.cp-toolbar, .cp-index, .cp-actionbar) {
+    position: static;
+  }
+
+  [data-surface="console"] :is(.cp-index, .cp-actionbar) {
+    display: none;
+  }
+}

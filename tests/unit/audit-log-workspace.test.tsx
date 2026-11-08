@@ -5,7 +5,7 @@ import AuditLogWorkspace, {
 } from "@/components/admin/audit-log-workspace";
 import { getAdminAuditEvents } from "@/services/audit-admin.service";
 import { getAdminPageCapability } from "@/lib/auth/capabilities";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -60,6 +60,65 @@ describe("audit log workspace", () => {
     expect(screen.getByText("Changed: status")).toBeVisible();
     expect(screen.queryByText(/session token/i)).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Outcome" })).toBeVisible();
+  });
+
+  it("is a C2 list: header, a bounded date-window toolbar, and the table with its marks", async () => {
+    const { container } = render(<AuditLogWorkspace />);
+    await screen.findByText("content published");
+
+    expect(container.firstElementChild).toHaveAttribute("data-archetype", "C2");
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Audit log" })
+    ).toBeVisible();
+    expect(screen.getByText("Governance")).toBeVisible();
+    const toolbar = screen.getByRole("group", { name: "Bounded date window" });
+    expect(within(toolbar).getByLabelText("From")).toBeVisible();
+    expect(within(toolbar).getByLabelText("To")).toBeVisible();
+    // the outcome is a status mark with a text label, not a coloured pill
+    const outcome = screen.getByText("success").closest(".status-mark");
+    expect(outcome).toHaveAttribute("data-glyph", "success");
+  });
+
+  it("shows the empty state, and a filtered-empty state with a clear action", async () => {
+    const user = userEvent.setup();
+    vi.mocked(getAdminAuditEvents).mockResolvedValue({
+      status: 200,
+      success: true,
+      data: [],
+      meta: { page: 1, limit: 10, total: 0 },
+    });
+    const { unmount } = render(<AuditLogWorkspace />);
+    expect(
+      await screen.findByText("No audit events in this window")
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Clear filters" })
+    ).not.toBeInTheDocument();
+    unmount();
+
+    window.history.replaceState({}, "", "/admin/audit?outcome=failure");
+    render(<AuditLogWorkspace />);
+    expect(
+      await screen.findByText("No audit events match these filters")
+    ).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(
+      await screen.findByText("No audit events in this window")
+    ).toBeVisible();
+    expect(getAdminAuditEvents).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ outcome: "failure" }),
+      expect.anything()
+    );
+  });
+
+  it("announces a rejected date window and keeps the table empty", async () => {
+    const user = userEvent.setup();
+    render(<AuditLogWorkspace />);
+    await screen.findByText("content published");
+    const from = screen.getByLabelText("From");
+    await user.clear(from);
+    await user.type(from, "2020-01-01");
+    expect(await screen.findByRole("alert")).toHaveTextContent(/90-day/);
   });
 
   it("reloads the bounded query when an audit filter changes", async () => {

@@ -9,8 +9,12 @@ export type TableProps = React.ComponentProps<"table"> & {
 
 const TableRoot = React.forwardRef<HTMLTableElement, TableProps>(
   ({ className, containerClassName, ...props }, ref) => (
+    // A scrollable region must be reachable by keyboard (axe: scrollable-region-focusable)
     <div
       data-slot="table-container"
+      role="region"
+      aria-label={props["aria-label"] ?? "Scrollable table"}
+      tabIndex={0}
       className={cn("relative w-full overflow-x-auto", containerClassName)}
     >
       <table

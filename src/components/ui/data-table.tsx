@@ -174,7 +174,7 @@ export type TDataTableProps<T extends object> = {
   caption?: string;
   searchPlaceholder?: string;
   emptyTitle?: string;
-  emptyDescription?: string;
+  emptyDescription?: React.ReactNode;
   className?: string;
   tableClassName?: string;
   tableContainerClassName?: string;
@@ -915,13 +915,17 @@ const DataTable = <T extends object>({
 
   return (
     <section
+      data-slot="data-table"
       className={cn(
-        "border-border bg-card overflow-hidden rounded-3xl border shadow-sm",
+        "border-border bg-card overflow-hidden rounded-[var(--radius-xl-token)] border shadow-sm",
         className
       )}
       aria-busy={status === "loading"}
     >
-      <div className="border-border flex flex-col gap-4 border-b p-4 sm:p-6">
+      <div
+        data-slot="data-table-toolbar"
+        className="border-border flex flex-col gap-4 border-b p-4 sm:p-6"
+      >
         {(title || slot) && (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {title && <h2 className="text-xl font-bold">{title}</h2>}

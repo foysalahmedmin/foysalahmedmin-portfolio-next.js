@@ -13,7 +13,7 @@ import {
  *
  * The allowlist is the only way out and it only shrinks. Each entry names the rules it exempts and why;
  * the second test fails when an entry no longer has any violation, so finished work must remove its
- * entry. Phase 7 and 8 empty the admin rows; Phase 7 removes the `status-badge` row.
+ * entry. Phase 7 and 8 empty the admin rows.
  */
 type AllowEntry = Readonly<{
   /** A file path, or a directory prefix ending in "/". */
@@ -33,17 +33,6 @@ const ALLOWLIST: readonly AllowEntry[] = [
     path: "src/app/admin/",
     rules: ["palette", "literal", "arbitrary", "rounded-large"],
     reason: "Admin routes keep legacy styling until Phase 7 and 8",
-  },
-  {
-    path: "src/components/ui/status-badge.tsx",
-    rules: ["palette"],
-    reason: "Shared with the admin; becomes StatusMark tones in Phase 7",
-  },
-  {
-    path: "src/components/ui/data-table.tsx",
-    rules: ["rounded-large"],
-    reason:
-      "Shared with the admin; restyled with the console DataTable in Phase 7",
   },
   {
     path: "src/app/global-error.tsx",

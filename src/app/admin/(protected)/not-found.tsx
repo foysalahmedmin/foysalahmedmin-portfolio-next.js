@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function AdminNotFound() {
   return (
-    <main className="p-6 lg:p-10">
+    <div className="p-6 lg:p-10">
       <EmptyState
         title="The requested record was not found"
         description="It may have been deleted, moved to trash, or removed by another administrator."
@@ -16,6 +16,6 @@ export default function AdminNotFound() {
           </Link>
         }
       />
-    </main>
+    </div>
   );
 }

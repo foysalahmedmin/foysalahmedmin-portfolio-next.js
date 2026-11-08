@@ -1,11 +1,9 @@
 "use client";
 
 import ArticleForm from "@/components/admin/article-form";
-import { buttonVariants } from "@/components/ui/button";
+import { ConsoleError, ConsoleListSkeleton } from "@/components/console";
 import { getAdminArticleById, updateArticle } from "@/services/article.service";
 import type { TArticle, TArticleInput } from "@/types/article.type";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -60,43 +58,27 @@ const AdminEditArticlePage = () => {
     }
   };
 
-  if (loading) return <p role="status">Loading article…</p>;
+  if (loading)
+    return <ConsoleListSkeleton rows={6} columns={2} label="Loading article" />;
+
+  if (!article) {
+    return (
+      <ConsoleError
+        title="Could not load this article"
+        description={error ?? "The article was not found."}
+        retryHref={`/admin/articles/edit/${id}`}
+      />
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <div className="flex items-center gap-4">
-        <Link
-          href="/admin/articles"
-          aria-label="Back to articles"
-          className={buttonVariants({ variant: "outline", shape: "icon" })}
-        >
-          <ArrowLeft aria-hidden="true" className="size-4" />
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Edit Article</h1>
-          <p className="text-muted-foreground mt-1">
-            Update your article content and settings.
-          </p>
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-destructive/10 text-destructive rounded-xl p-4 text-sm font-bold">
-          {error}
-        </div>
-      )}
-
-      <div className="border-border bg-card rounded-3xl border p-8 shadow-sm">
-        {article && (
-          <ArticleForm
-            initialData={article}
-            onSubmit={handleSubmit}
-            onCancel={() => router.push("/admin/articles")}
-            loading={saving}
-          />
-        )}
-      </div>
-    </div>
+    <ArticleForm
+      initialData={article}
+      onSubmit={handleSubmit}
+      onCancel={() => router.push("/admin/articles")}
+      loading={saving}
+      error={error}
+    />
   );
 };
 

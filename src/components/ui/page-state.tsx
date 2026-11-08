@@ -30,9 +30,11 @@ export function SectionSkeleton({ label }: { label: string }) {
 
 export function AdminPageSkeleton() {
   return (
-    <main
+    // The console shell owns the page's <main>; this renders inside it, so it is a region, not a second landmark
+    <div
       aria-busy="true"
       aria-label="Loading administration page"
+      role="region"
       className="p-6 lg:p-10"
     >
       <Stack gap="lg">
@@ -49,6 +51,6 @@ export function AdminPageSkeleton() {
       <span className="sr-only" role="status">
         Loading administration content…
       </span>
-    </main>
+    </div>
   );
 }

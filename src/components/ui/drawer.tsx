@@ -200,6 +200,7 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
   return (
     <div
       role="dialog"
+      data-slot="drawer-content"
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
