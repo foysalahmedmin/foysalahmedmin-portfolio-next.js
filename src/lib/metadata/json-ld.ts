@@ -86,7 +86,18 @@ export type TVideoJsonLd = Readonly<{
   keywords?: readonly string[];
 }>;
 
+export type TFaqPageJsonLd = Readonly<{
+  "@context": "https://schema.org";
+  "@type": "FAQPage";
+  mainEntity: readonly Readonly<{
+    "@type": "Question";
+    name: string;
+    acceptedAnswer: Readonly<{ "@type": "Answer"; text: string }>;
+  }>[];
+}>;
+
 export type TJsonLdNode =
+  | TFaqPageJsonLd
   | TWebSiteJsonLd
   | TWebPageJsonLd
   | TBreadcrumbJsonLd
@@ -353,3 +364,49 @@ export const serializeJsonLd = (payload: TJsonLdPayload): string =>
     /[<>&\u2028\u2029]/g,
     (character) => JSON_LD_ESCAPE[character]!
   );
+
+const FAQ_JSON_LD_MAX = 10;
+
+/** The visible text of a stored answer: tags dropped, entities decoded, whitespace collapsed. */
+const faqAnswerText = (html: string): string | undefined =>
+  cleanJsonLdText(
+    html
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, " "),
+    1000
+  );
+
+/**
+ * `FAQPage` from the same public FAQ records the page shows (docs plan 4.1, Ch.8). Only a published
+ * site emits it, and a question without a readable answer is left out; no questions means no node.
+ */
+export const buildFaqJsonLd = (
+  site: TPublicSiteDto,
+  faqs: readonly Readonly<{ question: string; answer: string }>[]
+): TFaqPageJsonLd | null => {
+  if (site.content_source !== "published") return null;
+  const mainEntity = faqs
+    .flatMap(({ question, answer }) => {
+      const name = cleanJsonLdText(question, 300);
+      const text = faqAnswerText(answer);
+      return name && text
+        ? [
+            {
+              "@type": "Question" as const,
+              name,
+              acceptedAnswer: { "@type": "Answer" as const, text },
+            },
+          ]
+        : [];
+    })
+    .slice(0, FAQ_JSON_LD_MAX);
+  return mainEntity.length
+    ? { "@context": "https://schema.org", "@type": "FAQPage", mainEntity }
+    : null;
+};

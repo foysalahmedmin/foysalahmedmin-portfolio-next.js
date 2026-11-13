@@ -37,6 +37,8 @@ export type CaseStudyDiscoveryQuery = {
   pillar: PillarKey | "all";
   category: string;
   technology: string;
+  /** The engagement type (client, internal, open source, lab), or `all`. */
+  engagement: ProjectType | "all";
   sort: CaseStudyDiscoverySort;
   page: number;
 };
@@ -52,6 +54,7 @@ export const DEFAULT_CASE_STUDY_DISCOVERY_QUERY: Readonly<CaseStudyDiscoveryQuer
     pillar: "all",
     category: "all",
     technology: "all",
+    engagement: "all",
     sort: "newest",
     page: 1,
   };
@@ -73,6 +76,11 @@ export const normalizeCaseStudyDiscoveryQuery = (
   pillar: normalizePillar(value.pillar, defaults.pillar),
   category: normalizeCategory(value.category, defaults.category),
   technology: normalizeFilterToken(value.technology, defaults.technology),
+  engagement: normalizeEnum(
+    value.engagement,
+    ["all", ...CASE_STUDY_ENGAGEMENT_TYPES] as const,
+    defaults.engagement
+  ),
   sort: normalizeEnum(value.sort, CASE_STUDY_DISCOVERY_SORTS, defaults.sort),
   page: normalizePage(value.page, defaults.page),
 });
@@ -88,6 +96,10 @@ export const parseCaseStudyDiscoveryQuery = (
       pillar: readValue(source, "pillar") as PillarKey | "all" | undefined,
       category: readValue(source, "category") as string | undefined,
       technology: readValue(source, "technology") as string | undefined,
+      engagement: readValue(source, "engagement") as
+        | ProjectType
+        | "all"
+        | undefined,
       sort: readValue(source, "sort") as CaseStudyDiscoverySort | undefined,
       page: readValue(source, "page") as number | undefined,
     },
@@ -109,7 +121,18 @@ export const mergeCaseStudyDiscoveryQueryString = (
   setWhenNotDefault(params, "search", query.search, defaults.search);
   setWhenNotDefault(params, "pillar", query.pillar, defaults.pillar);
   setWhenNotDefault(params, "category", query.category, defaults.category);
-  setWhenNotDefault(params, "technology", query.technology, defaults.technology);
+  setWhenNotDefault(
+    params,
+    "technology",
+    query.technology,
+    defaults.technology
+  );
+  setWhenNotDefault(
+    params,
+    "engagement",
+    query.engagement,
+    defaults.engagement
+  );
   setWhenNotDefault(params, "sort", query.sort, defaults.sort);
   setWhenNotDefault(params, "page", query.page, defaults.page);
   return finishQueryString(params);
@@ -119,7 +142,8 @@ export const hasCaseStudyDiscoveryFilters = (query: CaseStudyDiscoveryQuery) =>
   Boolean(query.search.trim()) ||
   query.pillar !== "all" ||
   query.category !== "all" ||
-  query.technology !== "all";
+  query.technology !== "all" ||
+  query.engagement !== "all";
 
 export const normalizeCaseStudyDiscoveryCompositionFilter = (
   value: Readonly<Record<string, unknown>>
@@ -173,6 +197,9 @@ export const buildCaseStudyDiscoveryRepositoryQuery = (
       ? { category: "000000000000000000000000" }
       : {}),
     ...(query.technology !== "all" ? { tech_stack: query.technology } : {}),
+    ...(query.engagement !== "all"
+      ? { engagement_type: query.engagement }
+      : {}),
     ...(composition.featured === undefined
       ? {}
       : { is_featured: String(composition.featured) }),
@@ -241,7 +268,9 @@ export const toSerializableCaseStudyListItem = (
       : {}),
     ...(clientName ? { client_name: clientName } : {}),
     ...(clientIndustry ? { client_industry: clientIndustry } : {}),
-    ...(CASE_STUDY_ENGAGEMENT_TYPES.includes(source.engagement_type as ProjectType)
+    ...(CASE_STUDY_ENGAGEMENT_TYPES.includes(
+      source.engagement_type as ProjectType
+    )
       ? { engagement_type: source.engagement_type as ProjectType }
       : {}),
     ...(PILLAR_KEYS.includes(source.primary_pillar as PillarKey)

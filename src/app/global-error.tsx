@@ -2,13 +2,8 @@
 
 import { NOINDEX_ROBOTS_CONTENT } from "@/lib/metadata/noindex";
 
-export default function GlobalError({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+// The error and its digest are never shown to a visitor (docs plan 4.2)
+export default function GlobalError({ reset }: { reset: () => void }) {
   return (
     <html lang="en">
       <head>
@@ -35,10 +30,7 @@ export default function GlobalError({
             </h1>
             <p>
               Retry once. If the issue continues, use the contact page and share
-              {error.digest
-                ? ` reference ${error.digest}`
-                : " the page address"}
-              .
+              the page address.
             </p>
             <button
               type="button"

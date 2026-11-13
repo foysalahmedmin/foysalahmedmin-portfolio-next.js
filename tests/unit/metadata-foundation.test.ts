@@ -7,6 +7,7 @@ import {
   buildArticleJsonLd,
   buildBreadcrumbJsonLd,
   buildCreativeWorkJsonLd,
+  buildFaqJsonLd,
   buildWebPageJsonLd,
   buildWebSiteJsonLd,
   serializeJsonLd,
@@ -375,5 +376,51 @@ describe("dynamic Open Graph contract", () => {
     expect(managedSocial.twitter).toMatchObject({
       card: "summary_large_image",
     });
+  });
+});
+
+describe("FAQPage JSON-LD", () => {
+  const published = {
+    ...createEmergencyPublicSite(),
+    content_source: "published" as const,
+  };
+
+  it("is built from the visible text of the public answers", () => {
+    const node = buildFaqJsonLd(published, [
+      {
+        question: "How do we start?",
+        answer: "<p>Write &amp; <b>describe</b> it.</p>",
+      },
+      { question: "   ", answer: "<p>No question</p>" },
+      { question: "Empty answer", answer: "<p> </p>" },
+    ]);
+    expect(node).toEqual({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "How do we start?",
+          acceptedAnswer: { "@type": "Answer", text: "Write & describe it." },
+        },
+      ],
+    });
+  });
+
+  it("is omitted without a published site or without a usable question", () => {
+    expect(
+      buildFaqJsonLd(createEmergencyPublicSite(), [
+        { question: "Q?", answer: "A" },
+      ])
+    ).toBeNull();
+    expect(buildFaqJsonLd(published, [])).toBeNull();
+  });
+
+  it("is capped at ten questions", () => {
+    const many = Array.from({ length: 14 }, (_, index) => ({
+      question: `Q${index}?`,
+      answer: `A${index}`,
+    }));
+    expect(buildFaqJsonLd(published, many)?.mainEntity).toHaveLength(10);
   });
 });

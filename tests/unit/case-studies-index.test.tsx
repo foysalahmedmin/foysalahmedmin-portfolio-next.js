@@ -92,11 +92,13 @@ describe("CaseStudiesContentSection filters", () => {
       "pillar",
       "category",
       "technology",
+      "engagement",
       "sort",
     ]);
     expect(screen.getByLabelText("Search")).toHaveValue("queue");
     expect(screen.getByLabelText("Role")).toHaveValue("software_developer");
     expect(screen.getByLabelText("Tool")).toHaveValue("all");
+    expect(screen.getByLabelText("Type")).toHaveValue("all");
     expect(within(form).getByRole("button", { name: "Apply" })).toHaveAttribute(
       "type",
       "submit"
@@ -314,5 +316,26 @@ describe("case-studies route source", () => {
         /^\s*["']use client["']/m
       );
     }
+  });
+});
+
+describe("CaseStudiesContentSection engagement type", () => {
+  it("offers the four engagement types and shows the active one as a removable chip", () => {
+    const { container } = view({ engagement: "internal" });
+    const select = screen.getByLabelText("Type") as HTMLSelectElement;
+    expect(select).toHaveValue("internal");
+    expect(
+      Array.from(select.options).map((option) => option.textContent)
+    ).toEqual([
+      "All types",
+      "Client engagement",
+      "Internal product",
+      "Open source",
+      "Lab experiment",
+    ]);
+    const chip = Array.from(container.querySelectorAll("a")).find((link) =>
+      link.textContent?.includes("Internal product")
+    );
+    expect(chip?.getAttribute("href")).toBe("/case-studies");
   });
 });

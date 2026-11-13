@@ -1,3 +1,7 @@
+import {
+  CASE_STUDY_ENGAGEMENT_LABELS,
+  CASE_STUDY_ENGAGEMENT_TYPES,
+} from "@/lib/content/case-study-contract";
 import type { TPublicSiteFallbacksDto } from "@/app/api/site/site.type";
 import { CaseFileRow } from "@/components/(common)/home-page/case-studies-section/files";
 import { buttonVariants } from "@/components/ui/button-variants";
@@ -43,7 +47,12 @@ const SORT_LABELS: Record<(typeof CASE_STUDY_DISCOVERY_SORTS)[number], string> =
 const hrefFor = (query: CaseStudyDiscoveryQuery) =>
   `${BASE_PATH}${mergeCaseStudyDiscoveryQueryString("", query)}`;
 
-type TFilterKey = "search" | "pillar" | "category" | "technology";
+type TFilterKey =
+  | "search"
+  | "pillar"
+  | "category"
+  | "technology"
+  | "engagement";
 
 /**
  * The case files index (docs plan 4.2): the Ch.4 case-file rows as a full list, with URL-backed
@@ -103,6 +112,15 @@ const CaseStudiesContentSection = ({
       : []),
     ...(query.technology !== "all"
       ? [{ key: "technology" as const, label: "Tool", value: query.technology }]
+      : []),
+    ...(query.engagement !== "all"
+      ? [
+          {
+            key: "engagement" as const,
+            label: "Type",
+            value: CASE_STUDY_ENGAGEMENT_LABELS[query.engagement],
+          },
+        ]
       : []),
   ];
 
@@ -194,6 +212,25 @@ const CaseStudiesContentSection = ({
                 {technologies.map((technology) => (
                   <option key={technology} value={technology}>
                     {technology}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="cfx-field">
+              <label htmlFor="cfx-engagement" className="cfx-label t-eyebrow">
+                Type
+              </label>
+              <select
+                id="cfx-engagement"
+                name="engagement"
+                defaultValue={query.engagement}
+                className="cfx-control"
+              >
+                <option value="all">All types</option>
+                {CASE_STUDY_ENGAGEMENT_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {CASE_STUDY_ENGAGEMENT_LABELS[type]}
                   </option>
                 ))}
               </select>
