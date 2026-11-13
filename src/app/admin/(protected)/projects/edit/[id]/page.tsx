@@ -1,11 +1,9 @@
 "use client";
 
 import ProjectForm from "@/components/admin/project-form";
-import { buttonVariants } from "@/components/ui/button";
+import { ConsoleError, ConsoleListSkeleton } from "@/components/console";
 import { getAdminProjectById, updateProject } from "@/services/project.service";
 import type { TProject, TProjectInput } from "@/types/project.type";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -60,43 +58,27 @@ const AdminEditProjectPage = () => {
     }
   };
 
-  if (loading) return <p role="status">Loading project…</p>;
+  if (loading)
+    return <ConsoleListSkeleton rows={6} columns={2} label="Loading project" />;
+
+  if (!project) {
+    return (
+      <ConsoleError
+        title="Could not load this project"
+        description={error ?? "The project was not found."}
+        retryHref={`/admin/projects/edit/${id}`}
+      />
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <div className="flex items-center gap-4">
-        <Link
-          href="/admin/projects"
-          aria-label="Back to projects"
-          className={buttonVariants({ variant: "outline", shape: "icon" })}
-        >
-          <ArrowLeft aria-hidden="true" className="size-4" />
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Edit Project</h1>
-          <p className="text-muted-foreground mt-1">
-            Update project details and settings.
-          </p>
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-destructive/10 text-destructive rounded-xl p-4 text-sm font-bold">
-          {error}
-        </div>
-      )}
-
-      <div className="border-border bg-card rounded-3xl border p-8 shadow-sm">
-        {project && (
-          <ProjectForm
-            initialData={project}
-            onSubmit={handleSubmit}
-            onCancel={() => router.push("/admin/projects")}
-            loading={saving}
-          />
-        )}
-      </div>
-    </div>
+    <ProjectForm
+      initialData={project}
+      onSubmit={handleSubmit}
+      onCancel={() => router.push("/admin/projects")}
+      loading={saving}
+      error={error}
+    />
   );
 };
 

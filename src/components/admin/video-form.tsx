@@ -2,14 +2,18 @@
 
 import {
   Checkbox,
+  ContentEditorFrame,
   Field,
-  FormSection,
+  changedFields,
   commaToList,
   fieldClass,
+  labelClass,
   toIsoDateTime,
   toLocalDateTime,
+  type ContentSection,
+  type ContentStatusMark,
 } from "@/components/admin/content-form-fields";
-import { Button } from "@/components/ui/button";
+import { EditorSection, type ValidationIssue } from "@/components/console";
 import { FileUploader } from "@/components/ui/file-uploader";
 import {
   DEFAULT_VIDEO_UPLOAD_MAX_BYTES,
@@ -27,15 +31,17 @@ import { getVideoCategories } from "@/services/category.service";
 import type { TFilePopulated } from "@/types/file.type";
 import type { TVideoCategory } from "@/types/video-category.type";
 import type { TVideo, TVideoInput, TVideoStatus } from "@/types/video.type";
-import { Save } from "lucide-react";
+import { StatusMark } from "@/components/ui/status-mark";
 import Image from "next/image";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 type Props = Readonly<{
   initialData?: Partial<TVideo>;
   onSubmit: (data: TVideoInput) => void;
   onCancel: () => void;
   loading?: boolean;
+  /** A failure from the last save, shown in the validation summary. */
+  error?: string | null;
 }>;
 
 type TFormState = {
@@ -64,26 +70,69 @@ const VIDEO_UPLOAD_LIMIT_BYTES =
 const formatMegabytes = (bytes: number) =>
   `${(bytes / 1_048_576).toFixed(bytes % 1_048_576 === 0 ? 0 : 1)} MB`;
 
-const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
-  const [form, setForm] = useState<TFormState>(() => ({
-    name: initialData?.name ?? "",
-    slug: initialData?.slug ?? "",
-    description: initialData?.description ?? "",
-    keywords: (initialData?.keywords ?? []).join(", "),
-    category: initialData?.category?._id ?? "",
-    aspect_ratio: initialData?.aspect_ratio ?? "landscape",
-    source_type: initialData?.source_type ?? "youtube",
-    youtube_url: initialData?.youtube_url ?? "",
-    video_file: initialData?.video_file ?? null,
-    thumbnail: initialData?.thumbnail ?? null,
-    duration_seconds: initialData?.duration_seconds
-      ? String(initialData.duration_seconds)
-      : "",
-    status: initialData?.status ?? "draft",
-    is_featured: initialData?.is_featured ?? false,
-    published_at: toLocalDateTime(initialData?.published_at),
-    expired_at: toLocalDateTime(initialData?.expired_at),
-  }));
+const toFormState = (initialData?: Partial<TVideo>): TFormState => ({
+  name: initialData?.name ?? "",
+  slug: initialData?.slug ?? "",
+  description: initialData?.description ?? "",
+  keywords: (initialData?.keywords ?? []).join(", "),
+  category: initialData?.category?._id ?? "",
+  aspect_ratio: initialData?.aspect_ratio ?? "landscape",
+  source_type: initialData?.source_type ?? "youtube",
+  youtube_url: initialData?.youtube_url ?? "",
+  video_file: initialData?.video_file ?? null,
+  thumbnail: initialData?.thumbnail ?? null,
+  duration_seconds: initialData?.duration_seconds
+    ? String(initialData.duration_seconds)
+    : "",
+  status: initialData?.status ?? "draft",
+  is_featured: initialData?.is_featured ?? false,
+  published_at: toLocalDateTime(initialData?.published_at),
+  expired_at: toLocalDateTime(initialData?.expired_at),
+});
+
+/** The sections of the editor: the form fields whose edits or errors mark each one. */
+const SECTIONS: readonly ContentSection[] = [
+  {
+    id: "video-basics",
+    label: "Basics",
+    fields: ["name", "status", "category", "slug", "description", "keywords"],
+  },
+  {
+    id: "video-source",
+    label: "Video",
+    fields: [
+      "aspect_ratio",
+      "source_type",
+      "youtube_url",
+      "video_file",
+      "thumbnail",
+      "duration_seconds",
+    ],
+  },
+  {
+    id: "video-publishing",
+    label: "Publishing",
+    fields: ["published_at", "expired_at", "is_featured"],
+  },
+];
+
+const STATUS_MARKS: Record<TVideoStatus, ContentStatusMark> = {
+  draft: { state: "draft", label: "Draft" },
+  pending: { state: "pending", label: "Pending" },
+  published: { state: "published", label: "Published" },
+  archived: { state: "archived", label: "Archived" },
+};
+
+const VideoForm = ({
+  initialData,
+  onSubmit,
+  onCancel,
+  loading,
+  error,
+}: Props) => {
+  const [initialState] = useState(() => toFormState(initialData));
+  const [form, setForm] = useState<TFormState>(initialState);
+  const formRef = useRef<HTMLFormElement>(null);
   const [categories, setCategories] = useState<TVideoCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -105,7 +154,9 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
         setErrors((current) => ({
           ...current,
           category:
-            error instanceof Error ? error.message : "Failed to load categories",
+            error instanceof Error
+              ? error.message
+              : "Failed to load categories",
         }));
       } finally {
         if (!controller.signal.aborted) setCategoriesLoading(false);
@@ -121,7 +172,8 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
   };
 
   const youtubeId = useMemo(
-    () => (form.youtube_url.trim() ? parseYouTubeVideoId(form.youtube_url) : null),
+    () =>
+      form.youtube_url.trim() ? parseYouTubeVideoId(form.youtube_url) : null,
     [form.youtube_url]
   );
 
@@ -141,7 +193,9 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
               : "landscape"
             : current.aspect_ratio,
         duration_seconds:
-          duration > 0 ? String(Math.round(duration)) : current.duration_seconds,
+          duration > 0
+            ? String(Math.round(duration))
+            : current.duration_seconds,
       };
     });
     setErrors((current) => ({ ...current, video_file: undefined }));
@@ -172,7 +226,8 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
       thumbnail: form.thumbnail?._id ?? null,
       aspect_ratio: form.aspect_ratio,
       source_type: form.source_type,
-      youtube_url: form.source_type === "youtube" ? form.youtube_url.trim() : null,
+      youtube_url:
+        form.source_type === "youtube" ? form.youtube_url.trim() : null,
       video_file: form.source_type === "upload" ? form.video_file!._id : null,
       duration_seconds:
         Number.isFinite(duration) && duration > 0 ? Math.round(duration) : null,
@@ -184,9 +239,29 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
     onSubmit(payload);
   };
 
+  const issues: ValidationIssue[] = error ? [{ message: error }] : [];
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-      <FormSection title="Basics">
+    <ContentEditorFrame
+      formRef={formRef}
+      onSubmit={handleSubmit}
+      noValidate
+      title={initialData ? initialData.name || "Untitled video" : "New video"}
+      backHref="/admin/videos"
+      backLabel="Back to videos"
+      status={
+        initialData ? STATUS_MARKS[initialData.status ?? "draft"] : undefined
+      }
+      savedAt={initialData?.updated_at}
+      sections={SECTIONS}
+      changed={changedFields(form, initialState)}
+      errored={Object.keys(errors).filter((key) => errors[key])}
+      issues={issues}
+      loading={loading}
+      onCancel={onCancel}
+      submitLabel={initialData ? "Update Video" : "Create Video"}
+    >
+      <EditorSection id="video-basics" title="Basics">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <Field
             label="Title"
@@ -207,7 +282,9 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             <select
               id="video-status"
               value={form.status}
-              onChange={(event) => set("status", event.target.value as TVideoStatus)}
+              onChange={(event) =>
+                set("status", event.target.value as TVideoStatus)
+              }
               className={fieldClass}
             >
               <option value="draft">Draft</option>
@@ -218,7 +295,11 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
           </Field>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <Field label="Category" htmlFor="video-category" error={errors.category}>
+          <Field
+            label="Category"
+            htmlFor="video-category"
+            error={errors.category}
+          >
             <select
               id="video-category"
               value={form.category}
@@ -278,24 +359,21 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             className={fieldClass}
           />
         </Field>
-      </FormSection>
+      </EditorSection>
 
-      <FormSection
+      <EditorSection
+        id="video-source"
         title="Video"
         description="Choose the shape, then where the video comes from."
       >
-        <fieldset className="space-y-2">
-          <legend className="text-muted-foreground mb-2 text-xs font-bold tracking-widest uppercase">
-            Aspect ratio
-          </legend>
+        <fieldset className="cp-field">
+          <legend className={cn(labelClass, "mb-2")}>Aspect ratio</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {VIDEO_ASPECT_RATIOS.map((ratio) => (
               <label
                 key={ratio}
-                className={cn(
-                  "border-border flex cursor-pointer items-center gap-4 rounded-xl border p-4",
-                  form.aspect_ratio === ratio && "border-primary bg-primary/5"
-                )}
+                data-checked={form.aspect_ratio === ratio}
+                className="cwa-choice gap-4"
               >
                 <input
                   type="radio"
@@ -308,10 +386,8 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "border-foreground/40 bg-muted block border-2",
-                    ratio === "landscape"
-                      ? "h-8 w-14 rounded-md"
-                      : "h-14 w-8 rounded-md"
+                    "border-foreground/40 bg-muted block rounded-[var(--radius-md-token)] border-2",
+                    ratio === "landscape" ? "h-8 w-14" : "h-14 w-8"
                   )}
                 />
                 <span className="text-sm font-bold">
@@ -327,18 +403,14 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
           </div>
         </fieldset>
 
-        <fieldset className="space-y-2">
-          <legend className="text-muted-foreground mb-2 text-xs font-bold tracking-widest uppercase">
-            Source
-          </legend>
+        <fieldset className="cp-field">
+          <legend className={cn(labelClass, "mb-2")}>Source</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {VIDEO_SOURCE_TYPES.map((source) => (
               <label
                 key={source}
-                className={cn(
-                  "border-border flex cursor-pointer items-center gap-3 rounded-xl border p-4 text-sm font-bold",
-                  form.source_type === source && "border-primary bg-primary/5"
-                )}
+                data-checked={form.source_type === source}
+                className="cwa-choice gap-3 text-sm font-bold"
               >
                 <input
                   type="radio"
@@ -372,23 +444,19 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
                 className={fieldClass}
               />
               {form.youtube_url.trim() ? (
-                <p
-                  className={cn(
-                    "text-xs font-semibold",
-                    youtubeId ? "text-success" : "text-destructive"
-                  )}
-                  role="status"
-                >
-                  {youtubeId
-                    ? `Detected YouTube video ${youtubeId}`
-                    : "This is not a valid YouTube video link."}
+                <p role="status" className="text-sm">
+                  <StatusMark state={youtubeId ? "success" : "error"}>
+                    {youtubeId
+                      ? `Detected YouTube video ${youtubeId}`
+                      : "This is not a valid YouTube video link."}
+                  </StatusMark>
                 </p>
               ) : null}
             </Field>
             {youtubeId ? (
               <div
                 className={cn(
-                  "border-border bg-muted relative overflow-hidden rounded-xl border",
+                  "border-border bg-muted relative overflow-hidden rounded-[var(--radius-lg-token)] border",
                   form.aspect_ratio === "reel"
                     ? "mx-auto aspect-[9/16] w-32"
                     : "aspect-video"
@@ -459,9 +527,9 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             />
           </Field>
         </div>
-      </FormSection>
+      </EditorSection>
 
-      <FormSection title="Publishing">
+      <EditorSection id="video-publishing" title="Publishing">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Field label="Publish at (optional)" htmlFor="video-published">
             <input
@@ -488,18 +556,8 @@ const VideoForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
           checked={form.is_featured}
           onChange={(checked) => set("is_featured", checked)}
         />
-      </FormSection>
-
-      <div className="flex justify-end gap-4 pt-2">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
-          Cancel
-        </Button>
-        <Button type="submit" className="gap-2" isLoading={loading}>
-          <Save className="size-4" aria-hidden="true" />
-          {initialData ? "Update Video" : "Create Video"}
-        </Button>
-      </div>
-    </form>
+      </EditorSection>
+    </ContentEditorFrame>
   );
 };
 

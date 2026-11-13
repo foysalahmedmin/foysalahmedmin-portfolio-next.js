@@ -7,10 +7,13 @@ import {
   EditorialSlugEditor,
   EditorialStatus,
   EditorialWorkspaceHeader,
+  editorialInputClassName,
+  editorialTextareaClassName,
   toEditorialSlug,
   type TEditorialCompletenessItem,
 } from "@/components/admin/editorial-editor-primitives";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { StatusMark } from "@/components/ui/status-mark";
 import { ErrorState, Skeleton } from "@/components/ui/async-state";
 import {
   FormControl,
@@ -62,9 +65,8 @@ type ReferenceState = Readonly<
   Record<string, AdminRepeatableReferenceOption[]>
 >;
 
-const inputClassName =
-  "border-input bg-card text-foreground focus-visible:border-ring focus-visible:ring-ring/25 min-h-11 w-full rounded-xl border px-4 text-sm outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
-const textareaClassName = `${inputClassName} py-3 leading-6`;
+const inputClassName = editorialInputClassName;
+const textareaClassName = editorialTextareaClassName;
 
 const getErrorMessage = (error: unknown, fallback: string) =>
   error instanceof Error && error.message ? error.message : fallback;
@@ -80,8 +82,8 @@ const EditSkeleton = () => (
       <Skeleton className="h-8 w-64" />
       <Skeleton className="h-4 w-full max-w-xl" />
     </div>
-    <Skeleton className="h-80 w-full rounded-3xl" />
-    <Skeleton className="h-64 w-full rounded-3xl" />
+    <Skeleton className="h-80 w-full rounded-[var(--radius-lg-token)]" />
+    <Skeleton className="h-64 w-full rounded-[var(--radius-lg-token)]" />
     <span className="sr-only" role="status">
       Loading content record…
     </span>
@@ -443,10 +445,7 @@ const RepeatableRecordEditor = ({
           </legend>
           <div className="grid gap-2 sm:grid-cols-2">
             {field.options.map((option) => (
-              <label
-                key={option.value}
-                className="border-input bg-card hover:bg-muted flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 text-sm"
-              >
+              <label key={option.value} className="cwa-choice gap-3">
                 <input
                   type="checkbox"
                   checked={selected.includes(option.value)}
@@ -479,10 +478,7 @@ const RepeatableRecordEditor = ({
 
     if (field.type === "boolean") {
       return (
-        <label
-          key={field.name}
-          className="border-input bg-card hover:bg-muted flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-sm"
-        >
+        <label key={field.name} className="cwa-choice gap-3">
           <input
             id={id}
             name={field.name}
@@ -508,7 +504,7 @@ const RepeatableRecordEditor = ({
       const reviewer = typeof value === "string" ? value : "";
       return (
         <div key={field.name}>
-          <label className="border-input bg-card hover:bg-muted flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-sm">
+          <label className="cwa-choice gap-3">
             <input
               id={id}
               name={field.name}
@@ -587,10 +583,7 @@ const RepeatableRecordEditor = ({
             </Button>
           </div>
           {sections.map((section, index) => (
-            <div
-              key={`${index}-${section.key}`}
-              className="border-border bg-surface-subtle space-y-4 rounded-2xl border p-4"
-            >
+            <div key={`${index}-${section.key}`} className="cwa-row space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-bold">Section {index + 1}</p>
                 <Button
@@ -701,7 +694,6 @@ const RepeatableRecordEditor = ({
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy(field)}
         onChange={(event) => setValue(field.name, event.target.value)}
-        className="rounded-xl"
       />
     );
   };
@@ -812,10 +804,10 @@ const RepeatableRecordEditor = ({
       />
 
       {referenceError ? (
-        <div
-          role="alert"
-          className="border-destructive/30 bg-destructive/10 text-destructive rounded-2xl border p-4 text-sm"
-        >
+        <div role="alert" className="cp-validation">
+          <p className="cp-validation__title">
+            <StatusMark state="error">Related records</StatusMark>
+          </p>
           <p>{referenceError}</p>
           <Button
             type="button"
@@ -829,13 +821,13 @@ const RepeatableRecordEditor = ({
         </div>
       ) : null}
 
-      <form onSubmit={submit} noValidate className="space-y-6">
+      <form onSubmit={submit} noValidate>
         {submitError ? (
-          <div
-            role="alert"
-            className="border-destructive/30 bg-destructive/10 text-destructive rounded-2xl border p-4 text-sm"
-          >
-            {submitError}
+          <div role="alert" className="cp-validation">
+            <p className="cp-validation__title">
+              <StatusMark state="error">Not saved</StatusMark>
+            </p>
+            <p>{submitError}</p>
           </div>
         ) : null}
 
@@ -863,7 +855,6 @@ const RepeatableRecordEditor = ({
                     errors.title ? `${fieldId("title")}-error` : undefined
                   }
                   onChange={(event) => setValue("title", event.target.value)}
-                  className="rounded-xl"
                 />
               </FieldFrame>
               <EditorialSlugEditor
@@ -943,10 +934,7 @@ const RepeatableRecordEditor = ({
                       const selected = stringArray(values.secondary_pillars);
                       const disabled = values.primary_pillar === pillar.value;
                       return (
-                        <label
-                          key={pillar.value}
-                          className="border-input bg-card flex min-h-11 items-center gap-3 rounded-xl border px-3 text-sm"
-                        >
+                        <label key={pillar.value} className="cwa-choice gap-3">
                           <input
                             type="checkbox"
                             checked={selected.includes(pillar.value)}
@@ -1072,12 +1060,11 @@ const RepeatableRecordEditor = ({
                   disabled={submitting}
                   aria-invalid={Boolean(errors.sequence)}
                   onChange={(event) => setValue("sequence", event.target.value)}
-                  className="rounded-xl"
                 />
               </FieldFrame>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              <label className="border-input bg-card flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-sm">
+              <label className="cwa-choice gap-3">
                 <input
                   type="checkbox"
                   checked={Boolean(values.enabled)}
@@ -1094,7 +1081,7 @@ const RepeatableRecordEditor = ({
                   </span>
                 </span>
               </label>
-              <label className="border-input bg-card flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-sm">
+              <label className="cwa-choice gap-3">
                 <input
                   type="checkbox"
                   checked={Boolean(values.is_featured)}

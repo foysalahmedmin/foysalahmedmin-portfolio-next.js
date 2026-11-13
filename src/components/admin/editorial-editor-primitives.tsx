@@ -1,14 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { formControlVariants } from "@/components/ui/form-control-variants";
+import { MonoLabel } from "@/components/ui/mono-label";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusMark } from "@/components/ui/status-mark";
 import { cn } from "@/lib/utils";
 import { useId, type ReactNode } from "react";
 
-export const editorialInputClassName =
-  "border-input bg-card text-foreground focus-visible:border-ring focus-visible:ring-ring/25 min-h-11 w-full rounded-xl border px-4 text-sm outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
+/** The native control look of the console; the surface sets the 2 px radius and the focus ring. */
+export const editorialInputClassName = cn(
+  formControlVariants({ size: "none" }),
+  "px-3 py-2 text-sm"
+);
 
-export const editorialTextareaClassName = `${editorialInputClassName} py-3 leading-6`;
+export const editorialTextareaClassName = cn(
+  editorialInputClassName,
+  "leading-6"
+);
 
 export type TEditorErrors = Readonly<Record<string, string>>;
 
@@ -35,21 +44,20 @@ export function EditorialErrorSummary({ errors }: { errors: TEditorErrors }) {
   };
 
   return (
-    <div
-      className="border-destructive/30 bg-destructive/10 rounded-xl border p-4"
-      role="alert"
-    >
-      <p className="text-destructive font-black">
-        Review {entries.length} validation source
-        {entries.length === 1 ? "" : "s"}
+    <div className="cp-validation" role="alert">
+      <p className="cp-validation__title">
+        <StatusMark state="error">
+          Review {entries.length} validation source
+          {entries.length === 1 ? "" : "s"}
+        </StatusMark>
       </p>
-      <ul className="mt-2 space-y-1 text-sm">
+      <ul className="cp-validation__list">
         {entries.map(([path, message]) => (
           <li key={path}>
             <button
               type="button"
               onClick={() => focus(path)}
-              className="focus-visible:ring-ring rounded text-left underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+              className="text-left underline underline-offset-4"
             >
               {path || "Editorial composition"}: {message}
             </button>
@@ -79,35 +87,20 @@ export function EditorialWorkspaceHeader({
   const resolvedHeadingId = headingId ?? `editorial-heading-${generatedId}`;
 
   return (
-    <header
-      aria-labelledby={resolvedHeadingId}
-      className="border-border bg-card rounded-2xl border p-5 shadow-[var(--shadow-sm)] sm:p-7"
-    >
-      <div className="flex flex-col justify-between gap-5 xl:flex-row xl:items-start">
-        <div className="max-w-3xl space-y-2">
-          <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
-            {eyebrow}
-          </p>
-          <h1
-            id={resolvedHeadingId}
-            className="text-3xl font-black tracking-tight sm:text-4xl"
-          >
-            {title}
-          </h1>
-          <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-            {description}
-          </p>
-          {status ? (
-            <div
-              className="flex flex-wrap gap-2 pt-1"
-              aria-label="Editorial status"
-            >
-              {status}
-            </div>
-          ) : null}
-        </div>
-        {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
+    <header aria-labelledby={resolvedHeadingId} className="cp-header">
+      <div className="cp-header__text">
+        <MonoLabel>{eyebrow}</MonoLabel>
+        <h1 id={resolvedHeadingId} className="cp-title">
+          {title}
+        </h1>
+        <p className="cp-lede">{description}</p>
+        {status ? (
+          <div className="cp-meta" aria-label="Editorial status">
+            {status}
+          </div>
+        ) : null}
       </div>
+      {actions ? <div className="cp-header__actions">{actions}</div> : null}
     </header>
   );
 }
@@ -121,14 +114,7 @@ export function EditorialStatus({
 }) {
   const badgeTone = tone === "danger" ? "destructive" : tone;
 
-  return (
-    <StatusBadge
-      tone={badgeTone}
-      className="px-3 py-1 text-[0.68rem] font-black"
-    >
-      {children}
-    </StatusBadge>
-  );
+  return <StatusBadge tone={badgeTone}>{children}</StatusBadge>;
 }
 
 export function EditorialPanel({
@@ -150,22 +136,15 @@ export function EditorialPanel({
   return (
     <section
       aria-labelledby={headingId}
-      className={cn(
-        "border-border bg-card rounded-2xl border p-5 shadow-[var(--shadow-sm)] sm:p-7",
-        className
-      )}
+      className={cn("cp-section", className)}
     >
-      <div className="mb-6">
-        <h2 id={headingId} className="text-xl font-black tracking-tight">
+      <div className="cp-section__head">
+        <h2 id={headingId} className="cp-section__title">
           {title}
         </h2>
-        {description ? (
-          <p className="text-muted-foreground mt-1 max-w-3xl text-sm leading-6">
-            {description}
-          </p>
-        ) : null}
+        {description ? <p className="cp-section__desc">{description}</p> : null}
       </div>
-      {children}
+      <div className="cp-section__body">{children}</div>
     </section>
   );
 }
@@ -190,31 +169,23 @@ export function EditorialField({
       .filter(Boolean)
       .join(" ") || undefined;
   return (
-    <div className="space-y-2" data-editor-path={path}>
-      <label htmlFor={path} className="text-sm font-bold">
+    <div className="cp-field" data-editor-path={path}>
+      <label htmlFor={path} className="cp-label">
         {label}
-        {required ? (
-          <span className="text-destructive" aria-hidden="true">
-            {" "}
-            *
-          </span>
-        ) : null}
+        {required ? <span aria-hidden="true"> *</span> : null}
       </label>
       <div data-editor-control data-described-by={describedBy}>
         {children}
       </div>
       {hint ? (
-        <p
-          id={`${path}-hint`}
-          className="text-muted-foreground text-xs leading-5"
-        >
+        <p id={`${path}-hint`} className="cp-hint">
           {hint}
         </p>
       ) : null}
       {error ? (
         <p
           id={`${path}-error`}
-          className="text-destructive text-xs"
+          className="text-destructive text-sm"
           role="alert"
         >
           {error}
@@ -236,19 +207,19 @@ export function EditorialNotice({
   return (
     <div
       role={tone === "danger" ? "alert" : "status"}
-      className={cn(
-        "rounded-xl border px-4 py-3 text-sm",
-        tone === "danger" &&
-          "border-destructive/30 bg-destructive/10 text-destructive",
-        tone === "warning" && "border-warning/30 bg-warning/10",
-        tone === "success" && "border-success/30 bg-success/10",
-        tone === "neutral" && "border-border bg-muted/40"
-      )}
+      data-notice={tone}
+      className="cwa-notice"
     >
-      <p className="font-bold">{title}</p>
-      {children ? (
-        <div className="mt-1 text-xs leading-5 opacity-90">{children}</div>
-      ) : null}
+      <p className="cwa-notice__title">
+        {tone === "neutral" ? (
+          title
+        ) : (
+          <StatusMark state={tone === "danger" ? "error" : tone}>
+            {title}
+          </StatusMark>
+        )}
+      </p>
+      {children ? <div className="cwa-notice__body">{children}</div> : null}
     </div>
   );
 }
@@ -271,6 +242,7 @@ export function EditorialStickyActions({
   return (
     <EditorialPublishBar
       busy={busy}
+      dirty={dirty}
       message={dirty ? "Unsaved changes" : "Draft matches the saved revision"}
     >
       <div className="flex flex-wrap justify-end gap-2">
@@ -303,11 +275,14 @@ export function EditorialStickyActions({
 export function EditorialPublishBar({
   message,
   busy = false,
+  dirty = false,
   children,
   className,
 }: {
   message: string;
   busy?: boolean;
+  /** Unsaved edits: the message turns bold (weight, not colour). */
+  dirty?: boolean;
   children: ReactNode;
   className?: string;
 }) {
@@ -316,16 +291,10 @@ export function EditorialPublishBar({
       role="region"
       aria-label="Publishing controls"
       aria-busy={busy || undefined}
-      className={cn(
-        "border-border bg-background/95 sticky bottom-3 z-20 flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-3 shadow-[var(--shadow-lg)] backdrop-blur-md",
-        className
-      )}
+      data-dirty={dirty}
+      className={cn("cp-actionbar", className)}
     >
-      <p
-        className="text-muted-foreground px-2 text-sm"
-        role="status"
-        aria-live="polite"
-      >
+      <p className="cp-actionbar__state" role="status" aria-live="polite">
         {message}
       </p>
       {children}
@@ -372,24 +341,19 @@ export function EditorialCompletenessPanel({
   const summary = summarizeEditorialCompleteness(items);
 
   return (
-    <aside
-      aria-labelledby={headingId}
-      className="border-border bg-card rounded-2xl border p-5 shadow-[var(--shadow-sm)] sm:p-7"
-    >
+    <aside aria-labelledby={headingId} className="cp-section">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 id={headingId} className="text-xl font-black tracking-tight">
+        <div className="cp-section__head">
+          <h2 id={headingId} className="cp-section__title">
             {title}
           </h2>
-          <p className="text-muted-foreground mt-1 max-w-3xl text-sm leading-6">
-            {description}
-          </p>
+          <p className="cp-section__desc">{description}</p>
         </div>
         <EditorialStatus tone={summary.ready ? "success" : "warning"}>
           {summary.ready ? "Required checks ready" : "Needs attention"}
         </EditorialStatus>
       </div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div
           role="progressbar"
           aria-label="Required editorial checks"
@@ -397,32 +361,28 @@ export function EditorialCompletenessPanel({
           aria-valuemax={100}
           aria-valuenow={summary.percent}
           aria-valuetext={`${summary.completeRequired} of ${summary.required} required checks complete`}
-          className="bg-muted h-2 overflow-hidden rounded-full"
+          className="cwa-meter"
         >
           <span
-            className="bg-primary block h-full rounded-full transition-[width]"
+            className="cwa-meter__fill"
             style={{ width: `${summary.percent}%` }}
           />
         </div>
-        <p className="text-muted-foreground text-xs font-bold">
+        <p className="cp-hint font-semibold">
           {summary.completeRequired}/{summary.required} required
         </p>
       </div>
-      <ul className="mt-5 grid gap-3 lg:grid-cols-2">
+      <ul className="grid gap-3 lg:grid-cols-2">
         {items.map((item) => {
           const required = item.required !== false;
           return (
             <li
               key={item.id}
-              className="border-border bg-background flex items-start justify-between gap-4 rounded-xl border p-4"
+              className="cwa-row flex items-start justify-between gap-4"
             >
               <div>
-                <p className="text-sm font-bold">{item.label}</p>
-                {item.detail ? (
-                  <p className="text-muted-foreground mt-1 text-xs leading-5">
-                    {item.detail}
-                  </p>
-                ) : null}
+                <p className="cp-label">{item.label}</p>
+                {item.detail ? <p className="cp-hint">{item.detail}</p> : null}
               </div>
               <EditorialStatus
                 tone={
@@ -586,16 +546,13 @@ export function EditorialSeoSocialPreview({
   const descriptionLength = description?.trim().length ?? 0;
 
   return (
-    <section
-      aria-labelledby={headingId}
-      className="border-border bg-background mt-6 rounded-2xl border p-5"
-    >
+    <section aria-labelledby={headingId} className="cwa-row mt-6 space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h3 id={headingId} className="text-base font-black">
+          <h3 id={headingId} className="cp-label">
             SEO and social preview
           </h3>
-          <p className="text-muted-foreground mt-1 text-xs leading-5">
+          <p className="cp-hint">
             Approximate editorial preview; search engines and social platforms
             control final rendering.
           </p>
@@ -621,13 +578,10 @@ export function EditorialSeoSocialPreview({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-2" aria-live="polite">
-        <article
-          aria-label="Search result preview"
-          className="border-border bg-card rounded-xl border p-4"
-        >
-          <p className="text-success truncate text-xs">{url}</p>
-          <p className="text-primary mt-1 line-clamp-1 text-lg font-medium">
+      <div className="grid gap-5 xl:grid-cols-2" aria-live="polite">
+        <article aria-label="Search result preview" className="cwa-row bg-card">
+          <p className="text-muted-foreground truncate text-xs">{url}</p>
+          <p className="mt-1 line-clamp-1 text-lg font-medium underline underline-offset-2">
             {resolvedTitle}
           </p>
           <p className="text-muted-foreground mt-1 line-clamp-2 text-sm leading-5">
@@ -637,7 +591,7 @@ export function EditorialSeoSocialPreview({
 
         <article
           aria-label="Social card preview"
-          className="border-border bg-card overflow-hidden rounded-xl border"
+          className="cwa-frame bg-card overflow-hidden"
         >
           <div className="bg-muted flex aspect-[1.91/1] items-center justify-center overflow-hidden">
             {socialMedia ?? (

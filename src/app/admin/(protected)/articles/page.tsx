@@ -1,5 +1,6 @@
 "use client";
 
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button, buttonVariants } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -295,28 +296,17 @@ const AdminArticlesPage = () => {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Articles Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Write and publish technical articles and tutorials.
-          </p>
-        </div>
-        <Link
-          href="/admin/articles/new"
-          className={buttonVariants({
-            className:
-              "text-[10px] font-bold tracking-widest uppercase md:text-sm",
-          })}
-        >
+    <ConsoleList
+      className="cp-rows-2"
+      title="Articles"
+      description="Write and publish technical articles and tutorials."
+      actions={
+        <Link href="/admin/articles/new" className={buttonVariants()}>
           <Plus aria-hidden="true" className="size-4" />
           Create New Article
         </Link>
-      </div>
-
+      }
+    >
       <DataTable
         data={articles}
         columns={columns}
@@ -363,7 +353,7 @@ const AdminArticlesPage = () => {
         emptyTitle="No articles found"
         emptyDescription="Create an article or adjust the current search and filters."
       />
-    </div>
+    </ConsoleList>
   );
 };
 

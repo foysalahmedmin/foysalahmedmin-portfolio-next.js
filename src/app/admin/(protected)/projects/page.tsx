@@ -1,5 +1,6 @@
 "use client";
 
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button, buttonVariants } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -297,28 +298,17 @@ const AdminProjectsPage = () => {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Projects Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your portfolio projects and case studies.
-          </p>
-        </div>
-        <Link
-          href="/admin/projects/new"
-          className={buttonVariants({
-            className:
-              "text-[10px] font-bold tracking-widest uppercase md:text-sm",
-          })}
-        >
+    <ConsoleList
+      className="cp-rows-2"
+      title="Projects"
+      description="Manage your portfolio projects and case studies."
+      actions={
+        <Link href="/admin/projects/new" className={buttonVariants()}>
           <Plus aria-hidden="true" className="size-4" />
           Add New Project
         </Link>
-      </div>
-
+      }
+    >
       <DataTable
         data={projects}
         columns={columns}
@@ -365,7 +355,7 @@ const AdminProjectsPage = () => {
         emptyTitle="No projects found"
         emptyDescription="Create a project or adjust the current search and filters."
       />
-    </div>
+    </ConsoleList>
   );
 };
 

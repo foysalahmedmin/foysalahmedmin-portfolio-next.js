@@ -1,5 +1,6 @@
 "use client";
 
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button, buttonVariants } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -229,7 +230,9 @@ const AdminVideosPage = () => {
         accessor: (video) => video.aspect_ratio,
         minWidth: "120px",
         cell: ({ row: video }) => (
-          <StatusBadge tone={video.aspect_ratio === "reel" ? "primary" : "info"}>
+          <StatusBadge
+            tone={video.aspect_ratio === "reel" ? "primary" : "info"}
+          >
             {video.aspect_ratio === "reel" ? "Reel" : "Landscape"}
           </StatusBadge>
         ),
@@ -348,28 +351,17 @@ const AdminVideosPage = () => {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Videos Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Add landscape videos and reels from YouTube or an uploaded file.
-          </p>
-        </div>
-        <Link
-          href="/admin/videos/new"
-          className={buttonVariants({
-            className:
-              "text-[10px] font-bold tracking-widest uppercase md:text-sm",
-          })}
-        >
+    <ConsoleList
+      className="cp-rows-2"
+      title="Videos"
+      description="Add landscape videos and reels from YouTube or an uploaded file."
+      actions={
+        <Link href="/admin/videos/new" className={buttonVariants()}>
           <Plus aria-hidden="true" className="size-4" />
           Create New Video
         </Link>
-      </div>
-
+      }
+    >
       <DataTable
         data={videos}
         columns={columns}
@@ -416,7 +408,7 @@ const AdminVideosPage = () => {
         emptyTitle="No videos found"
         emptyDescription="Create a video or adjust the current search and filters."
       />
-    </div>
+    </ConsoleList>
   );
 };
 

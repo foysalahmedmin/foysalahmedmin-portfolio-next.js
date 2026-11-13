@@ -44,7 +44,7 @@ const CaseStudyArchitecturePreview = ({
       role="img"
       aria-label={alt}
       viewBox={`0 0 ${width} ${height}`}
-      className="border-border text-foreground w-full rounded-xl border"
+      className="border-border text-foreground w-full rounded-[var(--radius-lg-token)] border"
     >
       <defs>
         <marker

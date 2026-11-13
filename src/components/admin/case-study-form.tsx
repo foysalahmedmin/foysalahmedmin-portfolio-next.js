@@ -2,8 +2,9 @@
 
 import {
   Checkbox,
+  ContentEditorFrame,
   Field,
-  FormSection,
+  changedFields,
   commaToList,
   fieldClass,
   labelClass,
@@ -11,8 +12,11 @@ import {
   listToLines,
   toIsoDateTime,
   toLocalDateTime,
+  type ContentSection,
+  type ContentStatusMark,
 } from "@/components/admin/content-form-fields";
 import CaseStudyArchitecturePreview from "@/components/admin/case-study-architecture-preview";
+import { EditorSection, type ValidationIssue } from "@/components/console";
 import { Button } from "@/components/ui/button";
 import { FileGalleryUploader } from "@/components/ui/file-gallery-uploader";
 import { FileUploader } from "@/components/ui/file-uploader";
@@ -37,14 +41,16 @@ import type {
   TCaseStudyStatus,
 } from "@/types/case-study.type";
 import type { TFilePopulated } from "@/types/file.type";
-import { Plus, Save, Trash2 } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 type Props = Readonly<{
   initialData?: Partial<TCaseStudy>;
   onSubmit: (data: TCaseStudyInput) => void;
   onCancel: () => void;
   loading?: boolean;
+  /** A failure from the last save, shown in the validation summary. */
+  error?: string | null;
 }>;
 
 type TOutcomeRow = {
@@ -106,65 +112,154 @@ const emptyOutcome = (): TOutcomeRow => ({
   evidence_reference: "",
 });
 
-const toDateInput = (value?: string | null) => toLocalDateTime(value).slice(0, 10);
+const toDateInput = (value?: string | null) =>
+  toLocalDateTime(value).slice(0, 10);
 
-const OUTCOME_STATE_LABELS: Record<TOutcomeRow["verification_state"], string> = {
-  derived: "Derived from approved data",
-  verified: "Verified (needs evidence)",
-  unverified: "Unverified (kept private)",
+const OUTCOME_STATE_LABELS: Record<TOutcomeRow["verification_state"], string> =
+  {
+    derived: "Derived from approved data",
+    verified: "Verified (needs evidence)",
+    unverified: "Unverified (kept private)",
+  };
+
+const toFormState = (initialData?: Partial<TCaseStudy>): TFormState => ({
+  name: initialData?.name ?? "",
+  slug: initialData?.slug ?? "",
+  status: initialData?.status ?? "draft",
+  category: initialData?.category?._id ?? "",
+  description: initialData?.description ?? "",
+  overview: initialData?.overview ?? "",
+  thumbnail: initialData?.thumbnail ?? null,
+  images: initialData?.images ?? [],
+  is_featured: initialData?.is_featured ?? false,
+  published_at: toLocalDateTime(initialData?.published_at),
+  expired_at: toLocalDateTime(initialData?.expired_at),
+  client_name: initialData?.client_name ?? "",
+  show_client_name: initialData?.show_client_name ?? false,
+  client_industry: initialData?.client_industry ?? "",
+  client_location: initialData?.client_location ?? "",
+  engagement_type: initialData?.engagement_type ?? "",
+  role: initialData?.role ?? "",
+  team_size: initialData?.team_size ? String(initialData.team_size) : "",
+  duration_label: initialData?.duration_label ?? "",
+  started_at: toDateInput(initialData?.started_at),
+  ended_at: toDateInput(initialData?.ended_at),
+  primary_pillar: initialData?.primary_pillar ?? "",
+  secondary_pillars: initialData?.secondary_pillars ?? [],
+  challenge: initialData?.challenge ?? "",
+  approach: initialData?.approach ?? "",
+  key_decisions: listToLines(initialData?.key_decisions),
+  constraints: listToLines(initialData?.constraints),
+  architecture: initialData?.architecture
+    ? JSON.stringify(initialData.architecture, null, 2)
+    : "",
+  solution: initialData?.solution ?? "",
+  results_summary: initialData?.results_summary ?? "",
+  outcomes: (initialData?.outcomes ?? []).map((outcome) => ({
+    label: outcome.label,
+    value: outcome.value,
+    description: outcome.description ?? "",
+    verification_state: outcome.verification_state,
+    evidence_reference: outcome.evidence_reference ?? "",
+  })),
+  learnings: listToLines(initialData?.learnings),
+  tech_stack: (initialData?.tech_stack ?? []).join(", "),
+  services: (initialData?.services ?? []).join(", "),
+  keywords: (initialData?.keywords ?? []).join(", "),
+  live_url: initialData?.live_url ?? "",
+  live_url_visibility: initialData?.live_url_visibility ?? "hidden",
+  source_url: initialData?.source_url ?? "",
+  source_url_visibility: initialData?.source_url_visibility ?? "hidden",
+  content: initialData?.content ?? "",
+});
+
+/** The sections of the editor: the index links, and the form fields whose edits or errors mark each one. */
+const SECTIONS: readonly ContentSection[] = [
+  {
+    id: "cs-basics",
+    label: "Basics",
+    fields: [
+      "name",
+      "status",
+      "category",
+      "slug",
+      "description",
+      "overview",
+      "thumbnail",
+      "images",
+    ],
+  },
+  {
+    id: "cs-client",
+    label: "Client and engagement",
+    fields: [
+      "client_name",
+      "client_industry",
+      "client_location",
+      "show_client_name",
+      "engagement_type",
+      "team_size",
+      "started_at",
+      "ended_at",
+      "role",
+      "duration_label",
+      "primary_pillar",
+      "secondary_pillars",
+    ],
+  },
+  {
+    id: "cs-story",
+    label: "The story",
+    fields: ["challenge", "approach", "key_decisions", "solution", "learnings"],
+  },
+  {
+    id: "cs-architecture-section",
+    label: "Constraints and architecture",
+    fields: ["constraints", "architecture"],
+  },
+  {
+    id: "cs-results-section",
+    label: "Results",
+    fields: ["results_summary", "outcomes"],
+  },
+  {
+    id: "cs-links",
+    label: "Tools, links and search",
+    fields: [
+      "tech_stack",
+      "services",
+      "keywords",
+      "live_url",
+      "live_url_visibility",
+      "source_url",
+      "source_url_visibility",
+    ],
+  },
+  { id: "cs-content-section", label: "Long-form content", fields: ["content"] },
+  {
+    id: "cs-publishing",
+    label: "Publishing",
+    fields: ["published_at", "expired_at", "is_featured"],
+  },
+];
+
+const STATUS_MARKS: Record<TCaseStudyStatus, ContentStatusMark> = {
+  draft: { state: "draft", label: "Draft" },
+  pending: { state: "pending", label: "Pending" },
+  published: { state: "published", label: "Published" },
+  archived: { state: "archived", label: "Archived" },
 };
 
-const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
-  const [form, setForm] = useState<TFormState>(() => ({
-    name: initialData?.name ?? "",
-    slug: initialData?.slug ?? "",
-    status: initialData?.status ?? "draft",
-    category: initialData?.category?._id ?? "",
-    description: initialData?.description ?? "",
-    overview: initialData?.overview ?? "",
-    thumbnail: initialData?.thumbnail ?? null,
-    images: initialData?.images ?? [],
-    is_featured: initialData?.is_featured ?? false,
-    published_at: toLocalDateTime(initialData?.published_at),
-    expired_at: toLocalDateTime(initialData?.expired_at),
-    client_name: initialData?.client_name ?? "",
-    show_client_name: initialData?.show_client_name ?? false,
-    client_industry: initialData?.client_industry ?? "",
-    client_location: initialData?.client_location ?? "",
-    engagement_type: initialData?.engagement_type ?? "",
-    role: initialData?.role ?? "",
-    team_size: initialData?.team_size ? String(initialData.team_size) : "",
-    duration_label: initialData?.duration_label ?? "",
-    started_at: toDateInput(initialData?.started_at),
-    ended_at: toDateInput(initialData?.ended_at),
-    primary_pillar: initialData?.primary_pillar ?? "",
-    secondary_pillars: initialData?.secondary_pillars ?? [],
-    challenge: initialData?.challenge ?? "",
-    approach: initialData?.approach ?? "",
-    key_decisions: listToLines(initialData?.key_decisions),
-    constraints: listToLines(initialData?.constraints),
-    architecture: initialData?.architecture
-      ? JSON.stringify(initialData.architecture, null, 2)
-      : "",
-    solution: initialData?.solution ?? "",
-    results_summary: initialData?.results_summary ?? "",
-    outcomes: (initialData?.outcomes ?? []).map((outcome) => ({
-      label: outcome.label,
-      value: outcome.value,
-      description: outcome.description ?? "",
-      verification_state: outcome.verification_state,
-      evidence_reference: outcome.evidence_reference ?? "",
-    })),
-    learnings: listToLines(initialData?.learnings),
-    tech_stack: (initialData?.tech_stack ?? []).join(", "),
-    services: (initialData?.services ?? []).join(", "),
-    keywords: (initialData?.keywords ?? []).join(", "),
-    live_url: initialData?.live_url ?? "",
-    live_url_visibility: initialData?.live_url_visibility ?? "hidden",
-    source_url: initialData?.source_url ?? "",
-    source_url_visibility: initialData?.source_url_visibility ?? "hidden",
-    content: initialData?.content ?? "",
-  }));
+const CaseStudyForm = ({
+  initialData,
+  onSubmit,
+  onCancel,
+  loading,
+  error,
+}: Props) => {
+  const [initialState] = useState(() => toFormState(initialData));
+  const [form, setForm] = useState<TFormState>(initialState);
+  const formRef = useRef<HTMLFormElement>(null);
   const [categories, setCategories] = useState<TCaseStudyCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -186,7 +281,9 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
         setErrors((current) => ({
           ...current,
           category:
-            error instanceof Error ? error.message : "Failed to load categories",
+            error instanceof Error
+              ? error.message
+              : "Failed to load categories",
         }));
       } finally {
         if (!controller.signal.aborted) setCategoriesLoading(false);
@@ -310,9 +407,33 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
     architecture: form.architecture.trim() || null,
   });
 
+  const issues: ValidationIssue[] = error ? [{ message: error }] : [];
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-      <FormSection title="Basics">
+    <ContentEditorFrame
+      formRef={formRef}
+      onSubmit={handleSubmit}
+      noValidate
+      title={
+        initialData
+          ? initialData.name || "Untitled case study"
+          : "New case study"
+      }
+      backHref="/admin/case-studies"
+      backLabel="Back to case studies"
+      status={
+        initialData ? STATUS_MARKS[initialData.status ?? "draft"] : undefined
+      }
+      savedAt={initialData?.updated_at}
+      sections={SECTIONS}
+      changed={changedFields(form, initialState)}
+      errored={Object.keys(errors).filter((key) => errors[key])}
+      issues={issues}
+      loading={loading}
+      onCancel={onCancel}
+      submitLabel={initialData ? "Update Case Study" : "Create Case Study"}
+    >
+      <EditorSection id="cs-basics" title="Basics">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <Field
             label="Title"
@@ -394,7 +515,11 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             className={cn(fieldClass, "min-h-24")}
           />
         </Field>
-        <Field label="Overview" htmlFor="cs-overview" hint="An opening paragraph for the detail page.">
+        <Field
+          label="Overview"
+          htmlFor="cs-overview"
+          hint="An opening paragraph for the detail page."
+        >
           <textarea
             id="cs-overview"
             value={form.overview}
@@ -422,9 +547,10 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             />
           </Field>
         </div>
-      </FormSection>
+      </EditorSection>
 
-      <FormSection
+      <EditorSection
+        id="cs-client"
         title="Client and engagement"
         description="Who it was for and how you worked together."
       >
@@ -577,9 +703,10 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             </select>
           </Field>
         </div>
-      </FormSection>
+      </EditorSection>
 
-      <FormSection
+      <EditorSection
+        id="cs-story"
         title="The story"
         description="Problem first, then how it was solved."
       >
@@ -634,9 +761,10 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             className={cn(fieldClass, "min-h-24")}
           />
         </Field>
-      </FormSection>
+      </EditorSection>
 
-      <FormSection
+      <EditorSection
+        id="cs-architecture-section"
         title="Constraints and architecture"
         description="What limited the work, and how the system was put together."
       >
@@ -668,20 +796,21 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
               className={cn(fieldClass, "min-h-64 font-mono")}
             />
           </Field>
-          <div className="space-y-2">
+          <div className="cp-field">
             <p className={labelClass}>Preview</p>
             <CaseStudyArchitecturePreview source={form.architecture} />
           </div>
         </div>
         {recommended.length ? (
-          <p className="text-muted-foreground text-xs">
+          <p className="cp-hint">
             Recommended before publishing: {recommended.join(", ")}. They do not
             block publishing.
           </p>
         ) : null}
-      </FormSection>
+      </EditorSection>
 
-      <FormSection
+      <EditorSection
+        id="cs-results-section"
         title="Results"
         description="Unverified results are never shown publicly."
       >
@@ -698,7 +827,7 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
           {form.outcomes.map((row, index) => (
             <div
               key={index}
-              className="border-border grid gap-4 rounded-xl border p-4 md:grid-cols-[10rem_1fr_auto]"
+              className="cwa-row grid gap-4 md:grid-cols-[10rem_1fr_auto]"
             >
               <input
                 aria-label={`Result ${index + 1} value`}
@@ -769,7 +898,9 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
                 value={row.evidence_reference}
                 maxLength={500}
                 onChange={(event) =>
-                  updateOutcome(index, { evidence_reference: event.target.value })
+                  updateOutcome(index, {
+                    evidence_reference: event.target.value,
+                  })
                 }
                 className={cn(fieldClass, "md:col-span-2")}
               />
@@ -791,9 +922,9 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             Add result
           </Button>
         </div>
-      </FormSection>
+      </EditorSection>
 
-      <FormSection title="Tools, links and search">
+      <EditorSection id="cs-links" title="Tools, links and search">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Field
             label="Tools used"
@@ -874,9 +1005,10 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
             />
           </div>
         </div>
-      </FormSection>
+      </EditorSection>
 
-      <FormSection
+      <EditorSection
+        id="cs-content-section"
         title="Long-form content (optional)"
         description="Extra detail below the story. Safe HTML is kept; scripts and unsafe markup are removed."
       >
@@ -886,9 +1018,9 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
           onChange={(event) => set("content", event.target.value)}
           className={cn(fieldClass, "min-h-64 font-mono")}
         />
-      </FormSection>
+      </EditorSection>
 
-      <FormSection title="Publishing">
+      <EditorSection id="cs-publishing" title="Publishing">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Field label="Publish at (optional)" htmlFor="cs-published">
             <input
@@ -915,18 +1047,8 @@ const CaseStudyForm = ({ initialData, onSubmit, onCancel, loading }: Props) => {
           checked={form.is_featured}
           onChange={(checked) => set("is_featured", checked)}
         />
-      </FormSection>
-
-      <div className="flex justify-end gap-4 pt-2">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
-          Cancel
-        </Button>
-        <Button type="submit" className="gap-2" isLoading={loading}>
-          <Save className="size-4" aria-hidden="true" />
-          {initialData ? "Update Case Study" : "Create Case Study"}
-        </Button>
-      </div>
-    </form>
+      </EditorSection>
+    </ContentEditorFrame>
   );
 };
 

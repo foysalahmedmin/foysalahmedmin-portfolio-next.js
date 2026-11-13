@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  Checkbox,
+  ContentEditorFrame,
+  Field,
+  changedFields,
+  fieldClass,
+  type ContentSection,
+  type ContentStatusMark,
+} from "@/components/admin/content-form-fields";
+import { EditorSection, type ValidationIssue } from "@/components/console";
 import { Button } from "@/components/ui/button";
 import { FileGalleryUploader } from "@/components/ui/file-gallery-uploader";
 import { FileUploader } from "@/components/ui/file-uploader";
@@ -8,18 +18,115 @@ import type { TFilePopulated } from "@/types/file.type";
 import type { TProjectCategory } from "@/types/project-category.type";
 import type { TProject, TProjectInput } from "@/types/project.type";
 import { PILLAR_CONTRACT } from "@/lib/content/pillars";
-import { Save } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import React, { useEffect, useRef, useState } from "react";
 
 interface ProjectFormProps {
   initialData?: Partial<TProject>;
   onSubmit: (data: TProjectInput) => void;
   onCancel: () => void;
   loading?: boolean;
+  /** A failure from the last save, shown in the validation summary. */
+  error?: string | null;
 }
 
 type TProjectFormState = Omit<Partial<TProject>, "category"> & {
   category: string;
+};
+
+const toFormState = (initialData?: Partial<TProject>): TProjectFormState => ({
+  ...initialData,
+  category: initialData?.category?._id ?? "",
+  name: initialData?.name ?? "",
+  slug: initialData?.slug ?? "",
+  description: initialData?.description ?? "",
+  content: initialData?.content ?? "",
+  status: initialData?.status ?? "planned",
+  delivery_status: initialData ? initialData.delivery_status : "planned",
+  publication_status: initialData ? initialData.publication_status : "draft",
+  project_type: initialData?.project_type,
+  primary_pillar: initialData?.primary_pillar,
+  secondary_pillars: initialData?.secondary_pillars ?? [],
+  constraints: initialData?.constraints ?? [],
+  decisions: initialData?.decisions ?? [],
+  learnings: initialData?.learnings ?? [],
+  outcomes: initialData?.outcomes ?? [],
+  live_url_visibility: initialData?.live_url_visibility ?? "hidden",
+  source_url_visibility: initialData?.source_url_visibility ?? "hidden",
+  is_featured: initialData?.is_featured ?? false,
+  is_premium: initialData?.is_premium ?? false,
+  tags: initialData?.tags ?? [],
+});
+
+/** The sections of the editor: the index links, and the form fields whose edits mark each one. */
+const SECTIONS: readonly ContentSection[] = [
+  {
+    id: "project-basics",
+    label: "Basics",
+    fields: ["name", "slug", "description"],
+  },
+  {
+    id: "project-classification",
+    label: "Classification",
+    fields: [
+      "category",
+      "project_type",
+      "primary_pillar",
+      "secondary_pillars",
+      "tags",
+    ],
+  },
+  {
+    id: "project-status",
+    label: "Status and visibility",
+    fields: ["status", "delivery_status", "publication_status", "is_featured"],
+  },
+  {
+    id: "project-evidence",
+    label: "Case-study evidence",
+    fields: [
+      "problem",
+      "role",
+      "architecture",
+      "implementation",
+      "security",
+      "performance_reliability",
+      "constraints",
+      "decisions",
+      "learnings",
+      "outcomes",
+    ],
+  },
+  {
+    id: "project-links",
+    label: "Links",
+    fields: [
+      "live_url",
+      "live_url_visibility",
+      "source_url",
+      "source_url_visibility",
+    ],
+  },
+  { id: "project-content", label: "Content", fields: ["content"] },
+  { id: "project-media", label: "Media", fields: ["thumbnail", "images"] },
+];
+
+const PUBLICATION_MARKS: Record<
+  NonNullable<TProject["publication_status"]>,
+  ContentStatusMark
+> = {
+  draft: { state: "draft", label: "Draft" },
+  published: { state: "published", label: "Published" },
+  archived: { state: "archived", label: "Archived" },
+};
+
+/** Records that predate the split status fields show their legacy workflow status. */
+const LEGACY_MARKS: Record<TProject["status"], ContentStatusMark> = {
+  planned: { state: "draft", label: "Planned" },
+  in_progress: { state: "pending", label: "In progress" },
+  on_hold: { state: "warning", label: "On hold" },
+  completed: { state: "success", label: "Completed" },
+  cancelled: { state: "archived", label: "Cancelled" },
 };
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
@@ -27,30 +134,11 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   onSubmit,
   onCancel,
   loading,
+  error,
 }) => {
-  const [formData, setFormData] = useState<TProjectFormState>(() => ({
-    ...initialData,
-    category: initialData?.category?._id ?? "",
-    name: initialData?.name ?? "",
-    slug: initialData?.slug ?? "",
-    description: initialData?.description ?? "",
-    content: initialData?.content ?? "",
-    status: initialData?.status ?? "planned",
-    delivery_status: initialData ? initialData.delivery_status : "planned",
-    publication_status: initialData ? initialData.publication_status : "draft",
-    project_type: initialData?.project_type,
-    primary_pillar: initialData?.primary_pillar,
-    secondary_pillars: initialData?.secondary_pillars ?? [],
-    constraints: initialData?.constraints ?? [],
-    decisions: initialData?.decisions ?? [],
-    learnings: initialData?.learnings ?? [],
-    outcomes: initialData?.outcomes ?? [],
-    live_url_visibility: initialData?.live_url_visibility ?? "hidden",
-    source_url_visibility: initialData?.source_url_visibility ?? "hidden",
-    is_featured: initialData?.is_featured ?? false,
-    is_premium: initialData?.is_premium ?? false,
-    tags: initialData?.tags ?? [],
-  }));
+  const [initialState] = useState(() => toFormState(initialData));
+  const [formData, setFormData] = useState<TProjectFormState>(initialState);
+  const formRef = useRef<HTMLFormElement>(null);
   const [categories, setCategories] = useState<TProjectCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoryError, setCategoryError] = useState<string | null>(null);
@@ -182,95 +270,207 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     onSubmit(payload);
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Project Name
-          </label>
-          <input
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Legacy workflow status
-          </label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
-          >
-            <option value="planned">Planned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="on_hold">On Hold</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-        </div>
-        <div className="space-y-2">
-          <label
-            htmlFor="project-category"
-            className="text-muted-foreground text-sm font-bold tracking-widest uppercase"
-          >
-            Category
-          </label>
-          <select
-            id="project-category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            disabled={loading || categoriesLoading}
-            aria-describedby={
-              categoryError ? "project-category-error" : undefined
-            }
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <option value="">
-              {categoriesLoading
-                ? "Loading categories…"
-                : categories.length
-                  ? "Select a category"
-                  : "No active categories available"}
-            </option>
-            {categories.map((category) => (
-              <option key={category._id} value={category._id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          {categoryError && (
-            <p id="project-category-error" className="text-destructive text-sm">
-              {categoryError}
-            </p>
-          )}
-        </div>
-      </div>
+  const issues: ValidationIssue[] = [
+    ...(categoryError
+      ? [
+          {
+            href: "#project-category",
+            field: "Category",
+            message: categoryError,
+          },
+        ]
+      : []),
+    ...(error ? [{ message: error }] : []),
+  ];
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Canonical slug
-          </label>
-          <input
-            name="slug"
-            value={formData.slug ?? ""}
-            onChange={handleChange}
-            placeholder="Generated from the project name"
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
-          />
+  return (
+    <ContentEditorFrame
+      formRef={formRef}
+      onSubmit={handleSubmit}
+      title={
+        initialData ? initialData.name || "Untitled project" : "New project"
+      }
+      backHref="/admin/projects"
+      backLabel="Back to projects"
+      status={
+        initialData
+          ? initialData.publication_status
+            ? PUBLICATION_MARKS[initialData.publication_status]
+            : LEGACY_MARKS[initialData.status ?? "planned"]
+          : undefined
+      }
+      savedAt={initialData?.updated_at}
+      sections={SECTIONS}
+      changed={changedFields(formData, initialState)}
+      errored={categoryError ? ["category"] : []}
+      issues={issues}
+      loading={loading}
+      onCancel={onCancel}
+      submitLabel={initialData ? "Update Project" : "Create Project"}
+    >
+      <EditorSection id="project-basics" title="Basics">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Field label="Project Name" htmlFor="project-name">
+            <input
+              id="project-name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className={fieldClass}
+            />
+          </Field>
+          <Field label="Canonical slug" htmlFor="project-slug">
+            <input
+              id="project-slug"
+              name="slug"
+              value={formData.slug ?? ""}
+              onChange={handleChange}
+              placeholder="Generated from the project name"
+              className={fieldClass}
+            />
+          </Field>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-            Delivery
+        <Field label="Short Description" htmlFor="project-description">
+          <textarea
+            id="project-description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            className={cn(fieldClass, "min-h-24")}
+          />
+        </Field>
+      </EditorSection>
+
+      <EditorSection id="project-classification" title="Classification">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="cp-field">
+            <label htmlFor="project-category" className="cp-label">
+              Category
+            </label>
             <select
+              id="project-category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+              disabled={loading || categoriesLoading}
+              aria-describedby={
+                categoryError ? "project-category-error" : undefined
+              }
+              aria-invalid={categoryError ? true : undefined}
+              className={fieldClass}
+            >
+              <option value="">
+                {categoriesLoading
+                  ? "Loading categories…"
+                  : categories.length
+                    ? "Select a category"
+                    : "No active categories available"}
+              </option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            {categoryError && (
+              <p
+                id="project-category-error"
+                className="text-destructive text-sm"
+              >
+                {categoryError}
+              </p>
+            )}
+          </div>
+          <Field label="Project type" htmlFor="project-type">
+            <select
+              id="project-type"
+              name="project_type"
+              value={formData.project_type ?? ""}
+              onChange={handleChange}
+              className={fieldClass}
+            >
+              <option value="">Not classified</option>
+              <option value="client">Client</option>
+              <option value="internal">Internal</option>
+              <option value="open_source">Open source</option>
+              <option value="lab">Lab</option>
+            </select>
+          </Field>
+          <Field label="Primary pillar" htmlFor="project-primary-pillar">
+            <select
+              id="project-primary-pillar"
+              name="primary_pillar"
+              value={formData.primary_pillar ?? ""}
+              onChange={handleChange}
+              className={fieldClass}
+            >
+              <option value="">Not assigned</option>
+              {PILLAR_CONTRACT.map((pillar) => (
+                <option key={pillar.key} value={pillar.key}>
+                  {pillar.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Field label="Secondary pillars" htmlFor="project-secondary-pillars">
+            <select
+              multiple
+              id="project-secondary-pillars"
+              value={formData.secondary_pillars ?? []}
+              onChange={(event) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  secondary_pillars: Array.from(
+                    event.currentTarget.selectedOptions,
+                    (option) => option.value
+                  ) as NonNullable<TProject["secondary_pillars"]>,
+                }))
+              }
+              className={cn(fieldClass, "min-h-28")}
+            >
+              {PILLAR_CONTRACT.map((pillar) => (
+                <option key={pillar.key} value={pillar.key}>
+                  {pillar.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Tags (comma separated)" htmlFor="project-tags">
+            <input
+              id="project-tags"
+              value={formData.tags?.join(", ")}
+              onChange={handleTagsChange}
+              placeholder="nextjs, tailwind, nodejs"
+              className={fieldClass}
+            />
+          </Field>
+        </div>
+      </EditorSection>
+
+      <EditorSection id="project-status" title="Status and visibility">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <Field label="Legacy workflow status" htmlFor="project-status-legacy">
+            <select
+              id="project-status-legacy"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className={fieldClass}
+            >
+              <option value="planned">Planned</option>
+              <option value="in_progress">In Progress</option>
+              <option value="on_hold">On Hold</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </Field>
+          <Field label="Delivery" htmlFor="project-delivery">
+            <select
+              id="project-delivery"
               name="delivery_status"
               value={formData.delivery_status ?? ""}
               onChange={(event) => {
@@ -289,104 +489,40 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                     : prev.status,
                 }));
               }}
-              className="border-border bg-background mt-2 w-full rounded-xl border p-3"
+              className={fieldClass}
             >
               <option value="">Use legacy status until migrated</option>
               <option value="planned">Planned</option>
               <option value="active">Active</option>
               <option value="completed">Completed</option>
             </select>
-          </label>
-          <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-            Publication
+          </Field>
+          <Field label="Publication" htmlFor="project-publication">
             <select
+              id="project-publication"
               name="publication_status"
               value={formData.publication_status ?? ""}
               onChange={handleChange}
-              className="border-border bg-background mt-2 w-full rounded-xl border p-3"
+              className={fieldClass}
             >
               <option value="">Use legacy visibility until migrated</option>
               <option value="draft">Draft</option>
               <option value="published">Published</option>
               <option value="archived">Archived</option>
             </select>
-          </label>
+          </Field>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Project type
-          <select
-            name="project_type"
-            value={formData.project_type ?? ""}
-            onChange={handleChange}
-            className="border-border bg-background mt-2 w-full rounded-xl border p-3"
-          >
-            <option value="">Not classified</option>
-            <option value="client">Client</option>
-            <option value="internal">Internal</option>
-            <option value="open_source">Open source</option>
-            <option value="lab">Lab</option>
-          </select>
-        </label>
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Primary pillar
-          <select
-            name="primary_pillar"
-            value={formData.primary_pillar ?? ""}
-            onChange={handleChange}
-            className="border-border bg-background mt-2 w-full rounded-xl border p-3"
-          >
-            <option value="">Not assigned</option>
-            {PILLAR_CONTRACT.map((pillar) => (
-              <option key={pillar.key} value={pillar.key}>
-                {pillar.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="space-y-2 text-sm font-bold tracking-widest uppercase">
-          Secondary pillars
-          <select
-            multiple
-            value={formData.secondary_pillars ?? []}
-            onChange={(event) =>
-              setFormData((prev) => ({
-                ...prev,
-                secondary_pillars: Array.from(
-                  event.currentTarget.selectedOptions,
-                  (option) => option.value
-                ) as NonNullable<TProject["secondary_pillars"]>,
-              }))
-            }
-            className="border-border bg-background mt-2 min-h-28 w-full rounded-xl border p-3"
-          >
-            {PILLAR_CONTRACT.map((pillar) => (
-              <option key={pillar.key} value={pillar.key}>
-                {pillar.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-          Short Description
-        </label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          className="border-border bg-background focus:border-primary min-h-[100px] w-full rounded-xl border p-3 focus:outline-none"
+        <Checkbox
+          id="is_featured"
+          label="Featured Project"
+          checked={Boolean(formData.is_featured)}
+          onChange={(checked) =>
+            setFormData((prev) => ({ ...prev, is_featured: checked }))
+          }
         />
-      </div>
+      </EditorSection>
 
-      <fieldset className="border-border space-y-5 rounded-2xl border p-5">
-        <legend className="px-2 text-sm font-bold tracking-widest uppercase">
-          Case-study evidence
-        </legend>
+      <EditorSection id="project-evidence" title="Case-study evidence">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {(
             [
@@ -398,15 +534,15 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               ["performance_reliability", "Performance & reliability"],
             ] as const
           ).map(([field, label]) => (
-            <label key={field} className="space-y-2 text-sm font-semibold">
-              {label}
+            <Field key={field} label={label} htmlFor={`project-${field}`}>
               <textarea
+                id={`project-${field}`}
                 name={field}
                 value={formData[field] ?? ""}
                 onChange={handleChange}
-                className="border-border bg-background mt-1 min-h-28 w-full rounded-xl border p-3"
+                className={cn(fieldClass, "min-h-28")}
               />
-            </label>
+            </Field>
           ))}
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -417,23 +553,29 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               ["learnings", "Learnings"],
             ] as const
           ).map(([field, label]) => (
-            <label key={field} className="space-y-2 text-sm font-semibold">
-              {label} (one per line)
+            <Field
+              key={field}
+              label={`${label} (one per line)`}
+              htmlFor={`project-${field}`}
+            >
               <textarea
+                id={`project-${field}`}
                 value={formData[field]?.join("\n") ?? ""}
                 onChange={(event) =>
                   handleListChange(field, event.target.value)
                 }
-                className="border-border bg-background mt-1 min-h-32 w-full rounded-xl border p-3"
+                className={cn(fieldClass, "min-h-32")}
               />
-            </label>
+            </Field>
           ))}
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold">Outcome metrics</p>
-            <button
+            <p className="cp-label">Outcome metrics</p>
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() =>
                 setFormData((prev) => ({
                   ...prev,
@@ -447,15 +589,14 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                   ],
                 }))
               }
-              className="border-border rounded-lg border px-3 py-2 text-sm font-semibold"
             >
               Add outcome
-            </button>
+            </Button>
           </div>
           {(formData.outcomes ?? []).map((outcome, index) => (
             <div
               key={index}
-              className="grid grid-cols-1 gap-3 rounded-xl border p-3 md:grid-cols-[1fr_1fr_10rem_1fr_auto]"
+              className="cwa-row grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_10rem_1fr_auto]"
             >
               <input
                 aria-label={`Outcome ${index + 1} label`}
@@ -464,7 +605,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                   updateOutcome(index, { label: event.target.value })
                 }
                 placeholder="Metric label"
-                className="border-border bg-background rounded-lg border p-2"
+                className={fieldClass}
               />
               <input
                 aria-label={`Outcome ${index + 1} value`}
@@ -473,7 +614,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                   updateOutcome(index, { value: event.target.value })
                 }
                 placeholder="Value"
-                className="border-border bg-background rounded-lg border p-2"
+                className={fieldClass}
               />
               <select
                 aria-label={`Outcome ${index + 1} verification`}
@@ -484,7 +625,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                       .value as typeof outcome.verification_state,
                   })
                 }
-                className="border-border bg-background rounded-lg border p-2"
+                className={fieldClass}
               >
                 <option value="unverified">Unverified</option>
                 <option value="derived">Derived</option>
@@ -499,10 +640,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                   })
                 }
                 placeholder="Private evidence reference"
-                className="border-border bg-background rounded-lg border p-2"
+                className={fieldClass}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 aria-label={`Remove outcome ${index + 1}`}
                 onClick={() =>
                   setFormData((prev) => ({
@@ -512,142 +655,90 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                     ),
                   }))
                 }
-                className="text-destructive px-2 text-sm font-semibold"
+                className="text-destructive"
               >
                 Remove
-              </button>
+              </Button>
             </div>
           ))}
         </div>
-      </fieldset>
+      </EditorSection>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {(
-          [
-            ["live_url", "live_url_visibility", "Live URL"],
-            ["source_url", "source_url_visibility", "Source URL"],
-          ] as const
-        ).map(([urlField, visibilityField, label]) => (
-          <div key={urlField} className="grid grid-cols-[1fr_9rem] gap-3">
-            <label className="space-y-2 text-sm font-semibold">
-              {label} (HTTPS)
-              <input
-                name={urlField}
-                type="url"
-                value={formData[urlField] ?? ""}
-                onChange={handleChange}
-                className="border-border bg-background mt-1 w-full rounded-xl border p-3"
-              />
-            </label>
-            <label className="space-y-2 text-sm font-semibold">
-              Visibility
-              <select
-                name={visibilityField}
-                value={formData[visibilityField] ?? "hidden"}
-                onChange={handleChange}
-                className="border-border bg-background mt-1 w-full rounded-xl border p-3"
-              >
-                <option value="hidden">Hidden</option>
-                <option value="private">Admin only</option>
-                <option value="public">Public</option>
-              </select>
-            </label>
-          </div>
-        ))}
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-          Content
-        </label>
-        <textarea
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          required
-          className="border-border bg-background focus:border-primary min-h-[300px] w-full rounded-xl border p-3 focus:outline-none"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Thumbnail
-          </label>
-          <FileUploader
-            purpose="project"
-            value={formData.thumbnail}
-            onChange={(file: TFilePopulated | null) =>
-              setFormData((prev) => ({ ...prev, thumbnail: file }))
-            }
-            disabled={loading}
-          />
+      <EditorSection id="project-links" title="Links">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {(
+            [
+              ["live_url", "live_url_visibility", "Live URL"],
+              ["source_url", "source_url_visibility", "Source URL"],
+            ] as const
+          ).map(([urlField, visibilityField, label]) => (
+            <div key={urlField} className="grid grid-cols-[1fr_9rem] gap-3">
+              <Field label={`${label} (HTTPS)`} htmlFor={`project-${urlField}`}>
+                <input
+                  id={`project-${urlField}`}
+                  name={urlField}
+                  type="url"
+                  value={formData[urlField] ?? ""}
+                  onChange={handleChange}
+                  className={fieldClass}
+                />
+              </Field>
+              <Field label="Visibility" htmlFor={`project-${visibilityField}`}>
+                <select
+                  id={`project-${visibilityField}`}
+                  name={visibilityField}
+                  value={formData[visibilityField] ?? "hidden"}
+                  onChange={handleChange}
+                  className={fieldClass}
+                >
+                  <option value="hidden">Hidden</option>
+                  <option value="private">Admin only</option>
+                  <option value="public">Public</option>
+                </select>
+              </Field>
+            </div>
+          ))}
         </div>
+      </EditorSection>
 
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Images
-          </label>
-          <FileGalleryUploader
-            purpose="project"
-            value={formData.images ?? []}
-            onChange={(files: TFilePopulated[]) =>
-              setFormData((prev) => ({ ...prev, images: files }))
-            }
-            disabled={loading}
+      <EditorSection id="project-content" title="Content">
+        <Field label="Content" htmlFor="project-content-body">
+          <textarea
+            id="project-content-body"
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            required
+            className={cn(fieldClass, "min-h-72")}
           />
-        </div>
-      </div>
+        </Field>
+      </EditorSection>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Tags (comma separated)
-          </label>
-          <input
-            value={formData.tags?.join(", ")}
-            onChange={handleTagsChange}
-            placeholder="nextjs, tailwind, nodejs"
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
-          />
+      <EditorSection id="project-media" title="Media">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Field label="Thumbnail">
+            <FileUploader
+              purpose="project"
+              value={formData.thumbnail}
+              onChange={(file: TFilePopulated | null) =>
+                setFormData((prev) => ({ ...prev, thumbnail: file }))
+              }
+              disabled={loading}
+            />
+          </Field>
+          <Field label="Images">
+            <FileGalleryUploader
+              purpose="project"
+              value={formData.images ?? []}
+              onChange={(files: TFilePopulated[]) =>
+                setFormData((prev) => ({ ...prev, images: files }))
+              }
+              disabled={loading}
+            />
+          </Field>
         </div>
-        <div className="flex items-center gap-3 pt-8">
-          <input
-            type="checkbox"
-            id="is_featured"
-            checked={formData.is_featured}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                is_featured: e.target.checked,
-              }))
-            }
-            className="border-border text-primary focus:ring-primary size-5 rounded"
-          />
-          <label
-            htmlFor="is_featured"
-            className="text-muted-foreground text-sm font-bold tracking-widest uppercase"
-          >
-            Featured Project
-          </label>
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-4 pt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" className="gap-2" isLoading={loading}>
-          <Save className="size-4" />
-          {initialData ? "Update Project" : "Create Project"}
-        </Button>
-      </div>
-    </form>
+      </EditorSection>
+    </ContentEditorFrame>
   );
 };
 

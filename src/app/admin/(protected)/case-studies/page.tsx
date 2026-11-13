@@ -1,5 +1,6 @@
 "use client";
 
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button, buttonVariants } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -192,7 +193,10 @@ const AdminCaseStudiesPage = () => {
         minWidth: "280px",
         cell: ({ row: caseStudy }) => (
           <div className="flex items-center gap-4">
-            <EntityThumbnail src={caseStudy.thumbnail?.url} alt={caseStudy.name} />
+            <EntityThumbnail
+              src={caseStudy.thumbnail?.url}
+              alt={caseStudy.name}
+            />
             <div className="min-w-0">
               <p className="max-w-72 truncate text-sm font-bold">
                 {caseStudy.name}
@@ -334,28 +338,17 @@ const AdminCaseStudiesPage = () => {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Case Studies Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Tell the full story of a problem solved, from challenge to result.
-          </p>
-        </div>
-        <Link
-          href="/admin/case-studies/new"
-          className={buttonVariants({
-            className:
-              "text-[10px] font-bold tracking-widest uppercase md:text-sm",
-          })}
-        >
+    <ConsoleList
+      className="cp-rows-2"
+      title="Case studies"
+      description="Tell the full story of a problem solved, from challenge to result."
+      actions={
+        <Link href="/admin/case-studies/new" className={buttonVariants()}>
           <Plus aria-hidden="true" className="size-4" />
           Create New Case Study
         </Link>
-      </div>
-
+      }
+    >
       <DataTable
         data={caseStudies}
         columns={columns}
@@ -402,7 +395,7 @@ const AdminCaseStudiesPage = () => {
         emptyTitle="No case studies found"
         emptyDescription="Create a case study or adjust the current search and filters."
       />
-    </div>
+    </ConsoleList>
   );
 };
 

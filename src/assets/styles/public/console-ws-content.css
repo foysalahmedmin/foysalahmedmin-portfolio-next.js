@@ -2,4 +2,90 @@
  * Admin console workspaces: content (Phase 8). Owned by one slice; add rules here.
  * Rules: tokens only (no colour literals), no backdrop-filter outside overlays, no animation library, state is
  * shape, weight and label (never colour). Scope every rule to [data-surface="console"].
+ *
+ * Contents: 1 frames and rows, 2 choice tiles, 3 editorial notice, 4 completeness meter.
+ * The editor pattern itself (header, sections, index, action bar) is the cp- classes of console-patterns.css.
  */
+
+/* ---------- 1. Frames and rows: a hairline frame, never a card with a shadow ---------- */
+[data-surface="console"] :is(.cwa-frame, .cwa-row) {
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-panel);
+}
+
+/* A repeated record inside an editor (an outcome, a legal section) */
+[data-surface="console"] .cwa-row {
+  padding: 0.75rem;
+}
+
+/* ---------- 2. Choice tiles: the checked tile has a heavier frame and a check mark ---------- */
+[data-surface="console"] .cwa-choice {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  padding: 0.75rem 1rem;
+  min-block-size: var(--hit-area);
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cwa-choice:hover {
+  background: var(--line-1);
+}
+
+[data-surface="console"] .cwa-choice[data-checked="true"] {
+  box-shadow: inset 0 0 0 1px var(--foreground);
+  border-color: var(--foreground);
+}
+
+/* The mark is shape, not colour; the empty alternative text keeps it out of the accessible name */
+[data-surface="console"] .cwa-choice[data-checked="true"]::after {
+  margin-inline-start: auto;
+  padding-inline-start: 0.75rem;
+  content: "\2713" / "";
+  font-weight: 700;
+}
+
+/* The radio inside a tile may be visually hidden: show its focus on the tile */
+[data-surface="console"] .cwa-choice:has(:focus-visible) {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+/* ---------- 3. Editorial notice: a frame and a labelled mark; a problem is a dashed frame ---------- */
+[data-surface="console"] .cwa-notice {
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  padding: 0.75rem 1rem;
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cwa-notice[data-notice="danger"] {
+  border: 1px dashed var(--foreground);
+}
+
+[data-surface="console"] .cwa-notice__title {
+  margin: 0;
+  font-weight: 600;
+}
+
+[data-surface="console"] .cwa-notice__body {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--step--1);
+}
+
+/* ---------- 4. Completeness meter: a quiet track and an ink fill ---------- */
+[data-surface="console"] .cwa-meter {
+  border-radius: var(--r-sm);
+  background: var(--line-2);
+  block-size: 0.5rem;
+  overflow: hidden;
+}
+
+[data-surface="console"] .cwa-meter__fill {
+  display: block;
+  background: var(--foreground);
+  block-size: 100%;
+}
