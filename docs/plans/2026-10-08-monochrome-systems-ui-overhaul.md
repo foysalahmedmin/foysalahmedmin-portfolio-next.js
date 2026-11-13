@@ -9,6 +9,15 @@
 | **Decision** | Needs ADR 0011 (amends ADR 0002 dependencies and ADR 0009 budgets). Drafted in Appendix C, not yet accepted.                                             |
 | **Handoff**  | On approval, each phase in section 7 gets its own task-level implementation plan (writing-plans format) before any code.                                 |
 
+### Revision 1.11: what Phases 8 and 9 changed in the plan (2026-11-13)
+
+- **The admin allowlist in the design lint is empty**; every admin workspace is on the console patterns. The stop rule left three gaps that are not restyles: inbox and moderation stay table plus drawer (no master-detail, no `j`, `k`, `e`), the repeatable record editor has no section index, unsaved count or Cmd/Ctrl+S, and the Site editor's inner repeatable rows keep their cards.
+- **The console page budget needs a second amendment.** Measured signed in: lists and editors are 12 to 37 KB over the shell, the Site editor 75 KB (target 60). The fix is loading only the open Site panel, a code change.
+- **Icon-shaped link buttons were broken** (the padding of the size beat the icon shape); fixed once in `button-variants.ts`.
+- **Detail pages stream their metadata into the body for a normal browser**; bots get it in the head. A Next setting would make it blocking for all; measure first (Phase 9 findings).
+- **Phase 9 was run as a fast pass on one engine.** Lighthouse, the smoothness harness and axe are measured; Firefox, WebKit, real devices, the motion review and the harness three times in a row are for the owner and CI (`docs/release/release-checklist.md`). **Phase 10 is prepared, not run:** `docs/release/launch-runbook.md`. There is no one-click restore of a previous published Site or Page; the rollback line in Phase 10 needs that small feature or an accepted manual procedure.
+  Full evidence: [`docs/baseline/phase-8-findings.md`](../baseline/phase-8-findings.md) and [`docs/baseline/phase-9-findings.md`](../baseline/phase-9-findings.md).
+
 ### Revision 1.10: what Phase 7 changed in the plan (2026-11-08)
 
 - **The Enquiries panel (D-08) is cut**: the observability endpoint stores no enquiry events.
@@ -1462,17 +1471,20 @@ Dependencies: P0 → P1 → P2 → (P3 ∥ P4 ∥ P7) → P5 → P6; P7 → P8; 
   - **B4** inbox: contacts and review moderation.
   - **B5** system: users, audit, taxonomy, media library, profile settings.
   - **B6** remainder: preview, recovery, dialogs.
+- **Result (2026-11-13):** built in four parallel slices instead of six batches; evidence and the stop-rule gaps are in [`docs/baseline/phase-8-findings.md`](../baseline/phase-8-findings.md). The allowlist is empty.
 - **Acceptance per batch:** existing tests green; authenticated visual snapshots (both themes); axe; consistency probe; design-lint allowlist shrinks; no behaviour change (any needed behaviour change is a separate PR). After B6 the design-lint allowlist is empty.
 - **Stop rule:** if a batch needs more than restyling to reach the pattern, stop, record the gap, and decide with you before continuing.
 
 ### Phase 9: Hardening and motion tuning (M–L)
 
 - **Work:** cross-browser pass (Firefox, WebKit; real Safari and iOS; mid Android); manual accessibility and screen-reader pass; SEO, JSON-LD, OG; performance tuning against 6.2; **motion tuning pass:** for each home chapter and page archetype, record screen captures at 1× and 0.25×, review easing, timing, overshoot and stagger against the 3.7.2 doctrine, fix, then re-run the harness three times in a row; kill-switch drill; lhci route set expanded; visual baselines approved; documentation (`docs/design-system/*`, ADR index, `plan.md` and `tasks.md`).
+- **Result (2026-11-13):** a fast single-engine pass; measured items and the list for the owner are in [`docs/baseline/phase-9-findings.md`](../baseline/phase-9-findings.md) and [`docs/release/release-checklist.md`](../release/release-checklist.md). Not met yet: cross-browser, real devices, harness three times in a row, the motion review.
 - **Acceptance:** ADR 0009 release checklist complete; no critical or serious axe findings; all budgets green on three consecutive runs; consistency probe green on public and console routes; you sign off the motion review.
 
 ### Phase 10: Content closure and launch (S–M, owner-dependent)
 
 - **Work:** resolve the confirm register (section 8); publish Site and Pages; run the production foundation seed with its confirmation phrase; flip `allow_indexing`; monitor field Web Vitals and conversion events.
+- **Prepared (2026-11-13), not run:** [`docs/release/launch-runbook.md`](../release/launch-runbook.md) lists the owner's facts, the steps and the rollback. Nothing was run on the owner's database.
 - **Acceptance:** the automated content gate proves nothing `unverified` is public; release checklist signed; rollback rehearsed (previous Site snapshot, 3D kill switch, default `?tier`).
 
 ### Risks

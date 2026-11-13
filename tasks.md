@@ -1648,9 +1648,9 @@ Source of truth: [`docs/plans/2026-10-08-monochrome-systems-ui-overhaul.md`](./d
 | SG5   | Verification  | Built and verified locally 2026-11-08 ([findings](./docs/baseline/phase-5-findings.md)): sixteen home chapters (Tier 1 and built-but-hidden Tier 2), chapter bindings in the deferred engine, pinned Stack and Pipeline with skip links, first hero role complete at scroll 0; home 22.8 screens (27.0 with Tier 2), initial JS 179.71 KB (302 bytes under), 1,565 tests pass, chapter and public browser specs pass. Lighthouse and the smoothness harness not re-run. Awaiting owner review                                                                           |
 | SG6   | Verification  | Built locally 2026-11-08 ([findings](./docs/baseline/phase-6-findings.md)): every public page on its archetype template with the shared header; case-study scrollytelling with a code-native diagram, lab registry, editorial articles and videos, About narrative, Contact with topic chips, legal and system pages; filters are server GET forms (no client discovery code); initial JS 177.4 KB on every list page, 1,681 tests pass. No engagement-type filter, no M30, no Lighthouse run. Awaiting owner review                                                    |
 | SG7   | Verification  | Built and verified locally 2026-11-08 ([findings](./docs/baseline/phase-7-findings.md)): the admin on the console surface; AdminShell with rail, top bar, publish-state chip and a console palette; dashboard with Needs attention and a pattern-filled pipeline; Review and publish; list and editor patterns (audit log and article editor adopt them); status marks; auth pages; authenticated Playwright fixture and spec (13 pass); 1,816 tests pass. Enquiries panel cut; content-workspace deep links and the 150 KB shell budget not met. Awaiting owner review |
-| SG8   | Pending       | Console workspaces sweep (about 370 legacy class hits across 35 files)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| SG9   | Pending       | Hardening and motion tuning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| SG10  | Blocked input | Content closure and launch; needs the owner confirm register (plan section 8)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| SG8   | Verification  | Built and verified locally 2026-11-13 ([findings](./docs/baseline/phase-8-findings.md)): every admin workspace on the console patterns in four parallel slices; the design-lint allowlist is empty (about 370 hits cleared); content forms and Site and Page editors are C3 editors (section index, sticky action bar, unsaved count, Cmd/Ctrl+S); icon link-buttons fixed; 1,863 tests pass; 13 workspaces axe-clean in both themes. Stop-rule gaps recorded (inbox master-detail, repeatable editor C3, Site editor 239.6 KB)                                         |
+| SG9   | Verification  | Fast single-engine pass 2026-11-13 ([findings](./docs/baseline/phase-9-findings.md), [release checklist](./docs/release/release-checklist.md)): engagement-type filter, FAQPage JSON-LD, error digest removed, Lighthouse (mobile Home 84, desktop 99 to 100), smoothness harness 8 of 8, axe on public and console. Not done: Firefox, WebKit, real devices, motion review, harness three in a row, visual baselines                                                                                                                                                   |
+| SG10  | Blocked input | Content closure and launch; the runbook is written ([launch runbook](./docs/release/launch-runbook.md)) and nothing was run. Needs the owner's facts (C-14, C-15, C-31, the rest of plan section 8) and the owner to run the production steps                                                                                                                                                                                                                                                                                                                           |
 
 ### SG3 checklist (shell, hero and 3D)
 
@@ -1720,7 +1720,7 @@ Updated as work lands. The acceptance gate is plan section 7, Phase 6.
 - [x] Server-rendered GET filters; the client discovery sections and `DiscoveryFilters` deleted; `/projects` and `/articles` under the JS budget
 - [x] Route header copy fixed (The lab, Case files, Recommended watching); A3 and A4 page headers in the contract
 - [x] Docs: `phase-6-findings.md`, plan revision 1.9, ADR 0011 Phase 6 outcome, motion registry
-- [ ] Engagement-type filter on `/case-studies` (discovery field and query)
+- [x] Engagement-type filter on `/case-studies` (done in Phase 9: `engagement` param, Type select, chip)
 - [ ] M30 shared-element morph; Lighthouse, smoothness harness and visual snapshots on the inner pages
 - [ ] Owner: review the inner pages on a real device; decide the root `error.tsx` digest
 - [ ] Owner review, then SG7 (console shell)
@@ -1739,6 +1739,36 @@ Updated as work lands. The acceptance gate is plan section 7, Phase 7.
 - [ ] Content workspaces read their filters from the URL (so every Needs-attention link is filtered); the 150 KB shell budget; R19 status-mark usability check
 - [ ] Owner: look at the console on a real device; decide the high versus medium ranking in `needs-attention.ts`
 - [ ] Owner review, then SG8 (workspaces sweep)
+
+### SG8 checklist (console workspaces sweep)
+
+- [x] Content forms (project, case study, video) and lists (projects, case studies, articles, videos) on the console patterns
+- [x] Site editor, Pages index, Page editor and preview panel (C3 with section index, sticky bar, unsaved count, Cmd/Ctrl+S)
+- [x] Contact inbox, review moderation, users, taxonomy, settings
+- [x] Media library and dialogs, project resources, repeatable content lists
+- [x] Design-lint allowlist for `src/components/admin/` and `src/app/admin/` removed (0 violations)
+- [x] Icon-shaped link buttons no longer squeezed (`button-variants.ts`); console specs for 13 workspaces (axe, both themes) and the back link
+- [x] Docs: `phase-8-findings.md`, plan revision 1.11, ADR 0011 Phase 8 and 9 outcome
+- [ ] Site editor: load only the open panel (239.6 KB, target 210); repeatable record editor as a C3 editor; merge the three notice components
+- [ ] Inbox and moderation as master-detail with `j`, `k`, `e` (behaviour change, own decision)
+- [ ] Owner: look at the admin on a phone and decide the three behaviour changes listed in the findings
+
+### SG9 checklist (hardening)
+
+- [x] Engagement-type filter, FAQPage JSON-LD, root error digest removed
+- [x] Lighthouse (mobile default and desktop preset), smoothness harness, axe on public and console routes
+- [x] Release checklist and launch runbook written
+- [ ] Firefox and WebKit projects in CI; real Safari, iOS and Android; screen-reader pass (owner)
+- [ ] Motion tuning review at 1x and 0.25x and the harness three times in a row; kill-switch drill by hand
+- [ ] Metadata streaming on detail pages (blocking metadata, measured); the no-JS skeleton routing decision; shell 150 KB; visual baselines
+- [ ] Owner: sign off the motion review
+
+### SG10 checklist (content closure and launch)
+
+- [x] Launch runbook with the owner's facts, steps, rollback and sign-off table (not run)
+- [ ] Owner: answer or consciously leave hidden the confirm register (C-14, C-15, C-31 first)
+- [ ] Owner: back up and verify the database, run migrate and seed v8, fill the facts, publish, flip `allow_indexing`
+- [ ] Decide on a "restore previous published Site or Page" feature before launch, or accept the manual rollback
 
 ## Deferred ideas — only after the core release
 
