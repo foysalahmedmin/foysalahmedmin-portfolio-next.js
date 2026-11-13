@@ -31,7 +31,8 @@ export const buttonVariants = cva(
       },
       shape: {
         default: "rounded-md",
-        icon: "rounded-md aspect-square px-0",
+        // px-0! because raw buttonVariants() calls (links styled as buttons) keep the size padding, which would squeeze the icon
+        icon: "rounded-md aspect-square px-0!",
         none: "",
       },
     },

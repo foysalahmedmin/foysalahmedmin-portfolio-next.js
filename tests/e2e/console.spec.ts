@@ -105,6 +105,73 @@ for (const scheme of ["dark", "light"] as const) {
   });
 }
 
+// Phase 8: every swept workspace opens, has one main landmark and a page title, and passes axe in both themes.
+const SWEPT = [
+  "/admin/projects",
+  "/admin/projects/new",
+  "/admin/case-studies/new",
+  "/admin/videos/new",
+  "/admin/site",
+  "/admin/pages",
+  "/admin/contacts",
+  "/admin/reviews",
+  "/admin/media",
+  "/admin/users",
+  "/admin/taxonomy",
+  "/admin/settings",
+  "/admin/project-resources",
+];
+for (const scheme of ["dark", "light"] as const) {
+  test(`the swept workspaces have no serious axe finding (${scheme})`, async ({
+    admin: page,
+  }) => {
+    test.setTimeout(120_000);
+    await page.emulateMedia({ colorScheme: scheme });
+    for (const path of SWEPT) {
+      const response = await page.goto(path);
+      expect(response?.status(), path).toBeLessThan(400);
+      await expect(page.getByRole("main")).toHaveCount(1);
+      await expect(
+        page.getByRole("heading", { level: 1 }).first()
+      ).toBeVisible();
+      await page.waitForTimeout(500);
+      const result = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+        .analyze();
+      const blocking = result.violations.filter(
+        ({ impact }) => impact === "critical" || impact === "serious"
+      );
+      expect(
+        blocking.map(
+          ({ id, nodes }) => `${path} ${id}: ${nodes[0]?.target.join(" ")}`
+        )
+      ).toEqual([]);
+    }
+  });
+}
+
+test("the content editors keep the sticky action bar and the back link has a real size", async ({
+  admin: page,
+}, testInfo) => {
+  test.skip(isMobile(testInfo.project.name), "desktop layout");
+  for (const path of [
+    "/admin/projects/new",
+    "/admin/case-studies/new",
+    "/admin/videos/new",
+    "/admin/articles/new",
+  ]) {
+    await page.goto(path);
+    await expect(page.getByText(/no unsaved changes/i)).toBeVisible();
+    const back = page.getByRole("link", { name: /^back to/i }).first();
+    const box = await back.boundingBox();
+    expect(box?.width, path).toBeGreaterThanOrEqual(32);
+    const iconWidth = await back
+      .locator("svg")
+      .evaluate((node) => node.getBoundingClientRect().width);
+    expect(iconWidth, path).toBeGreaterThanOrEqual(14);
+  }
+});
+
 test("no backdrop-filter outside overlays, and no animation library in the console", async ({
   admin: page,
 }) => {

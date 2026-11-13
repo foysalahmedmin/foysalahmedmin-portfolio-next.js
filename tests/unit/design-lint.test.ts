@@ -13,7 +13,7 @@ import {
  *
  * The allowlist is the only way out and it only shrinks. Each entry names the rules it exempts and why;
  * the second test fails when an entry no longer has any violation, so finished work must remove its
- * entry. Phase 7 and 8 empty the admin rows.
+ * entry. The admin rows were removed when the Phase 8 sweep finished.
  */
 type AllowEntry = Readonly<{
   /** A file path, or a directory prefix ending in "/". */
@@ -23,17 +23,6 @@ type AllowEntry = Readonly<{
 }>;
 
 const ALLOWLIST: readonly AllowEntry[] = [
-  {
-    path: "src/components/admin/",
-    rules: ["palette", "literal", "arbitrary", "rounded-large"],
-    reason:
-      "Admin keeps its legacy styling until the console shell (Phase 7) and workspace sweep (Phase 8)",
-  },
-  {
-    path: "src/app/admin/",
-    rules: ["palette", "literal", "arbitrary", "rounded-large"],
-    reason: "Admin routes keep legacy styling until Phase 7 and 8",
-  },
   {
     path: "src/app/global-error.tsx",
     rules: ["literal"],
