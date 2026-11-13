@@ -1,0 +1,5 @@
+/*
+ * Admin console workspaces: site (Phase 8). Owned by one slice; add rules here.
+ * Rules: tokens only (no colour literals), no backdrop-filter outside overlays, no animation library, state is
+ * shape, weight and label (never colour). Scope every rule to [data-surface="console"].
+ */

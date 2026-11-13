@@ -267,6 +267,10 @@
   @import "../assets/styles/public/console-dashboard.css";
   @import "../assets/styles/public/console-patterns.css";
   @import "../assets/styles/public/console-auth.css";
+  @import "../assets/styles/public/console-ws-content.css";
+  @import "../assets/styles/public/console-ws-site.css";
+  @import "../assets/styles/public/console-ws-inbox.css";
+  @import "../assets/styles/public/console-ws-media.css";
 
   .text-glow {
     text-shadow: 0 0 15px color-mix(in srgb, var(--primary) 50%, transparent);
