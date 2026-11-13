@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkspaceNotice } from "@/components/admin/workspace-notice";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -222,16 +223,11 @@ const ProjectResourceEditor = ({ resource, onClose, onSave }: Props) => {
 
             <ModalBody className="space-y-5">
               {errors.form ? (
-                <p
-                  role="alert"
-                  className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border p-3 text-sm"
-                >
-                  {errors.form}
-                </p>
+                <WorkspaceNotice tone="error">{errors.form}</WorkspaceNotice>
               ) : null}
 
               {editing ? (
-                <div className="border-border bg-muted/30 rounded-xl border p-4">
+                <div className="cwd-frame">
                   <p className="text-xs font-bold tracking-wider uppercase">
                     Project reference
                   </p>
@@ -246,7 +242,7 @@ const ProjectResourceEditor = ({ resource, onClose, onSave }: Props) => {
               ) : (
                 <section
                   aria-labelledby={`${formId}-project-reference-heading`}
-                  className="border-border rounded-xl border p-4"
+                  className="cwd-frame"
                 >
                   <h3
                     id={`${formId}-project-reference-heading`}
@@ -316,23 +312,25 @@ const ProjectResourceEditor = ({ resource, onClose, onSave }: Props) => {
                       Loading authorized projects…
                     </p>
                   ) : projectStatus === "error" ? (
-                    <div
-                      role="alert"
-                      className="text-destructive mt-3 flex flex-wrap items-center gap-3 text-sm"
+                    <WorkspaceNotice
+                      tone="error"
+                      className="mt-3"
+                      action={
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            setProjectRefreshKey((value) => value + 1)
+                          }
+                        >
+                          <RefreshCw aria-hidden="true" className="size-4" />
+                          Retry project search
+                        </Button>
+                      }
                     >
-                      <span>{projectError}</span>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          setProjectRefreshKey((value) => value + 1)
-                        }
-                      >
-                        <RefreshCw aria-hidden="true" className="size-4" />
-                        Retry project search
-                      </Button>
-                    </div>
+                      {projectError}
+                    </WorkspaceNotice>
                   ) : projectStatus === "success" &&
                     visibleProjectOptions.length === 0 ? (
                     <p className="text-muted-foreground mt-3 text-sm">
@@ -483,10 +481,7 @@ const ProjectResourceEditor = ({ resource, onClose, onSave }: Props) => {
                 ) : null}
               </div>
 
-              <label
-                htmlFor={fieldId("isPrivate")}
-                className="border-border bg-background flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border p-4"
-              >
+              <label htmlFor={fieldId("isPrivate")} className="cwd-check">
                 <input
                   id={fieldId("isPrivate")}
                   type="checkbox"

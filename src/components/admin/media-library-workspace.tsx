@@ -2,6 +2,14 @@
 
 import MediaMetadataEditor from "@/components/admin/media-metadata-editor";
 import MediaUploadDialog from "@/components/admin/media-upload-dialog";
+import { WorkspaceNotice } from "@/components/admin/workspace-notice";
+import {
+  ConsoleEmpty,
+  ConsoleError,
+  ConsoleFilteredEmpty,
+  ConsoleToolbar,
+} from "@/components/console";
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -26,6 +34,7 @@ import {
   StatusBadge,
   type TStatusBadgeTone,
 } from "@/components/ui/status-badge";
+import { StatusMark } from "@/components/ui/status-mark";
 import {
   DEFAULT_MEDIA_LIBRARY_QUERY,
   getMediaReferenceCount,
@@ -40,7 +49,6 @@ import {
   type MediaLibraryFilterKey,
   type MediaLibraryQuery,
 } from "@/lib/admin/media-library";
-import { cn } from "@/lib/utils";
 import {
   getAdminMedia,
   permanentlyDeleteAdminMedia,
@@ -79,14 +87,6 @@ type Notice = Readonly<{
   tone: "success" | "warning" | "error";
   message: string;
 }>;
-
-const noticeClassNames: Record<Notice["tone"], string> = {
-  success:
-    "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  warning:
-    "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300",
-  error: "border-destructive/30 bg-destructive/10 text-destructive",
-};
 
 const FILTERS: readonly Readonly<{
   id: MediaLibraryFilterKey;
@@ -205,7 +205,7 @@ const MediaPreview = ({ file }: { file: TFilePopulated }) => {
 
   return (
     <div
-      className="bg-muted relative grid aspect-video w-full place-items-center overflow-hidden rounded-xl"
+      className="cwd-preview"
       style={
         file.dominant_color
           ? { backgroundColor: file.dominant_color }
@@ -237,7 +237,7 @@ const MediaPreview = ({ file }: { file: TFilePopulated }) => {
         <FileText aria-hidden="true" className="text-muted-foreground size-8" />
       )}
       {file.access === "private" && (
-        <span className="bg-background/90 text-foreground absolute right-2 bottom-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase">
+        <span className="cwd-preview__flag">
           <LockKeyhole aria-hidden="true" className="size-3" />
           Private
         </span>
@@ -875,23 +875,22 @@ const MediaLibraryWorkspace = ({
     pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
 
   const currentSelectedFiles = selectedFiles();
+  const filtersActive =
+    Boolean(query.search) || Object.values(query.filters).some(Boolean);
+  const resetFilters = () => {
+    setSearchInput("");
+    setQuery(DEFAULT_MEDIA_LIBRARY_QUERY);
+    clearSelection();
+  };
 
   return (
-    <div className="space-y-8">
-      <header className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <p className="text-primary text-xs font-bold tracking-[0.18em] uppercase">
-            Managed media
-          </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
-            Media library
-          </h1>
-          <p className="text-muted-foreground mt-2 max-w-3xl text-sm sm:text-base">
-            Provider-neutral uploads, editorial metadata health, usage tracking
-            and reference-safe lifecycle operations in one bounded workspace.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+    <ConsoleList
+      className="cp-rows-2"
+      eyebrow="Managed media"
+      title="Media library"
+      description="Provider-neutral uploads, editorial metadata health, usage tracking and reference-safe lifecycle operations in one bounded workspace."
+      actions={
+        <>
           <Button
             type="button"
             variant="outline"
@@ -905,63 +904,34 @@ const MediaLibraryWorkspace = ({
             <UploadCloud aria-hidden="true" className="size-4" />
             Upload media
           </Button>
-        </div>
-      </header>
-
-      <section
-        aria-label="Media health summary"
-        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
-      >
+        </>
+      }
+    >
+      <dl aria-label="Media health summary" className="cwd-stats">
         {[
-          { label: "Matching records", value: total, tone: "text-primary" },
-          {
-            label: "Ready",
-            value: statistics.ready ?? 0,
-            tone: "text-emerald-600 dark:text-emerald-400",
-          },
+          { label: "Matching records", value: total },
+          { label: "Ready", value: statistics.ready ?? 0 },
           {
             label: "Metadata incomplete",
             value: statistics.metadata_incomplete ?? 0,
-            tone: "text-amber-700 dark:text-amber-300",
           },
-          {
-            label: "Referenced",
-            value: statistics.referenced ?? 0,
-            tone: "text-sky-700 dark:text-sky-300",
-          },
+          { label: "Referenced", value: statistics.referenced ?? 0 },
         ].map((item) => (
-          <article
-            key={item.label}
-            className="border-border bg-card rounded-2xl border p-4"
-          >
-            <p className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
-              {item.label}
-            </p>
-            <p className={cn("mt-2 text-3xl font-black", item.tone)}>
-              {item.value}
-            </p>
-          </article>
+          <div key={item.label}>
+            <dt>{item.label}</dt>
+            <dd>{item.value}</dd>
+          </div>
         ))}
-      </section>
+      </dl>
 
       {notice && (
-        <div
-          role={notice.tone === "error" ? "alert" : "status"}
-          className={cn(
-            "rounded-xl border px-4 py-3 text-sm",
-            noticeClassNames[notice.tone]
-          )}
-        >
-          {notice.message}
-        </div>
+        <WorkspaceNotice tone={notice.tone}>{notice.message}</WorkspaceNotice>
       )}
 
-      <section
-        aria-label="Media library controls"
-        className="border-border bg-card space-y-4 rounded-2xl border p-4 sm:p-5"
-      >
-        <div className="grid gap-3 lg:grid-cols-[minmax(16rem,1fr)_14rem_auto]">
-          <label className="relative">
+      <ConsoleToolbar
+        label="Media library controls"
+        search={
+          <label className="relative block">
             <span className="sr-only">Search media</span>
             <Search
               aria-hidden="true"
@@ -973,10 +943,12 @@ const MediaLibraryWorkspace = ({
               maxLength={100}
               placeholder="Search name, filename or description…"
               onChange={(event) => setSearchInput(event.target.value)}
-              className="border-input bg-background focus-visible:border-primary focus-visible:ring-primary/20 h-11 w-full rounded-xl border py-2 pr-10 pl-10 text-sm outline-none focus-visible:ring-2"
+              className="border-input bg-background focus-visible:border-primary focus-visible:ring-primary/20 h-11 w-full rounded-[var(--radius-lg-token)] border py-2 pr-10 pl-10 text-sm outline-none focus-visible:ring-2"
             />
           </label>
-          <label>
+        }
+        sort={
+          <label className="block w-52">
             <span className="sr-only">Sort media</span>
             <FormControl
               as="select"
@@ -993,79 +965,74 @@ const MediaLibraryWorkspace = ({
               ))}
             </FormControl>
           </label>
+        }
+        density={
           <div
-            className="border-border flex h-11 rounded-xl border p-1"
+            className="flex items-center gap-1.5"
             role="group"
             aria-label="Media view"
           >
-            <Button
+            <button
               type="button"
-              size="sm"
-              variant={view === "table" ? "default" : "ghost"}
+              className="cp-chip"
               aria-pressed={view === "table"}
               onClick={() => setView("table")}
             >
               <List aria-hidden="true" className="size-4" />
               Table
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              size="sm"
-              variant={view === "grid" ? "default" : "ghost"}
+              className="cp-chip"
               aria-pressed={view === "grid"}
               onClick={() => setView("grid")}
             >
               <Grid3X3 aria-hidden="true" className="size-4" />
               Grid
-            </Button>
+            </button>
           </div>
-        </div>
+        }
+      />
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-          {FILTERS.map((filter) => (
-            <label key={filter.id}>
-              <span className="sr-only">{filter.label}</span>
-              <FormControl
-                as="select"
-                aria-label={filter.label}
-                value={query.filters[filter.id] ?? ""}
-                onChange={(event) =>
-                  updateQuery({
-                    filters: {
-                      ...query.filters,
-                      [filter.id]: event.target.value || undefined,
-                    },
-                    page: 1,
-                  })
-                }
-              >
-                <option value="">{filter.allLabel}</option>
-                {filter.options.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </FormControl>
-            </label>
-          ))}
-        </div>
-
-        {(query.search || Object.values(query.filters).some(Boolean)) && (
+      <div className="cwd-filters" role="group" aria-label="Media filters">
+        {FILTERS.map((filter) => (
+          <label key={filter.id}>
+            <span className="sr-only">{filter.label}</span>
+            <FormControl
+              as="select"
+              aria-label={filter.label}
+              value={query.filters[filter.id] ?? ""}
+              onChange={(event) =>
+                updateQuery({
+                  filters: {
+                    ...query.filters,
+                    [filter.id]: event.target.value || undefined,
+                  },
+                  page: 1,
+                })
+              }
+            >
+              <option value="">{filter.allLabel}</option>
+              {filter.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </FormControl>
+          </label>
+        ))}
+        {filtersActive && (
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => {
-              setSearchInput("");
-              setQuery(DEFAULT_MEDIA_LIBRARY_QUERY);
-              clearSelection();
-            }}
+            onClick={resetFilters}
           >
             <RotateCcw aria-hidden="true" className="size-4" />
             Reset search and filters
           </Button>
         )}
-      </section>
+      </div>
 
       {view === "table" ? (
         <DataTable
@@ -1108,16 +1075,11 @@ const MediaLibraryWorkspace = ({
           tableContainerClassName="max-h-[70dvh]"
         />
       ) : (
-        <section
-          className="border-border bg-card overflow-hidden rounded-3xl border"
-          aria-busy={status === "loading"}
-        >
-          <div className="border-border flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
+        <section className="cwd-grid-region" aria-busy={status === "loading"}>
+          <div className="cwd-grid-head">
             <div>
-              <h2 className="text-xl font-bold">Media grid</h2>
-              <p className="text-muted-foreground text-sm">
-                {total} matching records
-              </p>
+              <h2>Media grid</h2>
+              <p>{total} matching records</p>
             </div>
             {files.length > 0 && (
               <label className="flex min-h-11 items-center gap-2 text-sm font-medium">
@@ -1139,15 +1101,12 @@ const MediaLibraryWorkspace = ({
           </div>
 
           {selectedIds.length > 0 && (
-            <div className="border-primary/20 bg-primary/5 flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center">
-              <span
-                className="text-primary text-sm font-medium"
-                aria-live="polite"
-              >
+            <div className="cwd-selection">
+              <span aria-live="polite">
                 {selectedIds.length} item{selectedIds.length === 1 ? "" : "s"}{" "}
                 selected
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="cwd-selection__actions">
                 {renderBulkActions(currentSelectedFiles)}
               </div>
               <Button
@@ -1163,53 +1122,57 @@ const MediaLibraryWorkspace = ({
           )}
 
           {status === "loading" && files.length === 0 ? (
-            <div
-              className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-              aria-label="Loading media"
-            >
+            <div className="cwd-grid" role="status" aria-busy="true">
+              <span className="sr-only">Loading media…</span>
               {Array.from({ length: 8 }, (_, index) => (
                 <div
                   key={index}
                   aria-hidden="true"
-                  className="bg-muted h-64 animate-pulse rounded-2xl"
+                  className="cwd-tile"
+                  data-skeleton=""
                 />
               ))}
             </div>
           ) : loadError && files.length === 0 ? (
-            <div className="p-8 text-center" role="alert">
-              <p className="text-destructive">{loadError}</p>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-4"
-                onClick={refresh}
-              >
-                Try again
-              </Button>
-            </div>
+            <ConsoleError
+              title="Could not load media"
+              description={loadError}
+              onRetry={refresh}
+            />
           ) : files.length === 0 ? (
-            <div className="p-12 text-center">
-              <h3 className="text-lg font-bold">No media matches this view</h3>
-              <p className="text-muted-foreground mt-2 text-sm">
-                Adjust the filters or upload a managed asset.
-              </p>
-            </div>
+            filtersActive ? (
+              <ConsoleFilteredEmpty
+                title="No media matches this view"
+                description="Adjust the filters or upload a managed asset."
+                onClear={resetFilters}
+                clearLabel="Reset search and filters"
+              />
+            ) : (
+              <ConsoleEmpty
+                title="No media in the library yet"
+                description="Upload a managed asset to start the library."
+                action={
+                  <Button type="button" onClick={() => setUploadOpen(true)}>
+                    <UploadCloud aria-hidden="true" className="size-4" />
+                    Upload media
+                  </Button>
+                }
+              />
+            )
           ) : (
-            <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="cwd-grid">
               {files.map((file) => {
                 const selected = selectedIds.includes(file._id);
                 return (
                   <article
                     key={file._id}
-                    className={cn(
-                      "border-border overflow-hidden rounded-2xl border",
-                      selected && "border-primary ring-primary/20 ring-2",
-                      file.is_deleted && "opacity-70"
-                    )}
+                    className="cwd-tile"
+                    data-selected={selected}
+                    data-deleted={Boolean(file.is_deleted)}
                   >
-                    <div className="relative">
+                    <div className="cwd-tile__media">
                       <MediaPreview file={file} />
-                      <label className="bg-background/90 absolute top-2 left-2 grid size-11 place-items-center rounded-lg shadow-sm">
+                      <label className="cwd-pick">
                         <span className="sr-only">
                           Select {file.name || file.filename}
                         </span>
@@ -1226,16 +1189,16 @@ const MediaLibraryWorkspace = ({
                         />
                       </label>
                     </div>
-                    <div className="space-y-3 p-4">
+                    <div className="cwd-tile__body">
                       <div>
-                        <h3 className="truncate font-bold">
+                        <h3 className="cwd-tile__title">
                           {file.name || file.filename}
                         </h3>
-                        <p className="text-muted-foreground truncate text-xs">
+                        <p className="cwd-tile__sub">
                           {file.originalname || file.filename}
                         </p>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="cwd-tile__badges">
                         <StatusBadge tone="info">{file.provider}</StatusBadge>
                         <StatusBadge tone="primary">
                           {humanize(file.purpose, "missing purpose")}
@@ -1249,8 +1212,11 @@ const MediaLibraryWorkspace = ({
                         >
                           {file.metadata_status || "not assessed"}
                         </StatusBadge>
+                        {file.is_deleted && (
+                          <StatusBadge tone="destructive">deleted</StatusBadge>
+                        )}
                       </div>
-                      <div className="text-muted-foreground flex items-center justify-between text-xs">
+                      <div className="cwd-tile__meta">
                         <span>{formatBytes(file.size)}</span>
                         <span>
                           {getMediaReferenceCount(file)} reference
@@ -1323,10 +1289,14 @@ const MediaLibraryWorkspace = ({
               <ModalCloseTrigger disabled={isBusy} />
             </ModalHeader>
             <ModalBody className="space-y-4">
-              <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border p-4 text-sm">
-                {permanentCandidates.length} already soft-deleted, unreferenced
-                asset{permanentCandidates.length === 1 ? "" : "s"} will be
-                removed. This cannot be undone.
+              <div className="cwd-callout" data-kind="danger">
+                <StatusMark state="warning">Irreversible</StatusMark>
+                <p>
+                  {permanentCandidates.length} already soft-deleted,
+                  unreferenced asset
+                  {permanentCandidates.length === 1 ? "" : "s"} will be removed.
+                  This cannot be undone.
+                </p>
               </div>
               <label>
                 <span className="mb-1 block text-sm font-medium">
@@ -1367,7 +1337,7 @@ const MediaLibraryWorkspace = ({
           </ModalContent>
         </ModalBackdrop>
       </Modal>
-    </div>
+    </ConsoleList>
   );
 };
 

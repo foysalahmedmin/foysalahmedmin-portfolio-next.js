@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkspaceNotice } from "@/components/admin/workspace-notice";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   FormControl,
@@ -16,6 +17,7 @@ import {
   ModalHeader,
   ModalTitle,
 } from "@/components/ui/modal";
+import { StatusMark } from "@/components/ui/status-mark";
 import {
   getMediaAccept,
   getMediaPurposeOption,
@@ -157,7 +159,7 @@ const MediaUploadDialog = ({ isOpen, setIsOpen, onUploaded }: Props) => {
             <ModalCloseTrigger disabled={uploading} />
           </ModalHeader>
 
-          <ModalBody className="space-y-6">
+          <ModalBody className="cwd-form">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <FormControlLabel htmlFor={`${inputId}-purpose`}>
@@ -224,7 +226,7 @@ const MediaUploadDialog = ({ isOpen, setIsOpen, onUploaded }: Props) => {
                 event.preventDefault();
                 addFiles(event.dataTransfer.files);
               }}
-              className="border-border bg-muted/20 focus-within:border-primary rounded-2xl border-2 border-dashed p-6 text-center"
+              className="cwd-drop"
             >
               <UploadCloud
                 aria-hidden="true"
@@ -273,12 +275,9 @@ const MediaUploadDialog = ({ isOpen, setIsOpen, onUploaded }: Props) => {
                     {formatBytes(selectedSize)} total
                   </span>
                 </div>
-                <ul className="mt-3 space-y-2">
+                <ul className="cwd-rows mt-3">
                   {files.map((file) => (
-                    <li
-                      key={getFileKey(file)}
-                      className="border-border flex min-h-11 items-center gap-3 rounded-xl border px-3 py-2"
-                    >
+                    <li key={getFileKey(file)}>
                       <span className="min-w-0 flex-1 truncate text-sm">
                         {file.name}
                       </span>
@@ -316,28 +315,21 @@ const MediaUploadDialog = ({ isOpen, setIsOpen, onUploaded }: Props) => {
               </p>
             )}
 
-            {error && (
-              <p
-                role="alert"
-                className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border px-4 py-3 text-sm"
-              >
-                {error}
-              </p>
-            )}
+            {error && <WorkspaceNotice tone="error">{error}</WorkspaceNotice>}
 
             {outcomes.length > 0 && (
-              <section
-                aria-live="polite"
-                className="border-border rounded-2xl border p-4"
-              >
+              <section aria-live="polite" className="cwd-frame">
                 <p className="font-semibold">
                   {successes.length} uploaded · {failures.length} failed
                 </p>
                 {failures.length > 0 && (
-                  <ul className="text-destructive mt-2 space-y-1 text-sm">
+                  <ul className="cwd-rows mt-2">
                     {failures.map((outcome) => (
                       <li key={getFileKey(outcome.input)}>
-                        {outcome.input.name}: {outcome.message}
+                        <StatusMark state="error">Failed</StatusMark>
+                        <span className="min-w-0 flex-1">
+                          {outcome.input.name}: {outcome.message}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -351,12 +343,12 @@ const MediaUploadDialog = ({ isOpen, setIsOpen, onUploaded }: Props) => {
               </section>
             )}
 
-            <div className="border-border bg-muted/30 flex gap-3 rounded-xl border p-3 text-sm">
+            <div className="cwd-callout">
               <ShieldCheck
                 aria-hidden="true"
-                className="text-primary mt-0.5 size-5 shrink-0"
+                className="mt-0.5 size-5 shrink-0"
               />
-              <p className="text-muted-foreground">
+              <p>
                 Provider credentials and storage object identifiers are never
                 requested or displayed in this workspace.
               </p>

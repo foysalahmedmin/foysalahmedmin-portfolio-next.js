@@ -1,6 +1,8 @@
 "use client";
 
 import ProjectResourceEditor from "@/components/admin/project-resource-editor";
+import { WorkspaceNotice } from "@/components/admin/workspace-notice";
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -94,14 +96,6 @@ const QUERY_CONTRACT = {
   allowedSortKeys: ["sequence", "title"],
   filters: FILTERS,
 } as const;
-
-const noticeClassNames: Record<Notice["tone"], string> = {
-  success:
-    "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  warning:
-    "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300",
-  error: "border-destructive/30 bg-destructive/10 text-destructive",
-};
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
@@ -504,22 +498,13 @@ const ProjectResourceWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
   );
 
   return (
-    <div className="space-y-7">
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-3xl">
-          <p className="text-primary text-xs font-bold tracking-[0.18em] uppercase">
-            Project proof controls
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            Project resources
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm leading-6">
-            Manage repository, design and documentation links with explicit
-            visibility. Public project surfaces receive only active, public
-            resources attached to a public project.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+    <ConsoleList
+      className="cp-rows-2"
+      eyebrow="Project proof controls"
+      title="Project resources"
+      description="Manage repository, design and documentation links with explicit visibility. Public project surfaces receive only active, public resources attached to a public project."
+      actions={
+        <>
           <Button
             type="button"
             variant="outline"
@@ -535,23 +520,20 @@ const ProjectResourceWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
               New resource
             </Button>
           ) : null}
-        </div>
-      </header>
-
+        </>
+      }
+    >
       {!canEdit ? (
-        <p className="border-border bg-muted/30 rounded-xl border p-4 text-sm">
+        <p className="cp-hint">
           Read-only access: resource content, private destinations and lifecycle
           state are visible, but mutation controls are unavailable.
         </p>
       ) : null}
 
       {notice ? (
-        <div
-          role={notice.tone === "error" ? "alert" : "status"}
-          className={`rounded-xl border p-4 text-sm ${noticeClassNames[notice.tone]}`}
-        >
-          <div className="flex min-h-11 items-center justify-between gap-3">
-            <p>{notice.message}</p>
+        <WorkspaceNotice
+          tone={notice.tone}
+          action={
             <Button
               type="button"
               size="sm"
@@ -562,18 +544,22 @@ const ProjectResourceWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
             >
               <X aria-hidden="true" className="size-4" />
             </Button>
-          </div>
-          {notice.failures?.length ? (
-            <ul
-              className="mt-2 space-y-1 font-mono text-xs"
-              aria-label="Failed resource IDs"
-            >
-              {notice.failures.map((id) => (
-                <li key={id}>{id}</li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+          }
+          details={
+            notice.failures?.length ? (
+              <ul
+                className="cwd-notice__list font-mono"
+                aria-label="Failed resource IDs"
+              >
+                {notice.failures.map((id) => (
+                  <li key={id}>{id}</li>
+                ))}
+              </ul>
+            ) : null
+          }
+        >
+          {notice.message}
+        </WorkspaceNotice>
       ) : null}
 
       <DataTable
@@ -696,7 +682,7 @@ const ProjectResourceWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
           onSave={saveEditor}
         />
       ) : null}
-    </div>
+    </ConsoleList>
   );
 };
 

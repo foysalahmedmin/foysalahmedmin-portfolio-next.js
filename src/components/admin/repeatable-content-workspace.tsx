@@ -1,5 +1,7 @@
 "use client";
 
+import { WorkspaceNotice } from "@/components/admin/workspace-notice";
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button, buttonVariants } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -83,14 +85,6 @@ const toneForStatus = (value: unknown): TStatusBadgeTone => {
 
 const getErrorMessage = (error: unknown, fallback: string) =>
   error instanceof Error && error.message ? error.message : fallback;
-
-const noticeClassNames: Record<OperationNotice["tone"], string> = {
-  success:
-    "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  warning:
-    "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300",
-  error: "border-destructive/30 bg-destructive/10 text-destructive",
-};
 
 const RepeatableContentWorkspace = ({
   workspace,
@@ -513,37 +507,26 @@ const RepeatableContentWorkspace = ({
   );
 
   return (
-    <div className="space-y-7">
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-3xl">
-          <p className="text-primary text-xs font-bold tracking-[0.18em] uppercase">
-            Repeatable content
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            {workspace.label}
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm leading-6">
-            {workspace.description}
-          </p>
-        </div>
-        {canEdit && (
+    <ConsoleList
+      eyebrow="Repeatable content"
+      title={workspace.label}
+      description={workspace.description}
+      actions={
+        canEdit ? (
           <Link
             href={`/admin/${workspace.key}/new`}
-            className={buttonVariants({ className: "shrink-0" })}
+            className={buttonVariants()}
           >
             <Plus aria-hidden="true" className="size-4" />
             New {workspace.singular}
           </Link>
-        )}
-      </header>
-
+        ) : undefined
+      }
+    >
       {notice && (
-        <div
-          role={notice.tone === "error" ? "alert" : "status"}
-          className={`rounded-2xl border px-4 py-3 text-sm ${noticeClassNames[notice.tone]}`}
-        >
-          <div className="flex min-h-11 items-center justify-between gap-3">
-            <p>{notice.message}</p>
+        <WorkspaceNotice
+          tone={notice.tone}
+          action={
             <Button
               type="button"
               variant="ghost"
@@ -554,18 +537,22 @@ const RepeatableContentWorkspace = ({
             >
               <X aria-hidden="true" className="size-4" />
             </Button>
-          </div>
-          {notice.failures?.length ? (
-            <ul className="mt-2 space-y-1 text-xs" aria-label="Failed records">
-              {notice.failures.map((failure) => (
-                <li key={failure.id}>
-                  <span className="font-mono">{failure.id}</span>:{" "}
-                  {failure.code}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+          }
+          details={
+            notice.failures?.length ? (
+              <ul className="cwd-notice__list" aria-label="Failed records">
+                {notice.failures.map((failure) => (
+                  <li key={failure.id}>
+                    <span className="font-mono">{failure.id}</span>:{" "}
+                    {failure.code}
+                  </li>
+                ))}
+              </ul>
+            ) : null
+          }
+        >
+          {notice.message}
+        </WorkspaceNotice>
       )}
 
       <DataTable
@@ -689,7 +676,7 @@ const RepeatableContentWorkspace = ({
             : "Adjust the URL-backed search and filters."
         }
       />
-    </div>
+    </ConsoleList>
   );
 };
 

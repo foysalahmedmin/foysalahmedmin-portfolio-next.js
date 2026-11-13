@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkspaceNotice } from "@/components/admin/workspace-notice";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -162,7 +163,7 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                 <ModalCloseTrigger disabled={saving} />
               </ModalHeader>
 
-              <ModalBody className="space-y-8">
+              <ModalBody className="cwd-form">
                 <div className="flex flex-wrap gap-2">
                   <StatusBadge tone="info">{file.provider}</StatusBadge>
                   <StatusBadge tone="primary">
@@ -185,12 +186,12 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                 {file.metadata_missing?.length ? (
                   <section
                     aria-labelledby={`${formId}-missing-heading`}
-                    className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4"
+                    className="cwd-callout"
                   >
                     <div className="flex gap-3">
                       <AlertTriangle
                         aria-hidden="true"
-                        className="mt-0.5 size-5 shrink-0 text-amber-700 dark:text-amber-300"
+                        className="mt-0.5 size-5 shrink-0"
                       />
                       <div>
                         <h3
@@ -213,14 +214,17 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                   </section>
                 ) : null}
 
-                <section aria-labelledby={`${formId}-editorial-heading`}>
+                <section
+                  aria-labelledby={`${formId}-editorial-heading`}
+                  className="cwd-section"
+                >
                   <h3
                     id={`${formId}-editorial-heading`}
-                    className="text-lg font-bold"
+                    className="cwd-section__title"
                   >
                     Editorial details
                   </h3>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <Field
                       id={`${formId}-name`}
                       label="Display name"
@@ -326,14 +330,17 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                 </section>
 
                 {image && (
-                  <section aria-labelledby={`${formId}-accessibility-heading`}>
+                  <section
+                    aria-labelledby={`${formId}-accessibility-heading`}
+                    className="cwd-section"
+                  >
                     <h3
                       id={`${formId}-accessibility-heading`}
-                      className="text-lg font-bold"
+                      className="cwd-section__title"
                     >
                       Accessibility and composition
                     </h3>
-                    <label className="border-border mt-4 flex min-h-11 items-center gap-3 rounded-xl border px-4 py-3">
+                    <label className="cwd-check items-center">
                       <input
                         type="checkbox"
                         checked={values.is_decorative}
@@ -353,7 +360,7 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                         </span>
                       </span>
                     </label>
-                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                       <div className="sm:col-span-2">
                         <Field
                           id={`${formId}-alt_text`}
@@ -440,7 +447,7 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                         <FormControl
                           id={`${formId}-dominant_color`}
                           value={values.dominant_color}
-                          placeholder="#102a43"
+                          placeholder="#RRGGBB"
                           maxLength={7}
                           onChange={(event) =>
                             setValue("dominant_color", event.target.value)
@@ -453,11 +460,11 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                       </Field>
                     </div>
 
-                    <details className="border-border mt-4 rounded-xl border p-4">
+                    <details className="cwd-frame">
                       <summary className="cursor-pointer font-semibold">
                         Advanced placeholder data
                       </summary>
-                      <div className="mt-4">
+                      <div className="mt-3">
                         <Field
                           id={`${formId}-blur_data_url`}
                           label="Blur data URL"
@@ -487,14 +494,17 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                   </section>
                 )}
 
-                <section aria-labelledby={`${formId}-rights-heading`}>
+                <section
+                  aria-labelledby={`${formId}-rights-heading`}
+                  className="cwd-section"
+                >
                   <h3
                     id={`${formId}-rights-heading`}
-                    className="text-lg font-bold"
+                    className="cwd-section__title"
                   >
                     Rights and attribution
                   </h3>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <Field
                       id={`${formId}-attribution_license`}
                       label="License"
@@ -619,24 +629,22 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                 </section>
 
                 {values.source === "generated" && (
-                  <section aria-labelledby={`${formId}-provenance-heading`}>
-                    <div className="flex items-center gap-2">
-                      <WandSparkles
-                        aria-hidden="true"
-                        className="text-primary size-5"
-                      />
-                      <h3
-                        id={`${formId}-provenance-heading`}
-                        className="text-lg font-bold"
-                      >
-                        Generated provenance
-                      </h3>
-                    </div>
+                  <section
+                    aria-labelledby={`${formId}-provenance-heading`}
+                    className="cwd-section"
+                  >
+                    <h3
+                      id={`${formId}-provenance-heading`}
+                      className="cwd-section__title"
+                    >
+                      <WandSparkles aria-hidden="true" className="size-5" />
+                      Generated provenance
+                    </h3>
                     <p className="text-muted-foreground mt-1 text-sm">
                       Record reproducibility facts only. Never paste provider
                       keys, access tokens or customer-confidential material.
                     </p>
-                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                       <Field
                         id={`${formId}-provenance_generator`}
                         label="Generator"
@@ -752,22 +760,23 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                   </section>
                 )}
 
-                <section aria-labelledby={`${formId}-usage-heading`}>
-                  <div className="flex items-center gap-2">
-                    <Link2 aria-hidden="true" className="text-primary size-5" />
-                    <h3
-                      id={`${formId}-usage-heading`}
-                      className="text-lg font-bold"
-                    >
-                      Usage references ({file.references?.length ?? 0})
-                    </h3>
-                  </div>
+                <section
+                  aria-labelledby={`${formId}-usage-heading`}
+                  className="cwd-section"
+                >
+                  <h3
+                    id={`${formId}-usage-heading`}
+                    className="cwd-section__title"
+                  >
+                    <Link2 aria-hidden="true" className="size-5" />
+                    Usage references ({file.references?.length ?? 0})
+                  </h3>
                   {file.references?.length ? (
-                    <ul className="mt-4 space-y-2">
+                    <ul className="cwd-rows">
                       {file.references.map((reference) => (
                         <li
                           key={`${reference.model}-${reference.entity}-${reference.field}`}
-                          className="border-border flex flex-wrap items-center gap-2 rounded-xl border px-4 py-3 text-sm"
+                          className="flex-wrap"
                         >
                           <StatusBadge tone="info">
                             {reference.model}
@@ -780,19 +789,19 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-muted-foreground mt-3 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       This file is not attached to a managed content record and
                       is eligible for soft deletion when ready.
                     </p>
                   )}
                 </section>
 
-                <div className="border-border bg-muted/30 flex gap-3 rounded-xl border p-3 text-sm">
+                <div className="cwd-callout">
                   <LockKeyhole
                     aria-hidden="true"
-                    className="text-primary mt-0.5 size-5 shrink-0"
+                    className="mt-0.5 size-5 shrink-0"
                   />
-                  <p className="text-muted-foreground">
+                  <p>
                     Storage credentials, deletion leases and private provider
                     configuration are operational fields and are not available
                     in this editor.
@@ -800,12 +809,7 @@ const MediaMetadataEditor = ({ file, setFile, onSaved }: Props) => {
                 </div>
 
                 {serverError && (
-                  <p
-                    role="alert"
-                    className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border px-4 py-3 text-sm"
-                  >
-                    {serverError}
-                  </p>
+                  <WorkspaceNotice tone="error">{serverError}</WorkspaceNotice>
                 )}
               </ModalBody>
 
