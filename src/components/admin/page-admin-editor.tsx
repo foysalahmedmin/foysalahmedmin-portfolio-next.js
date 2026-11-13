@@ -9,18 +9,24 @@ import type {
 } from "@/app/api/pages/page.type";
 import {
   EditorialField,
-  EditorialErrorSummary,
   EditorialNotice,
-  EditorialPanel,
   EditorialSeoSocialPreview,
-  EditorialStatus,
-  EditorialStickyActions,
-  EditorialWorkspaceHeader,
   editorialInputClassName,
   editorialTextareaClassName,
   type TEditorErrors,
 } from "@/components/admin/editorial-editor-primitives";
-import { Button } from "@/components/ui/button";
+import {
+  EditorActionBar,
+  EditorHeader,
+  EditorSection,
+  SectionIndex,
+  ValidationSummary,
+  type SectionIndexItem,
+  type ValidationIssue,
+} from "@/components/console";
+import { ConsoleEditor } from "@/components/templates/console-templates";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { MonoLabel } from "@/components/ui/mono-label";
 import PageRendererPreview from "@/components/admin/page-renderer-preview";
 import {
   createNeutralPageDraft,
@@ -39,6 +45,7 @@ import {
 } from "@/services/site-page-admin.service";
 import {
   ArrowDown,
+  ArrowLeft,
   ArrowUp,
   Eye,
   EyeOff,
@@ -47,6 +54,7 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -66,6 +74,9 @@ const sourceMap = (error: EditorialRequestError): TEditorErrors =>
   );
 
 const fieldError = (errors: TEditorErrors, path: string) => errors[path];
+
+const differs = (a: unknown, b: unknown) =>
+  JSON.stringify(a) !== JSON.stringify(b);
 
 const sectionTitle = (section: TPageSection): string =>
   section.heading?.trim() ||
@@ -125,6 +136,26 @@ export default function PageAdminEditor({
           savedDraft &&
           JSON.stringify(draft) !== JSON.stringify(savedDraft)
       ),
+    [draft, savedDraft]
+  );
+  // What differs from the saved draft: the SEO block and each section, for the index marks and the unsaved count
+  const changed = useMemo(
+    () => ({
+      seo: Boolean(draft && savedDraft && differs(draft.seo, savedDraft.seo)),
+      sections:
+        draft && savedDraft
+          ? Array.from(
+              {
+                length: Math.max(
+                  draft.sections.length,
+                  savedDraft.sections.length
+                ),
+              },
+              (_, index) =>
+                differs(draft.sections[index], savedDraft.sections[index])
+            )
+          : [],
+    }),
     [draft, savedDraft]
   );
   const disabled = !canEdit || Boolean(busy);
@@ -270,34 +301,61 @@ export default function PageAdminEditor({
     }
   };
 
+  // Cmd/Ctrl+S runs the Save draft handler under the same guards as that button's enabled state
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        if (!canEdit) return;
+        event.preventDefault();
+        if (dirty && !busy) void save();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
   if (!page || !draft || !savedDraft) {
     return (
-      <div className="mx-auto max-w-4xl space-y-6">
-        <EditorialWorkspaceHeader
-          eyebrow="Fixed-route composition"
-          title={`${routeKey} Page`}
-          description="This route has a bounded, typed section graph. Creating its neutral draft establishes structure only and does not fabricate or publish content."
-          status={
-            <EditorialStatus tone="warning">Not configured</EditorialStatus>
-          }
-        />
-        <EditorialNotice
-          tone="warning"
-          title="No Page record exists for this fixed route."
-        >
-          The neutral starting section is route-compatible, non-public and uses
-          only Site/system data or an empty automatic content query.
-        </EditorialNotice>
-        {canEdit ? (
-          <Button type="button" onClick={create} isLoading={busy === "create"}>
-            Create neutral Page draft
-          </Button>
-        ) : (
-          <EditorialNotice tone="danger" title="Read-only access">
-            A Site editor or administrator must create this Page draft.
+      <ConsoleEditor
+        className="mx-auto max-w-4xl"
+        header={
+          <div className="cwb-head">
+            <EditorHeader
+              title={`${routeKey} Page`}
+              status={{ state: "warning", label: "Not configured" }}
+            />
+            <p className="cp-lede">
+              This route has a bounded, typed section graph. Creating its
+              neutral draft establishes structure only and does not fabricate or
+              publish content.
+            </p>
+          </div>
+        }
+      >
+        <div className="grid gap-6">
+          <EditorialNotice
+            tone="warning"
+            title="No Page record exists for this fixed route."
+          >
+            The neutral starting section is route-compatible, non-public and
+            uses only Site/system data or an empty automatic content query.
           </EditorialNotice>
-        )}
-      </div>
+          {canEdit ? (
+            <Button
+              type="button"
+              className="justify-self-start"
+              onClick={create}
+              isLoading={busy === "create"}
+            >
+              Create neutral Page draft
+            </Button>
+          ) : (
+            <EditorialNotice tone="danger" title="Read-only access">
+              A Site editor or administrator must create this Page draft.
+            </EditorialNotice>
+          )}
+        </div>
+      </ConsoleEditor>
     );
   }
 
@@ -326,70 +384,184 @@ export default function PageAdminEditor({
     );
   };
 
-  return (
-    <div className="mx-auto max-w-[100rem] space-y-6">
-      <EditorialWorkspaceHeader
-        eyebrow="Fixed-route composition"
-        title={`${routeKey} Page`}
-        description={`${page.route_path} · SEO overrides, visible section order, typed data sources and bounded content limits.`}
-        status={
-          <>
-            <EditorialStatus>Draft r{page.revision}</EditorialStatus>
-            {publishedRevision ? (
-              <EditorialStatus tone="success">
-                Published r{publishedRevision}
-              </EditorialStatus>
-            ) : (
-              <EditorialStatus tone="warning">Never published</EditorialStatus>
-            )}
-            {dirty ? (
-              <EditorialStatus tone="warning">Unsaved</EditorialStatus>
-            ) : publishedRevision === page.revision ? (
-              <EditorialStatus tone="success">Published draft</EditorialStatus>
-            ) : (
-              <EditorialStatus tone="warning">
-                Unpublished revision
-              </EditorialStatus>
-            )}
-            {!canEdit ? <EditorialStatus>Read only</EditorialStatus> : null}
-          </>
-        }
-        actions={
-          <Button
-            type="button"
-            variant="outline"
-            onClick={reload}
-            isLoading={busy === "reload"}
-          >
-            <RotateCcw className="size-4" />
-            Reload
-          </Button>
-        }
-      />
-      {notice ? (
-        <EditorialNotice tone={notice.tone} title={notice.title}>
-          {notice.detail}
-        </EditorialNotice>
-      ) : null}
-      {conflictRevision ? (
-        <EditorialNotice
-          tone="warning"
-          title={`A newer revision (r${conflictRevision}) exists.`}
-        >
-          Your local composition is preserved for comparison. Reload the
-          authoritative revision before saving.
-        </EditorialNotice>
-      ) : null}
-      {!canEdit ? (
-        <EditorialNotice title="Read-only Page access">
-          You can inspect draft structure and start a server-validated preview.
-          Mutation controls are omitted by capability and still gated on the
-          API.
-        </EditorialNotice>
-      ) : null}
-      <EditorialErrorSummary errors={errors} />
+  const errorPaths = Object.keys(errors);
+  const hasError = (prefix: string) =>
+    errorPaths.some((path) => path === prefix || path.startsWith(`${prefix}.`));
+  const issues: ValidationIssue[] = errorPaths.map((path) => ({
+    href: path ? `#${path}` : undefined,
+    message: `${path || "Editorial composition"}: ${errors[path]}`,
+  }));
+  const indexItems: SectionIndexItem[] = [
+    {
+      id: "page-seo",
+      label: "SEO",
+      dirty: changed.seo,
+      error: hasError("seo"),
+    },
+    {
+      id: "page-composition",
+      label: "Composition",
+      dirty: draft.sections.length !== savedDraft.sections.length,
+      error: errorPaths.includes("sections"),
+    },
+    ...draft.sections.map((section, index) => ({
+      id: `page-section-${index}`,
+      label: `${index + 1}. ${sectionTitle(section)}`,
+      dirty: changed.sections[index],
+      error: hasError(`sections.${index}`),
+    })),
+    ...(preview ? [{ id: "page-renderer-preview", label: "Preview" }] : []),
+  ];
+  const unsavedCount = dirty
+    ? Math.max(1, Number(changed.seo) + changed.sections.filter(Boolean).length)
+    : 0;
 
-      <EditorialPanel
+  return (
+    <ConsoleEditor
+      className="cwb-editor mx-auto max-w-[100rem]"
+      header={
+        <div className="cwb-head">
+          <EditorHeader
+            title={`${routeKey} Page`}
+            back={
+              <Link
+                href="/admin/pages"
+                aria-label="Back to pages"
+                className={buttonVariants({
+                  variant: "outline",
+                  shape: "icon",
+                })}
+              >
+                <ArrowLeft aria-hidden="true" className="size-4" />
+              </Link>
+            }
+            status={
+              !publishedRevision
+                ? { state: "draft", label: "Never published" }
+                : publishedRevision === page.revision
+                  ? { state: "published", label: "Published" }
+                  : { state: "pending", label: "Unpublished revision" }
+            }
+            revision={`r${page.revision}${
+              publishedRevision && publishedRevision !== page.revision
+                ? ` · published r${publishedRevision}`
+                : ""
+            }`}
+            savedAt={page.updated_at}
+            actions={
+              <>
+                {!canEdit ? <MonoLabel>Read only</MonoLabel> : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={reload}
+                  isLoading={busy === "reload"}
+                >
+                  <RotateCcw className="size-4" />
+                  Reload
+                </Button>
+              </>
+            }
+          />
+          <p className="cp-lede">
+            {`${page.route_path} · SEO overrides, visible section order, typed data sources and bounded content limits.`}
+          </p>
+        </div>
+      }
+      validation={
+        <div className="cwb-notices">
+          {notice ? (
+            <EditorialNotice tone={notice.tone} title={notice.title}>
+              {notice.detail}
+            </EditorialNotice>
+          ) : null}
+          {conflictRevision ? (
+            <EditorialNotice
+              tone="warning"
+              title={`A newer revision (r${conflictRevision}) exists.`}
+            >
+              Your local composition is preserved for comparison. Reload the
+              authoritative revision before saving.
+            </EditorialNotice>
+          ) : null}
+          {!canEdit ? (
+            <EditorialNotice title="Read-only Page access">
+              You can inspect draft structure and start a server-validated
+              preview. Mutation controls are omitted by capability and still
+              gated on the API.
+            </EditorialNotice>
+          ) : null}
+          <ValidationSummary issues={issues} />
+        </div>
+      }
+      sectionIndex={<SectionIndex sections={indexItems} />}
+      actionBar={
+        <EditorActionBar
+          unsavedCount={unsavedCount}
+          discard={
+            canEdit ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setDraft(cloneDraft(savedDraft));
+                  setErrors({});
+                  setNotice(null);
+                }}
+                disabled={!dirty || Boolean(busy)}
+              >
+                Discard local changes
+              </Button>
+            ) : null
+          }
+          saveDraft={
+            canEdit ? (
+              <Button
+                type="button"
+                onClick={save}
+                disabled={!dirty || Boolean(busy)}
+                isLoading={Boolean(busy)}
+              >
+                Save draft
+              </Button>
+            ) : null
+          }
+          preview={
+            <Button
+              type="button"
+              variant="outline"
+              onClick={startPreview}
+              disabled={dirty || Boolean(busy)}
+              isLoading={busy === "preview"}
+            >
+              <Eye className="size-4" />
+              {dirty ? "Save before preview" : "Start secure preview"}
+            </Button>
+          }
+          publish={
+            canPublish ? (
+              <Button
+                type="button"
+                variant="success"
+                onClick={publish}
+                disabled={
+                  dirty || Boolean(busy) || publishedRevision === page.revision
+                }
+                isLoading={busy === "publish"}
+              >
+                <Send className="size-4" />
+                {dirty
+                  ? "Save before publishing"
+                  : publishedRevision === page.revision
+                    ? "Current revision published"
+                    : "Publish revision"}
+              </Button>
+            ) : null
+          }
+        />
+      }
+    >
+      <EditorSection
         id="page-seo"
         title="Route SEO overrides"
         description="Leave optional values empty to inherit published Site metadata. Noindex is explicit per route."
@@ -478,9 +650,9 @@ export default function PageAdminEditor({
           fallbackDescription="Inherited published Site description"
           noindex={draft.seo.noindex}
         />
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="page-composition"
         title="Section composition"
         description="Use the buttons or focus a section and press Alt+Arrow Up/Down to reorder. Changes remain local until Save draft succeeds against the expected revision."
@@ -551,7 +723,7 @@ export default function PageAdminEditor({
                       move(index, 1);
                     }
                   }}
-                  className="border-border focus-visible:ring-ring rounded-2xl border p-5 focus-visible:ring-2 focus-visible:outline-none"
+                  className="border-border focus-visible:ring-ring rounded-[var(--radius-lg-token)] border p-5 focus-visible:ring-2 focus-visible:outline-none"
                 >
                   <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -924,7 +1096,7 @@ export default function PageAdminEditor({
             );
           })}
         </ol>
-      </EditorialPanel>
+      </EditorSection>
 
       {preview ? (
         <PageRendererPreview
@@ -941,47 +1113,6 @@ export default function PageAdminEditor({
           }}
         />
       ) : null}
-
-      <EditorialStickyActions
-        dirty={dirty}
-        busy={Boolean(busy)}
-        canEdit={canEdit}
-        onSave={save}
-        onReset={() => {
-          setDraft(cloneDraft(savedDraft));
-          setErrors({});
-          setNotice(null);
-        }}
-      >
-        <Button
-          type="button"
-          variant="outline"
-          onClick={startPreview}
-          disabled={dirty || Boolean(busy)}
-          isLoading={busy === "preview"}
-        >
-          <Eye className="size-4" />
-          {dirty ? "Save before preview" : "Start secure preview"}
-        </Button>
-        {canPublish ? (
-          <Button
-            type="button"
-            variant="success"
-            onClick={publish}
-            disabled={
-              dirty || Boolean(busy) || publishedRevision === page.revision
-            }
-            isLoading={busy === "publish"}
-          >
-            <Send className="size-4" />
-            {dirty
-              ? "Save before publishing"
-              : publishedRevision === page.revision
-                ? "Current revision published"
-                : "Publish revision"}
-          </Button>
-        ) : null}
-      </EditorialStickyActions>
-    </div>
+    </ConsoleEditor>
   );
 }

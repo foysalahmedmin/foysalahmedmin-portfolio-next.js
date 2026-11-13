@@ -124,7 +124,7 @@ describe("Site and Page admin editor interactions", () => {
     const publicName = screen.getByLabelText("Public name");
     await user.clear(publicName);
     await user.type(publicName, "Verified Portfolio Owner");
-    expect(screen.getByText("Unsaved changes")).toBeVisible();
+    expect(screen.getByText("1 unsaved change")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Save draft" }));
 
     await waitFor(() =>
@@ -138,7 +138,8 @@ describe("Site and Page admin editor interactions", () => {
       )
     );
     expect(await screen.findByText("Site draft saved.")).toBeVisible();
-    expect(screen.getByText("Draft r4")).toBeVisible();
+    expect(screen.getByText("r4")).toBeVisible();
+    expect(screen.getByText("No unsaved changes")).toBeVisible();
   });
 
   it("maps optimistic Site conflicts back to their validation source", async () => {
@@ -263,7 +264,7 @@ describe("Site and Page admin editor interactions", () => {
       />
     );
 
-    expect(screen.getByText("Draft matches the saved revision")).toBeVisible();
+    expect(screen.getByText("No unsaved changes")).toBeVisible();
     expect(screen.getByText(/No engagement models configured/)).toBeVisible();
     expect(screen.getByLabelText("Workflow example")).toHaveValue("");
     expect(
@@ -528,6 +529,124 @@ describe("Site and Page admin editor interactions", () => {
       "src",
       "/admin/preview/pages/home?theme=dark&motion=reduced"
     );
+  });
+
+  it("gives the Site editor the console anatomy: header, section index and the action bar", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <SiteAdminEditor initialSite={siteDto()} canEdit canPublish />
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Site settings" })
+    ).toBeVisible();
+    expect(screen.getByText("Never published")).toBeVisible();
+    const index = screen.getByRole("navigation", { name: "Sections" });
+    expect(
+      within(index).getByRole("link", { name: "Structured data" })
+    ).toHaveAttribute("href", "#site-structured");
+    for (const link of within(index).getAllByRole("link")) {
+      const id = link.getAttribute("href")!.slice(1);
+      expect(container.querySelector(`section[id="${id}"]`)).not.toBeNull();
+    }
+
+    const bar = screen.getByRole("group", { name: "Editor actions" });
+    expect(within(bar).getByText("No unsaved changes")).toBeVisible();
+    await user.type(screen.getByLabelText("Public name"), " Two");
+    expect(within(bar).getByText("1 unsaved change")).toBeVisible();
+    expect(
+      within(index).getByRole("link", { name: /Identity/ })
+    ).toHaveTextContent("Edited");
+    expect(
+      within(bar).getByRole("button", { name: "Save draft" })
+    ).toBeEnabled();
+    expect(
+      within(bar).getByRole("button", { name: "Save before publishing" })
+    ).toBeDisabled();
+    expect(container.innerHTML).not.toMatch(
+      /\b(?:bg|text|border)-(?:red|green|emerald|amber|yellow|blue)-\d/
+    );
+  });
+
+  it("saves the Site draft with Cmd/Ctrl+S only when the Save draft button would be enabled", async () => {
+    const user = userEvent.setup();
+    vi.mocked(updateAdminSiteClient).mockImplementation(
+      async (_revision, draft) => siteDto(draft, 4)
+    );
+    render(
+      <SiteAdminEditor initialSite={siteDto()} canEdit canPublish={false} />
+    );
+
+    fireEvent.keyDown(window, { key: "s", ctrlKey: true });
+    expect(updateAdminSiteClient).not.toHaveBeenCalled();
+
+    await user.type(screen.getByLabelText("Public name"), " Two");
+    fireEvent.keyDown(window, { key: "s", metaKey: true });
+    await waitFor(() => expect(updateAdminSiteClient).toHaveBeenCalledTimes(1));
+    expect(await screen.findByText("Site draft saved.")).toBeVisible();
+  });
+
+  it("marks the Page index and header, and lists a validation problem as a jump link", async () => {
+    const user = userEvent.setup();
+    vi.mocked(updateAdminPageClient).mockRejectedValue(
+      new EditorialRequestError({
+        status: 422,
+        code: "PAGE_DRAFT_INVALID",
+        message: "The Page draft is invalid.",
+        sources: [
+          {
+            path: "sections.1.key",
+            message: "This field is invalid or unsupported.",
+          },
+        ],
+      })
+    );
+    render(
+      <PageAdminEditor
+        routeKey="home"
+        initialPage={pageDto()}
+        canEdit
+        canPublish={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "home Page" })
+    ).toBeVisible();
+    expect(screen.getByText("Never published")).toBeVisible();
+    const index = screen.getByRole("navigation", { name: "Sections" });
+    expect(
+      within(index)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href"))
+    ).toEqual([
+      "#page-seo",
+      "#page-composition",
+      "#page-section-0",
+      "#page-section-1",
+    ]);
+
+    await user.type(
+      screen.getByLabelText("Stable section key", {
+        selector: "[id='sections.1.key']",
+      }),
+      "x"
+    );
+    expect(
+      within(screen.getByRole("group", { name: "Editor actions" })).getByText(
+        "1 unsaved change"
+      )
+    ).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+
+    const summary = await screen.findByText("1 problem to fix");
+    const link = within(
+      summary.closest("[role=alert]") as HTMLElement
+    ).getByRole("link");
+    expect(link).toHaveAttribute("href", "#sections.1.key");
+    expect(
+      within(index).getByRole("link", { name: /2\. Projects/ })
+    ).toHaveTextContent("Error");
   });
 
   it("omits Page mutations for read-only capability state", () => {

@@ -68,7 +68,7 @@ const PreviewFailure = ({
   <main className="bg-background text-foreground grid min-h-screen place-items-center p-6">
     <section
       aria-labelledby="preview-failure-heading"
-      className="border-border bg-card w-full max-w-2xl rounded-3xl border p-8 shadow-[var(--shadow-md)]"
+      className="border-border bg-card w-full max-w-2xl rounded-[var(--radius-lg-token)] border p-8 shadow-[var(--shadow-md)]"
     >
       <p className="text-destructive text-xs font-black tracking-[0.16em] uppercase">
         Private preview unavailable

@@ -1,11 +1,9 @@
 "use client";
 
 import type { TPageRouteKey } from "@/app/api/pages/page.type";
-import {
-  EditorialPanel,
-  EditorialStatus,
-} from "@/components/admin/editorial-editor-primitives";
+import { EditorSection } from "@/components/console";
 import { Button } from "@/components/ui/button";
+import { StatusMark } from "@/components/ui/status-mark";
 import { getAdminPagePreviewPath } from "@/lib/pages/page-preview-path";
 import { clearAdminPagePreviewBestEffort } from "@/services/site-page-admin.service";
 import {
@@ -120,20 +118,22 @@ export default function PageRendererPreview({
   }, [expire, expiresAtMs]);
 
   return (
-    <EditorialPanel
+    <EditorSection
       id="page-renderer-preview"
       title="Public renderer preview"
       description="This sandboxed frame resolves the saved draft through the same bounded data pipeline and renders the same public section components. Width changes resize a real browser viewport, so responsive breakpoints—not a scaled imitation—are exercised."
     >
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
-          <EditorialStatus tone="success">Renderer parity</EditorialStatus>
-          <EditorialStatus>Saved r{revision}</EditorialStatus>
-          <EditorialStatus>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="cwb-preview-marks">
+          <StatusMark state="verified">Renderer parity</StatusMark>
+          <span>
+            Saved <span className="t-mono">r{revision}</span>
+          </span>
+          <span>
             {secondsRemaining === null
               ? `Expires at ${expiresAtLabel}`
               : `Expires in ${Math.max(1, Math.ceil(secondsRemaining / 60))} min · ${expiresAtLabel}`}
-          </EditorialStatus>
+          </span>
         </div>
         <Button type="button" variant="ghost" onClick={onClose}>
           <X className="size-4" />
@@ -142,7 +142,7 @@ export default function PageRendererPreview({
       </div>
 
       <div
-        className="border-border bg-muted/30 mb-5 flex flex-wrap gap-4 rounded-xl border p-3"
+        className="cwb-preview-controls"
         aria-label="Preview display controls"
       >
         <fieldset className="flex flex-wrap gap-2">
@@ -212,7 +212,7 @@ export default function PageRendererPreview({
         </fieldset>
       </div>
 
-      <p className="text-muted-foreground mb-3 text-xs">
+      <p className="text-muted-foreground text-xs">
         Frame viewport: {width}px. Forms, popups and top-level navigation are
         blocked by the preview sandbox.
       </p>
@@ -237,6 +237,6 @@ export default function PageRendererPreview({
           </div>
         )}
       </div>
-    </EditorialPanel>
+    </EditorSection>
   );
 }

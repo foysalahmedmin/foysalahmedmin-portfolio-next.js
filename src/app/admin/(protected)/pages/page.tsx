@@ -6,10 +6,12 @@ import {
   type TPageAdminDto,
   type TPageRouteKey,
 } from "@/app/api/pages/page.type";
-import { EditorialStatus } from "@/components/admin/editorial-editor-primitives";
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button } from "@/components/ui/button";
+import { MonoLabel } from "@/components/ui/mono-label";
+import { StatusMark } from "@/components/ui/status-mark";
 import { requireAdminSession } from "@/lib/auth/admin-session";
-import { ArrowRight, FileStack } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -39,83 +41,55 @@ export default async function AdminPagesIndex() {
     }))
   );
 
-  return (
-    <div className="mx-auto max-w-[100rem] space-y-7">
-      <header className="border-border bg-card rounded-2xl border p-6 shadow-[var(--shadow-sm)] sm:p-8">
-        <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
-          Fixed-route composition
-        </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
-          Pages
-        </h1>
-        <p className="text-muted-foreground mt-2 max-w-3xl text-sm leading-6">
-          Nine bounded public routes with revisioned SEO, typed section order,
-          graph validation, private preview sessions and independent publish
-          state.
-        </p>
-        {!session.capabilities.includes("site:edit") ? (
-          <div className="mt-4">
-            <EditorialStatus>Read only</EditorialStatus>
-          </div>
-        ) : null}
-      </header>
+  const canEdit = session.capabilities.includes("site:edit");
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+  return (
+    <ConsoleList
+      title="Pages"
+      description="Nine bounded public routes with revisioned SEO, typed section order, graph validation, private preview sessions and independent publish state."
+      actions={canEdit ? null : <MonoLabel>Read only</MonoLabel>}
+    >
+      <ul className="cwb-routes" aria-label="Fixed routes">
         {pages.map(({ routeKey, page }) => {
           const publishedRevision = page?.published?.revision;
           const currentPublished = page && publishedRevision === page.revision;
           return (
-            <article
-              key={routeKey}
-              className="border-border bg-card flex min-h-64 flex-col rounded-2xl border p-6 shadow-[var(--shadow-sm)]"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-primary text-xs font-black tracking-wider uppercase">
-                    {PAGE_ROUTE_PATHS[routeKey]}
-                  </p>
-                  <h2 className="mt-2 text-2xl font-black capitalize">
-                    {routeKey}
-                  </h2>
-                </div>
-                <FileStack
-                  className="text-muted-foreground size-6"
-                  aria-hidden="true"
-                />
+            <li key={routeKey} className="cwb-route">
+              <div className="cwb-route__name">
+                <MonoLabel>{PAGE_ROUTE_PATHS[routeKey]}</MonoLabel>
+                <h2 className="cwb-route__title">{routeKey}</h2>
               </div>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="cwb-route__marks">
                 {page ? (
                   <>
-                    <EditorialStatus>Draft r{page.revision}</EditorialStatus>
+                    <span>
+                      Draft <span className="t-mono">r{page.revision}</span>
+                    </span>
                     {publishedRevision ? (
-                      <EditorialStatus tone="success">
+                      <StatusMark state="published">
                         Published r{publishedRevision}
-                      </EditorialStatus>
+                      </StatusMark>
                     ) : (
-                      <EditorialStatus tone="warning">
-                        Never published
-                      </EditorialStatus>
+                      <StatusMark state="draft">Never published</StatusMark>
                     )}
                     {!currentPublished ? (
-                      <EditorialStatus tone="warning">
+                      <StatusMark state="pending">
                         Unpublished revision
-                      </EditorialStatus>
+                      </StatusMark>
                     ) : null}
                   </>
                 ) : (
-                  <EditorialStatus tone="warning">
-                    Not configured
-                  </EditorialStatus>
+                  <StatusMark state="warning">Not configured</StatusMark>
                 )}
               </div>
-              <p className="text-muted-foreground mt-5 flex-1 text-sm leading-6">
+              <p className="cwb-route__summary">
                 {page
                   ? `${page.draft.sections.length} draft section${page.draft.sections.length === 1 ? "" : "s"}; ${page.draft.sections.filter((section) => section.visible).length} visible.`
                   : "No record exists. The editor can create a neutral, non-public route-compatible draft."}
               </p>
-              <Button asChild variant="outline" className="mt-5 w-full">
+              <Button asChild variant="outline">
                 <Link href={`/admin/pages/${routeKey}`}>
-                  {session.capabilities.includes("site:edit")
+                  {canEdit
                     ? page
                       ? "Edit composition"
                       : "Configure Page"
@@ -123,10 +97,10 @@ export default async function AdminPagesIndex() {
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
-            </article>
+            </li>
           );
         })}
-      </div>
-    </div>
+      </ul>
+    </ConsoleList>
   );
 }

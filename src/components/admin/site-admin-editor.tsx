@@ -15,15 +15,21 @@ import {
 } from "@/app/api/site/site-content.validation";
 import { Button } from "@/components/ui/button";
 import { FileUploader } from "@/components/ui/file-uploader";
+import { MonoLabel } from "@/components/ui/mono-label";
 import {
-  EditorialErrorSummary,
   EditorialNotice,
-  EditorialPanel,
-  EditorialStatus,
-  EditorialStickyActions,
-  EditorialWorkspaceHeader,
   type TEditorErrors,
 } from "@/components/admin/editorial-editor-primitives";
+import {
+  EditorActionBar,
+  EditorHeader,
+  EditorSection,
+  SectionIndex,
+  ValidationSummary,
+  type SectionIndexItem,
+  type ValidationIssue,
+} from "@/components/console";
+import { ConsoleEditor } from "@/components/templates/console-templates";
 import {
   CheckField,
   SelectField,
@@ -103,6 +109,42 @@ const sourceMap = (error: EditorialRequestError): TEditorErrors =>
       ];
     })
   );
+
+/** The panels of the editor: the index links, and the draft keys whose edits and errors mark each one. */
+const SITE_SECTIONS: readonly {
+  id: string;
+  label: string;
+  keys: readonly (keyof TSiteDraftSnapshot)[];
+}[] = [
+  { id: "site-identity", label: "Identity", keys: ["identity", "positioning"] },
+  { id: "site-pillars", label: "Roles", keys: ["pillars"] },
+  { id: "site-contact", label: "Contact", keys: ["contact"] },
+  {
+    id: "site-links",
+    label: "Links",
+    keys: ["navigation", "primary_ctas", "social_links"],
+  },
+  { id: "site-brand", label: "Brand", keys: ["brand", "fallbacks"] },
+  { id: "site-seo", label: "SEO", keys: ["seo", "experience"] },
+  { id: "site-process", label: "Process", keys: ["process"] },
+  { id: "site-footer", label: "Footer", keys: ["footer", "metrics"] },
+  { id: "site-engagement", label: "Engagement", keys: ["engagement_models"] },
+  {
+    id: "site-commitments",
+    label: "Commitments",
+    keys: ["commitments", "principles", "next_steps"],
+  },
+  {
+    id: "site-deliverables",
+    label: "Deliverables",
+    keys: ["deliverable_samples"],
+  },
+  {
+    id: "site-structured",
+    label: "Structured data",
+    keys: ["workflow_example", "fit", "finder"],
+  },
+];
 
 function ManagedFileReferenceField({
   path,
@@ -842,6 +884,17 @@ export default function SiteAdminEditor({
       ),
     [draft, savedDraft, jsonErrors]
   );
+  // The top-level draft keys that differ from the saved draft, for the index marks and the unsaved count
+  const changedKeys = useMemo(
+    () =>
+      draft && savedDraft
+        ? (Object.keys(draft) as (keyof TSiteDraftSnapshot)[]).filter(
+            (key) =>
+              JSON.stringify(draft[key]) !== JSON.stringify(savedDraft[key])
+          )
+        : [],
+    [draft, savedDraft]
+  );
   const setJsonError = (path: string, message: string | undefined) =>
     setJsonErrors((current) =>
       message === undefined
@@ -958,103 +1011,207 @@ export default function SiteAdminEditor({
     }
   };
 
+  // Cmd/Ctrl+S runs the Save draft handler under the same guards as that button's enabled state
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        if (!canEdit) return;
+        event.preventDefault();
+        if (dirty && !busy) void save();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
   if (!site || !draft || !savedDraft) {
     return (
-      <div className="mx-auto max-w-4xl space-y-6">
-        <EditorialWorkspaceHeader
-          eyebrow="Site authority"
-          title="Site settings"
-          description="The revisioned Site singleton owns portfolio identity, positioning, core roles, delivery process, public navigation, contact policy and metadata defaults."
-          status={
-            <EditorialStatus tone="warning">Not configured</EditorialStatus>
-          }
-        />
-        {initialSite === null ? (
-          <EditorialNotice tone="warning" title="No Site singleton exists.">
-            Creating one produces a neutral, non-indexable draft with the exact
-            five immutable pillars. It does not invent or publish portfolio
-            claims.
-          </EditorialNotice>
-        ) : null}
-        {canEdit ? (
-          <Button type="button" onClick={create} isLoading={busy === "create"}>
-            Create neutral Site draft
-          </Button>
-        ) : (
-          <EditorialNotice tone="danger" title="Read-only access">
-            A Site editor or administrator must create the initial draft.
-          </EditorialNotice>
-        )}
-      </div>
+      <ConsoleEditor
+        className="mx-auto max-w-4xl"
+        header={
+          <div className="cwb-head">
+            <EditorHeader
+              title="Site settings"
+              status={{ state: "warning", label: "Not configured" }}
+            />
+            <p className="cp-lede">
+              The revisioned Site singleton owns portfolio identity,
+              positioning, core roles, delivery process, public navigation,
+              contact policy and metadata defaults.
+            </p>
+          </div>
+        }
+      >
+        <div className="grid gap-6">
+          {initialSite === null ? (
+            <EditorialNotice tone="warning" title="No Site singleton exists.">
+              Creating one produces a neutral, non-indexable draft with the
+              exact five immutable pillars. It does not invent or publish
+              portfolio claims.
+            </EditorialNotice>
+          ) : null}
+          {canEdit ? (
+            <Button
+              type="button"
+              className="justify-self-start"
+              onClick={create}
+              isLoading={busy === "create"}
+            >
+              Create neutral Site draft
+            </Button>
+          ) : (
+            <EditorialNotice tone="danger" title="Read-only access">
+              A Site editor or administrator must create the initial draft.
+            </EditorialNotice>
+          )}
+        </div>
+      </ConsoleEditor>
     );
   }
 
   const publishedRevision = site.published?.revision;
   const hasUnpublishedRevision = publishedRevision !== site.revision;
+  const errorPaths = Object.keys(errors);
+  const issues: ValidationIssue[] = errorPaths.map((path) => ({
+    href: path ? `#${path}` : undefined,
+    message: `${path || "Editorial composition"}: ${errors[path]}`,
+  }));
+  const indexItems: SectionIndexItem[] = SITE_SECTIONS.map(
+    ({ id, label, keys }) => ({
+      id,
+      label,
+      dirty: keys.some((key) => changedKeys.includes(key)),
+      error: keys.some((key) =>
+        errorPaths.some((path) => path === key || path.startsWith(`${key}.`))
+      ),
+    })
+  );
+
   return (
-    <div className="mx-auto max-w-[100rem] space-y-6">
-      <EditorialWorkspaceHeader
-        eyebrow="Site authority"
-        title="Site settings"
-        description="One revisioned source for public identity, positioning, contact policy, process, navigation, brand media, metadata and the fixed role narrative."
-        status={
-          <>
-            <EditorialStatus>Draft r{site.revision}</EditorialStatus>
-            {publishedRevision ? (
-              <EditorialStatus tone="success">
-                Published r{publishedRevision}
-              </EditorialStatus>
-            ) : (
-              <EditorialStatus tone="warning">Never published</EditorialStatus>
-            )}
-            {dirty ? (
-              <EditorialStatus tone="warning">Unsaved</EditorialStatus>
-            ) : hasUnpublishedRevision ? (
-              <EditorialStatus tone="warning">
-                Unpublished revision
-              </EditorialStatus>
-            ) : (
-              <EditorialStatus tone="success">Published draft</EditorialStatus>
-            )}
-            {!canEdit ? <EditorialStatus>Read only</EditorialStatus> : null}
-          </>
-        }
-        actions={
-          <Button
-            type="button"
-            variant="outline"
-            onClick={reload}
-            isLoading={busy === "reload"}
-          >
-            <RotateCcw className="size-4" />
-            Reload
-          </Button>
-        }
-      />
-
-      {notice ? (
-        <EditorialNotice tone={notice.tone} title={notice.title}>
-          {notice.detail}
-        </EditorialNotice>
-      ) : null}
-      {conflictRevision ? (
-        <EditorialNotice
-          tone="warning"
-          title={`A newer revision (r${conflictRevision}) exists.`}
-        >
-          Your local values remain visible for comparison. Reload before saving
-          to avoid overwriting another editor.
-        </EditorialNotice>
-      ) : null}
-      <EditorialErrorSummary errors={errors} />
-      {!canEdit ? (
-        <EditorialNotice title="Read-only Site access">
-          Your current role can inspect private drafts and publication status,
-          but server authority prevents mutation.
-        </EditorialNotice>
-      ) : null}
-
-      <EditorialPanel
+    <ConsoleEditor
+      className="cwb-editor mx-auto max-w-[100rem]"
+      header={
+        <div className="cwb-head">
+          <EditorHeader
+            title="Site settings"
+            status={
+              !publishedRevision
+                ? { state: "draft", label: "Never published" }
+                : hasUnpublishedRevision
+                  ? { state: "pending", label: "Unpublished revision" }
+                  : { state: "published", label: "Published" }
+            }
+            revision={`r${site.revision}${
+              publishedRevision && hasUnpublishedRevision
+                ? ` · published r${publishedRevision}`
+                : ""
+            }`}
+            savedAt={site.updated_at}
+            actions={
+              <>
+                {!canEdit ? <MonoLabel>Read only</MonoLabel> : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={reload}
+                  isLoading={busy === "reload"}
+                >
+                  <RotateCcw className="size-4" />
+                  Reload
+                </Button>
+              </>
+            }
+          />
+          <p className="cp-lede">
+            One revisioned source for public identity, positioning, contact
+            policy, process, navigation, brand media, metadata and the fixed
+            role narrative.
+          </p>
+        </div>
+      }
+      validation={
+        <div className="cwb-notices">
+          {notice ? (
+            <EditorialNotice tone={notice.tone} title={notice.title}>
+              {notice.detail}
+            </EditorialNotice>
+          ) : null}
+          {conflictRevision ? (
+            <EditorialNotice
+              tone="warning"
+              title={`A newer revision (r${conflictRevision}) exists.`}
+            >
+              Your local values remain visible for comparison. Reload before
+              saving to avoid overwriting another editor.
+            </EditorialNotice>
+          ) : null}
+          {!canEdit ? (
+            <EditorialNotice title="Read-only Site access">
+              Your current role can inspect private drafts and publication
+              status, but server authority prevents mutation.
+            </EditorialNotice>
+          ) : null}
+          <ValidationSummary issues={issues} />
+        </div>
+      }
+      sectionIndex={<SectionIndex sections={indexItems} />}
+      actionBar={
+        <EditorActionBar
+          unsavedCount={dirty ? Math.max(1, changedKeys.length) : 0}
+          discard={
+            canEdit ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setDraft(cloneDraft(savedDraft));
+                  setErrors({});
+                  setJsonErrors({});
+                  setEpoch((value) => value + 1);
+                  setNotice(null);
+                }}
+                disabled={!dirty || Boolean(busy)}
+              >
+                Discard local changes
+              </Button>
+            ) : null
+          }
+          saveDraft={
+            canEdit ? (
+              <Button
+                type="button"
+                onClick={save}
+                disabled={!dirty || Boolean(busy)}
+                isLoading={Boolean(busy)}
+              >
+                Save draft
+              </Button>
+            ) : null
+          }
+          publish={
+            canPublish ? (
+              <Button
+                type="button"
+                variant="success"
+                onClick={publish}
+                disabled={
+                  dirty || Boolean(busy) || publishedRevision === site.revision
+                }
+                isLoading={busy === "publish"}
+              >
+                <Send className="size-4" />
+                {dirty
+                  ? "Save before publishing"
+                  : publishedRevision === site.revision
+                    ? "Current revision published"
+                    : "Publish revision"}
+              </Button>
+            ) : null
+          }
+        />
+      }
+    >
+      <EditorSection
         id="site-identity"
         title="Identity & positioning"
         description="Canonical names and a consistent role-based positioning system used throughout the portfolio."
@@ -1162,9 +1319,9 @@ export default function SiteAdminEditor({
             />
           ))}
         </div>
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-pillars"
         title="Core roles"
         description="Key, label, order and fallback visual are contract-owned and intentionally immutable. Narrative, capabilities, technologies, CTA and managed File references remain editorial."
@@ -1182,7 +1339,7 @@ export default function SiteAdminEditor({
             return (
               <fieldset
                 key={pillar.key}
-                className="border-border rounded-2xl border p-5"
+                className="border-border rounded-[var(--radius-lg-token)] border p-5"
               >
                 <legend className="px-2 text-sm font-black">
                   {index + 1}. {pillar.label}
@@ -1378,9 +1535,9 @@ export default function SiteAdminEditor({
             );
           })}
         </div>
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-contact"
         title="Contact & availability"
         description="Visibility settings are fail-closed; email, phone and map details are projected publicly only when explicitly allowed."
@@ -1573,9 +1730,9 @@ export default function SiteAdminEditor({
             hint="Plain text, up to 160 characters."
           />
         </div>
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-links"
         title="Navigation, social & calls to action"
         description="Every destination is validated by kind. Email, phone and resume destinations derive from their authoritative Site fields."
@@ -1639,9 +1796,9 @@ export default function SiteAdminEditor({
             onChange={(links) => setDraft({ ...draft, social_links: links })}
           />
         </div>
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-brand"
         title="Brand, media references & fallbacks"
         description="Only IDs from the managed File module are accepted. Publishing validates purpose, public access, provider URL and metadata readiness."
@@ -1764,9 +1921,9 @@ export default function SiteAdminEditor({
             />
           ))}
         </div>
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-seo"
         title="SEO & experience defaults"
         description="Indexing remains an explicit publish-time choice. Verification values are private draft inputs and are never exposed by the public Site DTO."
@@ -2005,9 +2162,9 @@ export default function SiteAdminEditor({
             disabled={disabled}
           />
         </div>
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-process"
         title="Embedded delivery process"
         description="Process is low-volume Site content, not a standalone CRUD domain. Stable typed steps publish with the same optimistic revision as positioning, pillars and metrics."
@@ -2018,9 +2175,9 @@ export default function SiteAdminEditor({
           errors={errors}
           onChange={(process) => setDraft({ ...draft, process })}
         />
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-footer"
         title="Footer & evidence metrics"
         description="Metrics carry an explicit verification state; unverified claims can remain disabled until evidence is available."
@@ -2072,9 +2229,9 @@ export default function SiteAdminEditor({
           errors={errors}
           onChange={(metrics) => setDraft({ ...draft, metrics })}
         />
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-engagement"
         title="Engagement models"
         description="Commercial terms are claims: an enabled model must be complete and not unverified, and its price stays hidden until verified."
@@ -2087,9 +2244,9 @@ export default function SiteAdminEditor({
             setDraft({ ...draft, engagement_models })
           }
         />
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-commitments"
         title="Commitments, principles & next steps"
         description="Short titled statements for the home chapters. Array order is the public order; disabled rows stay private draft material."
@@ -2129,9 +2286,9 @@ export default function SiteAdminEditor({
             onChange={(next_steps) => setDraft({ ...draft, next_steps })}
           />
         </div>
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-deliverables"
         title="Deliverable samples"
         description="Inspectable excerpts from real artifacts, shown as plain text."
@@ -2144,9 +2301,9 @@ export default function SiteAdminEditor({
             setDraft({ ...draft, deliverable_samples })
           }
         />
-      </EditorialPanel>
+      </EditorSection>
 
-      <EditorialPanel
+      <EditorSection
         id="site-structured"
         title="Workflow example, fit check & starting-point finder"
         description="Nested structures edited as JSON and checked against the same schema the server enforces. Nothing invalid reaches the draft, and saving is blocked until each editor is valid."
@@ -2192,40 +2349,7 @@ export default function SiteAdminEditor({
             hint='"enabled", up to four "steps" (2 to 6 tagged options each) and "outcomes" that point at enabled engagement model keys.'
           />
         </div>
-      </EditorialPanel>
-
-      <EditorialStickyActions
-        dirty={dirty}
-        busy={Boolean(busy)}
-        canEdit={canEdit}
-        onSave={save}
-        onReset={() => {
-          setDraft(cloneDraft(savedDraft));
-          setErrors({});
-          setJsonErrors({});
-          setEpoch((value) => value + 1);
-          setNotice(null);
-        }}
-      >
-        {canPublish ? (
-          <Button
-            type="button"
-            variant="success"
-            onClick={publish}
-            disabled={
-              dirty || Boolean(busy) || publishedRevision === site.revision
-            }
-            isLoading={busy === "publish"}
-          >
-            <Send className="size-4" />
-            {dirty
-              ? "Save before publishing"
-              : publishedRevision === site.revision
-                ? "Current revision published"
-                : "Publish revision"}
-          </Button>
-        ) : null}
-      </EditorialStickyActions>
-    </div>
+      </EditorSection>
+    </ConsoleEditor>
   );
 }
