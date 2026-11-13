@@ -35,9 +35,12 @@ test("Cmd/Ctrl+K opens the console palette and jumps to a workspace", async ({
   admin: page,
 }, testInfo) => {
   test.skip(isMobile(testInfo.project.name), "keyboard shortcut");
-  await page.keyboard.press("Control+K");
   const palette = page.getByRole("dialog");
-  await expect(palette).toBeVisible();
+  // the shortcut only works once the shell has hydrated; retry the key until the palette opens
+  await expect(async () => {
+    await page.keyboard.press("Control+K");
+    await expect(palette).toBeVisible({ timeout: 1500 });
+  }).toPass({ timeout: 15_000 });
   await palette.locator("input").fill("audit");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/admin\/audit/);
