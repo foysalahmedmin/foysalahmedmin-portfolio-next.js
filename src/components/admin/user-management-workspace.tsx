@@ -1,5 +1,7 @@
 "use client";
 
+import { ConsoleNotice } from "@/components/admin/console-notice";
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -17,11 +19,12 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { FormControl } from "@/components/ui/form-control";
+import { MonoLabel } from "@/components/ui/mono-label";
 import {
   StatusBadge,
   type TStatusBadgeTone,
 } from "@/components/ui/status-badge";
-import { cn } from "@/lib/utils";
 import {
   getAdminUsers,
   permanentlyDeleteAdminUser,
@@ -326,6 +329,9 @@ const UserManagementWorkspace = ({
             <p className="text-muted-foreground truncate text-xs">
               {user.email}
             </p>
+            {user.is_deleted ? (
+              <StatusBadge tone="destructive">Deleted</StatusBadge>
+            ) : null}
           </div>
         ),
       },
@@ -407,42 +413,19 @@ const UserManagementWorkspace = ({
   );
 
   return (
-    <div className="space-y-8">
-      <header className="border-border bg-card rounded-2xl border p-5 shadow-[var(--shadow-sm)] sm:p-7">
-        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
-          <div>
-            <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
-              Identity and access
-            </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
-              User management
-            </h1>
-            <p className="text-muted-foreground mt-2 max-w-3xl text-sm leading-6">
-              Manage bounded account roles, access state, and verification. Role
-              or status changes revoke active sessions on the server.
-            </p>
-          </div>
-          <div className="border-border bg-background flex max-w-md gap-3 rounded-xl border p-4 text-sm">
-            <ShieldCheck
-              className="text-primary mt-0.5 size-5 shrink-0"
-              aria-hidden="true"
-            />
-            <p className="text-muted-foreground">
-              Self-escalation, privileged-account changes, and removal of the
-              last active super-admin are blocked by backend policy.
-            </p>
-          </div>
-        </div>
-      </header>
+    <ConsoleList
+      className="cp-rows-2"
+      eyebrow="Identity and access"
+      title="User management"
+      description="Manage bounded account roles, access state, and verification. Role or status changes revoke active sessions on the server."
+    >
+      <p className="cp-hint cwc-privacy">
+        <ShieldCheck aria-hidden="true" />
+        Self-escalation, privileged-account changes, and removal of the last
+        active super-admin are blocked by backend policy.
+      </p>
 
-      {notice ? (
-        <div
-          role="status"
-          className="border-success/30 bg-success/10 rounded-xl border p-4 text-sm"
-        >
-          {notice}
-        </div>
-      ) : null}
+      {notice ? <ConsoleNotice kind="success">{notice}</ConsoleNotice> : null}
 
       <DataTable
         title="Portfolio accounts"
@@ -468,7 +451,7 @@ const UserManagementWorkspace = ({
         emptyTitle="No accounts found"
         emptyDescription="No accounts match the current search and lifecycle filters."
         rowClassName={(user) =>
-          cn(user.is_deleted && "bg-destructive/[0.035] opacity-75")
+          user.is_deleted ? "cwc-row-deleted" : undefined
         }
       />
 
@@ -483,9 +466,7 @@ const UserManagementWorkspace = ({
           <DrawerContent side="end" size="lg" className="flex flex-col">
             <DrawerHeader>
               <div className="min-w-0 pr-4">
-                <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
-                  Account controls
-                </p>
+                <MonoLabel className="cp-eyebrow">Account controls</MonoLabel>
                 <DrawerTitle className="mt-1 truncate">
                   {selected?.name ?? "User account"}
                 </DrawerTitle>
@@ -495,42 +476,33 @@ const UserManagementWorkspace = ({
 
             <DrawerBody className="flex-1">
               {selected && draft ? (
-                <div className="space-y-6">
+                <div className="cwc-detail">
                   <section
                     aria-labelledby="managed-user-identity"
-                    className="border-border rounded-xl border p-5"
+                    className="cwc-section"
                   >
-                    <h3 id="managed-user-identity" className="font-black">
+                    <h3
+                      id="managed-user-identity"
+                      className="cwc-section__title"
+                    >
                       Account identity
                     </h3>
-                    <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
+                    <dl className="cwc-dl">
                       <div>
-                        <dt className="text-muted-foreground text-xs font-bold uppercase">
-                          Email
-                        </dt>
-                        <dd className="mt-1 break-all">{selected.email}</dd>
+                        <dt className="cp-label">Email</dt>
+                        <dd>{selected.email}</dd>
                       </div>
                       <div>
-                        <dt className="text-muted-foreground text-xs font-bold uppercase">
-                          Account ID
-                        </dt>
-                        <dd className="mt-1 font-mono text-xs break-all">
-                          {selected.id}
-                        </dd>
+                        <dt className="cp-label">Account ID</dt>
+                        <dd className="t-mono">{selected.id}</dd>
                       </div>
                       <div>
-                        <dt className="text-muted-foreground text-xs font-bold uppercase">
-                          Created
-                        </dt>
-                        <dd className="mt-1">
-                          {formatDate(selected.created_at)}
-                        </dd>
+                        <dt className="cp-label">Created</dt>
+                        <dd>{formatDate(selected.created_at)}</dd>
                       </div>
                       <div>
-                        <dt className="text-muted-foreground text-xs font-bold uppercase">
-                          Lifecycle
-                        </dt>
-                        <dd className="mt-1">
+                        <dt className="cp-label">Lifecycle</dt>
+                        <dd>
                           {selected.is_deleted
                             ? "Soft deleted"
                             : "Active record"}
@@ -542,15 +514,19 @@ const UserManagementWorkspace = ({
                   {!selected.is_deleted ? (
                     <section
                       aria-labelledby="managed-user-access"
-                      className="border-border rounded-xl border p-5"
+                      className="cwc-section"
                     >
-                      <h3 id="managed-user-access" className="font-black">
+                      <h3
+                        id="managed-user-access"
+                        className="cwc-section__title"
+                      >
                         Role and access state
                       </h3>
-                      <div className="mt-4 grid gap-4">
-                        <label className="grid gap-2 text-sm font-bold">
-                          Role
-                          <select
+                      <div className="cp-fields">
+                        <label className="cp-field">
+                          <span className="cp-label">Role</span>
+                          <FormControl
+                            as="select"
                             value={draft.role}
                             disabled={!canEditSelected || isMutating}
                             onChange={(event) =>
@@ -559,7 +535,6 @@ const UserManagementWorkspace = ({
                                 role: event.target.value as TRole,
                               })
                             }
-                            className="border-input bg-background focus-visible:ring-ring min-h-11 rounded-xl border px-3 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
                           >
                             {!assignableRoles.includes(draft.role) ? (
                               <option value={draft.role}>
@@ -571,11 +546,12 @@ const UserManagementWorkspace = ({
                                 {labelFor(role)}
                               </option>
                             ))}
-                          </select>
+                          </FormControl>
                         </label>
-                        <label className="grid gap-2 text-sm font-bold">
-                          Account status
-                          <select
+                        <label className="cp-field">
+                          <span className="cp-label">Account status</span>
+                          <FormControl
+                            as="select"
                             value={draft.status}
                             disabled={!canEditSelected || isMutating}
                             onChange={(event) =>
@@ -584,16 +560,15 @@ const UserManagementWorkspace = ({
                                 status: event.target.value as AdminUserStatus,
                               })
                             }
-                            className="border-input bg-background focus-visible:ring-ring min-h-11 rounded-xl border px-3 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
                           >
                             {STATUS_OPTIONS.map((status) => (
                               <option key={status} value={status}>
                                 {labelFor(status)}
                               </option>
                             ))}
-                          </select>
+                          </FormControl>
                         </label>
-                        <label className="border-input flex min-h-11 items-center gap-3 rounded-xl border px-3 text-sm font-bold">
+                        <label className="cwc-check">
                           <input
                             type="checkbox"
                             checked={draft.is_verified}
@@ -604,14 +579,13 @@ const UserManagementWorkspace = ({
                                 is_verified: event.target.checked,
                               })
                             }
-                            className="accent-primary size-4"
                           />
                           Identity is administratively verified
                         </label>
                       </div>
 
                       {!canEditSelected ? (
-                        <p className="text-muted-foreground mt-4 text-sm">
+                        <p className="cp-hint">
                           {isSelf
                             ? "Use profile settings for your own identity; self role, status, and verification changes are blocked."
                             : "Only a super-admin can change a privileged account."}
@@ -621,27 +595,27 @@ const UserManagementWorkspace = ({
                   ) : null}
 
                   {mutationError ? (
-                    <div
-                      role="alert"
-                      className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border p-4 text-sm"
-                    >
-                      {mutationError}
-                    </div>
+                    <ConsoleNotice kind="error">{mutationError}</ConsoleNotice>
                   ) : null}
 
                   <section
                     aria-labelledby="managed-user-lifecycle"
-                    className="border-border rounded-xl border p-5"
+                    className="cwc-section"
                   >
-                    <h3 id="managed-user-lifecycle" className="font-black">
-                      Account lifecycle
-                    </h3>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      Backend policy re-checks actor authority, self-action,
-                      privileged roles, super-admin continuity, and purge
-                      dependencies.
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-3">
+                    <div>
+                      <h3
+                        id="managed-user-lifecycle"
+                        className="cwc-section__title"
+                      >
+                        Account lifecycle
+                      </h3>
+                      <p className="cwc-section__desc">
+                        Backend policy re-checks actor authority, self-action,
+                        privileged roles, super-admin continuity, and purge
+                        dependencies.
+                      </p>
+                    </div>
+                    <div className="cp-header__actions">
                       {selected.is_deleted ? (
                         <Button
                           type="button"
@@ -702,7 +676,7 @@ const UserManagementWorkspace = ({
           </DrawerContent>
         </DrawerBackdrop>
       </Drawer>
-    </div>
+    </ConsoleList>
   );
 };
 

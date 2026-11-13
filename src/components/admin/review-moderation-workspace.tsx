@@ -1,6 +1,9 @@
 "use client";
 
-import { ErrorState, Skeleton } from "@/components/ui/async-state";
+import { ConsoleNotice } from "@/components/admin/console-notice";
+import { ConsoleError } from "@/components/console";
+import { ConsoleList } from "@/components/templates/console-templates";
+import { Skeleton } from "@/components/ui/async-state";
 import { Button } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -18,6 +21,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { FormControl } from "@/components/ui/form-control";
+import { MonoLabel } from "@/components/ui/mono-label";
 import {
   StatusBadge,
   type TStatusBadgeTone,
@@ -339,10 +344,7 @@ const ReviewModerationWorkspace = () => {
             className="inline-flex items-center gap-1 text-sm font-bold"
             aria-label={`${review.rating} out of 5 stars`}
           >
-            <Star
-              className="text-warning size-4 fill-current"
-              aria-hidden="true"
-            />
+            <Star className="size-4 fill-current" aria-hidden="true" />
             {review.rating}/5
           </span>
         ),
@@ -413,29 +415,17 @@ const ReviewModerationWorkspace = () => {
   );
 
   return (
-    <div className="space-y-8">
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="type-label text-primary">Trust operations</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            Review moderation
-          </h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-relaxed">
-            Review portfolio feedback, verify its target, and publish only
-            appropriate submissions.
-          </p>
-        </div>
-        <div className="border-border bg-background flex max-w-md items-start gap-3 rounded-xl border p-4 text-sm">
-          <ShieldCheck
-            className="text-primary mt-0.5 size-4 shrink-0"
-            aria-hidden="true"
-          />
-          <p className="text-muted-foreground">
-            Author email, role, account metadata, and private media are excluded
-            from the server moderation response.
-          </p>
-        </div>
-      </header>
+    <ConsoleList
+      className="cp-rows-2"
+      eyebrow="Trust operations"
+      title="Review moderation"
+      description="Review portfolio feedback, verify its target, and publish only appropriate submissions."
+    >
+      <p className="cp-hint cwc-privacy">
+        <ShieldCheck aria-hidden="true" />
+        Author email, role, account metadata, and private media are excluded
+        from the server moderation response.
+      </p>
 
       <DataTable
         data={reviews}
@@ -460,7 +450,7 @@ const ReviewModerationWorkspace = () => {
         emptyTitle="No reviews found"
         emptyDescription="The moderation queue is empty or no reviews match the current filters."
         rowClassName={(review) =>
-          review.status === "pending" ? "bg-warning/[0.035]" : undefined
+          review.status === "pending" ? "cwc-row-attention" : undefined
         }
       />
 
@@ -475,7 +465,7 @@ const ReviewModerationWorkspace = () => {
           <DrawerContent side="end" size="xl" className="flex flex-col">
             <DrawerHeader>
               <div className="min-w-0 pr-4">
-                <p className="type-label text-primary">Moderation detail</p>
+                <MonoLabel className="cp-eyebrow">Moderation detail</MonoLabel>
                 <DrawerTitle className="mt-1 truncate">
                   {detail?.target?.name ?? "Review detail"}
                 </DrawerTitle>
@@ -497,88 +487,82 @@ const ReviewModerationWorkspace = () => {
                   </div>
                 </div>
               ) : detailStatus === "error" && selectedId ? (
-                <ErrorState
+                <ConsoleError
+                  headingLevel="h3"
                   title="Review detail could not be loaded"
                   description={detailError ?? undefined}
                   onRetry={() => void loadDetail(selectedId)}
                 />
               ) : detail ? (
-                <div className="space-y-7">
+                <div className="cwc-detail">
                   <section
-                    className="border-border bg-surface-subtle rounded-xl border p-5"
+                    className="cwc-section"
                     aria-labelledby="review-context-heading"
                   >
-                    <h3 id="review-context-heading" className="font-bold">
+                    <h3
+                      id="review-context-heading"
+                      className="cwc-section__title"
+                    >
                       Review context
                     </h3>
-                    <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <dl className="cwc-dl">
                       <div>
-                        <dt className="type-label text-muted-foreground">
-                          Author
-                        </dt>
-                        <dd className="mt-1 text-sm font-semibold break-words">
-                          {detail.author?.name ?? "Unavailable author"}
-                        </dd>
+                        <dt className="cp-label">Author</dt>
+                        <dd>{detail.author?.name ?? "Unavailable author"}</dd>
                       </div>
                       <div>
-                        <dt className="type-label text-muted-foreground">
-                          Target
-                        </dt>
-                        <dd className="mt-1 text-sm font-semibold break-words">
+                        <dt className="cp-label">Target</dt>
+                        <dd>
                           {detail.target?.name ?? "Unavailable target"}
-                          <span className="text-muted-foreground ml-1 font-normal">
+                          <span className="text-muted-foreground ml-1">
                             ({detail.target_model})
                           </span>
                         </dd>
                       </div>
                       <div>
-                        <dt className="type-label text-muted-foreground">
-                          Rating
-                        </dt>
-                        <dd className="mt-1 text-sm font-semibold">
-                          {detail.rating} out of 5 stars
-                        </dd>
+                        <dt className="cp-label">Rating</dt>
+                        <dd>{detail.rating} out of 5 stars</dd>
                       </div>
                       <div>
-                        <dt className="type-label text-muted-foreground">
-                          Submitted
-                        </dt>
-                        <dd className="mt-1 text-sm">
-                          {formatDateTime(detail.created_at)}
-                        </dd>
+                        <dt className="cp-label">Submitted</dt>
+                        <dd>{formatDateTime(detail.created_at)}</dd>
                       </div>
                     </dl>
                   </section>
 
-                  <section aria-labelledby="review-content-heading">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <h3 id="review-content-heading" className="font-bold">
+                  <section
+                    className="cwc-section"
+                    aria-labelledby="review-content-heading"
+                  >
+                    <div className="cwc-section__head">
+                      <h3
+                        id="review-content-heading"
+                        className="cwc-section__title"
+                      >
                         Submitted review
                       </h3>
                       {detail.is_edited ? (
-                        <span className="text-muted-foreground text-xs">
+                        <span className="cp-hint">
                           Edited {formatDateTime(detail.edited_at)}
                         </span>
                       ) : null}
                     </div>
-                    <p className="border-border bg-background mt-3 rounded-xl border p-5 text-sm leading-7 break-words whitespace-pre-wrap">
-                      {detail.review}
-                    </p>
+                    <p className="cwc-message">{detail.review}</p>
                   </section>
 
                   <section
-                    className="border-border rounded-xl border p-5"
+                    className="cwc-section"
                     aria-labelledby="review-moderation-heading"
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="cwc-section__head">
                       <div>
                         <h3
                           id="review-moderation-heading"
-                          className="font-bold"
+                          className="cwc-section__title"
                         >
                           Moderation status
                         </h3>
-                        <p className="text-muted-foreground mt-1 text-sm">
+                        <p className="cwc-section__desc">
                           Approve, reject, or return this review to pending.
                         </p>
                       </div>
@@ -587,15 +571,16 @@ const ReviewModerationWorkspace = () => {
                       </StatusBadge>
                     </div>
 
-                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
-                      <label
-                        htmlFor="review-next-status"
-                        className="grid flex-1 gap-2"
-                      >
-                        <span className="type-label text-muted-foreground">
+                    <div className="cwc-form-row">
+                      <div className="cp-field">
+                        <label
+                          htmlFor="review-next-status"
+                          className="cp-label"
+                        >
                           Change status
-                        </span>
-                        <select
+                        </label>
+                        <FormControl
+                          as="select"
                           id="review-next-status"
                           value={nextStatus ?? detail.status}
                           disabled={isModerating}
@@ -604,15 +589,14 @@ const ReviewModerationWorkspace = () => {
                               event.target.value as ReviewModerationStatus
                             )
                           }
-                          className="border-border bg-background focus-visible:ring-ring h-11 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 disabled:opacity-60"
                         >
                           {REVIEW_MODERATION_STATUSES.map((status) => (
                             <option key={status} value={status}>
                               {labelFor(status)}
                             </option>
                           ))}
-                        </select>
-                      </label>
+                        </FormControl>
+                      </div>
                       <Button
                         type="button"
                         onClick={() => void moderate()}
@@ -624,29 +608,27 @@ const ReviewModerationWorkspace = () => {
                     </div>
 
                     {moderationNotice ? (
-                      <p
-                        className="text-success mt-4 text-sm font-semibold"
-                        role="status"
-                      >
+                      <ConsoleNotice kind="success">
                         {moderationNotice}
-                      </p>
+                      </ConsoleNotice>
                     ) : null}
                     {moderationError ? (
-                      <div
-                        role="alert"
-                        className="border-destructive/30 bg-destructive/5 text-destructive mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border p-3 text-sm"
+                      <ConsoleNotice
+                        kind="error"
+                        action={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => void loadDetail(detail.id)}
+                          >
+                            <RefreshCw className="size-4" aria-hidden="true" />
+                            Reload detail
+                          </Button>
+                        }
                       >
-                        <span>{moderationError}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => void loadDetail(detail.id)}
-                        >
-                          <RefreshCw className="size-4" aria-hidden="true" />
-                          Reload detail
-                        </Button>
-                      </div>
+                        {moderationError}
+                      </ConsoleNotice>
                     ) : null}
                   </section>
                 </div>
@@ -665,7 +647,7 @@ const ReviewModerationWorkspace = () => {
           </DrawerContent>
         </DrawerBackdrop>
       </Drawer>
-    </div>
+    </ConsoleList>
   );
 };
 

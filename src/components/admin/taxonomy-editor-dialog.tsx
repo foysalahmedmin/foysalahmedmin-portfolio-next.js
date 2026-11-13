@@ -1,5 +1,6 @@
 "use client";
 
+import { ConsoleNotice } from "@/components/admin/console-notice";
 import {
   EditorialErrorSummary,
   EditorialField,
@@ -156,7 +157,7 @@ const TaxonomyEditorDialog = ({
                 <ModalTitle>
                   {category ? "Edit" : "Create"} {contract.singular}
                 </ModalTitle>
-                <p className="text-muted-foreground mt-1 text-sm">
+                <p className="cp-hint mt-1">
                   Slug identity and parent changes are validated before the
                   existing category API applies them.
                 </p>
@@ -166,16 +167,11 @@ const TaxonomyEditorDialog = ({
 
             <ModalBody className="space-y-5">
               {requestError ? (
-                <p
-                  role="alert"
-                  className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border p-4 text-sm"
-                >
-                  {requestError}
-                </p>
+                <ConsoleNotice kind="error">{requestError}</ConsoleNotice>
               ) : null}
               <EditorialErrorSummary errors={summaryErrors} />
 
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="cp-fields">
                 <EditorialField
                   path={fieldId("name")}
                   label="Category name"
@@ -211,7 +207,7 @@ const TaxonomyEditorDialog = ({
                 />
               </div>
 
-              <div className="grid gap-5 md:grid-cols-3">
+              <div className="cp-fields">
                 <EditorialField
                   path={fieldId("sequence")}
                   label="Display order"

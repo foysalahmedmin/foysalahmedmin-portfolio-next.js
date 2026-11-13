@@ -1,10 +1,8 @@
 "use client";
 
-import {
-  EditorialStatus,
-  EditorialWorkspaceHeader,
-} from "@/components/admin/editorial-editor-primitives";
+import { ConsoleNotice } from "@/components/admin/console-notice";
 import TaxonomyEditorDialog from "@/components/admin/taxonomy-editor-dialog";
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -13,6 +11,7 @@ import DataTable, {
   type TDataTableStatus,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusMark } from "@/components/ui/status-mark";
 import {
   Tabs,
   TabsContent,
@@ -370,7 +369,6 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
                 title={`Move ${row.name} to deleted records`}
                 disabled={Boolean(busyId)}
                 isLoading={busyId === row.id}
-                className="text-destructive hover:bg-destructive/10"
                 onClick={() => void completeOperation(row, "delete")}
               >
                 <Trash2 aria-hidden="true" className="size-4" />
@@ -401,7 +399,6 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
                 title={`Permanently delete ${row.name}`}
                 disabled={Boolean(busyId)}
                 isLoading={busyId === row.id}
-                className="text-destructive hover:bg-destructive/10"
                 onClick={() => void completeOperation(row, "permanent")}
               >
                 <Trash2 aria-hidden="true" className="size-4" />
@@ -490,23 +487,16 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
   );
 
   return (
-    <div className="mx-auto max-w-[100rem] space-y-7">
-      <EditorialWorkspaceHeader
-        eyebrow="Content taxonomy"
-        title="Content categories"
-        description="Manage separate category identities for articles, projects, case studies and videos: active visibility, hierarchy, and deletion lifecycle."
-        status={
-          <>
-            {TAXONOMY_KINDS.map((kind) => (
-              <EditorialStatus key={kind} tone="success">
-                {TAXONOMY_CONTRACT[kind].label}
-              </EditorialStatus>
-            ))}
-            {!canEdit ? <EditorialStatus>Read only</EditorialStatus> : null}
-          </>
-        }
-        actions={
-          canEdit ? (
+    <ConsoleList
+      eyebrow="Content taxonomy"
+      title="Content categories"
+      description="Manage separate category identities for articles, projects, case studies and videos: active visibility, hierarchy, and deletion lifecycle."
+      actions={
+        <>
+          {!canEdit ? (
+            <StatusMark state="archived">Read only</StatusMark>
+          ) : null}
+          {canEdit ? (
             <Button
               type="button"
               disabled={parentStatus !== "success" || Boolean(busyId)}
@@ -518,21 +508,14 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
               <Plus aria-hidden="true" className="size-4" />
               New {contract.singular}
             </Button>
-          ) : undefined
-        }
-      />
-
+          ) : null}
+        </>
+      }
+    >
       {notice ? (
-        <div
-          role={notice.tone === "error" ? "alert" : "status"}
-          className={
-            notice.tone === "error"
-              ? "border-destructive/30 bg-destructive/10 text-destructive rounded-xl border p-4 text-sm"
-              : "border-success/30 bg-success/10 text-success rounded-xl border p-4 text-sm"
-          }
-        >
-          <div className="flex items-center justify-between gap-3">
-            <p>{notice.message}</p>
+        <ConsoleNotice
+          kind={notice.tone}
+          action={
             <Button
               type="button"
               variant="ghost"
@@ -543,26 +526,25 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
             >
               <X aria-hidden="true" className="size-4" />
             </Button>
-          </div>
-        </div>
+          }
+        >
+          {notice.message}
+        </ConsoleNotice>
       ) : null}
 
       {parentError ? (
-        <div
-          role="alert"
-          className="border-warning/30 bg-warning/10 rounded-xl border p-4 text-sm"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p>
-              {parentError} Create and edit controls are paused to protect the
-              hierarchy; list and lifecycle controls remain available.
-            </p>
+        <ConsoleNotice
+          kind="warning"
+          action={
             <Button type="button" variant="outline" size="sm" onClick={refresh}>
               <RotateCcw aria-hidden="true" className="size-4" />
               Retry parent graph
             </Button>
-          </div>
-        </div>
+          }
+        >
+          {parentError} Create and edit controls are paused to protect the
+          hierarchy; list and lifecycle controls remain available.
+        </ConsoleNotice>
       ) : null}
 
       <Tabs
@@ -573,16 +555,9 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
           }
         }}
       >
-        <TabsList
-          aria-label="Taxonomy type"
-          className="border-border bg-muted/40 inline-flex rounded-xl border p-1"
-        >
+        <TabsList aria-label="Taxonomy type">
           {TAXONOMY_KINDS.map((kind) => (
-            <TabsTrigger
-              key={kind}
-              value={kind}
-              className="data-[state=active]:bg-card rounded-lg px-5 before:hidden data-[state=active]:shadow-sm"
-            >
+            <TabsTrigger key={kind} value={kind}>
               {TAXONOMY_CONTRACT[kind].label}
             </TabsTrigger>
           ))}
@@ -607,7 +582,7 @@ const TaxonomyAdminWorkspace = ({ canEdit, canPermanentDelete }: Props) => {
           refresh();
         }}
       />
-    </div>
+    </ConsoleList>
   );
 };
 

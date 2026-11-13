@@ -3,3 +3,165 @@
  * Rules: tokens only (no colour literals), no backdrop-filter outside overlays, no animation library, state is
  * shape, weight and label (never colour). Scope every rule to [data-surface="console"].
  */
+
+/* ---------- Notices: a state mark, the message, an optional action; errors are a dashed frame, never a red box ---------- */
+[data-surface="console"] .cwc-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-panel);
+  padding: 0.625rem 0.875rem;
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cwc-note[data-kind="error"] {
+  border-style: dashed;
+  border-color: var(--foreground);
+}
+
+[data-surface="console"] .cwc-note__text {
+  flex: 1 1 16rem;
+  margin: 0;
+  min-inline-size: 0;
+}
+
+/* The one-line privacy statement under a page header */
+[data-surface="console"] .cwc-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  max-inline-size: 64ch;
+}
+
+[data-surface="console"] .cwc-privacy svg {
+  flex: none;
+  margin-block-start: 0.125rem;
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
+/* ---------- Drawer detail: hairline sections, not nested cards ---------- */
+[data-surface="console"] .cwc-detail {
+  display: grid;
+  gap: 0;
+}
+
+[data-surface="console"] .cwc-section {
+  display: grid;
+  gap: 0.75rem;
+  padding-block: var(--cp-gap);
+}
+
+[data-surface="console"] .cwc-section:first-child {
+  padding-block-start: 0;
+}
+
+[data-surface="console"] .cwc-section + .cwc-section {
+  border-block-start: 1px solid var(--line-2);
+}
+
+[data-surface="console"] .cwc-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem 1rem;
+}
+
+[data-surface="console"] .cwc-section__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--step-0);
+}
+
+[data-surface="console"] .cwc-section__desc {
+  margin: 0.125rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cwc-dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--field-gap) 1.25rem;
+  margin: 0;
+}
+
+[data-surface="console"] .cwc-dl dd {
+  margin: 0.25rem 0 0;
+  font-size: var(--ui-text);
+  overflow-wrap: anywhere;
+}
+
+/* A visitor's message is quoted text: a rule on the start edge, not a card */
+[data-surface="console"] .cwc-message {
+  margin: 0;
+  border-inline-start: 2px solid var(--line-4);
+  padding-inline-start: 1rem;
+  font-size: var(--ui-text);
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+[data-surface="console"] .cwc-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+[data-surface="console"] .cwc-form-row > .cp-field {
+  flex: 1 1 14rem;
+}
+
+[data-surface="console"] .cwc-empty {
+  display: grid;
+  place-items: center;
+  gap: 0.5rem;
+  min-block-size: 14rem;
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+/* A checkbox row is a labelled control on a hairline, not a bordered card */
+[data-surface="console"] .cwc-check {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--input);
+  border-radius: var(--r-control);
+  padding-inline: 0.75rem;
+  min-block-size: var(--hit-area);
+  font-weight: 600;
+  font-size: var(--ui-text);
+}
+
+[data-surface="console"] .cwc-check input {
+  flex: none;
+  inline-size: 1rem;
+  block-size: 1rem;
+  accent-color: var(--foreground);
+}
+
+/* Unread or waiting rows: a start bar and a heavier first cell. The status column still names the state. */
+[data-surface="console"]
+  .cwc-row-attention
+  > [data-slot="table-cell"]:first-child {
+  box-shadow: inset 2px 0 0 var(--foreground);
+  font-weight: 600;
+}
+
+/* Soft-deleted rows recede; the account cell carries a "Deleted" mark as well */
+[data-surface="console"] .cwc-row-deleted > [data-slot="table-cell"] {
+  opacity: 0.7;
+}
+
+/* The save row under the settings form */
+[data-surface="console"] .cwc-settings-actions {
+  display: flex;
+  justify-content: flex-end;
+}

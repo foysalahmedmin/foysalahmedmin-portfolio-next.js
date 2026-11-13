@@ -1,7 +1,11 @@
 "use client";
 
+import { ConsoleNotice } from "@/components/admin/console-notice";
+import { ConsolePageHeader, EditorSection } from "@/components/console";
+import { ConsoleSettings } from "@/components/templates/console-templates";
 import { Button } from "@/components/ui/button";
 import { FileUploader } from "@/components/ui/file-uploader";
+import { FormControl } from "@/components/ui/form-control";
 import { updateSelf } from "@/services/user.service";
 import type { TFilePopulated } from "@/types/file.type";
 import type { TUser } from "@/types/user.type";
@@ -61,76 +65,81 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
-      <div>
-        <h1 className="text-3xl font-black tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Manage your profile information
-        </p>
-      </div>
+    <ConsoleSettings
+      header={
+        <ConsolePageHeader
+          eyebrow="Account"
+          title="Settings"
+          description="Manage your profile information."
+        />
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <EditorSection
+          id="settings-profile"
+          title="Profile"
+          description="Your name, email and photo as other operators see them."
+        >
+          <div className="cp-field">
+            <span id="settings-image-label" className="cp-label">
+              Profile image
+            </span>
+            <FileUploader
+              purpose="profile"
+              value={formData.image as TFilePopulated | null}
+              onChange={(file) =>
+                setFormData((prev) => ({ ...prev, image: file }))
+              }
+              label="Upload profile photo"
+              disabled={loading}
+            />
+          </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Profile Image
-          </label>
-          <FileUploader
-            purpose="profile"
-            value={formData.image as TFilePopulated | null}
-            onChange={(file) =>
-              setFormData((prev) => ({ ...prev, image: file }))
-            }
-            label="Upload profile photo"
-            disabled={loading}
-          />
-        </div>
+          <div className="cp-fields">
+            <div className="cp-field">
+              <label htmlFor="settings-name" className="cp-label">
+                Name
+              </label>
+              <FormControl
+                id="settings-name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Name
-          </label>
-          <input
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
-          />
-        </div>
+            <div className="cp-field">
+              <label htmlFor="settings-email" className="cp-label">
+                Email
+              </label>
+              <FormControl
+                id="settings-email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+        </EditorSection>
 
-        <div className="space-y-2">
-          <label className="text-muted-foreground text-sm font-bold tracking-widest uppercase">
-            Email
-          </label>
-          <input
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="border-border bg-background focus:border-primary w-full rounded-xl border p-3 focus:outline-none"
-          />
-        </div>
-
-        {error && (
-          <p className="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border px-4 py-3 text-sm">
-            {error}
-          </p>
-        )}
+        {error && <ConsoleNotice kind="error">{error}</ConsoleNotice>}
 
         {success && (
-          <p className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-600 dark:text-green-400">
+          <ConsoleNotice kind="success">
             Profile updated successfully.
-          </p>
+          </ConsoleNotice>
         )}
 
-        <div className="flex justify-end">
+        <div className="cwc-settings-actions">
           <Button type="submit" className="gap-2" isLoading={loading}>
             <Save className="size-4" />
             Save Changes
           </Button>
         </div>
       </form>
-    </div>
+    </ConsoleSettings>
   );
 }

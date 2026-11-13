@@ -6,6 +6,9 @@ import {
   type TContactDeliveryStatus,
   type TContactStatus,
 } from "@/app/api/contacts/contact.type";
+import { ConsoleNotice } from "@/components/admin/console-notice";
+import { ConsoleError } from "@/components/console";
+import { ConsoleList } from "@/components/templates/console-templates";
 import { Button } from "@/components/ui/button";
 import DataTable, {
   type TColumn,
@@ -23,7 +26,9 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { ErrorState, Skeleton } from "@/components/ui/async-state";
+import { Skeleton } from "@/components/ui/async-state";
+import { FormControl } from "@/components/ui/form-control";
+import { MonoLabel } from "@/components/ui/mono-label";
 import {
   StatusBadge,
   type TStatusBadgeTone,
@@ -440,29 +445,17 @@ const ContactInboxWorkspace = ({
     : [];
 
   return (
-    <div className="space-y-8">
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="type-label text-primary">Secure operations</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            Contact inbox
-          </h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-relaxed">
-            Triage portfolio inquiries without exposing message content or raw
-            email addresses in the list view.
-          </p>
-        </div>
-        <div className="border-border bg-background flex max-w-md items-start gap-3 rounded-xl border p-4 text-sm">
-          <LockKeyhole
-            className="text-primary mt-0.5 size-4 shrink-0"
-            aria-hidden="true"
-          />
-          <p className="text-muted-foreground">
-            Full personal data is fetched only when an authorized operator opens
-            one inquiry.
-          </p>
-        </div>
-      </header>
+    <ConsoleList
+      className="cp-rows-2"
+      eyebrow="Secure operations"
+      title="Contact inbox"
+      description="Triage portfolio inquiries without exposing message content or raw email addresses in the list view."
+    >
+      <p className="cp-hint cwc-privacy">
+        <LockKeyhole aria-hidden="true" />
+        Full personal data is fetched only when an authorized operator opens one
+        inquiry.
+      </p>
 
       <DataTable
         data={contacts}
@@ -487,7 +480,7 @@ const ContactInboxWorkspace = ({
         emptyTitle="No inquiries found"
         emptyDescription="The inbox is empty or no inquiries match the current filters."
         rowClassName={(contact) =>
-          contact.status === "new" ? "bg-primary/[0.035]" : undefined
+          contact.status === "new" ? "cwc-row-attention" : undefined
         }
       />
 
@@ -507,7 +500,7 @@ const ContactInboxWorkspace = ({
           >
             <DrawerHeader>
               <div className="min-w-0 pr-4">
-                <p className="type-label text-primary">Authorized detail</p>
+                <MonoLabel className="cp-eyebrow">Authorized detail</MonoLabel>
                 <DrawerTitle className="mt-1 truncate">
                   {detail?.subject ?? "Inquiry detail"}
                 </DrawerTitle>
@@ -529,50 +522,40 @@ const ContactInboxWorkspace = ({
                   </div>
                 </div>
               ) : detailStatus === "error" && selectedId ? (
-                <ErrorState
+                <ConsoleError
+                  headingLevel="h3"
                   title="Inquiry detail could not be loaded"
                   description={detailError ?? undefined}
                   onRetry={() => void loadDetail(selectedId)}
                 />
               ) : detail ? (
-                <div className="space-y-7">
+                <div className="cwc-detail">
                   <section
-                    className="border-border bg-surface-subtle rounded-xl border p-5"
+                    className="cwc-section"
                     aria-labelledby="contact-sender-heading"
                   >
-                    <h3 id="contact-sender-heading" className="font-bold">
+                    <h3
+                      id="contact-sender-heading"
+                      className="cwc-section__title"
+                    >
                       Sender
                     </h3>
-                    <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <dl className="cwc-dl">
                       <div>
-                        <dt className="type-label text-muted-foreground">
-                          Name
-                        </dt>
-                        <dd className="mt-1 text-sm font-semibold break-words">
-                          {detail.name}
-                        </dd>
+                        <dt className="cp-label">Name</dt>
+                        <dd>{detail.name}</dd>
                       </div>
                       <div>
-                        <dt className="type-label text-muted-foreground">
-                          Email
-                        </dt>
-                        <dd className="mt-1 text-sm font-semibold break-all">
-                          {detail.email}
-                        </dd>
+                        <dt className="cp-label">Email</dt>
+                        <dd>{detail.email}</dd>
                       </div>
                       <div>
-                        <dt className="type-label text-muted-foreground">
-                          Received
-                        </dt>
-                        <dd className="mt-1 text-sm">
-                          {formatDateTime(detail.created_at)}
-                        </dd>
+                        <dt className="cp-label">Received</dt>
+                        <dd>{formatDateTime(detail.created_at)}</dd>
                       </div>
                       <div>
-                        <dt className="type-label text-muted-foreground">
-                          Delivery
-                        </dt>
-                        <dd className="mt-1">
+                        <dt className="cp-label">Delivery</dt>
+                        <dd>
                           <StatusBadge
                             tone={deliveryTone[detail.delivery_status]}
                           >
@@ -583,25 +566,32 @@ const ContactInboxWorkspace = ({
                     </dl>
                   </section>
 
-                  <section aria-labelledby="contact-message-heading">
-                    <h3 id="contact-message-heading" className="font-bold">
+                  <section
+                    className="cwc-section"
+                    aria-labelledby="contact-message-heading"
+                  >
+                    <h3
+                      id="contact-message-heading"
+                      className="cwc-section__title"
+                    >
                       Message
                     </h3>
-                    <p className="border-border bg-background mt-3 rounded-xl border p-5 text-sm leading-7 break-words whitespace-pre-wrap">
-                      {detail.message}
-                    </p>
+                    <p className="cwc-message">{detail.message}</p>
                   </section>
 
                   <section
-                    className="border-border rounded-xl border p-5"
+                    className="cwc-section"
                     aria-labelledby="contact-status-heading"
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="cwc-section__head">
                       <div>
-                        <h3 id="contact-status-heading" className="font-bold">
+                        <h3
+                          id="contact-status-heading"
+                          className="cwc-section__title"
+                        >
                           Inbox status
                         </h3>
-                        <p className="text-muted-foreground mt-1 text-sm">
+                        <p className="cwc-section__desc">
                           Only policy-authorized transitions are available.
                         </p>
                       </div>
@@ -609,15 +599,16 @@ const ContactInboxWorkspace = ({
                         {labelFor(detail.status)}
                       </StatusBadge>
                     </div>
-                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
-                      <label
-                        className="grid flex-1 gap-2"
-                        htmlFor="contact-next-status"
-                      >
-                        <span className="type-label text-muted-foreground">
+                    <div className="cwc-form-row">
+                      <div className="cp-field">
+                        <label
+                          htmlFor="contact-next-status"
+                          className="cp-label"
+                        >
                           Change status
-                        </span>
-                        <select
+                        </label>
+                        <FormControl
+                          as="select"
                           id="contact-next-status"
                           value={nextStatus ?? detail.status}
                           onChange={(event) =>
@@ -627,15 +618,14 @@ const ContactInboxWorkspace = ({
                             isUpdatingStatus ||
                             Boolean(detail.retention.anonymized_at)
                           }
-                          className="border-border bg-background focus-visible:ring-ring h-11 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 disabled:opacity-60"
                         >
                           {statusOptions.map((status) => (
                             <option key={status} value={status}>
                               {labelFor(status)}
                             </option>
                           ))}
-                        </select>
-                      </label>
+                        </FormControl>
+                      </div>
                       <Button
                         type="button"
                         onClick={() => void updateStatus()}
@@ -650,17 +640,14 @@ const ContactInboxWorkspace = ({
                       </Button>
                     </div>
                     {detail.retention.anonymized_at ? (
-                      <p className="text-muted-foreground mt-3 text-sm">
+                      <p className="cp-hint">
                         This anonymized record is immutable.
                       </p>
                     ) : null}
                     {statusError ? (
-                      <div
-                        role="alert"
-                        className="border-destructive/30 bg-destructive/5 text-destructive mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border p-3 text-sm"
-                      >
-                        <span>{statusError}</span>
-                        {detail ? (
+                      <ConsoleNotice
+                        kind="error"
+                        action={
                           <Button
                             type="button"
                             variant="ghost"
@@ -670,14 +657,16 @@ const ContactInboxWorkspace = ({
                             <RefreshCw className="size-4" aria-hidden="true" />
                             Reload detail
                           </Button>
-                        ) : null}
-                      </div>
+                        }
+                      >
+                        {statusError}
+                      </ConsoleNotice>
                     ) : null}
                   </section>
                 </div>
               ) : (
-                <div className="text-muted-foreground flex min-h-56 flex-col items-center justify-center text-center">
-                  <Inbox className="mb-3 size-6" aria-hidden="true" />
+                <div className="cwc-empty">
+                  <Inbox className="size-6" aria-hidden="true" />
                   <p>No inquiry selected.</p>
                 </div>
               )}
@@ -695,7 +684,7 @@ const ContactInboxWorkspace = ({
           </DrawerContent>
         </DrawerBackdrop>
       </Drawer>
-    </div>
+    </ConsoleList>
   );
 };
 
