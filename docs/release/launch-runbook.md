@@ -1,8 +1,9 @@
 # Launch runbook (Signal overhaul, Phase 10)
 
-Status: prepared, **not run**. Every step that touches the production database, publishes content or turns on
-indexing is the owner's to run or to authorise, one step at a time. Nothing in this runbook has been run against
-the owner's database.
+Status: prepared and **rehearsed end to end on a throwaway database** (2026-11-15, results in
+[`docs/baseline/phase-10-findings.md`](../baseline/phase-10-findings.md)); **not run on the owner's database**.
+Every step that touches the production database, publishes content or turns on indexing is the owner's to run or
+to authorise, one step at a time.
 
 Related: [release checklist](./release-checklist.md), the plan section 8 (the confirm register) in
 [`docs/plans/2026-10-08-monochrome-systems-ui-overhaul.md`](../plans/2026-10-08-monochrome-systems-ui-overhaul.md),
@@ -64,7 +65,10 @@ manifest lists as `needs-owner-verification` with `production_publish: block` th
    review-and-publish workspace) to see what blocks publishing; it lists the failing gate per page.
 5. **Choose how to go live. These are two different routes; do not do both blindly.**
    - **By hand (recommended):** the admin. Site editor, Pages and the content editors, one thing at a time, then
-     step 6. Indexing stays off until step 8.
+     step 6. Indexing stays off until step 8. **The seed creates only the Site and Page drafts, three services,
+     nine FAQ items and two legal documents (all drafts).** There are no projects, articles, case studies or
+     videos: the six projects, six articles, four case studies and seven videos exist only in
+     `scripts/launch-content.ts`, so on this route you write or paste your own in the admin.
    - **One shot, `scripts/launch-content.ts`:** it is the old all-in-one launcher and it goes live in a single
      run with no dry-run. In that one run it sets the public name, the **public email `foysalahmedmin@gmail.com`**,
      the GitHub and LinkedIn links, the canonical `https://www.foysalahmedmin.com` and the SEO defaults, sets
@@ -72,7 +76,16 @@ manifest lists as `needs-owner-verification` with `production_publish: block` th
      studies, videos and legal documents, and publishes all nine pages with `noindex: false`. It therefore
      publishes facts the manifest still marks needs-owner-verification (C-01, C-03, C-07, C-18, C-27). Run it only
      if the owner has confirmed those and wants to be live in one step; it has not been run on the owner's
-     database.
+     database. Three things learned in the rehearsal:
+     - **It does not refresh the live site's cache.** Run from a terminal it cannot reach the running server's
+       cache, so it logs `framework_invalidation_failed` for the Site and every Page (the commit is fine; nothing
+       retries the pending invalidations). The public pages show the new content after the next deploy, or after
+       at most an hour (the revalidation window). **Redeploy right after the script**, or publish the Site once
+       from the admin (that invalidates in place).
+     - **It removes the `skills`, `trust`, `timeline` and `credentials` sections from the Pages** because they
+       cannot be published without verified facts. Add them back in the Page editor when those facts exist.
+     - **It is repeatable**: a second run changes no content but publishes again, so every revision goes up by
+       one.
 6. **Publish Site, then each page** from the admin (by-hand route). Publishing is gated by the content-truth rules;
    a blocked page says why.
 7. **Check as a visitor** (a private window): home at scroll 0 shows the first hero role complete; the pinned
@@ -84,6 +97,9 @@ manifest lists as `needs-owner-verification` with `production_publish: block` th
 
 ## 4. Rollback
 
+- **Indexing (rehearsed):** Site editor, SEO, `allow_indexing` off, publish. `/robots.txt` and the page robots
+  meta flip at once (verified through the admin API: off, then on again, both effective on the next request).
+  This is the first thing to do if anything looks wrong after launch.
 - **Content:** there is **no one-click restore** of a previous published Site or Page (the API has publish only).
   Before step 6, write down or export the published values you are about to change; to roll back, put the old
   values into the draft and publish again. Turn `allow_indexing` back to `false` first if the problem is visible

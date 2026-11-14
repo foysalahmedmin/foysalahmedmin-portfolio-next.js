@@ -9,6 +9,14 @@
 | **Decision** | Needs ADR 0011 (amends ADR 0002 dependencies and ADR 0009 budgets). Drafted in Appendix C, not yet accepted.                                             |
 | **Handoff**  | On approval, each phase in section 7 gets its own task-level implementation plan (writing-plans format) before any code.                                 |
 
+### Revision 1.12: what Phase 10 preparation changed in the plan (2026-11-15)
+
+- **Phase 10 itself is still the owner's** (register, production database, publish, indexing). What could be done without them was done on a throwaway database: the full launch sequence and an indexing rollback were rehearsed and a clean checkout was built the way CI does ([`docs/baseline/phase-10-findings.md`](../baseline/phase-10-findings.md)).
+- **Found and corrected in the runbook:** the one-shot launcher cannot refresh the live cache (redeploy after it); the seed creates no projects, articles, case studies or videos (they exist only in the launcher); the launcher removes the `skills`, `trust`, `timeline` and `credentials` sections from the Pages.
+- **CI's build step could not build** without `NEXT_PUBLIC_URL`; fixed in `.github/workflows/quality.yml`.
+- **No restore button before launch** (decision recorded in the findings): the rehearsed rollback is indexing off.
+- **The generated share card exists** (`/share-card`), so pages without an image of their own now have an `og:image` (Phase 9 follow-up).
+
 ### Revision 1.11: what Phases 8 and 9 changed in the plan (2026-11-13)
 
 - **The admin allowlist in the design lint is empty**; every admin workspace is on the console patterns. The stop rule left three gaps that are not restyles: inbox and moderation stay table plus drawer (no master-detail, no `j`, `k`, `e`), the repeatable record editor has no section index, unsaved count or Cmd/Ctrl+S, and the Site editor's inner repeatable rows keep their cards.

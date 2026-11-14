@@ -47,7 +47,7 @@ Launch steps and the owner's facts are in the [launch runbook](./launch-runbook.
 | Firefox Playwright project                            | The browser does not start on this machine (above)                                                               | CI or another machine |
 | Visual baselines                                      | By design they are generated per platform and are not committed (`tests/e2e/visual.spec.ts`); nothing to approve | none                  |
 | Real devices, screen reader, the motion review itself | Need a person and the hardware (section 4)                                                                       | Owner                 |
-| Clean-checkout CI simulation                          | Not rerun since Phase 3                                                                                          | CI                    |
+| Clean-checkout CI simulation                          | Run 2026-11-15, see Phase 10 findings, section 3 (the CI Build step lacked `NEXT_PUBLIC_URL`; fixed)             | done                  |
 
 ## 4. By hand, on real devices (owner)
 

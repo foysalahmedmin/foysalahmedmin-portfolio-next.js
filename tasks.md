@@ -1772,7 +1772,10 @@ Updated as work lands. The acceptance gate is plan section 7, Phase 7.
 - [x] Launch runbook with the owner's facts, steps, rollback and sign-off table (not run)
 - [ ] Owner: answer or consciously leave hidden the confirm register (C-14, C-15, C-31 first)
 - [ ] Owner: back up and verify the database, run migrate and seed v8, fill the facts, publish, flip `allow_indexing`
-- [ ] Decide on a "restore previous published Site or Page" feature before launch, or accept the manual rollback
+- [x] Rehearse the whole launch on a throwaway database (migrate, seed in production mode, one-shot launcher twice, build, smoke every route) and the indexing rollback; findings in `docs/baseline/phase-10-findings.md`
+- [x] Clean-checkout CI simulation; CI Build step now sets `NEXT_PUBLIC_URL`
+- [x] Restore feature: decided against before launch (nothing published to restore at first launch; indexing off is the rehearsed rollback)
+- [ ] Optional: a route or script that retries pending cache invalidations (the one-shot launcher leaves the live cache stale until a deploy or an hour)
 
 ## Deferred ideas — only after the core release
 
