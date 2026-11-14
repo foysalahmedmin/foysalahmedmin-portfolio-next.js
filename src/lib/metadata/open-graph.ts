@@ -57,7 +57,7 @@ export type TDynamicOgBuildInput = {
   image?: TPublicSiteMediaDto;
 };
 
-const boundedText = (
+export const boundedText = (
   value: string | undefined,
   maximum: number
 ): string | undefined => {

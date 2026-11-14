@@ -29,6 +29,12 @@ const ALLOWLIST: readonly AllowEntry[] = [
     reason:
       "Replaces the root layout, so no stylesheet or token is available; the greys mirror mono-950 and mono-50",
   },
+  {
+    path: "src/app/share-card/route.tsx",
+    rules: ["literal"],
+    reason:
+      "Rendered to a PNG by the image renderer, which has no stylesheet or CSS variables; the greys mirror mono-950, mono-50, mono-400 and mono-800",
+  },
 ];
 
 const isAllowed = (path: string, rule: DesignRule) =>

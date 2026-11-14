@@ -119,6 +119,11 @@ const nextConfig: NextConfig = {
         headers: [...publicPreviewAssetHeaders],
       },
       {
+        // The generated share card is embedded by other sites' previews
+        source: "/share-card",
+        headers: [...publicPreviewAssetHeaders],
+      },
+      {
         source: "/api/projects",
         headers: [...publicPreviewDiscoveryHeaders],
       },

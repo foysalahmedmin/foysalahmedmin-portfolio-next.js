@@ -1764,7 +1764,8 @@ Updated as work lands. The acceptance gate is plan section 7, Phase 7.
 - [x] Release checklist and launch runbook written
 - [ ] Firefox project (does not start on this machine; CI); real Safari, iOS and Android; screen-reader pass (owner)
 - [ ] Owner: sign off the motion review (stills reviewed, live timing is the owner's)
-- [ ] Optional: a default share image (`og:image`), blocking metadata on detail pages if measured worthwhile
+- [x] Default share image: generated card at `/share-card`, advertised in `og:image` and `twitter:image` when no page image exists
+- [ ] Optional: blocking metadata on detail pages if measured worthwhile (real database)
 
 ### SG10 checklist (content closure and launch)
 

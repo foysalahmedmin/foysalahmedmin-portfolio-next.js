@@ -6,6 +6,7 @@ import { PILLAR_CONTRACT, type PillarKey } from "@/lib/content/pillars";
 import type { Metadata } from "next";
 import { buildRobotsPolicy } from "./noindex";
 import { buildDynamicOgInput, type TDynamicOgKind } from "./open-graph";
+import { buildShareCardText, SHARE_CARD_PATH } from "./share-card";
 import {
   buildCanonicalUrl,
   normalizeMetadataMediaUrl,
@@ -91,6 +92,13 @@ export const buildSocialMetadata = (
   });
   const managedImage =
     ogInput?.visual.source === "managed_media" ? ogInput.visual : undefined;
+  const codeVisual =
+    ogInput?.visual.source === "code_fallback" ? ogInput.visual : undefined;
+  // Advertised only when the route can render it (the same check the route makes)
+  const cardUrl =
+    codeVisual && buildShareCardText(site)
+      ? buildCanonicalUrl(site, SHARE_CARD_PATH)
+      : undefined;
   const image = managedImage
     ? {
         url: managedImage.url,
@@ -98,7 +106,14 @@ export const buildSocialMetadata = (
         ...(managedImage.width ? { width: managedImage.width } : {}),
         ...(managedImage.height ? { height: managedImage.height } : {}),
       }
-    : undefined;
+    : codeVisual && cardUrl
+      ? {
+          url: cardUrl,
+          alt: codeVisual.alt,
+          width: codeVisual.width,
+          height: codeVisual.height,
+        }
+      : undefined;
   const siteName =
     (site.content_source === "published"
       ? (cleanText(site.identity.short_name, 60) ??

@@ -26,6 +26,7 @@ import {
   buildDynamicOgInput,
   DYNAMIC_OG_IMAGE_CONTRACT,
 } from "@/lib/metadata/open-graph";
+import { buildShareCardText } from "@/lib/metadata/share-card";
 import {
   buildSiteMetadata,
   buildSocialMetadata,
@@ -358,13 +359,47 @@ describe("dynamic Open Graph contract", () => {
     ).toBeNull();
   });
 
-  it("does not advertise a nonexistent generated image route", () => {
+  it("advertises the generated share card only when it can render", () => {
     const fallbackSocial = buildSocialMetadata(createEmergencyPublicSite(), {
       pathname: "/",
       kind: "site",
     });
     expect(fallbackSocial.openGraph).not.toHaveProperty("images");
     expect(fallbackSocial.twitter).toMatchObject({ card: "summary" });
+
+    const published = buildPublishedSite();
+    const card = buildSocialMetadata(published, {
+      pathname: "/about",
+      kind: "page",
+    });
+    expect(card.openGraph).toMatchObject({
+      images: [
+        {
+          url: "https://portfolio.example.com/base/share-card",
+          width: 1200,
+          height: 630,
+        },
+      ],
+    });
+    expect(card.twitter).toMatchObject({ card: "summary_large_image" });
+
+    // No public name or no canonical domain: nothing verified to print, so text only
+    for (const mutate of [
+      (site: TPublicSiteDto) => {
+        site.identity.public_name = undefined;
+        site.identity.short_name = undefined;
+      },
+      (site: TPublicSiteDto) => {
+        site.identity.canonical_url = undefined;
+        site.seo.canonical_url = undefined;
+      },
+    ]) {
+      const site = buildPublishedSite();
+      mutate(site);
+      expect(
+        buildSocialMetadata(site, { pathname: "/", kind: "site" }).openGraph
+      ).not.toHaveProperty("images");
+    }
 
     const site = buildPublishedSite();
     site.seo.default_og = media("site-default");
@@ -373,9 +408,25 @@ describe("dynamic Open Graph contract", () => {
       kind: "site",
     });
     expect(managedSocial.openGraph).toHaveProperty("images");
+    expect(managedSocial.openGraph).not.toMatchObject({
+      images: [{ url: expect.stringContaining("share-card") }],
+    });
     expect(managedSocial.twitter).toMatchObject({
       card: "summary_large_image",
     });
+  });
+
+  it("prints only published Site facts on the share card", () => {
+    expect(buildShareCardText(buildPublishedSite())).toEqual({
+      name: "Portfolio Owner",
+      line: "Five connected engineering capabilities",
+      host: "portfolio.example.com",
+    });
+    expect(buildShareCardText(createEmergencyPublicSite())).toBeNull();
+
+    const long = buildPublishedSite();
+    long.identity.public_name = "N".repeat(200);
+    expect(buildShareCardText(long)?.name).toHaveLength(60);
   });
 });
 
