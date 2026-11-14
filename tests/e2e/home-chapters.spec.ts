@@ -86,6 +86,17 @@ const open = async (
   }
 };
 
+/** A click lands on the element under the pointer when the button goes up, so let a smooth scroll come to rest first. */
+const scrollAtRest = async (page: Page) => {
+  let previous = -1;
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const current = await page.evaluate(() => window.scrollY);
+    if (current === previous) return;
+    previous = current;
+    await page.waitForTimeout(150);
+  }
+};
+
 const scrollToCentre = (page: Page, selector: string) =>
   page.evaluate((target) => {
     const element = document.querySelector(target);
@@ -195,12 +206,16 @@ test("the triage follows the page and the keyboard, and each pain links to the c
   await expect.poll(() => list.getAttribute("data-focus-index")).toBe("1");
 
   // A pain's link is reachable by keyboard and carries the topic
+  await scrollAtRest(page);
   const link = rows
     .nth(0)
     .getByRole("link", { name: /describe this problem/i });
   await link.focus();
   await expect(link).toBeFocused();
   expect(await link.getAttribute("href")).toMatch(/^\/contact\?topic=[^&]+$/);
+  // Headless WebKit did not navigate on a click at the very bottom edge of the viewport; centre the link first
+  await link.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await scrollAtRest(page);
   await link.click();
   await expect(page).toHaveURL(/\/contact\?topic=/);
 });

@@ -1,4 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
+import type { Dialog } from "@playwright/test";
 import { expect, test } from "./support/admin-session";
 
 /**
@@ -173,6 +174,44 @@ test("the content editors keep the sticky action bar and the back link has a rea
       .evaluate((node) => node.getBoundingClientRect().width);
     expect(iconWidth, path).toBeGreaterThanOrEqual(14);
   }
+});
+
+test("leaving an editor with unsaved changes asks first, and a clean editor leaves silently", async ({
+  admin: page,
+}, testInfo) => {
+  test.skip(isMobile(testInfo.project.name), "the rail is a sheet on phones");
+  await page.goto("/admin/articles/new");
+  const rail = page.getByRole("navigation").getByRole("link", {
+    name: "Videos",
+    exact: true,
+  });
+
+  // Clean: no prompt
+  const unexpected = (dialog: Dialog) => {
+    throw new Error(`unexpected dialog: ${dialog.message()}`);
+  };
+  page.on("dialog", unexpected);
+  await rail.click();
+  await expect(page).toHaveURL(/\/admin\/videos/);
+  page.off("dialog", unexpected);
+
+  // Dirty: the prompt appears; dismissing it stays on the editor
+  await page.goto("/admin/articles/new");
+  await page.getByLabel("Title").first().fill("A title");
+  await expect(page.getByText(/1 unsaved change/i)).toBeVisible();
+  let asked = "";
+  page.once("dialog", async (dialog) => {
+    asked = dialog.message();
+    await dialog.dismiss();
+  });
+  await rail.click();
+  await expect.poll(() => asked).toMatch(/unsaved changes/i);
+  await expect(page).toHaveURL(/\/admin\/articles\/new/);
+
+  // Accepting it leaves
+  page.once("dialog", (dialog) => dialog.accept());
+  await rail.click();
+  await expect(page).toHaveURL(/\/admin\/videos/);
 });
 
 test("no backdrop-filter outside overlays, and no animation library in the console", async ({
