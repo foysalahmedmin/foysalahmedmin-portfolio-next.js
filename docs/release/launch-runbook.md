@@ -62,16 +62,24 @@ manifest lists as `needs-owner-verification` with `production_publish: block` th
    lands as a draft and `allow_indexing` stays `false`.
 4. **Fill the facts** from section 1 in the admin: Site editor, Pages, case studies. Use `/admin/site/review` (the
    review-and-publish workspace) to see what blocks publishing; it lists the failing gate per page.
-5. **Run `scripts/launch-content.ts`** only if the owner wants the launch articles, projects, case studies and
-   videos it creates. It publishes the five commitments and three next steps that the manifest still marks
-   needs-owner-verification (C-18), so approve that wording first. It has not been run on the owner's database.
-6. **Publish Site, then each page** from the admin. Publishing is gated by the content-truth rules; a blocked page
-   says why.
+5. **Choose how to go live. These are two different routes; do not do both blindly.**
+   - **By hand (recommended):** the admin. Site editor, Pages and the content editors, one thing at a time, then
+     step 6. Indexing stays off until step 8.
+   - **One shot, `scripts/launch-content.ts`:** it is the old all-in-one launcher and it goes live in a single
+     run with no dry-run. In that one run it sets the public name, the **public email `foysalahmedmin@gmail.com`**,
+     the GitHub and LinkedIn links, the canonical `https://www.foysalahmedmin.com` and the SEO defaults, sets
+     **`allow_indexing: true`**, publishes the Site, creates and publishes the launch articles, projects, case
+     studies, videos and legal documents, and publishes all nine pages with `noindex: false`. It therefore
+     publishes facts the manifest still marks needs-owner-verification (C-01, C-03, C-07, C-18, C-27). Run it only
+     if the owner has confirmed those and wants to be live in one step; it has not been run on the owner's
+     database.
+6. **Publish Site, then each page** from the admin (by-hand route). Publishing is gated by the content-truth rules;
+   a blocked page says why.
 7. **Check as a visitor** (a private window): home at scroll 0 shows the first hero role complete; the pinned
-   chapters have skip links; `/case-studies?type=…` filters; the contact form sends one test message to the owner's
-   own inbox; `/sitemap.xml` and `/robots.txt` still say noindex.
-8. **Flip indexing last.** Site editor, SEO, `allow_indexing` on, publish. Then request indexing for the home page
-   in the search console and set the canonical domain (C-27).
+   chapters have skip links; `/case-studies?engagement=client` filters; the contact form sends one test message to
+   the owner's own inbox; `/sitemap.xml` and `/robots.txt` still say noindex (by-hand route) before step 8.
+8. **Flip indexing last** (by-hand route; the one-shot script already did it). Site editor, SEO, `allow_indexing`
+   on, publish. Then request indexing for the home page in the search console and set the canonical domain (C-27).
 9. **Watch for a week.** Field Web Vitals, error logs, contact deliveries.
 
 ## 4. Rollback

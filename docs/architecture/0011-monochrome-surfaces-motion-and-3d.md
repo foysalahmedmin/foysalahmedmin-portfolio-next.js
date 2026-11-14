@@ -112,11 +112,11 @@ Full evidence: [`docs/baseline/phase-7-findings.md`](../baseline/phase-7-finding
 
 The admin renders on the console surface: the same ramp, fonts, focus ring and status marks as the public site, with the workbench density and no motion library. The shell, the dashboard (decision order: needs attention, publish state, pipeline), the workspace patterns and the auth pages are built; the audit log and the article editor adopt the patterns and Phase 8 sweeps the rest. Status is carried by shape and label (`StatusBadge` keeps its tone API). The shell's first load is 164 KB gzip against the plan's 150 KB: the root layout and its providers are the floor (the sign-in page is 160 KB), which is recorded for Phase 9. Authenticated browser coverage now exists (`tests/e2e/console.spec.ts`).
 
-## Phase 8 and 9 outcome (2026-11-13)
+## Phase 8 and 9 outcome (2026-11-13 and 2026-11-14)
 
 Full evidence: [`docs/baseline/phase-8-findings.md`](../baseline/phase-8-findings.md) and [`docs/baseline/phase-9-findings.md`](../baseline/phase-9-findings.md).
 
-Every admin workspace is on the console patterns and the design-lint allowlist is empty; behaviour is unchanged except the items listed in the findings. The console JavaScript table is amended with measured numbers: shell 164 KB, lists and editors 12 to 37 KB above it, the Site editor 75 KB above it. Public routes are unchanged at 177.3 KB. Phase 9 measured Lighthouse (mobile default Home 84, TBT 119 ms; desktop preset 99 to 100), the smoothness harness (8 of 8) and axe on the public routes and 17 console routes in both themes; cross-engine and real-device checks are on the owner's release checklist.
+Every admin workspace is on the console patterns and the design-lint allowlist is empty. The console JavaScript rows are amended with measured numbers: **shell at most 165 KB (measured 164; the framework floor), list and editor routes at most shell plus 60 KB (all met)**. Public routes are unchanged at 177.3 KB. The mono font fallback is calibrated per width step (`fonts.css`), which took the constrained mobile CLS from up to 0.123 to at most 0.001. Measured: Lighthouse mobile default Home 84 and desktop 99 to 100, the smoothness harness 8 of 8 three runs in a row, `lhci autorun` on seven routes, axe on Chromium and WebKit, 1,876 tests. The kill switch `PUBLIC_3D_ENABLED` acts when pages are rendered (prerendered for an hour), and was verified end to end on a build. Firefox, real devices and the motion sign-off are on the owner's release checklist.
 
 ## Verification
 

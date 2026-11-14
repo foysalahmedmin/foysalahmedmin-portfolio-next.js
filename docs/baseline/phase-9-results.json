@@ -1,0 +1,271 @@
+{
+  "measured_at": "2026-11-14T09:03:07.343Z",
+  "base": "http://127.0.0.1:3107",
+  "node": "v24.15.0",
+  "results": [
+    {
+      "profile": "desktop",
+      "route": "/",
+      "html_kb": 55.5,
+      "js_kb_transferred": 272.5,
+      "js_requests": 23,
+      "fcp_ms": 124,
+      "lcp_ms": 124,
+      "cls": 0.023,
+      "tbt_ms": 0,
+      "doc_height_px": 24314,
+      "smoothness": {
+        "frames": 600,
+        "p50_ms": 16.7,
+        "p95_ms": 17.6,
+        "max_ms": 17.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/about",
+      "html_kb": 50,
+      "js_kb_transferred": 269.9,
+      "js_requests": 22,
+      "fcp_ms": 96,
+      "lcp_ms": 96,
+      "cls": 0.001,
+      "tbt_ms": 0,
+      "doc_height_px": 12674,
+      "smoothness": {
+        "frames": 600,
+        "p50_ms": 16.7,
+        "p95_ms": 17.3,
+        "max_ms": 17.7,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/contact",
+      "html_kb": 27.1,
+      "js_kb_transferred": 282.6,
+      "js_requests": 23,
+      "fcp_ms": 92,
+      "lcp_ms": 92,
+      "cls": 0.001,
+      "tbt_ms": 0,
+      "doc_height_px": 3250
+    },
+    {
+      "profile": "desktop",
+      "route": "/projects",
+      "html_kb": 36.5,
+      "js_kb_transferred": 269.9,
+      "js_requests": 22,
+      "fcp_ms": 88,
+      "lcp_ms": 88,
+      "cls": 0.001,
+      "tbt_ms": 0,
+      "doc_height_px": 3515
+    },
+    {
+      "profile": "desktop",
+      "route": "/case-studies",
+      "html_kb": 35.4,
+      "js_kb_transferred": 269.9,
+      "js_requests": 22,
+      "fcp_ms": 88,
+      "lcp_ms": 88,
+      "cls": 0.001,
+      "tbt_ms": 0,
+      "doc_height_px": 3406,
+      "smoothness": {
+        "frames": 600,
+        "p50_ms": 16.7,
+        "p95_ms": 17.5,
+        "max_ms": 17.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "desktop",
+      "route": "/articles",
+      "html_kb": 34.3,
+      "js_kb_transferred": 269.9,
+      "js_requests": 22,
+      "fcp_ms": 88,
+      "lcp_ms": 88,
+      "cls": 0.001,
+      "tbt_ms": 0,
+      "doc_height_px": 3890
+    },
+    {
+      "profile": "desktop",
+      "route": "/videos",
+      "html_kb": 34.6,
+      "js_kb_transferred": 271.9,
+      "js_requests": 23,
+      "fcp_ms": 88,
+      "lcp_ms": 88,
+      "cls": 0.001,
+      "tbt_ms": 0,
+      "doc_height_px": 4241
+    },
+    {
+      "profile": "desktop",
+      "route": "/privacy",
+      "html_kb": 20,
+      "js_kb_transferred": 269.9,
+      "js_requests": 22,
+      "fcp_ms": 76,
+      "lcp_ms": 76,
+      "cls": 0.001,
+      "tbt_ms": 0,
+      "doc_height_px": 1985
+    },
+    {
+      "profile": "desktop",
+      "route": "/terms",
+      "html_kb": 19.8,
+      "js_kb_transferred": 269.9,
+      "js_requests": 22,
+      "fcp_ms": 72,
+      "lcp_ms": 72,
+      "cls": 0.001,
+      "tbt_ms": 0,
+      "doc_height_px": 1792
+    },
+    {
+      "profile": "mobile",
+      "route": "/",
+      "html_kb": 55.5,
+      "js_kb_transferred": 214.8,
+      "js_requests": 21,
+      "fcp_ms": 1440,
+      "lcp_ms": 1440,
+      "cls": 0,
+      "tbt_ms": 123,
+      "doc_height_px": 22770,
+      "smoothness": {
+        "frames": 601,
+        "p50_ms": 16.7,
+        "p95_ms": 18.1,
+        "max_ms": 18.8,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/about",
+      "html_kb": 50,
+      "js_kb_transferred": 212.2,
+      "js_requests": 20,
+      "fcp_ms": 1280,
+      "lcp_ms": 1280,
+      "cls": 0,
+      "tbt_ms": 77,
+      "doc_height_px": 17711,
+      "smoothness": {
+        "frames": 600,
+        "p50_ms": 16.7,
+        "p95_ms": 18.2,
+        "max_ms": 18.7,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/contact",
+      "html_kb": 27.1,
+      "js_kb_transferred": 224.9,
+      "js_requests": 21,
+      "fcp_ms": 1184,
+      "lcp_ms": 1184,
+      "cls": 0,
+      "tbt_ms": 18,
+      "doc_height_px": 4295
+    },
+    {
+      "profile": "mobile",
+      "route": "/projects",
+      "html_kb": 36.5,
+      "js_kb_transferred": 212.2,
+      "js_requests": 20,
+      "fcp_ms": 1192,
+      "lcp_ms": 1192,
+      "cls": 0.001,
+      "tbt_ms": 24,
+      "doc_height_px": 5303
+    },
+    {
+      "profile": "mobile",
+      "route": "/case-studies",
+      "html_kb": 35.4,
+      "js_kb_transferred": 212.2,
+      "js_requests": 20,
+      "fcp_ms": 1176,
+      "lcp_ms": 1176,
+      "cls": 0.001,
+      "tbt_ms": 16,
+      "doc_height_px": 4840,
+      "smoothness": {
+        "frames": 600,
+        "p50_ms": 16.6,
+        "p95_ms": 18.5,
+        "max_ms": 18.7,
+        "dropped_pct": 0,
+        "long_animation_frames_over_50ms": 0
+      }
+    },
+    {
+      "profile": "mobile",
+      "route": "/articles",
+      "html_kb": 34.3,
+      "js_kb_transferred": 212.2,
+      "js_requests": 20,
+      "fcp_ms": 1184,
+      "lcp_ms": 1184,
+      "cls": 0,
+      "tbt_ms": 19,
+      "doc_height_px": 5459
+    },
+    {
+      "profile": "mobile",
+      "route": "/videos",
+      "html_kb": 34.6,
+      "js_kb_transferred": 214.2,
+      "js_requests": 21,
+      "fcp_ms": 1248,
+      "lcp_ms": 1248,
+      "cls": 0,
+      "tbt_ms": 18,
+      "doc_height_px": 5802
+    },
+    {
+      "profile": "mobile",
+      "route": "/privacy",
+      "html_kb": 20,
+      "js_kb_transferred": 212.2,
+      "js_requests": 20,
+      "fcp_ms": 1180,
+      "lcp_ms": 1180,
+      "cls": 0.001,
+      "tbt_ms": 16,
+      "doc_height_px": 2544
+    },
+    {
+      "profile": "mobile",
+      "route": "/terms",
+      "html_kb": 19.8,
+      "js_kb_transferred": 212.2,
+      "js_requests": 20,
+      "fcp_ms": 1176,
+      "lcp_ms": 1176,
+      "cls": 0,
+      "tbt_ms": 17,
+      "doc_height_px": 2333
+    }
+  ]
+}
