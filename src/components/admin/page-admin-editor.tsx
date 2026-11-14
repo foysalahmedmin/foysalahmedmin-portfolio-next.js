@@ -160,13 +160,6 @@ export default function PageAdminEditor({
   );
   const disabled = !canEdit || Boolean(busy);
 
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
-
   const accept = (next: TPageAdminDto, message: string) => {
     setPage(next);
     setDraft(cloneDraft(next.draft));

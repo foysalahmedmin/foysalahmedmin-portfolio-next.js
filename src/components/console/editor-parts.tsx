@@ -1,6 +1,7 @@
 import { StatusMark, type StatusMarkState } from "@/components/ui/status-mark";
 import { cn } from "@/lib/utils";
 import type { ComponentProps, ReactNode } from "react";
+import { UnsavedChangesGuard } from "./unsaved-guard";
 
 const formatSavedAt = (iso: string) => {
   const date = new Date(iso);
@@ -164,7 +165,7 @@ export function ValidationSummary({
 
 /**
  * Sticky solid action bar. The slots are filled by the editor: the pattern never decides what a button
- * does (Cmd/Ctrl+S included). `unsavedCount` drives the "N unsaved changes" label.
+ * does (Cmd/Ctrl+S included). `unsavedCount` drives the "N unsaved changes" label and the leave-page guard.
  */
 export function EditorActionBar({
   unsavedCount = 0,
@@ -194,6 +195,7 @@ export function EditorActionBar({
       className={cn("cp-actionbar", className)}
       {...props}
     >
+      <UnsavedChangesGuard dirty={dirty} />
       <p className="cp-actionbar__state" aria-live="polite">
         {dirty ? (
           <StatusMark state="pending">

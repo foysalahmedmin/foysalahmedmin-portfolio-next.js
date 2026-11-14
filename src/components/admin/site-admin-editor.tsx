@@ -8,11 +8,6 @@ import type {
   TSiteProcessStep,
   TSiteSocialLink,
 } from "@/app/api/site/site.type";
-import {
-  siteFinderSchema,
-  siteFitSchema,
-  siteWorkflowExampleSchema,
-} from "@/app/api/site/site-content.validation";
 import { Button } from "@/components/ui/button";
 import { FileUploader } from "@/components/ui/file-uploader";
 import { MonoLabel } from "@/components/ui/mono-label";
@@ -43,7 +38,6 @@ import {
   EngagementModelsEditor,
   TitledRowsEditor,
 } from "@/components/admin/site/site-list-editors";
-import { ValidatedJsonEditor } from "@/components/admin/site/validated-json-editor";
 import {
   getPillarLabel,
   PILLAR_ACCENTS,
@@ -66,6 +60,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import type {
   TFileEditorialMetadataInput,
@@ -80,6 +75,21 @@ type SiteAdminEditorProps = Readonly<{
 }>;
 
 // A stored snapshot that predates the engagement and home-proof fields lacks them; the form starts them empty.
+// Zod and the three JSON editors load when the Site editor mounts, not with its first-load script.
+const StructuredJsonEditors = dynamic(
+  () =>
+    import("@/components/admin/site/structured-json-editors").then(
+      (module) => module.StructuredJsonEditors
+    ),
+  {
+    loading: () => (
+      <p className="text-fg-secondary text-sm" role="status">
+        Loading the structured editors…
+      </p>
+    ),
+  }
+);
+
 const cloneDraft = (draft: TSiteDraftSnapshot): TSiteDraftSnapshot => {
   const next = structuredClone(draft);
   return {
@@ -904,13 +914,6 @@ export default function SiteAdminEditor({
         : { ...current, [path]: message }
     );
   const disabled = !canEdit || Boolean(busy);
-
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
 
   const accept = (next: TSiteAdminDto, message: string) => {
     setSite(next);
@@ -2308,47 +2311,14 @@ export default function SiteAdminEditor({
         title="Workflow example, fit check & starting-point finder"
         description="Nested structures edited as JSON and checked against the same schema the server enforces. Nothing invalid reaches the draft, and saving is blocked until each editor is valid."
       >
-        <div className="grid gap-6 xl:grid-cols-3">
-          <ValidatedJsonEditor
-            key={`workflow_example-${epoch}`}
-            path="workflow_example"
-            label="Workflow example"
-            value={draft.workflow_example}
-            schema={siteWorkflowExampleSchema}
-            onChange={(workflow_example) =>
-              setDraft({ ...draft, workflow_example })
-            }
-            onError={setJsonError}
-            errors={errors}
-            disabled={disabled}
-            allowEmpty
-            hint='Illustrative only ("illustrative": true) with 2 to 8 nodes. Leave empty to remove it.'
-          />
-          <ValidatedJsonEditor
-            key={`fit-${epoch}`}
-            path="fit"
-            label="Fit check"
-            value={draft.fit}
-            schema={siteFitSchema}
-            onChange={(fit) => fit && setDraft({ ...draft, fit })}
-            onError={setJsonError}
-            errors={errors}
-            disabled={disabled}
-            hint='"enabled", up to six "segments" and up to six "not_a_fit" lines. Enabling needs at least one segment.'
-          />
-          <ValidatedJsonEditor
-            key={`finder-${epoch}`}
-            path="finder"
-            label="Starting-point finder"
-            value={draft.finder}
-            schema={siteFinderSchema}
-            onChange={(finder) => finder && setDraft({ ...draft, finder })}
-            onError={setJsonError}
-            errors={errors}
-            disabled={disabled}
-            hint='"enabled", up to four "steps" (2 to 6 tagged options each) and "outcomes" that point at enabled engagement model keys.'
-          />
-        </div>
+        <StructuredJsonEditors
+          draft={draft}
+          epoch={epoch}
+          onDraftChange={setDraft}
+          onError={setJsonError}
+          errors={errors}
+          disabled={disabled}
+        />
       </EditorSection>
     </ConsoleEditor>
   );

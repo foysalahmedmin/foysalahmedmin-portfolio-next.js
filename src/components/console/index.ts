@@ -15,6 +15,7 @@ export {
   type ValidationIssue,
 } from "./editor-parts";
 export { SectionIndex, type SectionIndexItem } from "./section-index";
+export { UnsavedChangesGuard } from "./unsaved-guard";
 // The region templates (C2 list, C3 editor, C4 inbox) live with the other archetypes
 export {
   ConsoleEditor,
