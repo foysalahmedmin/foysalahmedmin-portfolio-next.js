@@ -66,3 +66,69 @@ describe("display font fallbacks", () => {
     }
   });
 });
+
+/**
+ * Martian Mono's advance per character at each width step (em, measured in the browser, the same at every
+ * weight), divided by the 0.602 em of the system monospaces the fallbacks use.
+ */
+const MONO_ADVANCE: Record<string, number> = {
+  "75": 0.6,
+  "90": 0.66,
+  "100": 0.7,
+};
+const SYSTEM_MONO_ADVANCE = 0.6021;
+
+describe("mono font fallbacks", () => {
+  it.each(Object.entries(MONO_ADVANCE))(
+    "wdth %s has a face scaled to the real advance",
+    (step, advance) => {
+      const block = faces.find((face) =>
+        face.includes(`"Martian Mono Fallback ${step}"`)
+      );
+      expect(block, `mono fallback ${step}`).toBeDefined();
+      const adjust = block!.match(/size-adjust:\s*([\d.]+)%/);
+      expect(Number(adjust![1])).toBeCloseTo(
+        (advance / SYSTEM_MONO_ADVANCE) * 100,
+        0
+      );
+      // Only monospaces whose advance is 0.600 to 0.602 em may stand in
+      expect(block).not.toMatch(/local\("(Arial|Helvetica|Consolas)/);
+    }
+  );
+
+  it("puts each calibrated mono fallback right after the real face in its stack", () => {
+    for (const step of Object.keys(MONO_ADVANCE)) {
+      const token = step === "100" ? "--ff-mono" : `--ff-mono-${step}`;
+      expect(tokens).toMatch(
+        new RegExp(
+          `${token}:\\s*var\\(--font-mono-face\\), "Martian Mono Fallback ${step}"`
+        )
+      );
+    }
+  });
+
+  it("sets the narrow labels and the metric in the stack that matches their stretch", () => {
+    expect(type).toMatch(/\.t-eyebrow\s*\{[^}]*--ff-mono-75/);
+    expect(type).toMatch(/\.type-label\s*\{[^}]*--ff-mono-75/);
+    expect(type).toMatch(/\.type-metric\s*\{[^}]*--ff-mono-90/);
+  });
+
+  it("leaves no generic mono family on a rule that sets a narrow stretch", () => {
+    for (const file of [
+      "src/assets/styles/public/type.css",
+      "src/assets/styles/public/pages-editorial.css",
+      "src/assets/styles/public/pages-lab.css",
+    ]) {
+      const css = stripComments(readRepoFile(file));
+      const blocks = [
+        ...css.matchAll(/\{([^{}]*font-stretch:\s*75%[^{}]*)\}/g),
+      ];
+      expect(blocks.length, file).toBeGreaterThan(0);
+      for (const [, body] of blocks) {
+        if (/--ff-mono/.test(body!)) {
+          expect(body, file).toMatch(/--ff-mono-75/);
+        }
+      }
+    }
+  });
+});

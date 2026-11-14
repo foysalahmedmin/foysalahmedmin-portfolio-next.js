@@ -44,3 +44,40 @@
     local("Arial");
   font-family: "Archivo Fallback 100";
 }
+
+/*
+ * Mono fallbacks, calibrated per width step.
+ *
+ * Martian Mono's advance is 0.600 em at wdth 75, 0.660 at wdth 90, 0.700 at wdth 100 and 0.748 at wdth 112
+ * (measured per character, the same at every weight). The labels, dates and metrics set in it are mostly
+ * wdth 75, and next/font's own fallback is an Arial scaled for the default instance, so the first paint was
+ * about 45% wider than the real face and every row of mono text re-wrapped on the swap (the legal pages
+ * shifted 0.122 on the constrained mobile profile). The system monospaces below all advance 0.600 to 0.602
+ * em, so one scale per width step lands the fallback on the real width and the swap changes letterforms only.
+ */
+@font-face {
+  font-weight: 100 800;
+  size-adjust: 99.7%;
+  src:
+    local("Menlo"), local("Menlo Regular"), local("Courier New"),
+    local("Liberation Mono"), local("DejaVu Sans Mono");
+  font-family: "Martian Mono Fallback 75";
+}
+
+@font-face {
+  font-weight: 100 800;
+  size-adjust: 109.6%;
+  src:
+    local("Menlo"), local("Menlo Regular"), local("Courier New"),
+    local("Liberation Mono"), local("DejaVu Sans Mono");
+  font-family: "Martian Mono Fallback 90";
+}
+
+@font-face {
+  font-weight: 100 800;
+  size-adjust: 116.3%;
+  src:
+    local("Menlo"), local("Menlo Regular"), local("Courier New"),
+    local("Liberation Mono"), local("DejaVu Sans Mono");
+  font-family: "Martian Mono Fallback 100";
+}

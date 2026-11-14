@@ -723,7 +723,7 @@
   font-weight: 500;
   font-stretch: 75%;
   font-size: var(--step--2);
-  font-family: var(--ff-mono, ui-monospace, monospace);
+  font-family: var(--ff-mono-75, ui-monospace, monospace);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }

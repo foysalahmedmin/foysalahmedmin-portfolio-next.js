@@ -10,7 +10,7 @@
   font-stretch: 75%;
   font-size: var(--step--2);
   line-height: 1.4;
-  font-family: var(--ff-mono, ui-monospace, monospace);
+  font-family: var(--ff-mono-75, ui-monospace, monospace);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -161,7 +161,7 @@
   font-stretch: 75%;
   font-size: var(--step--2);
   line-height: 1.4;
-  font-family: var(--ff-mono);
+  font-family: var(--ff-mono-75);
   letter-spacing: 0.08em;
 }
 
@@ -170,7 +170,7 @@
   font-stretch: 90%;
   font-size: clamp(2rem, 1.5rem + 2vw, 3.2rem);
   line-height: 1;
-  font-family: var(--ff-mono);
+  font-family: var(--ff-mono-90);
   letter-spacing: -0.04em;
 }
 

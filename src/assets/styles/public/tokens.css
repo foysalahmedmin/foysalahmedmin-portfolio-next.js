@@ -70,7 +70,14 @@
   --ff-display-100:
     var(--font-display-face), "Archivo Fallback 100", Arial, sans-serif;
   --ff-mono:
-    var(--font-mono-face), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    var(--font-mono-face), "Martian Mono Fallback 100", ui-monospace, "SF Mono",
+    Menlo, Consolas, monospace;
+  --ff-mono-90:
+    var(--font-mono-face), "Martian Mono Fallback 90", ui-monospace, "SF Mono",
+    Menlo, Consolas, monospace;
+  --ff-mono-75:
+    var(--font-mono-face), "Martian Mono Fallback 75", ui-monospace, "SF Mono",
+    Menlo, Consolas, monospace;
 
   /* Radius: control 2 px, panel 6 px, glass slab 10 px (corner ticks replace big radii) */
   --r-sm: 2px;

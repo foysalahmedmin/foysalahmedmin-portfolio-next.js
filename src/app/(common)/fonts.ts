@@ -35,6 +35,8 @@ export const fontMono = localFont({
   variable: "--font-mono-face",
   display: "swap",
   preload: false,
+  // Off on purpose: the mono fallbacks are calibrated per width step in assets/styles/public/fonts.css
+  adjustFontFallback: false,
   declarations: [{ prop: "font-stretch", value: "75% 112%" }],
 });
 
